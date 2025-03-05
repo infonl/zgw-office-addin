@@ -1,2 +1,3 @@
-# podiumd-office-plugin
-Office plugin for integration with Dimpact's PodiumD
+# PodiumD Office Plugin
+
+Microsoft Office add-in for integration with Dimpact's PodiumD.
