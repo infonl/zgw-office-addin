@@ -1,8 +1,8 @@
 # Licence
 
-Copyright INFO.nl.
+Copyright (c) 2025, INFO.nl.
 
-Licensed under the EUPL-1.2-or-later
+Licensed under the EUPL-1.2-or-later.
 
 For instructions on how to use the license please see: [CONTRIBUTING.md](CONTRIBUTING.md).
 
