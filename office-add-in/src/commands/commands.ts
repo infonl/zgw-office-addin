@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/*
- * See LICENSE in the project root for license information.
- */
-
 /* global Office */
 
 Office.onReady(() => {

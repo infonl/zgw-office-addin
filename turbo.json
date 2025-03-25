@@ -15,5 +15,21 @@
         "dependsOn": ["^build"],
         "outputs": ["office-add-in/dist/**", "office-backend/dist/**"]
       }
-    }
+    }, "pipeline": {
+  "build": {
+    "dependsOn": ["^build"],
+    "outputs": ["office-add-in/dist/**", "office-nest/dist/**"]
+  },
+  "dev": {
+    "dependsOn": ["^dev"],
+    "outputs": []
+  },
+  "lint": {
+    "dependsOn": ["^lint"]
+  },
+  "test": {
+    "dependsOn": ["^build"],
+    "outputs": []
+  }
+}
   }
