@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "workspaces": [
+      "office-add-in",
+      "office-nest"
+    ],
+    "packageManager": "npm@10.9.2",
+    "scripts": {
+      "dev": "turbo dev",
+      "build": "turbo build"
+    },
+    "devDependencies": {
+      "turbo": "^1.0.0"
+    }
+  }
+  
