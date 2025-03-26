@@ -10,10 +10,6 @@ app.listen({ port: 3003 }, () => {
   console.log("Server running on http://localhost:3003");
 });
 
-app.listen({ port: 3003 }, () => {
-  console.log("Server running on http://localhost:3003");
-});
-
 // Route to get a case by number
 app.get("/zaak/:caseNumber", async (request) => {
   // @ts-ignore
