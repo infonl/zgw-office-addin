@@ -5,7 +5,7 @@
   "config": {
     "app_to_debug": "word",
     "app_type_to_debug": "web",
-    "dev_server_port": 3000
+    "dev_server_port": 3003
   },
   "scripts": {
     "build": "webpack --mode production",
