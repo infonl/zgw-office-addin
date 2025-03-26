@@ -8,7 +8,7 @@
   "license": "MIT",
   "config": {
     "app_to_debug": "word",
-    "app_type_to_debug": "desktop",
+    "app_type_to_debug": "web",
     "dev_server_port": 3000
   },
   "scripts": {
