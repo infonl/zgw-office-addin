@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Lifely
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 /* eslint-disable no-undef */
 
 const devCerts = require("office-addin-dev-certs");
