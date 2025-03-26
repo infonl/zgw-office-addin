@@ -1,12 +1,14 @@
 import Fastify from "fastify";
-import { start } from "repl";
 
 const app = Fastify({ logger: true });
 
-app.get("/", async () => {
-  return { message: "Hello Fastify!" };
+// Route to get a case by number
+app.get("/zaak/:caseNumber", async (request) => {
+  // @ts-ignore
+  const { caseNumber } = request.params
+  return { message: `GET: / zaak / ${caseNumber}` };
 });
 
-app.listen({ port: 3000 }, () => {
-  console.log("Server running on http://localhost:3000");
+app.listen({ port: 3003 }, () => {
+  console.log("Server running on http://localhost:3003");
 });

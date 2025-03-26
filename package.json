@@ -2,7 +2,7 @@
     "private": true,
     "workspaces": [
       "office-add-in",
-      "office-nest"
+      "office-backend"
     ],
     "packageManager": "npm@10.9.2",
     "scripts": {
@@ -13,4 +13,3 @@
       "turbo": "^1.0.0"
     }
   }
-  

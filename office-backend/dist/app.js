@@ -4,18 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
-const app = (0, fastify_1.default)();
-app.get('/', async (request, reply) => {
-    return { message: 'Hello from Fastify Backend!' };
+const app = (0, fastify_1.default)({ logger: true });
+app.put("/zaak", async () => {
+    return { message: "Hello Fastify!" };
 });
-const start = async () => {
-    try {
-        await app.listen({ port: 3001, host: '0.0.0.0' });
-        console.log('🚀 Server running on http://localhost:3001');
-    }
-    catch (err) {
-        console.error(err);
-        process.exit(1);
-    }
-};
-start();
+app.listen({ port: 3003 }, () => {
+    console.log("Server running on http://localhost:3003");
+});
