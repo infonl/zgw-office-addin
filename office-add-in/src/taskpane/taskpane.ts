@@ -3,31 +3,34 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/* global document, Office, Word */
+import { TaskpaneService } from "../service/taskpane.service";
+
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("upload").onclick = run(document.getElementById("case-number").innerText);
+
+    // Fix: Assign a function reference
+    document.getElementById("upload").onclick = () => {
+      const caseNumber = (document.getElementById("case-number") as HTMLInputElement).value;
+      console.log("Button clicked! Case Number:", caseNumber);
+      run(caseNumber);
+    };
   }
 });
 
+
 export async function run(caseNumber: string) {
   return Word.run(async (context) => {
-    /**
-     * Insert your Word code here
-     */
     if (!caseNumber) {
         // If a case number is not provided, show an error message.
         console.warn("No case number provided.");
         return
     }
-    if (!context.document.saved) {
-        // If the document is unsaved, show a warning message.
-        console.warn("Please save the document first.");
-        return
-    }
 
     await context.sync();
+    const taskService = new TaskpaneService();
+    const zaken = await taskService.getZaken(caseNumber);
+    console.log("Zaken:", zaken);
   });
 }
