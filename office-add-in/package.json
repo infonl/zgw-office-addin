@@ -5,7 +5,7 @@
     "type": "git",
     "url": "https://github.com/OfficeDev/podiumd-office-taskpane-addin.git"
   },
-  "license": "MIT",
+  "license": "EUPL-1.2+",
   "config": {
     "app_to_debug": "word",
     "app_type_to_debug": "web",
