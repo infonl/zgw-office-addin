@@ -1,22 +1,25 @@
 export class TaskpaneService {
-    constructor() {}
+  constructor() {}
 
-    public async getZaken(caseNumber: string): Promise<any> {
-        fetch(`http://localhost:3003/zaken/${caseNumber}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Data:", data);
-                return data;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                return [];
-            });
-    }
+  public async getZaken(caseNumber: string): Promise<any> {
+    console.log("Button clicked! Case Number:", caseNumber);
 
+    const backendUrl = "https://chubby-planes-search.loca.lt"; // Replace with your Localtunnel URL
+
+    fetch(`${backendUrl}/zaken/${caseNumber}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Data:", data);
+        return data;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        return [];
+      });
+  }
 }

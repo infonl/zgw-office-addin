@@ -13,7 +13,6 @@ Office.onReady((info) => {
     // Fix: Assign a function reference
     document.getElementById("upload").onclick = () => {
       const caseNumber = (document.getElementById("case-number") as HTMLInputElement).value;
-      console.log("Button clicked! Case Number:", caseNumber);
       run(caseNumber);
     };
   }
