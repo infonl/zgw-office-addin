@@ -1,5 +1,6 @@
 {
   "private": true,
+  "name": "podiumd-office-plugin",
   "version": "0.0.1",
   "license": "EUPL-1.2+",
   "repository": {
@@ -10,12 +11,12 @@
     "office-add-in",
     "office-backend"
   ],
-  "packageManager": "npm@10.9.2",
+  "packageManager": "npm@11.2.0",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build"
   },
   "devDependencies": {
-    "turbo": "1.13.4"
+    "turbo": "2.4.4"
   }
 }

@@ -1,20 +1,19 @@
 {
-    "pipeline": {
+    "tasks": {
       "build": {
         "dependsOn": ["^build"],
         "outputs": ["office-add-in/dist/**", "office-nest/dist/**"]
       },
       "dev": {
         "dependsOn": ["^dev"],
-        "outputs": []
+        "outputs": ["office-add-in/dist/**", "office-nest/dist/**"]
       },
       "lint": {
         "dependsOn": ["^lint"]
       },
       "test": {
         "dependsOn": ["^build"],
-        "outputs": []
+        "outputs": ["office-add-in/dist/**", "office-nest/dist/**"]
       }
     }
   }
-  
