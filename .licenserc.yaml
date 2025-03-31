@@ -27,7 +27,7 @@ header:
     # there are ways to link licensing information to JSON files however; see e.g. https://reuse.software/faq/
     - '**/**.json'
     - '**/**.txt'
+    - '.github/CODEOWNERS'
     - '**/dist'
-    - '.mvn/**'
     - '.nvmrc'
   comment: on-failure
