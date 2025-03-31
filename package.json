@@ -1,15 +1,21 @@
 {
-    "private": true,
-    "workspaces": [
-      "office-add-in",
-      "office-backend"
-    ],
-    "packageManager": "npm@10.9.2",
-    "scripts": {
-      "dev": "turbo dev",
-      "build": "turbo build"
-    },
-    "devDependencies": {
-      "turbo": "1.13.4"
-    }
+  "private": true,
+  "version": "0.0.1",
+  "license": "EUPL-1.2+",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infonl/podiumd-office-plugin.git"
+  },
+  "workspaces": [
+    "office-add-in",
+    "office-backend"
+  ],
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build"
+  },
+  "devDependencies": {
+    "turbo": "1.13.4"
   }
+}

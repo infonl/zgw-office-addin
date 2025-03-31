@@ -9,10 +9,10 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "EUPL-1.2+",
   "description": "",
   "dependencies": {
-    "fastify": "5.2.1"
+    "fastify": "5.2.2"
   },
   "devDependencies": {
     "@types/node": "22.13.13",

@@ -1,10 +1,6 @@
 {
-  "name": "podiumd-office-taskpane-addin",
+  "name": "office-add-in",
   "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/OfficeDev/podiumd-office-taskpane-addin.git"
-  },
   "license": "EUPL-1.2+",
   "config": {
     "app_to_debug": "word",
@@ -59,6 +55,6 @@
   },
   "prettier": "office-addin-prettier-config",
   "browserslist": [
-    "last 2 versions",
+    "last 2 versions"
   ]
 }
