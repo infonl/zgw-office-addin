@@ -4,7 +4,7 @@ export class TaskpaneService {
   public async getZaken(caseNumber: string): Promise<any> {
     console.log("Button clicked! Case Number:", caseNumber);
 
-    const backendUrl = "https://chubby-planes-search.loca.lt"; // Replace with your Localtunnel URL
+    const backendUrl = "https://funny-stars-fall.loca.lt";
 
     fetch(`${backendUrl}/zaken/${caseNumber}`, {
       method: "GET",

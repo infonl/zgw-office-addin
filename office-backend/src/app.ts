@@ -2,9 +2,9 @@ import Fastify from 'fastify';
 
 const fastify = Fastify();
 
-const allowedOrigins = ['https://localhost:3000', 'https://chubby-planes-search.loca.lt']; // Allowed origins
 
 fastify.addHook('onRequest', (request, reply, done) => {
+  const allowedOrigins = ['https://localhost:3000', 'https://funny-stars-fall.loca.lt']; // Allowed origins
   const origin = request.headers.origin;
 
   // @ts-ignore
@@ -26,9 +26,12 @@ fastify.addHook('onRequest', (request, reply, done) => {
   done();
 });
 
+
 fastify.get('/zaken/:caseNumber', async (request, reply) => {
   // @ts-ignore
   const caseNumber = request.params.caseNumber;
+  
+  console.log("Origin received:", request.headers.origin);
   console.log('Received request for case number:', caseNumber);
 
   return { caseNumber };  // Mock response
