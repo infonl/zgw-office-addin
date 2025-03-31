@@ -12,16 +12,16 @@ Office.onReady((info) => {
 
     // Fix: Assign a function reference
     document.getElementById("upload").onclick = () => {
-      const caseNumber = (document.getElementById("case-number") as HTMLInputElement).value;
-      run(caseNumber);
+      const zaakNummer = (document.getElementById("case-number") as HTMLInputElement).value;
+      run(zaakNummer);
     };
   }
 });
 
 
-export async function run(caseNumber: string) {
+export async function run(zaakNummer: string) {
   return Word.run(async (context) => {
-    if (!caseNumber) {
+    if (!zaakNummer) {
         // If a case number is not provided, show an error message.
         console.warn("No case number provided.");
         return
@@ -29,7 +29,7 @@ export async function run(caseNumber: string) {
 
     await context.sync();
     const taskService = new TaskpaneService();
-    const zaken = await taskService.getZaken(caseNumber);
+    const zaken = await taskService.getZaken(zaakNummer);
     console.log("Zaken:", zaken);
   });
 }

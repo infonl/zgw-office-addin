@@ -1,12 +1,12 @@
 export class TaskpaneService {
   constructor() {}
 
-  public async getZaken(caseNumber: string): Promise<any> {
-    console.log("Button clicked! Case Number:", caseNumber);
+  public async getZaken(zaakNummer: string): Promise<any> {
+    console.log("Button clicked! Case Number:", zaakNummer);
 
-    const backendUrl = "https://funny-stars-fall.loca.lt";
+    const backendUrl = "https://localhost:3003"; // Replace with your backend URL
 
-    fetch(`${backendUrl}/zaken/${caseNumber}`, {
+    fetch(`${backendUrl}/zaken/${zaakNummer}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
