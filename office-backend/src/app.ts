@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fs from 'fs';
 import { ZaakService } from '../service/ZaakService';
 
@@ -9,7 +9,6 @@ const fastify = Fastify({
   },
 });
 
-// ✅ Manually handle CORS
 fastify.addHook('onRequest', (request, reply, done) => {
   const allowedOrigins = ['https://localhost:3000', 'https://funny-stars-fall.loca.lt'];
   const origin = request.headers.origin;
@@ -29,13 +28,7 @@ fastify.addHook('onRequest', (request, reply, done) => {
   done();
 });
 
-fastify.get('/cases/:caseNumber', async (request, reply) => {
-  const caseNumber = (request.params as { caseNumber: string }).caseNumber;
-  console.log("Received request for case number:", caseNumber);
-  return { caseNumber };
-});
-
-fastify.get('/zaken/:zaakNummer', async (request, reply) => {
+fastify.get('/zaken/:zaakNummer', async (request: FastifyRequest, reply: FastifyReply) => {
   const zaakNummer = (request.params as { zaakNummer: string }).zaakNummer;
   const zaakService = new ZaakService();
   const response = zaakService.getZaken(zaakNummer);
