@@ -15,17 +15,12 @@ header:
   paths:
     - '**'
   paths-ignore:
-    - 'build'
     - 'certificates'
     - 'config'
     - 'docs'
-    - 'gradle'
     # Exclude Helm Chart files because the 'Azure Kubernetes Bake' GitHub Action that we use cannot
     # deal with SPDX headers in these files. See: https://github.com/Azure/k8s-bake/issues/117
     - 'charts'
-    - 'scripts'
-    - 'target'
-    - 'wildfly-*'
     - '**/*.md'
     - '**/node_modules'
     # SPDX license headers cannot be added to JSON files so we ignore them
@@ -33,21 +28,6 @@ header:
     - '**/**.json'
     - '**/**.txt'
     - '**/dist'
-    - 'gradlew'
-    - 'gradlew.bat'
-    - '.kotlin/**'
-    - '.github/CODEOWNERS'
     - '.mvn/**'
-    - 'mvnw.cmd'
-    - 'mvnw'
-    - 'src/main/resources/api-specs/**'
-    - 'src/main/resources/cmmn/**'
-    - 'src/main/resources/openapi-generator-templates/**'
-    - 'src/main/resources/policies/policies'
-    # ignore Flyway DB migration files without SPDX headers
-    # adding SPDX headers to these files would break the migration on existing databases
-    - 'src/main/resources/schemas/V34__*.sql'
-    - 'src/main/resources/schemas/V38__*.sql'
-    - 'src/main/resources/schemas/V39__*.sql'
-    - 'src/main/resources/schemas/V40__*.sql'
+    - '.nvmrc'
   comment: on-failure
