@@ -4,7 +4,7 @@
       "office-add-in",
       "office-backend"
     ],
-    "packageManager": "npm@10.9.2",
+    "packageManager": "npm@11.2.0",
     "scripts": {
       "dev": "turbo dev",
       "build": "turbo build"
