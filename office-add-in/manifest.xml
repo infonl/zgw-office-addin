@@ -6,7 +6,7 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
   <Id>e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>INFO</ProviderName>
+  <ProviderName>INFO.nl</ProviderName>
   <DefaultLocale>nl-NL</DefaultLocale>
   <DisplayName DefaultValue="PodiumD Office Add-In"/>
   <Description DefaultValue="Dimpact PodiumD office integratie add-in."/>
