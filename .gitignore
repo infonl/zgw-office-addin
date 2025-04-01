@@ -26,3 +26,5 @@ dist/
 .vscode/
 **/.vscode/
 **/.pem
+office-backend/cert.pem
+office-backend/key.pem
