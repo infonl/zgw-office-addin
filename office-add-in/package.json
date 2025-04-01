@@ -24,7 +24,7 @@
   "dependencies": {
     "core-js": "3.41.0",
     "fastify": "5.2.1",
-    "fastify-cors": "6.0.3",
+    "fastify-cors": "6.1.0",
     "regenerator-runtime": "0.14.1"
   },
   "devDependencies": {
