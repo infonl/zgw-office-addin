@@ -1,3 +1,8 @@
+/*  
+ * SPDX-FileCopyrightText: 2025 Info  
+ * SPDX-License-Identifier: EUPL-1.2+  
+ */ 
+
 export class TaskpaneService {
   constructor() {}
 
