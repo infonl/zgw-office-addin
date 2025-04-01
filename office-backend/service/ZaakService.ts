@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO  
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 export class ZaakService {
     constructor() {}
 
