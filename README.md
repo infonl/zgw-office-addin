@@ -34,10 +34,10 @@ More details on the development setup can be found in the [development setup doc
 
 ### Prerequisites
 
-- Node.js (compatible with npm 10.9.2)
+- Node.js (per version in `.nvmrc`)
 - Microsoft Office (desktop version for local testing)
 
 
 ## License
 
-This project is licensed under the EUPL-1.2-or-later - see the LICENSE file for details.
+This project is licensed under the EUPL-1.2-or-later - see the [LICENSE](LICENSE.md) file for details.

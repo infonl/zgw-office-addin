@@ -2,19 +2,19 @@
 
 ### Prerequisites
 
-- Node.js (compatible with npm 10.9.2)
+- Node.js (per version in `.nvmrc`)
 - Microsoft Office (desktop version for local testing)
 
 ### Installation
 
 1. Clone the repository
-   ```bash
+   ```shell
    git clone https://github.com/infonl/podiumd-office-plugin/
    cd podiumd-office-plugin
    ```
 
 2. Install dependencies
-   ```bash
+   ```shell
    npm install
    ```
 
@@ -51,11 +51,10 @@ From within the `office-backend` directory, start the backend service:
 npm run dev
 ```
 
-
 ### Sideloading the Add-in in Word Application
 For more detailed instructions on sideloading the add-in, see the [official documentation](https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-for-testing).
 
-To test the add-in in the Word Application, start the add-in and it will open the application with the add-in loaded:
+To test the add-in in the Word Application, start the add-in, and it will open the application with the add-in loaded:
 ```shell
 npm run start
 ```
