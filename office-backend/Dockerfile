@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Info
+# SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 FROM node:20-alpine
 
