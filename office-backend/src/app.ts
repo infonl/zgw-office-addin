@@ -16,6 +16,3 @@ app.get("/zaak/:caseNumber", async (request) => {
   const { caseNumber } = request.params
   return { message: `GET: / zaak / ${caseNumber}` };
 });
-
-
-
