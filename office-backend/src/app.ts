@@ -15,7 +15,7 @@ const fastify = Fastify({
 });
 
 fastify.addHook('onRequest', (request, reply, done) => {
-  const allowedOrigins = ['https://localhost:3000', 'https://funny-stars-fall.loca.lt'];
+  const allowedOrigins = ['https://localhost:3000'];
   const origin = request.headers.origin;
 
   if (origin && allowedOrigins.includes(origin)) {

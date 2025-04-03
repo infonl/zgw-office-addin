@@ -9,7 +9,7 @@ export class TaskpaneService {
   public async getZaken(zaakNummer: string): Promise<any> {
     console.log("Button clicked! Case Number:", zaakNummer);
 
-    const backendUrl = "https://localhost:3003"; // Replace with your backend URL
+    const backendUrl = "https://localhost:3003";
 
     fetch(`${backendUrl}/zaken/${zaakNummer}`, {
       method: "GET",
