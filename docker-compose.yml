@@ -1,23 +1,25 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
-version: '3'
+version: "3.8"
 services:
   frontend:
+    build:
+      context: ./office-add-in
+      dockerfile: Dockerfile
     image: my-office-addin-frontend
     container_name: my-office-frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
     networks:
       - office-add-in-net
 
   backend:
+    build:
+      context: ./office-backend
+      dockerfile: Dockerfile
     image: my-office-backend-image
     container_name: my-office-backend
     ports:
       - "3003:3003"
     networks:
       - office-add-in-net
-
-networks:
-  office-add-in-net:
-    driver: bridge
