@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: ./office-add-in
+      dockerfile: Dockerfile
+    image: office-add-in-frontend  
+    container_name: office-add-in-frontend  
+    ports:
+      - "3000:3000"
+
+  backend:
+    build:
+      context: ./office-backend
+      dockerfile: Dockerfile
+    image: office-add-in-backend  
+    container_name: office-add-in-backend  
+    ports:
+      - "3003:3003"

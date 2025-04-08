@@ -30,4 +30,5 @@ header:
     - '.github/CODEOWNERS'
     - '**/dist'
     - '.nvmrc'
+    - '**/manifest.xml'
   comment: on-failure
