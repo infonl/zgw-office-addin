@@ -9,6 +9,5 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy the built frontend files
 COPY ./dist/ /usr/share/nginx/html/
 
-# Expose port 80 inside the container (we map this to 3000 when running)
 EXPOSE 3000
 
