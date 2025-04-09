@@ -12,14 +12,9 @@
   <AppDomains>
     <AppDomain>https://www.info.nl/zaak-gericht-werken/office-integratie</AppDomain>
   </AppDomains>
-
-  <!-- Hosts Section: Specifies which Office apps the add-in supports -->
   <Hosts>
-    <Host Name="Document"/>  <!-- For Word -->
-    <Host Name="Workbook"/>  <!-- For Excel -->
-    <Host Name="Presentation"/>  <!-- For PowerPoint -->
+    <Host Name="Document"/>
   </Hosts>
-
   <DefaultSettings>
     <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
   </DefaultSettings>
