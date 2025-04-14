@@ -24,6 +24,6 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "fastify-cors": "6.0.3"
+    "fastify-cors": "6.1.0"
   }
 }
