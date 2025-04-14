@@ -1,33 +1,31 @@
 /*
- * SPDX-FileCopyrightText: 2025 INFO  
+ * SPDX-FileCopyrightText: 2025 INFO.nl  
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/* global document, Office, Word */
+import { TaskpaneService } from "../service/taskpane.service";
+
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("upload").onclick = run(document.getElementById("case-number").innerText);
+    document.getElementById("upload").onclick = () => {
+      const zaakNummer = (document.getElementById("case-number") as HTMLInputElement).value;
+      run(zaakNummer);
+    };
   }
 });
 
-export async function run(caseNumber: string) {
+
+export async function run(zaakNummer: string) {
   return Word.run(async (context) => {
-    /**
-     * Insert your Word code here
-     */
-    if (!caseNumber) {
-        // If a case number is not provided, show an error message.
+    if (!zaakNummer) {
         console.warn("No case number provided.");
-        return
-    }
-    if (!context.document.saved) {
-        // If the document is unsaved, show a warning message.
-        console.warn("Please save the document first.");
         return
     }
 
     await context.sync();
+    const taskService = new TaskpaneService();
+    const zaken = await taskService.getZaken(zaakNummer);
   });
 }
