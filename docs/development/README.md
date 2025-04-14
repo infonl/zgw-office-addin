@@ -60,3 +60,18 @@ npm run start
 ```
 
 You can edit your source files, and see the changes reflected in the Word Application immediately.
+
+## Docker Compose
+
+We use Docker to create containers for the frontend and backend.
+
+To create and start the containers, run the following commands in the root of the project:
+
+- `docker-compose build`: Builds the docker images
+- `docker-compose up -d`: Starts the containers in detached mode
+
+To delete the containers run
+- `docker-compose down`: Deletes the docker containers
+
+   
+
