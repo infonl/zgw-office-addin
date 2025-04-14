@@ -7,23 +7,23 @@
     "type": "git",
     "url": "https://github.com/infonl/podiumd-office-plugin.git"
   },
-    "workspaces": [
-        "office-add-in",
-        "office-backend"
-    ],
+  "workspaces": [
+    "office-add-in",
+    "office-backend"
+  ],
   "packageManager": "npm@11.3.0",
-    "scripts": {
-        "dev": "turbo dev",
-        "build": "turbo build",
-      "lint": "turbo lint"
-    },
-    "devDependencies": {
-        "turbo": "2.5.0"
-    },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "2.5.0"
+  },
   "engines": {
     "node": ">=22.0.0"
   },
-    "dependencies": {
-        "fastify-cors": "6.0.3"
-    }
+  "dependencies": {
+    "fastify-cors": "6.0.3"
+  }
 }
