@@ -1,6 +1,6 @@
 frontend:
   image:
-    repository: office-add-in-frontend
+    repository: ghcr.io/infonl/podiumd-office-plugin-frontend
     tag: latest
     pullPolicy: IfNotPresent
   service:
@@ -8,7 +8,7 @@ frontend:
 
 backend:
   image:
-    repository: office-add-in-backend
+    repository: ghcr.io/infonl/podiumd-office-plugin-backend
     tag: latest
     pullPolicy: IfNotPresent
   service:
