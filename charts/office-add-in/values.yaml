@@ -1,0 +1,15 @@
+frontend:
+  image:
+    repository: office-add-in-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 3000
+
+backend:
+  image:
+    repository: office-add-in-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 3003
