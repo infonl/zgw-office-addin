@@ -30,11 +30,11 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| backend.image.repository | string | `"office-add-in-backend"` |  |
+| backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-plugin-backend"` |  |
 | backend.image.tag | string | `"latest"` |  |
 | backend.service.port | int | `3003` |  |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| frontend.image.repository | string | `"office-add-in-frontend"` |  |
+| frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-plugin-frontend"` |  |
 | frontend.image.tag | string | `"latest"` |  |
 | frontend.service.port | int | `3000` |  |
 
