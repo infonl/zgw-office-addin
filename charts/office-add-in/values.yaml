@@ -4,6 +4,7 @@ frontend:
     tag: latest
     pullPolicy: IfNotPresent
   service:
+    type: ClusterIP
     port: 3000
 
 backend:
@@ -12,4 +13,5 @@ backend:
     tag: latest
     pullPolicy: IfNotPresent
   service:
+    type: ClusterIP
     port: 3003
