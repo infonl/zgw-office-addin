@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: office-add-in-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: office-add-in-frontend
+  template:
+    metadata:
+      labels:
+        app: office-add-in-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: "{{ .Values.frontend.image.pullPolicy }}"
+          ports:
+            - containerPort: 3000

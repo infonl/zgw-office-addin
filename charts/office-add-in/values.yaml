@@ -1,0 +1,17 @@
+frontend:
+  image:
+    repository: ghcr.io/infonl/podiumd-office-plugin-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+
+backend:
+  image:
+    repository: ghcr.io/infonl/podiumd-office-plugin-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3003

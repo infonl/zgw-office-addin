@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: office-add-in-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: office-add-in-backend
+  template:
+    metadata:
+      labels:
+        app: office-add-in-backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: "{{ .Values.backend.image.pullPolicy }}"
+          ports:
+            - containerPort: 3003
