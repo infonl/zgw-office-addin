@@ -55,7 +55,6 @@ jobs:
           office-add-in/dist/
           office-backend/dist/
 
-
   next-version:
     runs-on: ubuntu-24.04
     outputs:
@@ -150,8 +149,8 @@ jobs:
         context: ./office-add-in
         push: true
         tags: |
-          ghcr.io/podiumd-office-add-in-frontend:latest
-          ghcr.io/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+          ghcr.io/infonl/podiumd-office-add-in-frontend:latest
+          ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
 
     - name: Build and push Backend Docker image
       uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6.17.0
@@ -159,5 +158,5 @@ jobs:
         context: ./office-backend
         push: true
         tags: |
-          ghcr.io/podiumd-office-add-in-backend:latest
-          ghcr.io/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
+          ghcr.io/infonl/podiumd-office-add-in-backend:latest
+          ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
