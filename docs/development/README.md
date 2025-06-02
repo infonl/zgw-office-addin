@@ -25,6 +25,12 @@
 - `npm run dev`: Start all packages in development mode
 - `npm run build`: Build all packages for production
 
+#### Generating keys for development
+
+In order to run the application, run the `generate-keys.sh` in the root directory.
+
+Make sure to add trust the `key.pem` on your local machine.
+
 ### Office Add-in Commands
 
 - `npm run dev`: Build in development mode
@@ -42,7 +48,7 @@
 - `npm run start`: Start the server
 - `npm run build`: Build for production
 
-## Testing 
+## Testing
 
 ### Start the Office Backend
 
@@ -72,6 +78,3 @@ To create and start the containers, run the following commands in the root of th
 
 To delete the containers run
 - `docker-compose down`: Deletes the docker containers
-
-   
-

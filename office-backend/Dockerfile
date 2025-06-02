@@ -13,7 +13,7 @@ COPY tsconfig.json ./
 RUN npm install
 
 # Copy the built dist directory
-COPY src ./src
+COPY ./ ./
 
 RUN npm run build
 
