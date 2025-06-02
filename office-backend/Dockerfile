@@ -13,7 +13,9 @@ COPY tsconfig.json ./
 RUN npm install
 
 # Copy the built dist directory
-COPY dist ./dist
+COPY src ./src
+
+RUN npm run build
 
 # Expose ports
 EXPOSE 3003
