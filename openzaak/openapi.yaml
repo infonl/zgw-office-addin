@@ -1820,13 +1820,13 @@ paths:
           schema:
             type: string
           description: '**EXPERIMENTEEL** **DEPRECATED** Een uniek nummer gekoppeld
-          aan de onderneming.'
+            aan de onderneming.'
         - in: query
           name: betrokkeneIdentificatie__vestiging__vestigingsNummer
           schema:
             type: string
           description: '**EXPERIMENTEEL** **DEPRECATED** Een korte unieke aanduiding
-          van de Vestiging.'
+            van de Vestiging.'
         - in: query
           name: betrokkeneType
           schema:
@@ -1870,16 +1870,16 @@ paths:
               - urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard
               - urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI
           description: "**EXPERIMENTEEL** Rollen met een 'authenticatieContext.levelOfAssurance'\
-          \ die lager of gelijk is dan de aangegeven aanduiding worden teruggeven\
-          \ als resultaten.\n \n **Digid:** \n* `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport`\
-          \ - DigiD Basis\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract`\
-          \ - DigiD Midden\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard` -\
-          \ DigiD Substantieel\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI`\
-          \ - DigiD Hoog\n \n **eHerkenning:** \n* `urn:etoegang:core:assurance-class:loa1`\
-          \ - Niet bestaand (1)\n* `urn:etoegang:core:assurance-class:loa2` - Laag\
-          \ (2)\n* `urn:etoegang:core:assurance-class:loa2plus` - Laag (2+)\n* `urn:etoegang:core:assurance-class:loa3`\
-          \ - Substantieel (3)\n* `urn:etoegang:core:assurance-class:loa4` - Hoog\
-          \ (4)\n\n"
+            \ die lager of gelijk is dan de aangegeven aanduiding worden teruggeven\
+            \ als resultaten.\n \n **Digid:** \n* `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport`\
+            \ - DigiD Basis\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract`\
+            \ - DigiD Midden\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard` -\
+            \ DigiD Substantieel\n* `urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI`\
+            \ - DigiD Hoog\n \n **eHerkenning:** \n* `urn:etoegang:core:assurance-class:loa1`\
+            \ - Niet bestaand (1)\n* `urn:etoegang:core:assurance-class:loa2` - Laag\
+            \ (2)\n* `urn:etoegang:core:assurance-class:loa2plus` - Laag (2+)\n* `urn:etoegang:core:assurance-class:loa3`\
+            \ - Substantieel (3)\n* `urn:etoegang:core:assurance-class:loa4` - Hoog\
+            \ (4)\n\n"
         - in: query
           name: omschrijving
           schema:
