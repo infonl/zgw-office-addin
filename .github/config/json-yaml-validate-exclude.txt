@@ -11,4 +11,4 @@ charts/
 # Exclude validation on external OpenAPI specification files since it breaks on some of these files,
 # and it makes little sense for us to validate external files,
 # even though some of them include manual changes made by us.
-resources/
+resources/api-specs
