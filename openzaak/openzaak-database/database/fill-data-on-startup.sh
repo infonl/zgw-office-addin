@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
 #!/bin/bash
 
 echo ">>>>  Waiting until Open Zaak has initialized the database <<<<"

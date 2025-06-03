@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+
 # INFO.nl: made manual changes to this specification to make it work with the OpenAPI generator; search for "INFO.nl" to find the changes
 openapi: 3.0.3
 info:

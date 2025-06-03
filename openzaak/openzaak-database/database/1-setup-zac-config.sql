@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2025 INFO.nl
+-- SPDX-License-Identifier: EUPL-1.2+
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 INSERT INTO catalogi_catalogus (naam, uuid, domein, rsin, contactpersoon_beheer_naam, contactpersoon_beheer_telefoonnummer, contactpersoon_beheer_emailadres, _etag, begindatum_versie, versie) VALUES

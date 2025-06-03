@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+
 openssl req -new -x509 -days 9999 -config ./ca.example.cnf -keyout ./office-backend/ca-key.pem -out ./office-backend/ca-cert.pem
 openssl genrsa -out ./office-backend/key.pem 4096
 openssl req -new -config ./server.example.cnf -key ./office-backend/key.pem -out ./office-backend/csr.pem

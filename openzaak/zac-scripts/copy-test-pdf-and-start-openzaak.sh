@@ -9,6 +9,6 @@
 # note that this script is run as the 'openzaak' user (see the Dockerfile of Open Zaak) so
 # we do not need to change any file or directory permissions here
 
-echo -e "Starting Open OpenZaak.."
+echo -e "Starting OpenZaak.."
 
 /start.sh
