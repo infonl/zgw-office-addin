@@ -23,7 +23,7 @@ services:
   openzaak-database:
     image: docker.io/postgis/postgis:17-3.4@sha256:d0b5a6ecab18997637f55a83cb4a9467391de5645916cfa1b6f2a8d19eee7be5
     ports:
-      - "54322:5432"
+      - "15432:5432"
     platform: linux/amd64
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -38,8 +38,8 @@ services:
       - BAG_API_CLIENT_MP_REST_URL=${BAG_API_CLIENT_MP_REST_URL:-https://api.bag.kadaster.nl/lvbag/individuelebevragingen/v2/}
       - BAG_API_KEY=${BAG_API_KEY:-please-request-a-bag-api-key}
     volumes:
-      - ./openzaak-database:/docker-entrypoint-initdb.d
-      - ./openzaak-database-data:/var/lib/postgresql/data
+      - ./openzaak/openzaak-database:/docker-entrypoint-initdb.d
+      - ./openzaak/openzaak-database-data:/var/lib/postgresql/data
 
 
   openzaak.local:
@@ -69,7 +69,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
       - CELERY_LOGLEVEL=DEBUG
     ports:
-      - "8001:8000"
+      - "8020:8000"
     volumes:
       - ./openzaak/zac-scripts:/zac-scripts
     command: ["/zac-scripts/copy-test-pdf-and-start-openzaak.sh"]

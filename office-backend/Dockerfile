@@ -21,4 +21,4 @@ RUN npm run build
 EXPOSE 3003
 
 # Set the entry point to the startup script
-ENTRYPOINT ["node", "dist/app.js"]
+ENTRYPOINT ["node", "dist/src/app.js"]
