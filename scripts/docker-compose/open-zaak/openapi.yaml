@@ -1804,7 +1804,7 @@ paths:
           schema:
             type: string
           description: '**EXPERIMENTEEL** Een uniek nummer toegekend door de Kamer van
-          Koophandel'
+            Koophandel'
         - in: query
           name: betrokkeneIdentificatie__nietNatuurlijkPersoon__vestigingsNummer
           schema:

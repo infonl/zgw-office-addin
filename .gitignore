@@ -28,4 +28,4 @@ dist/
 *.pem
 *.srl
 openzaak-database-data
-openzaak/generated-client
+generated-client

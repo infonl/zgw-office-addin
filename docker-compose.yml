@@ -38,8 +38,8 @@ services:
       - BAG_API_CLIENT_MP_REST_URL=${BAG_API_CLIENT_MP_REST_URL:-https://api.bag.kadaster.nl/lvbag/individuelebevragingen/v2/}
       - BAG_API_KEY=${BAG_API_KEY:-please-request-a-bag-api-key}
     volumes:
-      - ./openzaak/openzaak-database:/docker-entrypoint-initdb.d
-      - ./openzaak/openzaak-database-data:/var/lib/postgresql/data
+      - ./scripts/docker-compose/open-zaak/openzaak-database:/docker-entrypoint-initdb.d
+      - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
 
 
   openzaak.local:
@@ -71,8 +71,7 @@ services:
     ports:
       - "8020:8000"
     volumes:
-      - ./openzaak/zac-scripts:/zac-scripts
-    command: ["/zac-scripts/copy-test-pdf-and-start-openzaak.sh"]
+      - ./scripts/docker-compose/open-zaak/zac-scripts:/zac-scripts
     healthcheck:
       test: [ "CMD", "python", "-c", "import requests; exit(requests.head('http://localhost:8000/admin/').status_code not in [200, 302])" ]
       interval: 30s
