@@ -1769,9 +1769,7 @@ paths:
           name: betrokkeneIdentificatie__medewerker__identificatie
           schema:
             type: string
-          description: '**EXPERIMENTEEL** Een korte unieke aanduiding van de MEDEWERKER.
-          Dit veld wijkt af van de standaard, omdat er 128 karakters zijn toegestaan
-          in plaats van 24'
+          description: '**EXPERIMENTEEL** Een korte unieke aanduiding van de MEDEWERKER. Dit veld wijkt af van de standaard, omdat er 128 karakters zijn toegestaan in plaats van 24'
         - in: query
           name: betrokkeneIdentificatie__natuurlijkPersoon__anpIdentificatie
           schema:
