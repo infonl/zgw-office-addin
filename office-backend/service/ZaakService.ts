@@ -7,7 +7,6 @@ export class ZaakService {
     constructor() {}
 
     public getZaken(zaakNummer: string): void | string {
-        this.checkzaakNummer(zaakNummer);
         if (!this.checkzaakNummer(zaakNummer)) {
             return "Geen valide zaaknummer opgegeven";
         }

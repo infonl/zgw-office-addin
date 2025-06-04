@@ -35,8 +35,6 @@ services:
       - POSTGRES_USER=openzaak
       - POSTGRES_PASSWORD=openzaak
       - POSTGRES_DB=openzaak
-      - BAG_API_CLIENT_MP_REST_URL=${BAG_API_CLIENT_MP_REST_URL:-https://api.bag.kadaster.nl/lvbag/individuelebevragingen/v2/}
-      - BAG_API_KEY=${BAG_API_KEY:-please-request-a-bag-api-key}
     volumes:
       - ./scripts/docker-compose/open-zaak/openzaak-database:/docker-entrypoint-initdb.d
       - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
@@ -65,13 +63,8 @@ services:
       - OPENZAAK_SUPERUSER_EMAIL=noreply@example.com
       - SECRET_KEY=openZaakSecretKey
       - SENDFILE_BACKEND=django_sendfile.backends.simple
-      - CELERY_BROKER_URL=redis://redis:6379/1
-      - CELERY_RESULT_BACKEND=redis://redis:6379/1
-      - CELERY_LOGLEVEL=DEBUG
     ports:
       - "8020:8000"
-    volumes:
-      - ./scripts/docker-compose/open-zaak/zac-scripts:/zac-scripts
     healthcheck:
       test: [ "CMD", "python", "-c", "import requests; exit(requests.head('http://localhost:8000/admin/').status_code not in [200, 302])" ]
       interval: 30s
