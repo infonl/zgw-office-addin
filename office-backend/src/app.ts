@@ -36,7 +36,7 @@ fastify.addHook('onRequest', (request, reply, done) => {
 fastify.get('/zaken/:zaakNummer', async (request: FastifyRequest, reply: FastifyReply) => {
   const zaakNummer = (request.params as { zaakNummer: string }).zaakNummer;
   const zaakService = new ZaakService();
-  const response = zaakService.getZaken(zaakNummer);
+  const response = await zaakService.getZaken(zaakNummer);
   reply.send({ response });
 });
 
