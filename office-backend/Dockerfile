@@ -10,13 +10,15 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the built dist directory
-COPY dist ./dist
+COPY ./ ./
+
+RUN npm run build
 
 # Expose ports
 EXPOSE 3003
 
 # Set the entry point to the startup script
-ENTRYPOINT ["node", "dist/app.js"]
+ENTRYPOINT ["node", "dist/src/app.js"]

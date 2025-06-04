@@ -6,12 +6,11 @@
 export class ZaakService {
     constructor() {}
 
-    public getZaken(zaakNummer: string): string {
-        this.checkzaakNummer(zaakNummer);
+    public getZaken(zaakNummer: string): void | string {
         if (!this.checkzaakNummer(zaakNummer)) {
             return "Geen valide zaaknummer opgegeven";
         }
-        return "Gevonden Zaken: " + zaakNummer;
+        return zaakNummer;
     }
 
     private checkzaakNummer(zaakNummer: string): boolean {

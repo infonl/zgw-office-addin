@@ -19,3 +19,66 @@ services:
     container_name: office-add-in-backend  
     ports:
       - "3003:3003"
+
+  openzaak-database:
+    image: docker.io/postgis/postgis:17-3.4@sha256:d0b5a6ecab18997637f55a83cb4a9467391de5645916cfa1b6f2a8d19eee7be5
+    ports:
+      - "15432:5432"
+    platform: linux/amd64
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    environment:
+      - POSTGRES_USER=openzaak
+      - POSTGRES_PASSWORD=openzaak
+      - POSTGRES_DB=openzaak
+    volumes:
+      - ./scripts/docker-compose/open-zaak/openzaak-database:/docker-entrypoint-initdb.d
+      - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
+
+
+  openzaak.local:
+    image: docker.io/openzaak/open-zaak:1.21.0@sha256:627c293ac5f4b8c27b7f1afd088d4df3f7b03bb8a63a665c643de5467e47089f
+    platform: linux/amd64
+    environment: &openzaak-env
+      - ALLOWED_HOSTS="*"
+      - DB_HOST=openzaak-database
+      - DB_NAME=openzaak
+      - DB_PASSWORD=openzaak
+      - DB_USER=openzaak
+      - CACHE_DEFAULT=redis:6379/0
+      - CACHE_AXES=redis:6379/0
+      - DEBUG=true
+      - DISABLE_2FA=true
+      - DJANGO_SETTINGS_MODULE=openzaak.conf.docker
+      - DJANGO_SUPERUSER_PASSWORD=admin
+      - LOG_LEVEL=DEBUG
+      # uncomment to enable logging of outgoing requests; can be helpful for debugging
+      #- LOG_REQUESTS=true
+      - NOTIFICATIONS_DISABLED=${OPENZAAK_NOTIFICATIONS_DISABLED:-true}
+      - OPENZAAK_SUPERUSER_USERNAME=admin
+      - OPENZAAK_SUPERUSER_EMAIL=noreply@example.com
+      - SECRET_KEY=openZaakSecretKey
+      - SENDFILE_BACKEND=django_sendfile.backends.simple
+    ports:
+      - "8020:8000"
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import requests; exit(requests.head('http://localhost:8000/admin/').status_code not in [200, 302])" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # This should allow for enough time for migrations to run before the max
+      # retries have passed. This healthcheck in turn allows other containers
+      # to wait for the database migrations.
+      start_period: 30s
+    depends_on:
+      openzaak-database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  redis:
+    image: redis:7.4.3@sha256:7df1eeff67eb0ba84f6b9d2940765a6bb1158081426745c185a03b1507de6a09
