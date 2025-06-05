@@ -5,8 +5,10 @@
 
 export interface PartialZaak {
   count: number;
-  zaaknummer: string;
-  zaaktype: string;
-  status: string;
-  omschrijving: string;
+  results: Array<{
+    identificatie: string;
+    zaaktype: string;
+    status: string;
+    omschrijving: string;
+  }>;
 }

@@ -1,16 +1,17 @@
 /*
  * SPDX-FileCopyrightText: 2025 INFO.nl
- * SPDX-License-Identifier: EUPL-1.2+
- */
+* SPDX-License-Identifier: EUPL-1.2+
+*/
 
-import Fastify, { FastifyRequest, FastifyReply } from "fastify";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
 import fs from "fs";
-import { ZaakService } from "../service/ZaakService";
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakDto } from "../dto/ZaakParam";
-import dotenv from 'dotenv';
+import Fastify from "fastify";
 
-dotenv.config();
 const fastify = Fastify({
   https: {
     key: fs.readFileSync("./key.pem"),
@@ -41,7 +42,7 @@ fastify.addHook("onRequest", (request, reply, done) => {
 });
 
 fastify.get<{Params: ZaakDto}>(
-  "/zaken/:zaakNummer",
+  "/zaken/:zaakIdentificatie",
   async (request, reply) => {
     await new ZaakController().getZaak(request, reply);
   }

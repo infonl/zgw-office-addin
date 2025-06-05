@@ -30,19 +30,19 @@ export class ZaakService {
   private readonly zaakApiUrl = process.env.API_BASE_URL!;
   /**
    * Retrieves a zaak by its number.
-   * @param zaakNummer The unique identifier of the zaak.
+   * @param zaakIdentificatie The unique identifier of the zaak.
    * @returns A promise that resolves to the zaak data or throws an error if not found.
    */
-  public async getZaak(zaakNummer: string): Promise<PartialZaak> {
-    if (!this.checkzaakNummer(zaakNummer)) {
+  public async getZaak(zaakIdentificatie: string): Promise<PartialZaak> {
+    if (!this.checkzaakIdentificatie(zaakIdentificatie)) {
       throw new NoValidZaakNummer();
     }
 
-    const response = await this.fetchZaak(zaakNummer);
+    const response = await this.fetchZaak(zaakIdentificatie);
 
-    // If the response count is 0, it means no zaak was found with the given zaakNummer.
+    // If the response count is 0, it means no zaak was found with the given zaakIdentificatie.
     if (response.count === 0) {
-      throw new NoZaakFound(zaakNummer);
+      throw new NoZaakFound(zaakIdentificatie);
     }
 
     return response;
@@ -50,14 +50,14 @@ export class ZaakService {
 
   /**
    * Makes a request to the OpenZaak API to fetch a zaak by its number.
-   * @param zaakNummer The unique identifier of the zaak to fetch.
+   * @param zaakIdentificatie The unique identifier of the zaak to fetch.
    * @returns The Json object of one singular zaak object or an empty object if not found.
    */
-  private async fetchZaak(zaakNummer: string): Promise<PartialZaak> {
+  private async fetchZaak(zaakIdentificatie: string): Promise<PartialZaak> {
     const url = new URL(this.zaakApiUrl + "/zaken/api/v1/zaken");
 
     url.search = new URLSearchParams({
-      identificatie: zaakNummer,
+      identificatie: zaakIdentificatie,
     }).toString();
 
     const fetchZaak = await fetch(url.toString(), {
@@ -74,10 +74,10 @@ export class ZaakService {
 
   /**
    * Checks if the provided zaak number is valid.
-   * @param zaakNummer The zaak number to validate.
+   * @param zaakIdentificatie The zaak number to validate.
    * @returns true if valid, false otherwise.
    */
-  private checkzaakNummer(zaakNummer: string): boolean {
-    return zaakNummer !== null && zaakNummer.startsWith("ZAAK-");
+  private checkzaakIdentificatie(zaakIdentificatie: string): boolean {
+    return zaakIdentificatie !== null && zaakIdentificatie.startsWith("ZAAK-");
   }
 }

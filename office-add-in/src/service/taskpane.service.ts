@@ -6,12 +6,12 @@
 export class TaskpaneService {
   constructor() {}
 
-  public async getZaken(zaakNummer: string): Promise<any> {
-    console.log("Button clicked! Case Number:", zaakNummer);
+  public async getZaken(zaakIdentificatie: string): Promise<any> {
+    console.log("Button clicked! Case Number:", zaakIdentificatie);
 
     const backendUrl = "https://localhost:3003";
 
-    fetch(`${backendUrl}/zaken/${zaakNummer}`, {
+    fetch(`${backendUrl}/zaken/${zaakIdentificatie}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

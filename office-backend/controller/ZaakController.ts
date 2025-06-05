@@ -25,9 +25,9 @@ export class ZaakController {
      * @param reply The Fastify reply object used to send the response.
      */
     public async getZaak(request: FastifyRequest<{ Params: ZaakDto }>, reply: FastifyReply) {
-        const { zaakNummer } = request.params;
+        const zaakIdentificatie = request.params.zaakIdentificatie;        
         try {
-            const response = await this.zaakService.getZaak(zaakNummer);
+            const response = await this.zaakService.getZaak(zaakIdentificatie);
             reply.status(200).send(response);
         } catch (error: any) {
             const status = error.statusCode || 500;
