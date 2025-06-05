@@ -6,7 +6,7 @@
 import Fastify, { FastifyRequest, FastifyReply } from "fastify";
 import fs from "fs";
 import { ZaakService } from "../service/ZaakService";
-import { ZaakController } from "../Controllers/ZaakController";
+import { ZaakController } from "../controller/ZaakController";
 import { ZaakDto } from "../dto/ZaakParam";
 
 const fastify = Fastify({

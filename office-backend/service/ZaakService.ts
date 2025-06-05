@@ -25,15 +25,12 @@ export class ZaakService {
       algorithm: "HS256",
     }
   );
-
-  private url = new URL("http://localhost:8020/zaken/api/v1/zaken");
-
   /**
    * Retrieves a zaak by its number.
    * @param zaakNummer The unique identifier of the zaak.
    * @returns A promise that resolves to the zaak data or throws an error if not found.
    */
-  public async getZaak(zaakNummer: string): Promise<PartialZaak | string> {
+  public async getZaak(zaakNummer: string): Promise<PartialZaak> {
     if (!this.checkzaakNummer(zaakNummer)) {
       throw new NoValidZaakNummer();
     }
@@ -54,11 +51,13 @@ export class ZaakService {
    * @returns The Json object of one singular zaak object or an empty object if not found.
    */
   private async fetchZaak(zaakNummer: string): Promise<PartialZaak> {
-    this.url.search = new URLSearchParams({
+    const url = new URL("http://localhost:8020/zaken/api/v1/zaken");
+
+    url.search = new URLSearchParams({
       identificatie: zaakNummer,
     }).toString();
 
-    const fetchZaak = await fetch(this.url.toString(), {
+    const fetchZaak = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
