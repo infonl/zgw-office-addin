@@ -8,7 +8,9 @@ import fs from "fs";
 import { ZaakService } from "../service/ZaakService";
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakDto } from "../dto/ZaakParam";
+import dotenv from 'dotenv';
 
+dotenv.config();
 const fastify = Fastify({
   https: {
     key: fs.readFileSync("./key.pem"),

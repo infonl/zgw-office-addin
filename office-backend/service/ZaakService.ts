@@ -8,11 +8,12 @@ import { NoZaakFound } from "../exception/NoZaakFound";
 import { NoValidZaakNummer } from "../exception/NoValidZaakNummer";
 import { PartialZaak } from "../models/PartialZaak";
 
+
 export class ZaakService {
   constructor() {}
 
   // Create a JWT token for authentication with the OpenZaak API.
-  private jwtToken = jwt.sign(
+  private readonly jwtToken = jwt.sign(
     {
       iss: "office-add-in",
       iat: Math.floor(Date.now() / 1000),
@@ -20,11 +21,13 @@ export class ZaakService {
       user_id: "office-add-in",
       user_representation: "office-add-in",
     },
-    "openzaakOfficeAddInSecret",
+    process.env.JWT_SECRET!,
     {
       algorithm: "HS256",
     }
   );
+
+  private readonly zaakApiUrl = process.env.API_BASE_URL!;
   /**
    * Retrieves a zaak by its number.
    * @param zaakNummer The unique identifier of the zaak.
@@ -51,7 +54,7 @@ export class ZaakService {
    * @returns The Json object of one singular zaak object or an empty object if not found.
    */
   private async fetchZaak(zaakNummer: string): Promise<PartialZaak> {
-    const url = new URL("http://localhost:8020/zaken/api/v1/zaken");
+    const url = new URL(this.zaakApiUrl + "/zaken/api/v1/zaken");
 
     url.search = new URLSearchParams({
       identificatie: zaakNummer,

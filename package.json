@@ -26,6 +26,7 @@
   "dependencies": {
     "@fastify/cors": "11.0.1",
     "@types/jsonwebtoken": "9.0.9",
+    "dotenv": "16.5.0",
     "jsonwebtoken": "9.0.2"
   }
 }
