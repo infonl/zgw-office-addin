@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/**
- * ZaakDto represents the parameters required to fetch a 'zaak' (case) by its number.
- */
-export type ZaakDto = {
+export type ZaakParam = {
   zaakIdentificatie: string;
 };

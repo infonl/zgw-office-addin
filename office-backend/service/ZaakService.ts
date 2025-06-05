@@ -4,10 +4,9 @@
  */
 
 import jwt from "jsonwebtoken";
-import { NoZaakFound } from "../exception/NoZaakFound";
-import { NoValidZaakNummer } from "../exception/NoValidZaakNummer";
+import { ZaakNotFound } from "../exception/ZaakNotFound";
+import { ZaakNummerNotValid } from "../exception/ZaakNummerNotValid";
 import { PartialZaak } from "../models/PartialZaak";
-
 
 export class ZaakService {
   constructor() {}
@@ -28,39 +27,26 @@ export class ZaakService {
   );
 
   private readonly zaakApiUrl = process.env.API_BASE_URL!;
-  /**
-   * Retrieves a zaak by its number.
-   * @param zaakIdentificatie The unique identifier of the zaak.
-   * @returns A promise that resolves to the zaak data or throws an error if not found.
-   */
+
   public async getZaak(zaakIdentificatie: string): Promise<PartialZaak> {
     if (!this.checkzaakIdentificatie(zaakIdentificatie)) {
-      throw new NoValidZaakNummer();
+      throw new ZaakNummerNotValid();
     }
-
     const response = await this.fetchZaak(zaakIdentificatie);
 
-    // If the response count is 0, it means no zaak was found with the given zaakIdentificatie.
     if (response.count === 0) {
-      throw new NoZaakFound(zaakIdentificatie);
+      throw new ZaakNotFound(zaakIdentificatie);
     }
-
     return response;
   }
 
-  /**
-   * Makes a request to the OpenZaak API to fetch a zaak by its number.
-   * @param zaakIdentificatie The unique identifier of the zaak to fetch.
-   * @returns The Json object of one singular zaak object or an empty object if not found.
-   */
   private async fetchZaak(zaakIdentificatie: string): Promise<PartialZaak> {
     const url = new URL(this.zaakApiUrl + "/zaken/api/v1/zaken");
-
     url.search = new URLSearchParams({
       identificatie: zaakIdentificatie,
     }).toString();
 
-    const fetchZaak = await fetch(url.toString(), {
+    const res = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -69,14 +55,16 @@ export class ZaakService {
         Authorization: `Bearer ${this.jwtToken}`,
       },
     });
-    return fetchZaak.json();
+
+    if (!res.ok) {
+      const errorBody = await res.json();
+      throw new Error(
+        `OpenZaak error: ${errorBody.status} ${errorBody.title} - ${errorBody.detail}`
+      );
+    }
+    return res.json();
   }
 
-  /**
-   * Checks if the provided zaak number is valid.
-   * @param zaakIdentificatie The zaak number to validate.
-   * @returns true if valid, false otherwise.
-   */
   private checkzaakIdentificatie(zaakIdentificatie: string): boolean {
     return zaakIdentificatie !== null && zaakIdentificatie.startsWith("ZAAK-");
   }

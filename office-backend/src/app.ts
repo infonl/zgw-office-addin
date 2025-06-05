@@ -9,7 +9,7 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 import fs from "fs";
 import { ZaakController } from "../controller/ZaakController";
-import { ZaakDto } from "../dto/ZaakParam";
+import { ZaakParam } from "../dto/ZaakParam";
 import Fastify from "fastify";
 
 const fastify = Fastify({
@@ -41,7 +41,7 @@ fastify.addHook("onRequest", (request, reply, done) => {
   done();
 });
 
-fastify.get<{Params: ZaakDto}>(
+fastify.get<{Params: ZaakParam}>(
   "/zaken/:zaakIdentificatie",
   async (request, reply) => {
     await new ZaakController().getZaak(request, reply);
