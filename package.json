@@ -18,12 +18,14 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
-    "turbo": "2.5.4"
+    "turbo": "^2.5.4"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@fastify/cors": "11.0.1"
+    "@fastify/cors": "11.0.1",
+    "@types/jsonwebtoken": "9.0.9",
+    "jsonwebtoken": "9.0.2"
   }
 }
