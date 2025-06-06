@@ -35,3 +35,4 @@ node_modules/
 *.srl
 openzaak-database-data
 generated-client
+generated/types.ts
