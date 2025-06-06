@@ -6,7 +6,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ZaakService } from "../service/ZaakService";
 import type { ZaakParam } from "../dto/ZaakParam";
-import { ExceptionHandler } from '../exception/ExceptionHandler';
+import { ExceptionHandler } from "../exception/ExceptionHandler";
 
 export class ZaakController {
   constructor(private readonly zaakService: ZaakService) {}

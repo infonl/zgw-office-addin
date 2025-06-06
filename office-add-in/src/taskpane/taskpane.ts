@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
+import { LoggerService } from "../service/logger.service";
 import { HttpService } from "../service/http.service";
 import { OfficeService } from "../service/office.service";
 import { TaskpaneService } from "../service/taskpane.service";
@@ -29,7 +30,7 @@ Office.onReady((info) => {
 function fetchZaak(zaakIdentificatie: string) {
   return Word.run(async (context) => {
     if (!zaakIdentificatie) {
-      console.warn("No case number provided.");
+      LoggerService.warn("No case number provided.");
       return;
     }
 

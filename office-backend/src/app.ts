@@ -14,6 +14,7 @@ import Fastify from "fastify";
 import { ZaakService } from "../service/ZaakService";
 import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
+import { LoggerService } from "../service/LoggerService";
 
 const fastify = Fastify({
   https: {
@@ -62,8 +63,8 @@ fastify.post<{ Params: ZaakParam }>(
 
 fastify.listen({ port: 3003, host: "127.0.0.1" }, (err, address) => {
   if (err) {
-    console.error("Error starting server:", err);
+    LoggerService.error("Error starting server:", err);
     process.exit(1);
   }
-  console.log(`🚀 Secure server running at ${address}`);
+  LoggerService.log(`🚀 Secure server running at ${address}`);
 });

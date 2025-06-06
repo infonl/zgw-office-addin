@@ -6,6 +6,7 @@
 import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { ZaakNummerNotValid } from "../exception/ZaakNummerNotValid";
 import { type HttpService } from "./HttpService";
+import { LoggerService } from "./LoggerService";
 import { type GeneratedType } from "../../generated/generated-types";
 
 export class ZaakService {
@@ -44,7 +45,7 @@ export class ZaakService {
   }
 
   public async addDocumentToZaak(zaakIdentificatie: string): Promise<void> {
-    console.log("adding document to zaak", zaakIdentificatie);
+    LoggerService.debug("adding document to zaak", zaakIdentificatie);
   }
 
   private checkzaakIdentificatie(zaakIdentificatie: string): boolean {

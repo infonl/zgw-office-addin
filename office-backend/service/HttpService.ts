@@ -4,6 +4,7 @@
  */
 
 import jwt from "jsonwebtoken";
+import { LoggerService } from "./LoggerService";
 
 export class HttpService {
   private readonly baseUrl = process.env.API_BASE_URL!;
@@ -34,7 +35,7 @@ export class HttpService {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
 
-    console.debug(`[HTTP] ${method} - ${fullUrl}`, options);
+    LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, options);
 
     try {
       const request: RequestInit = {
@@ -54,7 +55,7 @@ export class HttpService {
 
       const response = await fetch(fullUrl, request);
 
-      console.debug(`[HTTP] ${method} - ${fullUrl}`, {
+      LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, {
         status: response.status,
       });
 
@@ -64,11 +65,11 @@ export class HttpService {
 
       const data = await response.json();
 
-      console.debug(`[HTTP] ${method} - ${fullUrl}`, data);
+      LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, data);
 
       return data;
     } catch (error) {
-      console.error(`[HTTP] ${method} - ${fullUrl}`, error);
+      LoggerService.error(`[HTTP] ${method} - ${fullUrl}`, error);
       throw error;
     }
   }

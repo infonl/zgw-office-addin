@@ -4,6 +4,7 @@
  */
 
 import { type HttpService } from "./http.service";
+import { LoggerService } from "./logger.service";
 
 type State = { file: Office.File; currentSlice: number };
 
@@ -18,7 +19,7 @@ export class OfficeService {
   private async processFile(zaakIdentificatie: string) {
     Office.context.document.getFileAsync(Office.FileType.Compressed, async (result) => {
       if (result.status !== Office.AsyncResultStatus.Succeeded) {
-        console.warn(result);
+        LoggerService.warn("Unable to process file", result);
         return;
       }
 
@@ -27,10 +28,10 @@ export class OfficeService {
   }
 
   private async getSlice(state: State, zaakIdentificatie: string) {
-    console.debug("Getting slice", state);
+    LoggerService.debug("Getting slice", state);
     state.file.getSliceAsync(state.currentSlice, async (result) => {
       if (result.status !== Office.AsyncResultStatus.Succeeded) {
-        console.warn(result);
+        LoggerService.warn("Unable to get slice", result);
         return;
       }
 
@@ -39,19 +40,19 @@ export class OfficeService {
   }
 
   private async sendSlice(slice: Office.Slice, state: State, zaakIdentificatie: string) {
-    console.debug("Sending slice", slice, state);
+    LoggerService.debug("Sending slice", slice, state);
     var data = slice.data;
 
     if (!data) {
-      console.warn("No data in slice:", slice.index);
+      LoggerService.warn("No data in slice:", slice.index);
       return;
     }
 
-    console.debug("Encoding data...");
+    LoggerService.debug("Encoding data...");
 
     const encoded = btoa(data);
 
-    console.debug("Encoded data");
+    LoggerService.debug("Encoded data");
 
     try {
       await this.httpService.POST(
@@ -59,14 +60,14 @@ export class OfficeService {
         JSON.stringify({ inhoud: encoded })
       );
     } catch (error) {
-      console.error("Error sending slice:", error);
+      LoggerService.error("Error sending slice:", error);
       await OfficeService.closeFile(state);
       return;
     }
 
     const currentSlice = state.currentSlice + 1;
 
-    console.debug("Processed slice", {
+    LoggerService.debug("Processed slice", {
       currentSlice,
       sliceCount: state.file.sliceCount,
       zaakIdentificatie,
@@ -82,11 +83,11 @@ export class OfficeService {
   private static async closeFile(state: State) {
     state.file.closeAsync(function (result) {
       if (result.status !== Office.AsyncResultStatus.Succeeded) {
-        console.warn(result);
+        LoggerService.warn("Unable to close file", result);
         return;
       }
 
-      console.debug("File closed successfully");
+      LoggerService.debug("File closed successfully");
     });
   }
 }

@@ -4,13 +4,14 @@
  */
 
 import { FastifyRequest, FastifyReply, HookHandlerDoneFunction } from "fastify";
+import { LoggerService } from "../service/LoggerService";
 
 export const onRequestLoggerHook = (
   request: FastifyRequest,
   _reply: FastifyReply,
   done: HookHandlerDoneFunction,
 ) => {
-  console.debug(`[REQUEST] ${request.method} - ${request.url}`);
+  LoggerService.debug(`[REQUEST] ${request.method} - ${request.url}`);
 
   done();
 };
