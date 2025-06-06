@@ -10,5 +10,6 @@ export interface PartialZaak {
     zaaktype: string;
     status: string;
     omschrijving: string;
+    zaakinformatieobjecten: Array<Record<string, unknown>>;
   }>;
 }

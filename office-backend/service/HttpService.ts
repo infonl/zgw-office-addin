@@ -24,7 +24,7 @@ export class HttpService {
       params?: Record<string, string>;
     } = { headers: {} },
   ): Promise<T> {
-    const fullUrl = new URL(`${this.baseUrl}${url}`);
+    const fullUrl = url.startsWith("HTTP") ? url : new URL(url, this.baseUrl);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }

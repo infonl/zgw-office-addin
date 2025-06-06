@@ -16,16 +16,32 @@ export class ZaakService {
       throw new ZaakNummerNotValid();
     }
 
-    const response = await this.httpService.GET<PartialZaak>(
+    const zaken = await this.httpService.GET<PartialZaak>(
       "/zaken/api/v1/zaken",
       { identificatie: zaakIdentificatie },
     );
 
-    if (response.count === 0) {
+    const zaak = zaken.results.at(0);
+
+    if (!zaak) {
       throw new ZaakNotFound(zaakIdentificatie);
     }
 
-    return response;
+    const zaaktype = await this.httpService.GET<{
+      informatieobjecttypen: string[];
+    }>(zaak.zaaktype);
+
+    const zaakinformatieobjecten = await Promise.all(
+      zaaktype.informatieobjecttypen.map((url) =>
+        this.httpService.GET<Record<string, unknown>>(url),
+      ),
+    );
+
+    return {
+      ...zaak,
+      zaakinformatieobjecten,
+      zaaktype,
+    };
   }
 
   public async addDocumentToZaak(zaakIdentificatie: string): Promise<void> {

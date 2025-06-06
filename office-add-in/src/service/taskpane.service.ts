@@ -10,6 +10,6 @@ export class TaskpaneService {
   public async getZaken(zaakIdentificatie: string) {
     console.log("Button clicked! Case Number:", zaakIdentificatie);
 
-    return this.httpService.GET(`/zaken/${zaakIdentificatie}`);
+    return this.httpService.GET(`/zaken/${zaakIdentificatie}`).catch(console.warn);
   }
 }
