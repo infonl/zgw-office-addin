@@ -6,6 +6,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ZaakService } from "../service/ZaakService";
 import type { ZaakParam } from "../dto/ZaakParam";
+import { ExceptionHandler } from '../exception/ExceptionHandler';
 
 export class ZaakController {
   constructor(private readonly zaakService: ZaakService) {}
@@ -18,9 +19,8 @@ export class ZaakController {
     try {
       const response = await this.zaakService.getZaak(zaakIdentificatie);
       reply.status(200).send(response);
-    } catch (error: any) {
-      const status = error.statusCode || 500;
-      reply.status(status).send({ error: error.message });
+    } catch (error) {
+      ExceptionHandler.handleAndReply(error, reply);
     }
   }
 
@@ -32,9 +32,8 @@ export class ZaakController {
     try {
       await this.zaakService.addDocumentToZaak(zaakIdentificatie);
       reply.status(200).send({ message: "Document added successfully" });
-    } catch (error: any) {
-      const status = error.statusCode || 500;
-      reply.status(status).send({ error: error.message });
+    } catch (error) {
+      ExceptionHandler.handleAndReply(error, reply);
     }
   }
 }
