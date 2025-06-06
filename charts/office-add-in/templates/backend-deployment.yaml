@@ -18,3 +18,8 @@ spec:
           imagePullPolicy: "{{ .Values.backend.image.pullPolicy }}"
           ports:
             - containerPort: 3003
+          env:
+            - name: JWT_SECRET
+              value: {{ .Values.backend.jwtSecret | quote }}
+            - name: API_BASE_URL
+              value: {{ .Values.backend.apiBaseUrl | quote }}

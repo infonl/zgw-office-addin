@@ -54,6 +54,8 @@ jobs:
         path: |
           office-add-in/dist/
           office-backend/dist/
+          office-add-in/node_modules/
+          office-backend/node_modules/
 
   next-version:
     runs-on: ubuntu-24.04
@@ -96,7 +98,7 @@ jobs:
   create-release:
     needs: [build,next-version]
     runs-on: ubuntu-24.04
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     steps:
 
     - name: Checkout
@@ -108,15 +110,15 @@ jobs:
         name: office-plugin-artifacts
         path: release-${{ needs.next-version.outputs.version }}/ 
 
-    - name: Create zip
-      run: |
-        zip -r podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip release-${{ needs.next-version.outputs.version }}
-
-    - name: Create Github release
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        gh release create ${{ needs.next-version.outputs.version }} podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }}
+#    - name: Create zip
+#      run: |
+#        zip -r podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip release-${{ needs.next-version.outputs.version }}
+#
+#    - name: Create Github release
+#      env:
+#        GH_TOKEN: ${{ github.token }}
+#      run: |
+#        gh release create ${{ needs.next-version.outputs.version }} podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }}
 
   create-docker-image:
     needs: [build,next-version,create-release] # no release, no docker image
@@ -147,7 +149,7 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       with:
         context: ./office-add-in
-        push: true
+        push: false
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-frontend:latest
           ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
@@ -156,7 +158,7 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       with:
         context: ./office-backend
-        push: true
+        push: false
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest
           ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
