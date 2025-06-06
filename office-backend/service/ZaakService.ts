@@ -15,7 +15,6 @@ export class ZaakService {
     if (!this.checkzaakIdentificatie(zaakIdentificatie)) {
       throw new ZaakNummerNotValid();
     }
-    const response = await this.fetchZaak(zaakIdentificatie);
 
     const zaken = await this.httpService.GET<
       GeneratedType<"PaginatedZaakList">
