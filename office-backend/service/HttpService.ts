@@ -30,12 +30,14 @@ export class HttpService {
       params?: Record<string, string>;
     } = { headers: {} },
   ): Promise<T> {
-    const fullUrl = /^https?:\/\//i.test(url) ? url : new URL(url, this.baseUrl);
+    const fullUrl = /^https?:\/\//i.test(url)
+      ? url
+      : new URL(url, this.baseUrl);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
 
-    LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, options);
+    LoggerService.debug(`[HTTP] [${method}] ${fullUrl}`, options);
 
     try {
       const request: RequestInit = {
@@ -55,7 +57,7 @@ export class HttpService {
 
       const response = await fetch(fullUrl, request);
 
-      LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, {
+      LoggerService.debug(`[HTTP] [${method}] [STATUS] ${fullUrl}`, {
         status: response.status,
       });
 
@@ -65,11 +67,11 @@ export class HttpService {
 
       const data = await response.json();
 
-      LoggerService.debug(`[HTTP] ${method} - ${fullUrl}`, data);
+      LoggerService.debug(`[HTTP] [${method}] [RESULT] ${fullUrl}`, data);
 
       return data;
     } catch (error) {
-      LoggerService.error(`[HTTP] ${method} - ${fullUrl}`, error);
+      LoggerService.error(`[HTTP] [${method}] [ERROR] ${fullUrl}`, error);
       throw error;
     }
   }

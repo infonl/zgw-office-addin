@@ -9,7 +9,7 @@ const isDev = typeof __DEV__ !== "undefined" ? __DEV__ : true;
 
 export class LoggerService {
   public static debug(message: string, ...optionalParams: any[]) {
-    if (isDev) return;
+    if (!isDev) return;
     console.debug(`[DEBUG] ${message}`, ...optionalParams);
   }
   public static log(message: string, ...optionalParams: any[]) {

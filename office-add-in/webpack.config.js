@@ -18,7 +18,6 @@ async function getHttpsOptions() {
   return { ca: httpsOptions.ca, key: httpsOptions.key, cert: httpsOptions.cert };
 }
 
-console.log(">>>> ENV", process.env.NODE_ENV);
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
   const config = {
@@ -89,7 +88,7 @@ module.exports = async (env, options) => {
       }),
       new webpack.DefinePlugin({
         __DEV__: JSON.stringify(
-          process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev"
+          dev || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev"
         ),
       }),
     ],
