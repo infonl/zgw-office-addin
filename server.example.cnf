@@ -1,13 +1,10 @@
-# SPDX-FileCopyrightText: 2025 INFO.nl
-# SPDX-License-Identifier: EUPL-1.2+
-
 [ req ]
 default_bits           = 4096
 days                   = 9999
 distinguished_name     = req_distinguished_name
 attributes             = req_attributes
 prompt                 = no
-x509_extensions        = v3_ca
+req_extensions         = v3_req
 
 [ req_distinguished_name ]
 C                      = US
@@ -21,9 +18,11 @@ emailAddress           = certs@example.com
 [ req_attributes ]
 challengePassword      = password
 
-[ v3_ca ]
-authorityInfoAccess = @issuer_info
+[ v3_req ]
+subjectAltName = @alt_names
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
 
-[ issuer_info ]
-OCSP;URI.0 = http://ocsp.example.com/
-caIssuers;URI.0 = http://example.com/ca.cert
+[ alt_names ]
+DNS.1 = localhost
+IP.1 = 127.0.0.1

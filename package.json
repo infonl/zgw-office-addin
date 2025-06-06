@@ -13,9 +13,10 @@
   ],
   "packageManager": "npm@11.4.1",
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint"
+    "dev": "npm run types && turbo dev",
+    "build": "npm run types && turbo build",
+    "lint": "npm run types && turbo lint",
+    "types": "npx openapi-typescript ./resources/api-specs/openapi.yaml -o ./generated/types.ts"
   },
   "devDependencies": {
     "turbo": "2.5.4"

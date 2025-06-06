@@ -8,6 +8,7 @@
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
@@ -38,7 +39,7 @@ module.exports = async (env, options) => {
           test: /\.ts$/,
           exclude: /node_modules/,
           use: {
-            loader: "babel-loader"
+            loader: "babel-loader",
           },
         },
         {
@@ -85,6 +86,11 @@ module.exports = async (env, options) => {
         template: "./src/commands/commands.html",
         chunks: ["polyfill", "commands"],
       }),
+      new webpack.DefinePlugin({
+        __DEV__: JSON.stringify(
+          dev || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev"
+        ),
+      }),
     ],
     devServer: {
       headers: {
@@ -92,7 +98,10 @@ module.exports = async (env, options) => {
       },
       server: {
         type: "https",
-        options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
+        options:
+          env.WEBPACK_BUILD || options.https !== undefined
+            ? options.https
+            : await getHttpsOptions(),
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
