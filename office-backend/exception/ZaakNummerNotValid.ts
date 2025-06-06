@@ -7,6 +7,6 @@ export class ZaakNummerNotValid extends Error {
   public statusCode = 400;
   constructor() {
     super(`Geen valide zaaknummer opgegeven`);
-    this.name = "ZaakNummerNotValid";
+    this.name = ZaakNummerNotValid.name;
   }
 }

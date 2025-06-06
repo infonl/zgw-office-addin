@@ -11,21 +11,6 @@ import { PartialZaak } from "../models/PartialZaak";
 export class ZaakService {
   constructor() {}
 
-  // Create a JWT token for authentication with the OpenZaak API.
-  private readonly jwtToken = jwt.sign(
-    {
-      iss: "office-add-in",
-      iat: Math.floor(Date.now() / 1000),
-      client_id: "office-add-in",
-      user_id: "office-add-in",
-      user_representation: "office-add-in",
-    },
-    process.env.JWT_SECRET!,
-    {
-      algorithm: "HS256",
-    }
-  );
-
   private readonly zaakApiUrl = process.env.API_BASE_URL!;
 
   public async getZaak(zaakIdentificatie: string): Promise<PartialZaak> {
@@ -52,7 +37,7 @@ export class ZaakService {
         "Content-Type": "application/json",
         "Accept-Crs": "EPSG:4326",
         "Content-Crs": "EPSG:4326",
-        Authorization: `Bearer ${this.jwtToken}`,
+        Authorization: `Bearer ${this.generateJwtToken()}`,
       },
     });
 
@@ -67,5 +52,21 @@ export class ZaakService {
 
   private checkzaakIdentificatie(zaakIdentificatie: string): boolean {
     return zaakIdentificatie !== null && zaakIdentificatie.startsWith("ZAAK-");
+  }
+
+  private generateJwtToken(): string {
+    return jwt.sign(
+      {
+        iss: "office-add-in",
+        iat: Math.floor(Date.now() / 1000),
+        client_id: "office-add-in",
+        user_id: "office-add-in",
+        user_representation: "office-add-in",
+      },
+      process.env.JWT_SECRET!,
+      {
+        algorithm: "HS256",
+      }
+    );
   }
 }
