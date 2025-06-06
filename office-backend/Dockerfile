@@ -10,7 +10,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy the built dist directory
 COPY ./ ./

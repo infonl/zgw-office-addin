@@ -54,7 +54,6 @@ jobs:
         path: |
           office-add-in/dist/
           office-backend/dist/
-          node_modules/
 
   next-version:
     runs-on: ubuntu-24.04
