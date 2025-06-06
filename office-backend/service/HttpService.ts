@@ -29,7 +29,7 @@ export class HttpService {
       params?: Record<string, string>;
     } = { headers: {} },
   ): Promise<T> {
-    const fullUrl = url.startsWith("HTTP") ? url : new URL(url, this.baseUrl);
+    const fullUrl = /^https?:\/\//i.test(url) ? url : new URL(url, this.baseUrl);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
