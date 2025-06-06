@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 export class HttpService {
   private readonly baseUrl = "https://localhost:3003";
 
