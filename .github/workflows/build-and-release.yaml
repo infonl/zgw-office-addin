@@ -38,6 +38,7 @@ jobs:
       run: |
         mkdir -p release
         cp -r office-add-in/dist release/
+        find . 
 
     - name: Archive Artifacts for release zip
       #if: github.ref == 'refs/heads/main'
