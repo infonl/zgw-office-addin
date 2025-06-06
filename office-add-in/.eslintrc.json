@@ -1,8 +1,8 @@
 {
-  "plugins": ["office-addins", "@typescript-eslint/recommended"],
+  "plugins": [
+    "office-addins"
+  ],
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:office-addins/recommended"
+    "plugin:office-addins/react"
   ]
 }

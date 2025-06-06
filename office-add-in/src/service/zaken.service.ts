@@ -4,13 +4,16 @@
  */
 import { HttpService } from "./http.service";
 import { LoggerService } from "./logger.service";
+import { type GeneratedType } from "../../../generated/generated-types";
 
-export class TaskpaneService {
+export class ZaakService {
   constructor(private readonly httpService: HttpService) {}
 
-  public async getZaken(zaakIdentificatie: string) {
+  public async getZaak(zaakIdentificatie: string) {
     LoggerService.debug("Button clicked! Case Number:", zaakIdentificatie);
 
-    return this.httpService.GET(`/zaken/${zaakIdentificatie}`).catch(LoggerService.warn);
+    return this.httpService
+      .GET<GeneratedType<"Zaak">>(`/zaken/${zaakIdentificatie}`)
+      .catch(LoggerService.warn);
   }
 }

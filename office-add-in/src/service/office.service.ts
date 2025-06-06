@@ -50,6 +50,7 @@ export class OfficeService {
 
     LoggerService.debug("Encoding data...");
 
+    // https://github.com/infonl/podiumd-office-plugin/pull/112#discussion_r2132179467
     const encoded = btoa(data);
 
     LoggerService.debug("Encoded data");
@@ -57,7 +58,9 @@ export class OfficeService {
     try {
       await this.httpService.POST(
         `/zaken/${zaakIdentificatie}/documenten`,
-        JSON.stringify({ inhoud: encoded })
+        JSON.stringify({
+          inhoud: encoded,
+        })
       );
     } catch (error) {
       LoggerService.error("Error sending slice:", error);
