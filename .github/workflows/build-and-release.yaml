@@ -38,7 +38,6 @@ jobs:
       run: |
         mkdir -p release
         cp -r office-add-in/dist release/
-        find . 
 
     - name: Archive Artifacts for release zip
       #if: github.ref == 'refs/heads/main'
@@ -55,8 +54,7 @@ jobs:
         path: |
           office-add-in/dist/
           office-backend/dist/
-          office-add-in/node_modules/
-          office-backend/node_modules/
+          node_modules/
 
   next-version:
     runs-on: ubuntu-24.04
