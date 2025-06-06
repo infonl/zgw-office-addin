@@ -1,7 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2025 INFO.nl
-* SPDX-License-Identifier: EUPL-1.2+
-*/
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
 
 import dotenv from "dotenv";
 import path from "path";
@@ -11,11 +11,15 @@ import fs from "fs";
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
 import Fastify from "fastify";
+import { ZaakService } from "../service/ZaakService";
+import { HttpService } from "../service/HttpService";
+import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 
 const fastify = Fastify({
   https: {
     key: fs.readFileSync("./key.pem"),
     cert: fs.readFileSync("./cert.pem"),
+    ca: fs.readFileSync("./ca-cert.pem"),
   },
 });
 
@@ -27,7 +31,7 @@ fastify.addHook("onRequest", (request, reply, done) => {
     reply.header("Access-Control-Allow-Origin", origin);
     reply.header(
       "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
+      "GET, POST, PUT, DELETE, OPTIONS",
     );
     reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     reply.header("Access-Control-Allow-Credentials", "true");
@@ -41,11 +45,19 @@ fastify.addHook("onRequest", (request, reply, done) => {
   done();
 });
 
-fastify.get<{Params: ZaakParam}>(
-  "/zaken/:zaakIdentificatie",
-  async (request, reply) => {
-    await new ZaakController().getZaak(request, reply);
-  }
+fastify.addHook("onRequest", onRequestLoggerHook);
+
+const httpService = new HttpService();
+const zaakService = new ZaakService(httpService);
+const zaakController = new ZaakController(zaakService);
+
+fastify.get<{ Params: ZaakParam }>("/zaken/:zaakIdentificatie", (req, res) =>
+  zaakController.getZaak(req, res),
+);
+
+fastify.post<{ Params: ZaakParam }>(
+  "/zaken/:zaakIdentificatie/documenten",
+  (req, res) => zaakController.addDocumentToZaak(req, res),
 );
 
 fastify.listen({ port: 3003, host: "127.0.0.1" }, (err, address) => {
