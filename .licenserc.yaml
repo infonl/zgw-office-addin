@@ -6,29 +6,30 @@
 # to perform checks (and optionally fixes) on SPDX copyright headers in source files
 header:
   license:
-    content: |      
-       SPDX-FileCopyrightText: 2025 INFO.nl
-       SPDX-License-Identifier: EUPL-1.2+
+    content: |
+      SPDX-FileCopyrightText: 2025 INFO.nl
+      SPDX-License-Identifier: EUPL-1.2+
     pattern: |
-       SPDX-FileCopyrightText: .*
-       SPDX-License-Identifier: EUPL-1\.2\+
+      SPDX-FileCopyrightText: .*
+      SPDX-License-Identifier: EUPL-1\.2\+
   paths:
-    - '**'
+    - "**"
   paths-ignore:
-    - 'certificates'
-    - 'config'
-    - 'docs'
+    - "certificates"
+    - "config"
+    - "docs"
     # Exclude Helm Chart files because the 'Azure Kubernetes Bake' GitHub Action that we use cannot
     # deal with SPDX headers in these files. See: https://github.com/Azure/k8s-bake/issues/117
-    - 'charts'
-    - '**/*.md'
-    - '**/node_modules'
+    - "charts"
+    - "**/*.md"
+    - "**/node_modules"
     # SPDX license headers cannot be added to JSON files so we ignore them
     # there are ways to link licensing information to JSON files however; see e.g. https://reuse.software/faq/
-    - '**/**.json'
-    - '**/**.txt'
-    - '.github/CODEOWNERS'
-    - '**/dist'
-    - '.nvmrc'
-    - '**/manifest.xml'
+    - "**/**.json"
+    - "**/**.txt"
+    - ".github/CODEOWNERS"
+    - "**/dist"
+    - ".nvmrc"
+    - "**/manifest.xml"
+    - "**/*.example.cnf"
   comment: on-failure
