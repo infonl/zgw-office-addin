@@ -10,22 +10,22 @@ Office.onReady((info) => {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     document.getElementById("upload").onclick = () => {
-      const zaakNummer = (document.getElementById("case-number") as HTMLInputElement).value;
-      run(zaakNummer);
+      const zaakIdentificatie = (document.getElementById("case-number") as HTMLInputElement).value;
+      run(zaakIdentificatie);
     };
   }
 });
 
 
-export async function run(zaakNummer: string) {
+export async function run(zaakIdentificatie: string) {
   return Word.run(async (context) => {
-    if (!zaakNummer) {
+    if (!zaakIdentificatie) {
         console.warn("No case number provided.");
         return
     }
 
     await context.sync();
     const taskService = new TaskpaneService();
-    const zaken = await taskService.getZaken(zaakNummer);
+    const zaken = await taskService.getZaken(zaakIdentificatie);
   });
 }

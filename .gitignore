@@ -4,6 +4,8 @@
 #
 
 ### BUILD ###
+dist/
+**/dist/
 
 ### INTELLIJ ###
 *.iml
@@ -12,16 +14,20 @@
 ### DIRENV ###
 .envrc
 
+### ENVIRONMENT ###
+.env
+
 ### OS specific ###
 *.swp
 
 ### Docker ###
 .DS_store
 
+### Node ###
 node_modules/
 **/node_modules/
-dist/
-**/dist/
+
+### Custom ###
 .turbo/
 .vscode/
 **/.vscode/
