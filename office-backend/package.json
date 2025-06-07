@@ -22,7 +22,7 @@
     "@types/node": "22.15.30",
     "@types/office-js": "1.0.508",
     "@types/office-runtime": "1.0.35",
-    "@types/send": "0.17.4",
+    "@types/send": "0.17.5",
     "@types/serve-static": "1.15.7",
     "@types/wrap-ansi": "8.1.0",
     "ts-node": "10.9.2",
