@@ -12,6 +12,19 @@ type State = { file: Office.File; currentSlice: number };
 export class OfficeService {
   constructor(private readonly httpService: HttpService) {}
 
+  public static getFileName() {
+    return new Promise<string>((resolve, reject) => {
+      Office.context.document.getFilePropertiesAsync((result) => {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+          resolve(result.value.url.split("/").at(-1) ?? "");
+        } else {
+          LoggerService.warn("Unable to get file properties", result);
+          reject(new Error("Unable to get file properties"));
+        }
+      });
+    });
+  }
+
   public async addDocumentToZaak(zaakIdentificatie: string) {
     await this.processFile(zaakIdentificatie);
   }

@@ -11,7 +11,23 @@ export function useGetZaak(zaaknummer: string) {
   const query = useQuery({
     queryKey: ["zaak", zaaknummer],
     enabled: !!zaaknummer,
-    queryFn: () => new HttpService().GET<GeneratedType<"Zaak">>(`/zaken/${zaaknummer}`),
+    queryFn: () =>
+      new HttpService().GET<
+        Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
+          zaaktype: Omit<GeneratedType<"ZaakType">, "statustypen"> & {
+            statustypen: Array<{
+              url: string;
+              omschrijving: string;
+            }>;
+          };
+          zaakinformatieobjecten: Array<
+            GeneratedType<"ZaakInformatieObject"> & {
+              vertrouwelijkheidaanduiding: string;
+              omschrijving: string;
+            }
+          >;
+        }
+      >(`/zaken/${zaaknummer}`),
   });
 
   return query;

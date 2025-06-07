@@ -23,6 +23,12 @@ export class ZaakService {
       zaak.zaaktype,
     );
 
+    const statustypen = await Promise.all(
+      zaaktype.statustypen.map((url) =>
+        this.httpService.GET<{ omschrijving: string }>(url),
+      ),
+    );
+
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url) =>
         this.httpService.GET<{ omschrijving: string }>(url),
@@ -32,7 +38,10 @@ export class ZaakService {
     return {
       ...zaak,
       zaakinformatieobjecten,
-      zaaktype,
+      zaaktype: {
+        ...zaaktype,
+        statustypen,
+      },
     };
   }
 
