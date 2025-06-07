@@ -15,7 +15,7 @@
     "fastify": "5.3.3"
   },
   "devDependencies": {
-    "@types/body-parser": "1.19.5",
+    "@types/body-parser": "1.19.6",
     "@types/bonjour": "3.5.13",
     "@types/connect": "3.4.38",
     "@types/jsonfile": "6.1.4",
