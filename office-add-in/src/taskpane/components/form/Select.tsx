@@ -41,6 +41,5 @@ type Option = {
 type Props = SelectProps & {
   name: string;
   label?: string;
-  disabed?: boolean;
   options: Array<Option>;
 };
