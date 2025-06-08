@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import { Caption1, Label, Input as FluentUiInput, InputProps } from "@fluentui/react-components";
 import { useFormError } from "./hooks/useFormError";
 import { formStyles } from "./styles";

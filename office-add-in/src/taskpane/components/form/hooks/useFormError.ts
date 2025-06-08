@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import { useFormContext } from "react-hook-form";
 
 export function useFormError(name: string) {
