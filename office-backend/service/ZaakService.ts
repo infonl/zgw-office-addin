@@ -4,7 +4,7 @@
  */
 
 import { ZaakNotFound } from "../exception/ZaakNotFound";
-import { ZaakNummerNotValid } from "../exception/ZaakNummerNotValid";
+import { FileNotSupported } from "../exception/FileNotSupported";
 import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
 import { type GeneratedType } from "../../generated/generated-types";
@@ -13,10 +13,6 @@ export class ZaakService {
   constructor(private readonly httpService: HttpService) {}
 
   public async getZaak(zaakIdentificatie: string) {
-    if (!this.checkzaakIdentificatie(zaakIdentificatie)) {
-      throw new ZaakNummerNotValid();
-    }
-
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
     const zaaktype = await this.httpService.GET<GeneratedType<"ZaakType">>(
@@ -48,10 +44,11 @@ export class ZaakService {
     >(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
       JSON.stringify({
-        bronorganisatie: zaak.bronorganisatie,
-        formaat: "application/msword",
-        taal: "dut",
         ...body,
+        bronorganisatie: zaak.bronorganisatie,
+        formaat: this.getFileFormat(String(body.titel)),
+        taal: "dut",
+        bestandsnaam: body.titel,
         creatiedatum: new Date(String(body.creatiedatum))
           .toISOString()
           .split("T")
@@ -74,8 +71,16 @@ export class ZaakService {
     return informatieobject;
   }
 
-  private checkzaakIdentificatie(zaakIdentificatie: string): boolean {
-    return zaakIdentificatie !== null && zaakIdentificatie.startsWith("ZAAK-");
+  private getFileFormat(file: string) {
+    const extention = file.split(".").at(-1)!;
+
+    switch (extention) {
+      case "doc":
+      case "docx":
+        return "application/msword";
+      default:
+        throw new FileNotSupported(file);
+    }
   }
 
   private async getZaakFromOpenZaak(zaakIdentificatie: string) {

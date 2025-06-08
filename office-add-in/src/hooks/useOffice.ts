@@ -82,11 +82,15 @@ export function useOffice() {
       }
 
       // https://github.com/infonl/podiumd-office-plugin/pull/112#discussion_r2132179467
-      const encoded = btoa(data);
+      const binaryString = Array.from(data)
+        .map((byte) => String.fromCharCode(Number(byte)))
+        .join("");
+      const encoded = btoa(binaryString);
       DEBUG("Encoded data");
 
       resolve(encoded);
-      // TODO: bigger files
+
+      // TODO: handle bigger files
       // const currentSlice = state.currentSlice + 1;
 
       // DEBUG("Processed slice", {

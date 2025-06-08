@@ -48,7 +48,6 @@ export function useHttp() {
       }
 
       const response = await fetch(fullUrl, request);
-
       DEBUG(`[${method}] [STATUS] ${fullUrl}`, {
         status: response.status,
       });
