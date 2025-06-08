@@ -4,15 +4,17 @@
  */
 
 import { GeneratedType } from "../../../generated/generated-types";
-import { HttpService } from "../service/http.service";
 import { useQuery } from "@tanstack/react-query";
+import { useHttp } from "./useHttp";
 
 export function useGetZaak(zaaknummer: string) {
+  const { GET } = useHttp();
+
   const query = useQuery({
     queryKey: ["zaak", zaaknummer],
     enabled: !!zaaknummer,
     queryFn: () =>
-      new HttpService().GET<
+      GET<
         Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
           zaaktype: Omit<GeneratedType<"ZaakType">, "statustypen"> & {
             statustypen: Array<{

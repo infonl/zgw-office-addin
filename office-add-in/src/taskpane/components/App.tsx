@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { Input, Label, makeStyles } from "@fluentui/react-components";
+import { Input, Label, makeStyles, tokens } from "@fluentui/react-components";
 import { Button } from "@fluentui/react-components";
 import { FluentProvider, webLightTheme, webDarkTheme } from "@fluentui/react-components";
 import { useDarkMode } from "usehooks-ts";
@@ -14,15 +14,15 @@ import { ZaakForm } from "./ZaakForm";
 const useStyles = makeStyles({
   root: {
     minHeight: "100vh",
-    paddingLeft: "20px",
-    paddingRight: "20px",
+    paddingLeft: tokens.spacingHorizontalL,
+    paddingRight: tokens.spacingHorizontalL,
   },
   input: {
     display: "flex",
     flexDirection: "column",
-    gap: "2px",
-    paddingTop: "16px",
-    marginBottom: "16px",
+    gap: tokens.spacingVerticalXXS,
+    paddingTop: tokens.spacingVerticalL,
+    marginBottom: tokens.spacingVerticalL,
   },
   flex: {
     display: "flex",
@@ -72,7 +72,7 @@ function Zaak() {
       >
         Zaak zoeken
       </Button>
-      <ZaakForm zaaknummer={zaakToSearch} />
+      {zaakToSearch && <ZaakForm zaaknummer={zaakToSearch} />}
     </section>
   );
 }
