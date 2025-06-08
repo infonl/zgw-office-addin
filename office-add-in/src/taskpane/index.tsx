@@ -10,7 +10,7 @@ import { App } from "./components/App";
 const rootElement: HTMLElement | null = document.getElementById("container");
 const root = rootElement ? createRoot(rootElement) : undefined;
 
-Office.onReady((info) => {
+Office.onReady(async (info) => {
   console.log(info);
   root?.render(<App />);
 });

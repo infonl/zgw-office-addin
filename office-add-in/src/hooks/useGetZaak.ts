@@ -16,12 +16,7 @@ export function useGetZaak(zaaknummer: string) {
     queryFn: () =>
       GET<
         Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
-          zaaktype: Omit<GeneratedType<"ZaakType">, "statustypen"> & {
-            statustypen: Array<{
-              url: string;
-              omschrijving: string;
-            }>;
-          };
+          zaaktype: GeneratedType<"ZaakType">;
           zaakinformatieobjecten: Array<
             GeneratedType<"ZaakInformatieObject"> & {
               vertrouwelijkheidaanduiding: string;

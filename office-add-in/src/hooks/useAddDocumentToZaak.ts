@@ -6,29 +6,46 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import * as zod from "zod";
 import { useOffice } from "./useOffice";
+import { useHttp } from "./useHttp";
+import { GeneratedType } from "../../../generated/generated-types";
+
+export const documentstatus = [
+  "in_bewerking",
+  "ter_vaststelling",
+  "definitief",
+  "gearchiveerd",
+] as const;
 
 export const addDocumentSchema = zod
   .object({
     vertrouwelijkheidaanduiding: zod.string(),
-    zaakinformatieobjectUrl: zod.string().url(),
-    documentstatus: zod.string(),
+    informatieobjecttype: zod.string().url(),
+    status: zod.enum(documentstatus),
     creatiedatum: zod.date({ coerce: true }),
-    bestandsnaam: zod.string().min(1).max(100),
     zaakidentificatie: zod.string(),
+    auteur: zod.string().min(1),
   })
   .required();
 
 export type AddDocumentSchema = zod.infer<typeof addDocumentSchema>;
 
+type SuccessData = GeneratedType<"ZaakInformatieObject">;
 export function useAddDocumentToZaak(
-  options?: UseMutationOptions<void, unknown, AddDocumentSchema>
+  options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>
 ) {
-  const { addDocumentToZaak } = useOffice();
+  const { getDocumentData, getFileName } = useOffice();
+  const { POST } = useHttp();
 
   return useMutation({
-    mutationFn: async (data: AddDocumentSchema) => {
-      return addDocumentToZaak(data.zaakidentificatie, data);
-    },
+    mutationFn: async (data: AddDocumentSchema) =>
+      POST<SuccessData>(
+        `/zaken/${data.zaakidentificatie}/documenten`,
+        JSON.stringify({
+          ...data,
+          inhoud: await getDocumentData(),
+          titel: await getFileName(),
+        })
+      ),
     ...options,
   });
 }

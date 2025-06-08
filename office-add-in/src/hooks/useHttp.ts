@@ -1,7 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import { useLogger } from "./useLogger";
 
 export function useHttp() {
-  const { DEBUG, ERROR } = useLogger();
+  const { DEBUG, ERROR } = useLogger(useHttp.name);
 
   const baseUrl = "https://localhost:3003";
 
@@ -27,7 +32,7 @@ export function useHttp() {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
 
-    DEBUG(`[HTTP] [${method}] ${fullUrl}`, options);
+    DEBUG(`[${method}] ${fullUrl}`, options);
 
     try {
       const request: RequestInit = {
@@ -44,7 +49,7 @@ export function useHttp() {
 
       const response = await fetch(fullUrl, request);
 
-      DEBUG(`[HTTP] [${method}] [STATUS] ${fullUrl}`, {
+      DEBUG(`[${method}] [STATUS] ${fullUrl}`, {
         status: response.status,
       });
 
@@ -54,11 +59,11 @@ export function useHttp() {
 
       const data = await response.json();
 
-      DEBUG(`[HTTP] [${method}] [RESULT] ${fullUrl}`, data);
+      DEBUG(`[${method}] [RESULT] ${fullUrl}`, data);
 
       return data;
     } catch (error) {
-      ERROR(`[HTTP] [${method}] [ERROR] ${fullUrl}`, error);
+      ERROR(`[${method}] [ERROR] ${fullUrl}`, error);
       throw error;
     }
   }

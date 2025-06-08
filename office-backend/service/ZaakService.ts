@@ -23,12 +23,6 @@ export class ZaakService {
       zaak.zaaktype,
     );
 
-    const statustypen = await Promise.all(
-      zaaktype.statustypen.map((url) =>
-        this.httpService.GET<{ omschrijving: string }>(url),
-      ),
-    );
-
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url) =>
         this.httpService.GET<{ omschrijving: string }>(url),
@@ -38,10 +32,7 @@ export class ZaakService {
     return {
       ...zaak,
       zaakinformatieobjecten,
-      zaaktype: {
-        ...zaaktype,
-        statustypen,
-      },
+      zaaktype,
     };
   }
 
@@ -51,22 +42,36 @@ export class ZaakService {
   ) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
-    LoggerService.debug("adding document to zaak", zaakIdentificatie);
-    return await this.httpService.POST<GeneratedType<"ZaakInformatieObject">>(
+    LoggerService.debug("creating document", zaakIdentificatie);
+    const informatieobject = await this.httpService.POST<
+      GeneratedType<"ZaakInformatieObject">
+    >(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
       JSON.stringify({
         bronorganisatie: zaak.bronorganisatie,
-        creatiedatum: new Date().toISOString().split("T").at(0),
         formaat: "application/msword",
-        titel: "Document toegevoegd via Office Add-in",
-        auteur: "pietje puk",
         taal: "dut",
-        inhoud: "",
-        informatieobjecttype:
-          "http://localhost:8020/catalogi/api/v1/informatieobjecttypen/efc332f2-be3b-4bad-9e3c-49a6219c92ad",
         ...body,
+        creatiedatum: new Date(String(body.creatiedatum))
+          .toISOString()
+          .split("T")
+          .at(0),
       }),
     );
+
+    LoggerService.debug(
+      `adding document to zaak ${zaak.url}`,
+      informatieobject,
+    );
+    await this.httpService.POST(
+      "/zaken/api/v1/zaakinformatieobjecten",
+      JSON.stringify({
+        informatieobject: informatieobject.url,
+        zaak: zaak.url,
+      }),
+    );
+
+    return informatieobject;
   }
 
   private checkzaakIdentificatie(zaakIdentificatie: string): boolean {

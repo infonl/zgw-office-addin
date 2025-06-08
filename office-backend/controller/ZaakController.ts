@@ -33,8 +33,11 @@ export class ZaakController {
   ) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      await this.zaakService.addDocumentToZaak(zaakIdentificatie, request.body);
-      reply.status(200).send({ message: "Document added successfully" });
+      const data = await this.zaakService.addDocumentToZaak(
+        zaakIdentificatie,
+        request.body,
+      );
+      reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
     }

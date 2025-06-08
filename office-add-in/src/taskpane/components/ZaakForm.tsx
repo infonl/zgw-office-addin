@@ -8,139 +8,123 @@ import {
   Button,
   Caption1,
   Caption2,
-  Input,
-  Label,
-  Link,
   makeStyles,
-  Select,
   Spinner,
   Title1,
   Toast,
   ToastBody,
-  Toaster,
-  ToastFooter,
   ToastTitle,
-  useToastController,
   tokens,
   Subtitle2,
 } from "@fluentui/react-components";
 import { useGetZaak } from "../../hooks/useGetZaak";
-import { useEffect, useId } from "react";
+import { useEffect } from "react";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AddDocumentSchema,
   addDocumentSchema,
+  documentstatus,
   useAddDocumentToZaak,
 } from "../../hooks/useAddDocumentToZaak";
+import { useOffice } from "../../hooks/useOffice";
+import { Input } from "./form/Input";
+import { Select } from "./form/Select";
+import { useToast } from "../../provider/ToastProvider";
 
 const useStyles = makeStyles({
-  root: {
-    minHeight: "100vh",
-    paddingLeft: tokens.spacingHorizontalL,
-    paddingRight: tokens.spacingHorizontalL,
-  },
-  input: {
-    display: "flex",
-    flexDirection: "column",
-    gap: tokens.spacingVerticalXXS,
-    paddingTop: tokens.spacingVerticalL,
-    marginBottom: tokens.spacingVerticalL,
-  },
   section: {
     paddingTop: tokens.spacingVerticalL,
     display: "flex",
     flexDirection: "column",
   },
-  flex: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  error: {
-    color: tokens.colorStatusDangerForeground1,
-  },
 });
 
-export function ZaakForm(props: { zaaknummer: string }) {
+export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
   const styles = useStyles();
 
-  const toasterId = useId();
-  const { dispatchToast } = useToastController(toasterId);
+  const { dispatchToast, dismissToast } = useToast();
 
   const { data, isLoading, error } = useGetZaak(props.zaaknummer);
   const { mutateAsync, isPending } = useAddDocumentToZaak({
+    onMutate: () => {
+      dispatchToast(
+        <Toast>
+          <ToastTitle media={<Spinner size="tiny" />}>Toevoegen document</ToastTitle>
+          <ToastBody>Het document wordt aan {props.zaaknummer} toegevoegd.</ToastBody>
+        </Toast>,
+        { intent: "info", toastId: "adding-document" }
+      );
+    },
     onError: (error) => {
-      console.log(error);
+      dismissToast("adding-document");
       dispatchToast(
         <Toast>
           <ToastTitle>Oeps, er is iets mis gegaan</ToastTitle>
-          <ToastBody subtitle="Subtitle">{String(error)}</ToastBody>
+          <ToastBody>{String(error)}</ToastBody>
         </Toast>,
         { intent: "error" }
       );
     },
     onSuccess: () => {
+      props.onSuccess();
+      dismissToast("adding-document");
       dispatchToast(
         <Toast>
           <ToastTitle>Document toegevoegd</ToastTitle>
-          <ToastBody subtitle="Subtitle">
-            Het document is succesvol toegevoegd aan de zaak.
-          </ToastBody>
-          <ToastFooter>
-            <Link href={data?.url} target="_blank" rel="noopener noreferrer">
-              Bekijk de zaak
-            </Link>
-          </ToastFooter>
+          <ToastBody>Het document is succesvol toegevoegd aan {props.zaaknummer}.</ToastBody>
         </Toast>,
         { intent: "success" }
       );
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { isValid, errors },
-  } = useForm({
+  const form = useForm({
     resolver: zodResolver(addDocumentSchema),
     defaultValues: {
       zaakidentificatie: props.zaaknummer,
       vertrouwelijkheidaanduiding: "openbaar",
-      bestandsnaam: "PLACEHOLDER", // We get the actual file name during the `mutateAsync`
-      zaakinformatieobjectUrl: "",
+      informatieobjecttype: "",
+      auteur: "",
+      creatiedatum: new Date(),
+      status: documentstatus.at(0)!,
     },
   });
 
-  console.log(errors, isValid);
-
-  const zaakinformatieobjectUrl = watch("zaakinformatieobjectUrl");
-  console.log(zaakinformatieobjectUrl);
-  console.log(watch("zaakidentificatie"));
+  const informatieobjecttype = form.watch("informatieobjecttype");
 
   const onSubmit = async (formData: AddDocumentSchema) => {
     await mutateAsync(formData);
   };
 
-  useEffect(() => {
-    if (!data?.vertrouwelijkheidaanduiding) return;
-    setValue("vertrouwelijkheidaanduiding", data.vertrouwelijkheidaanduiding);
-  }, [data?.vertrouwelijkheidaanduiding, setValue]);
+  const { getSignedInUser } = useOffice();
 
   useEffect(() => {
-    if (!zaakinformatieobjectUrl) return;
+    if (!informatieobjecttype) return;
     if (!data?.zaakinformatieobjecten?.length) return;
 
     const zaakinformatieobject = data.zaakinformatieobjecten.find(
-      ({ url }) => url === zaakinformatieobjectUrl
+      ({ url }) => url === informatieobjecttype
     );
 
     if (!zaakinformatieobject?.vertrouwelijkheidaanduiding) return;
 
-    setValue("vertrouwelijkheidaanduiding", zaakinformatieobject.vertrouwelijkheidaanduiding);
-  }, [zaakinformatieobjectUrl, data?.zaakinformatieobjecten, setValue]);
+    form.setValue("vertrouwelijkheidaanduiding", zaakinformatieobject.vertrouwelijkheidaanduiding);
+  }, [informatieobjecttype, data?.zaakinformatieobjecten, form.setValue]);
+
+  useEffect(() => {
+    if (!data?.vertrouwelijkheidaanduiding) return;
+
+    form.setValue("vertrouwelijkheidaanduiding", data.vertrouwelijkheidaanduiding);
+  }, [data?.vertrouwelijkheidaanduiding, form.setValue]);
+
+  useEffect(() => {
+    getSignedInUser().then((user) => {
+      if (!user) return;
+      form.setValue("auteur", user);
+    });
+  }, [getSignedInUser, form.setValue]);
 
   if (isLoading) {
     return (
@@ -167,9 +151,8 @@ export function ZaakForm(props: { zaaknummer: string }) {
   }
 
   return (
-    <>
-      <Toaster toasterId={toasterId} />
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.section}>
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.section}>
         <section className={styles.section}>
           <Title1>{data.identificatie}</Title1>
           <Caption2>{data.uuid}</Caption2>
@@ -177,55 +160,29 @@ export function ZaakForm(props: { zaaknummer: string }) {
         <section className={styles.section}>
           <Subtitle2>{data.zaaktype.aanleiding}</Subtitle2>
         </section>
-        <section className={styles.input}>
-          <label htmlFor="document-type">Document type</label>
-          <Select id="document-type" {...register("zaakinformatieobjectUrl")}>
-            <option value="" disabled>
-              -
-            </option>
-            {data.zaakinformatieobjecten.map((zaakinformatieobject) => (
-              <option key={zaakinformatieobject.url} value={zaakinformatieobject.url}>
-                {zaakinformatieobject.omschrijving}
-              </option>
-            ))}
-          </Select>
-          <Caption1 className={styles.error}>{errors.zaakinformatieobjectUrl?.message}</Caption1>
-        </section>
-        <section className={styles.input}>
-          <Label htmlFor="vertrouwelijkheidsaanduiding">Vertrouwelijkheidsaanduiding</Label>
-          <Input
-            disabled
-            id="vertrouwelijkheidsaanduiding"
-            value={watch("vertrouwelijkheidaanduiding")}
-            {...register("vertrouwelijkheidaanduiding")}
-          />
-          <Caption1 className={styles.error}>
-            {errors.vertrouwelijkheidaanduiding?.message}
-          </Caption1>
-        </section>
-        <section className={styles.input}>
-          <label htmlFor="document-status">Status</label>
-          <Select id="document-status" {...register("documentstatus")}>
-            <option value="" disabled>
-              -
-            </option>
-            {data.zaaktype.statustypen.map((statustype) => (
-              <option key={statustype.url} value={statustype.url}>
-                {statustype.omschrijving}
-              </option>
-            ))}
-          </Select>
-          <Caption1 className={styles.error}>{errors.documentstatus?.message}</Caption1>
-        </section>
-        <section className={styles.input}>
-          <Label htmlFor="creatiedatum">Creatiedatum</Label>
-          <Input id="creatiedatum" type="date" {...register("creatiedatum")} />
-          <Caption1 className={styles.error}>{errors.creatiedatum?.message}</Caption1>
-        </section>
-        <Button disabled={!isValid || isPending} appearance="primary" type="submit">
+        <Select
+          name="informatieobjecttype"
+          label="Document type"
+          options={data.zaakinformatieobjecten.map((zaakinformatieobject) => ({
+            label: zaakinformatieobject.omschrijving,
+            value: zaakinformatieobject.url!,
+          }))}
+        />
+        <Input readOnly name="vertrouwelijkheidaanduiding" />
+        <Select
+          name="status"
+          label="Status"
+          options={documentstatus.map((status) => ({
+            label: status.replace(/_/g, " "),
+            value: status,
+          }))}
+        />
+        <Input type="date" name="creatiedatum" />
+        <Input name="auteur" />
+        <Button disabled={!form.formState.isValid || isPending} appearance="primary" type="submit">
           Document toevoegen
         </Button>
       </form>
-    </>
+    </FormProvider>
   );
 }
