@@ -29,7 +29,7 @@
 
 In order to run the application, run the `generate-keys.sh` in the root directory.
 
-Make sure to add trust the `key.pem` on your local machine.
+Make sure to add trust the `cert.pem` and `ca-cert.pem` on your local machine.
 
 ##### MacOS
 The keys should go under your `system keychain` and you should set the trust level to `Always Trust`.
