@@ -15,3 +15,5 @@ backend:
   service:
     type: ClusterIP
     port: 3003
+  jwtSecret: "SECRECT_KEY_PLACEHOLDER"
+  apiBaseUrl: "http://localhost:8020"
