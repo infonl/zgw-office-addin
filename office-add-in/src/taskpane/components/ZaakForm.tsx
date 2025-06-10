@@ -16,8 +16,10 @@ import {
   ToastTitle,
   tokens,
   Subtitle2,
+  MessageBar,
+  MessageBarBody,
+  MessageBarTitle,
 } from "@fluentui/react-components";
-import { useGetZaak } from "../../hooks/useGetZaak";
 import { useEffect } from "react";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -32,27 +34,48 @@ import { useOffice } from "../../hooks/useOffice";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
 import { useToast } from "../../provider/ToastProvider";
+import { useZaak } from "../../provider/ZaakProvider";
 
 const useStyles = makeStyles({
-  section: {
+  title: {
+    display: "flex",
+    flexDirection: "column",
+    gap: tokens.spacingHorizontalS,
+    marginTop: tokens.spacingHorizontalXXXL,
+  },
+  messageBar: {
+    marginTop: tokens.spacingHorizontalM,
+    marginBottom: tokens.spacingHorizontalM,
+  },
+  form: {
     paddingTop: tokens.spacingVerticalL,
     display: "flex",
     flexDirection: "column",
+    gap: tokens.spacingVerticalL,
+  },
+  fieldset: {
+    display: "flex",
+    gap: tokens.spacingVerticalM,
+    padding: 0,
+    border: 0,
   },
 });
 
-export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
+export function ZaakForm() {
   const styles = useStyles();
 
   const { dispatchToast, dismissToast } = useToast();
+  const {
+    zaak: { data },
+    documentAdded,
+  } = useZaak();
 
-  const { data, isLoading, error } = useGetZaak(props.zaaknummer);
   const { mutateAsync, isPending } = useAddDocumentToZaak({
     onMutate: () => {
       dispatchToast(
         <Toast>
-          <ToastTitle media={<Spinner size="tiny" />}>Toevoegen document</ToastTitle>
-          <ToastBody>Het document wordt aan {props.zaaknummer} toegevoegd.</ToastBody>
+          <ToastTitle media={<Spinner size="tiny" />}>Koppelen document</ToastTitle>
+          <ToastBody>Het document wordt aan {data?.identificatie} gekoppeld.</ToastBody>
         </Toast>,
         { intent: "info", toastId: "adding-document" }
       );
@@ -68,12 +91,12 @@ export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
       );
     },
     onSuccess: () => {
-      props.onSuccess();
+      documentAdded();
       dismissToast("adding-document");
       dispatchToast(
         <Toast>
-          <ToastTitle>Document toegevoegd</ToastTitle>
-          <ToastBody>Het document is succesvol toegevoegd aan {props.zaaknummer}.</ToastBody>
+          <ToastTitle>Document gekoppeld</ToastTitle>
+          <ToastBody>Het document is succesvol gekoppeld aan {data?.identificatie}.</ToastBody>
         </Toast>,
         { intent: "success" }
       );
@@ -83,7 +106,7 @@ export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
   const form = useForm({
     resolver: zodResolver(addDocumentSchema),
     defaultValues: {
-      zaakidentificatie: props.zaaknummer,
+      zaakidentificatie: data?.identificatie ?? "",
       vertrouwelijkheidaanduiding: "openbaar",
       informatieobjecttype: "",
       auteur: "",
@@ -99,6 +122,11 @@ export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
   };
 
   const { getSignedInUser } = useOffice();
+
+  useEffect(() => {
+    if (!data?.identificatie) return;
+    form.setValue("zaakidentificatie", data.identificatie);
+  }, [data?.identificatie, form.setValue]);
 
   useEffect(() => {
     if (!informatieobjecttype) return;
@@ -126,63 +154,58 @@ export function ZaakForm(props: { zaaknummer: string; onSuccess: () => void }) {
     });
   }, [getSignedInUser, form.setValue]);
 
-  if (isLoading) {
-    return (
-      <section className={styles.section}>
-        <Spinner />
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className={styles.section}>
-        <Body1>Error: {error.message}</Body1>
-      </section>
-    );
-  }
-
-  if (!data) {
-    return (
-      <section className={styles.section}>
-        <Caption1 align="center">Zoekresultaat is leeg. Probeer een ander zaaknummer.</Caption1>
-      </section>
-    );
-  }
-
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.section}>
-        <section className={styles.section}>
-          <Title1>{data.identificatie}</Title1>
-          <Caption2>{data.uuid}</Caption2>
-        </section>
-        <section className={styles.section}>
-          <Subtitle2>{data.zaaktype.aanleiding}</Subtitle2>
-        </section>
-        <Select
-          name="informatieobjecttype"
-          label="Document type"
-          options={data.zaakinformatieobjecten.map((zaakinformatieobject) => ({
-            label: zaakinformatieobject.omschrijving,
-            value: zaakinformatieobject.url!,
-          }))}
-        />
-        <Input readOnly name="vertrouwelijkheidaanduiding" />
-        <Select
-          name="status"
-          label="Status"
-          options={documentstatus.map((status) => ({
-            label: status.replace(/_/g, " "),
-            value: status,
-          }))}
-        />
-        <Input type="date" name="creatiedatum" />
-        <Input name="auteur" />
-        <Button disabled={!form.formState.isValid || isPending} appearance="primary" type="submit">
-          Document toevoegen
-        </Button>
-      </form>
+      <section className={styles.title}>
+        <Title1>Documentgegevens</Title1>
+        <Body1>
+          Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
+        </Body1>
+      </section>
+      <section className={styles.messageBar}>
+        {!data && (
+          <MessageBar intent="info">
+            <MessageBarBody>
+              <MessageBarTitle>Geen zaak gevonden</MessageBarTitle>
+              Zoek eerst een zaak voordat je deze kunt koppelen
+            </MessageBarBody>
+          </MessageBar>
+        )}
+      </section>
+      {data && (
+        <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+          <Input name="auteur" />
+          <fieldset className={styles.fieldset}>
+            <Select
+              name="informatieobjecttype"
+              label="Document type"
+              options={data.zaakinformatieobjecten.map((zaakinformatieobject) => ({
+                label: zaakinformatieobject.omschrijving,
+                value: zaakinformatieobject.url!,
+              }))}
+            />
+            <Input readOnly name="vertrouwelijkheidaanduiding" />
+          </fieldset>
+          <fieldset className={styles.fieldset}>
+            <Select
+              name="status"
+              label="Status"
+              options={documentstatus.map((status) => ({
+                label: status.replace(/_/g, " "),
+                value: status,
+              }))}
+            />
+            <Input type="date" name="creatiedatum" />
+          </fieldset>
+          <Button
+            disabled={!form.formState.isValid || isPending}
+            appearance="primary"
+            type="submit"
+          >
+            Document koppelen
+          </Button>
+        </form>
+      )}
     </FormProvider>
   );
 }

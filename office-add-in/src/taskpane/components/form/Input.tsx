@@ -12,7 +12,7 @@ import { Controller, useFormContext } from "react-hook-form";
 export function Input(props: Props) {
   const styles = formStyles();
   const error = useFormError(props.name);
-  const { control, watch } = useFormContext();
+  const { control } = useFormContext();
 
   return (
     <section className={styles.input}>

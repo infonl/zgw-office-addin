@@ -9,9 +9,8 @@ export const formStyles = makeStyles({
   input: {
     display: "flex",
     flexDirection: "column",
-    gap: tokens.spacingVerticalXXS,
-    paddingTop: tokens.spacingVerticalL,
-    marginBottom: tokens.spacingVerticalL,
+    gap: tokens.spacingVerticalS,
+    flexGrow: 1,
   },
   error: {
     color: tokens.colorStatusDangerForeground1,

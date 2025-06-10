@@ -7,25 +7,23 @@ import { GeneratedType } from "../../../generated/generated-types";
 import { useQuery } from "@tanstack/react-query";
 import { useHttp } from "./useHttp";
 
-export function useGetZaak(zaaknummer: string) {
+export type Zaak = Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
+  zaaktype: GeneratedType<"ZaakType">;
+  status: GeneratedType<"Status">;
+  zaakinformatieobjecten: Array<
+    GeneratedType<"ZaakInformatieObject"> & {
+      vertrouwelijkheidaanduiding: string;
+      omschrijving: string;
+    }
+  >;
+};
+
+export function useGetZaak(zaaknummer: string | null) {
   const { GET } = useHttp();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: ["zaak", zaaknummer],
     enabled: !!zaaknummer,
-    queryFn: () =>
-      GET<
-        Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
-          zaaktype: GeneratedType<"ZaakType">;
-          zaakinformatieobjecten: Array<
-            GeneratedType<"ZaakInformatieObject"> & {
-              vertrouwelijkheidaanduiding: string;
-              omschrijving: string;
-            }
-          >;
-        }
-      >(`/zaken/${zaaknummer}`),
+    queryFn: () => GET<Zaak>(`/zaken/${zaaknummer}`),
   });
-
-  return query;
 }

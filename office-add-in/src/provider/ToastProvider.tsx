@@ -4,17 +4,13 @@
  */
 
 import { Toaster, useId, useToastController } from "@fluentui/react-components";
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, PropsWithChildren, useContext } from "react";
 
 type ToastContextType = ReturnType<typeof useToastController>;
 
 const ToastContext = createContext<ToastContextType>({} as ToastContextType);
 
-interface ToastProviderProps {
-  children: ReactNode;
-}
-
-export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
+export function ToastProvider({ children }: PropsWithChildren) {
   const toasterId = useId();
   const toasts = useToastController(toasterId);
 
@@ -24,6 +20,6 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
       {children}
     </ToastContext.Provider>
   );
-};
+}
 
 export const useToast = () => useContext(ToastContext);
