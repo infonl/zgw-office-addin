@@ -56,7 +56,7 @@ fastify.get<{ Params: ZaakParam }>("/zaken/:zaakIdentificatie", (req, res) =>
   zaakController.getZaak(req, res),
 );
 
-fastify.post<{ Params: ZaakParam }>(
+fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   "/zaken/:zaakIdentificatie/documenten",
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );

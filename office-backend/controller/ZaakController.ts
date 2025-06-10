@@ -25,13 +25,19 @@ export class ZaakController {
   }
 
   public async addDocumentToZaak(
-    request: FastifyRequest<{ Params: ZaakParam }>,
+    request: FastifyRequest<{
+      Params: ZaakParam;
+      Body: Record<string, unknown>;
+    }>,
     reply: FastifyReply,
   ) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      await this.zaakService.addDocumentToZaak(zaakIdentificatie);
-      reply.status(200).send({ message: "Document added successfully" });
+      const data = await this.zaakService.addDocumentToZaak(
+        zaakIdentificatie,
+        request.body,
+      );
+      reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
     }

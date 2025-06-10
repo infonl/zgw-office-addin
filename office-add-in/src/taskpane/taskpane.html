@@ -2,8 +2,12 @@
   ~ SPDX-FileCopyrightText: 2025 INFO.nl
   ~ SPDX-License-Identifier: EUPL-1.2+
 -->
+
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. -->
+<!-- See LICENSE in the project root for license information -->
+
 <!doctype html>
-<html>
+<html lang="en" data-framework="typescript">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
@@ -15,56 +19,32 @@
       type="text/javascript"
       src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"
     ></script>
-
-    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
-    <link
-      rel="stylesheet"
-      href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"
-    />
-
-    <!-- Template styles -->
-    <link href="taskpane.css" rel="stylesheet" type="text/css" />
   </head>
 
-  <body class="ms-font-m ms-welcome ms-Fabric">
-    <header class="ms-welcome__header ms-bgColor-neutralLighter">
-      <img width="100%" src="../../assets/dimpact-logo.svg" alt="" title="" />
-    </header>
-    <section id="sideload-msg" class="ms-welcome__main">
-      <h2 class="ms-font-xl">
-        Please
-        <a
-          target="_blank"
-          href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing"
-          >sideload</a
-        >
-        your add-in to see app body.
-      </h2>
-    </section>
-    <main id="app-body" class="ms-welcome__main" style="display: none">
-      <h2 class="ms-font-xl">Dimpact Office Add-In</h2>
-      <ul class="ms-List ms-welcome__features">
-        <li class="ms-ListItem">
-          <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
-          <span class="ms-font-m"
-            ><label class="ms-font-m"
-              >Vul een zaaknummer in
-              <input id="case-number" class="ms-font-m" type="text" /> </label
-          ></span>
-        </li>
-      </ul>
-      <p class="ms-font-l">
-        Koppel dit document aan de opgegeven zaak door op <b>Koppel aan zaak</b> te clicken.
-      </p>
-      <div
-        role="button"
-        id="upload"
-        class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl"
-      >
-        <span class="ms-Button-label">Koppel aan zaak</span>
-      </div>
-      <p><label id="item-subject"></label></p>
-      <button id="upload-button">upload</button>
-    </main>
+  <body style="width: 100%; height: 100%; margin: 0; padding: 0">
+    <div id="container"></div>
+
+    <!--
+        Fluent UI React v. 9 uses modern JavaScript syntax that is not supported in
+        Trident (Internet Explorer) or EdgeHTML (Edge Legacy), so this add-in won't
+        work in Office versions that use these webviews. The script below makes the
+        following div display when an unsupported webview is in use, and hides the
+        React container div.
+    -->
+    <div id="tridentmessage" style="display: none; padding: 10">
+      This add-in will not run in your version of Office. Please upgrade either to perpetual Office
+      2021 (or later) or to a Microsoft 365 account.
+    </div>
+    <script>
+      if (
+        navigator.userAgent.indexOf("Trident") !== -1 ||
+        navigator.userAgent.indexOf("Edge") !== -1
+      ) {
+        var tridentMessage = document.getElementById("tridentmessage");
+        var normalContainer = document.getElementById("container");
+        tridentMessage.style.display = "block";
+        normalContainer.style.display = "none";
+      }
+    </script>
   </body>
 </html>

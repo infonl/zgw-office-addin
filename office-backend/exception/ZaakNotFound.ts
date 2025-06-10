@@ -4,7 +4,7 @@
  */
 
 export class ZaakNotFound extends Error {
-    public statusCode = 404;
+  public readonly statusCode = 404;
   constructor(zaakIdentificatie: string) {
     super(`Geen zaak gevonden voor zaaknummer: ${zaakIdentificatie}`);
     this.name = ZaakNotFound.name;
