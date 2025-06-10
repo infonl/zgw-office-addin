@@ -32,4 +32,5 @@ header:
     - ".nvmrc"
     - "**/manifest.xml"
     - "**/*.example.cnf"
+    - ".hintrc"
   comment: on-failure

@@ -3,20 +3,22 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { LoggerService } from "./logger.service";
+import { useLogger } from "./useLogger";
 
-export class HttpService {
-  private readonly baseUrl = "https://localhost:3003";
+export function useHttp() {
+  const { DEBUG, ERROR } = useLogger(useHttp.name);
 
-  public async POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
-    return this.request<T>("POST", url, { body, headers });
+  const baseUrl = "https://localhost:3003";
+
+  async function POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
+    return request<T>("POST", url, { body, headers });
   }
 
-  public async GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
-    return this.request<T>("GET", url, { headers, params });
+  async function GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
+    return request<T>("GET", url, { headers, params });
   }
 
-  private async request<T>(
+  async function request<T>(
     method: "POST" | "GET",
     url: string,
     options: {
@@ -25,12 +27,12 @@ export class HttpService {
       params?: Record<string, string>;
     } = { headers: {} }
   ): Promise<T> {
-    const fullUrl = new URL(`${this.baseUrl}${url}`);
+    const fullUrl = new URL(`${baseUrl}${url}`);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
 
-    LoggerService.debug(`[HTTP] [${method}] ${fullUrl}`, options);
+    DEBUG(`[${method}] ${fullUrl}`, options);
 
     try {
       const request: RequestInit = {
@@ -46,8 +48,7 @@ export class HttpService {
       }
 
       const response = await fetch(fullUrl, request);
-
-      LoggerService.debug(`[HTTP] [${method}] [STATUS] ${fullUrl}`, {
+      DEBUG(`[${method}] [STATUS] ${fullUrl}`, {
         status: response.status,
       });
 
@@ -57,12 +58,14 @@ export class HttpService {
 
       const data = await response.json();
 
-      LoggerService.debug(`[HTTP] [${method}] [RESULT] ${fullUrl}`, data);
+      DEBUG(`[${method}] [RESULT] ${fullUrl}`, data);
 
       return data;
     } catch (error) {
-      LoggerService.error(`[HTTP] [${method}] [ERROR] ${fullUrl}`, error);
+      ERROR(`[${method}] [ERROR] ${fullUrl}`, error);
       throw error;
     }
   }
+
+  return { GET, POST };
 }

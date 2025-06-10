@@ -24,14 +24,18 @@ module.exports = async (env, options) => {
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
-      taskpane: ["./src/taskpane/taskpane.ts", "./src/taskpane/taskpane.html"],
+      react: ["react", "react-dom"],
+      taskpane: {
+        import: ["./src/taskpane/index.tsx", "./src/taskpane/taskpane.html"],
+        dependOn: "react",
+      },
       commands: "./src/commands/commands.ts",
     },
     output: {
       clean: true,
     },
     resolve: {
-      extensions: [".ts", ".html", ".js"],
+      extensions: [".ts", ".tsx", ".html", ".js"],
     },
     module: {
       rules: [
@@ -43,12 +47,17 @@ module.exports = async (env, options) => {
           },
         },
         {
+          test: /\.tsx?$/,
+          exclude: /node_modules/,
+          use: ["ts-loader"],
+        },
+        {
           test: /\.html$/,
           exclude: /node_modules/,
           use: "html-loader",
         },
         {
-          test: /\.(png|jpg|jpeg|gif|ico)$/,
+          test: /\.(png|jpg|jpeg|ttf|woff|woff2|gif|ico)$/,
           type: "asset/resource",
           generator: {
             filename: "assets/[name][ext][query]",
@@ -60,7 +69,7 @@ module.exports = async (env, options) => {
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
-        chunks: ["polyfill", "taskpane"],
+        chunks: ["polyfill", "taskpane", "react"],
       }),
       new CopyWebpackPlugin({
         patterns: [
@@ -86,13 +95,12 @@ module.exports = async (env, options) => {
         template: "./src/commands/commands.html",
         chunks: ["polyfill", "commands"],
       }),
-      new webpack.DefinePlugin({
-        __DEV__: JSON.stringify(
-          dev || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev"
-        ),
+      new webpack.ProvidePlugin({
+        Promise: ["es6-promise", "Promise"],
       }),
     ],
     devServer: {
+      hot: true,
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
