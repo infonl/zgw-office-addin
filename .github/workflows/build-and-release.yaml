@@ -47,7 +47,6 @@ jobs:
         path: release/
 
     - name: Archive Artifacts for docker image
-      if: github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: office-plugin-build-artifacts-docker
@@ -119,7 +118,7 @@ jobs:
         gh release create ${{ needs.next-version.outputs.version }} podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }}
 
   create-docker-image:
-    needs: [build,next-version,create-release] # no release, no docker image
+    needs: [build,next-version]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -143,21 +142,41 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push Frontend Docker image
+    - name: Build Frontend Docker image
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      if: ${{ github.ref != 'refs/heads/main'}}
       with:
-        context: .
-        file: ./office-add-in/Dockerfile
+        context: ./office-add-in
+        push: false
+        tags: |
+          ghcr.io/infonl/podiumd-office-add-in-frontend:latest
+          ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+
+    - name: Build and Push Frontend Docker image
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      if: ${{ github.ref == 'refs/heads/main'}}
+      with:
+        context: ./office-add-in
         push: true
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-frontend:latest
           ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
 
-    - name: Build and push Backend Docker image
+    - name: Build Backend Docker image
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      if: ${{ github.ref != 'refs/heads/main'}}
       with:
-        context: .
-        file: ./office-backend/Dockerfile
+        context: ./office-backend
+        push: false
+        tags: |
+          ghcr.io/infonl/podiumd-office-add-in-backend:latest
+          ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
+
+    - name: Build and Push Backend Docker image
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      if: ${{ github.ref == 'refs/heads/main'}}
+      with:
+        context: ./office-backend
         push: true
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest
