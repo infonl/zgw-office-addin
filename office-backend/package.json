@@ -22,7 +22,7 @@
     "@types/connect": "3.4.38",
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "22.15.30",
+    "@types/node": "22.15.31",
     "@types/send": "0.17.4",
     "@types/serve-static": "1.15.7",
     "@types/wrap-ansi": "8.1.0",
