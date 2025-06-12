@@ -42,7 +42,7 @@ export class ZaakService {
     body: Record<string, unknown> = {},
   ) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
-
+    
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<
       GeneratedType<"ZaakInformatieObject">
@@ -60,6 +60,11 @@ export class ZaakService {
           .at(0),
       }),
     );
+    LoggerService.debug(
+      `adding gebruiksrechten to document ${informatieobject.url}`
+    );
+
+    this.createGebruiksrechten(informatieobject.url!, new Date(String(body.creatiedatum)));
 
     LoggerService.debug(
       `adding document to zaak ${zaak.url}`,
@@ -100,5 +105,16 @@ export class ZaakService {
     }
 
     return zaak;
+  }
+
+  private async createGebruiksrechten(url: string, startdatum: Date) {
+    await this.httpService.POST(
+      "documenten/api/v1/gebruiksrechten",
+      JSON.stringify({
+        informatieobject: url,
+        startdatum: startdatum,
+        omschrijvingVoorwaarden: "geen"
+      })
+    );
   }
 }

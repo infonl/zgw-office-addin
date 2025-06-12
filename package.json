@@ -16,8 +16,7 @@
     "dev": "npm run types && turbo dev",
     "build": "npm run types && turbo build",
     "lint": "npm run types && turbo lint",
-    "types": "npx openapi-typescript ./resources/api-specs/openapi.yaml -o ./generated/types.ts"
-  },
+    "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts && npx openapi-typescript ./resources/api-specs/drc-openapi.yaml -o ./generated/drc-types.ts"  },
   "devDependencies": {
     "turbo": "2.5.4"
   },
