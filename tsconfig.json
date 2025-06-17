@@ -15,7 +15,7 @@
     "sourceMap": true,
     "target": "es5",
     "lib": ["dom", "es2015"],
-    "types": ["office-js", "node"],
+    "types": ["node"],
     "strict": true,
     "pretty": true,
     "typeRoots": ["node_modules/@types"]
