@@ -1,0 +1,43 @@
+# Node modules (always install fresh in container)
+node_modules/
+office-backend/node_modules/
+office-add-in/node_modules/
+
+# Build output
+dist/
+office-backend/dist/
+office-add-in/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS and editor files
+.DS_Store
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Environment files (do not copy secrets)
+.env
+.env.*
+
+# Git and VCS
+.git/
+.gitignore
+
+# Test, docs, and scripts not needed in image
+test/
+docs/
+scripts/
+README.md
+*.md
+
+# Ignore frontend and other unrelated workspace folders
+office-add-in/
+scripts/
+resources/
+charts/
+docs/
