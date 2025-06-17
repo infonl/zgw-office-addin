@@ -35,6 +35,5 @@ README.md
 
 # Ignore frontend and other unrelated workspace folders
 scripts/
-resources/
 charts/
 docs/
