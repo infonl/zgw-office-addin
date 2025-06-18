@@ -19,6 +19,8 @@ WORKDIR /app/office-backend
 
 RUN npm run build
 
+RUN find /
+
 # Expose ports
 EXPOSE 3003
 
