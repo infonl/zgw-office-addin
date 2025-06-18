@@ -5,8 +5,11 @@ FROM node:22.16.0-alpine@sha256:41e4389f3d988d2ed55392df4db1420ad048ae53324a8e2b
 # Set the working directory
 WORKDIR /app
 
+# Copy root code to workdir
 COPY . .
-# Copy code to workdir
+
+# Set the working directory to the office-backend directory
+WORKDIR /app/office-backend
 
 # Install dependencies
 RUN npm install
