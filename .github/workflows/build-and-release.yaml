@@ -181,6 +181,7 @@ jobs:
         file: ./office-backend/Dockerfile
         context: .
         push: ${{ github.ref == 'refs/heads/main' }}
+
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest
           ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}

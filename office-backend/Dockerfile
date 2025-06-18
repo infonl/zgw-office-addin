@@ -17,7 +17,6 @@ RUN npm run types
 # Set the working directory to the office-backend directory
 WORKDIR /app/office-backend
 
-
 RUN npm run build
 
 # Expose ports
