@@ -8,6 +8,8 @@ RUN rm -rf /usr/share/nginx/html/*
 
 # Copy the built frontend files
 COPY ./office-add-in/dist/ /usr/share/nginx/html/
+COPY --chmod=755 ./office-add-in/entrypoint.sh /entrypoint.sh
 
 EXPOSE 3000
 
+ENTRYPOINT ["/entrypoint.sh"]

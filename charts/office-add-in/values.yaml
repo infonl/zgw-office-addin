@@ -6,6 +6,8 @@ frontend:
   service:
     type: ClusterIP
     port: 3000
+  # -- The frontend URL where the manifest.xml and static js file are served
+  frontendUrl: "https://localhost:3000"
 
 backend:
   image:
@@ -15,5 +17,7 @@ backend:
   service:
     type: ClusterIP
     port: 3003
+  # -- Secret key used for generating and validating JWT tokens for secure communication
   jwtSecret: "SECRECT_KEY_PLACEHOLDER"
+  # -- Base URL for the backend API to connect to external services
   apiBaseUrl: "http://localhost:8020"

@@ -142,48 +142,23 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build Frontend Docker image
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-      if: ${{ github.ref != 'refs/heads/main'}}
-      with:
-        file: ./office-add-in/Dockerfile
-        context: .
-        push: false
-        tags: |
-          ghcr.io/infonl/podiumd-office-add-in-frontend:latest
-          ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
-
-    - name: Build and Push Frontend Docker image
+    - name: Build (and Push) Frontend Docker image
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       if: ${{ github.ref == 'refs/heads/main'}}
       with:
         file: ./office-add-in/Dockerfile
         context: .
-        push: true
+        push: ${{ github.ref == 'refs/heads/main' }}
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-frontend:latest
           ghcr.io/infonl/podiumd-office-add-in-frontend:${{ needs.next-version.outputs.version }}
 
-    - name: Build Backend Docker image
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-      if: ${{ github.ref != 'refs/heads/main'}}
-      with:
-        file: ./office-backend/Dockerfile
-        context: .
-        push: false
-        tags: |
-          ghcr.io/infonl/podiumd-office-add-in-backend:latest
-          ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
-
-    - name: Build and Push Backend Docker image
+    - name: Build (and Push) Backend Docker image
       uses: docker/build-push-action@v6
       with:
         file: ./office-backend/Dockerfile
         context: .
         push: ${{ github.ref == 'refs/heads/main' }}
-
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest
           ghcr.io/infonl/podiumd-office-add-in-backend:${{ needs.next-version.outputs.version }}
-
-          
