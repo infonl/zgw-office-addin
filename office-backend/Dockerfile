@@ -8,11 +8,15 @@ WORKDIR /app
 # Copy root code to workdir
 COPY . .
 
+# Install dependencies
+RUN npm install
+
+# Generate the types
+RUN npm run types
+
 # Set the working directory to the office-backend directory
 WORKDIR /app/office-backend
 
-# Install dependencies
-RUN npm install
 
 RUN npm run build
 
