@@ -31,14 +31,14 @@ The Github workflow will perform helm-linting and will bump the version if neede
 |-----|------|---------|-------------|
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL for the backend API to connect to external services |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-plugin-backend"` |  |
+| backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
 | backend.image.tag | string | `"latest"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-plugin-frontend"` |  |
+| frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
 | frontend.image.tag | string | `"latest"` |  |
 | frontend.service.port | int | `3000` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
