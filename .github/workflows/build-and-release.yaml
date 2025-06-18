@@ -146,7 +146,8 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       if: ${{ github.ref != 'refs/heads/main'}}
       with:
-        context: ./office-add-in
+        file: ./office-add-in/Dockerfile
+        context: .
         push: false
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-frontend:latest
@@ -156,7 +157,8 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       if: ${{ github.ref == 'refs/heads/main'}}
       with:
-        context: ./office-add-in
+        file: ./office-add-in/Dockerfile
+        context: .
         push: true
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-frontend:latest
@@ -166,7 +168,8 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       if: ${{ github.ref != 'refs/heads/main'}}
       with:
-        context: ./office-backend
+        file: ./office-backend/Dockerfile
+        context: .
         push: false
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest
@@ -176,7 +179,8 @@ jobs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       if: ${{ github.ref == 'refs/heads/main'}}
       with:
-        context: ./office-backend
+        file: ./office-backend/Dockerfile
+        context: .
         push: true
         tags: |
           ghcr.io/infonl/podiumd-office-add-in-backend:latest

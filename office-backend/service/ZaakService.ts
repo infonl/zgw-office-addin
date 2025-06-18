@@ -24,7 +24,7 @@ export class ZaakService {
       : ({ statustoelichting: "-" } satisfies Partial<GeneratedType<"Status">>);
 
     const zaakinformatieobjecten = await Promise.all(
-      zaaktype.informatieobjecttypen.map((url) =>
+      zaaktype.informatieobjecttypen.map((url: string) =>
         this.httpService.GET<{ omschrijving: string }>(url),
       ),
     );
