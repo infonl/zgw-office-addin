@@ -23,4 +23,4 @@ RUN npm run build
 EXPOSE 3003
 
 # Set the entry point to the startup script
-ENTRYPOINT ["node", "dist/src/app.js"]
+ENTRYPOINT ["node", "dist/office-backend/src/app.js"]
