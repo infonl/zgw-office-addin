@@ -30,7 +30,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
-| backend.certificate.caPath | string | `""` | path to ca certificate file |
+| backend.certificate.caPath | string | `""` | path to ca certificate file. If not specified, a self signed certificate will be generated for localhost |
 | backend.certificate.certPath | string | `""` | path to certificate file |
 | backend.certificate.keyPath | string | `""` | path to private key file |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
