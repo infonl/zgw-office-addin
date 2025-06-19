@@ -24,8 +24,8 @@ backend:
 
   certificate:
     # -- path to ca certificate file
-    caPath: ""
+    caPath: "./testca"
     # -- path to private key file
-    keyPath: ""
+    keyPath: "./testkey"
     # -- path to certificate file
-    certPath: ""
+    certPath: "./testcert"
