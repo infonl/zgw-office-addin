@@ -18,9 +18,9 @@ import { LoggerService } from "../service/LoggerService";
 
 const fastify = Fastify({
   https: {
-    key: fs.readFileSync("./key.pem"),
-    cert: fs.readFileSync("./cert.pem"),
-    ca: fs.readFileSync("./ca-cert.pem"),
+    key: fs.readFileSync(process.env.KEY_PATH!),
+    cert: fs.readFileSync(process.env.CERT_PATH!),
+    ca: fs.readFileSync(process.env.CA_CERT_PATH!),
   },
 });
 
