@@ -18,9 +18,10 @@ RUN npm run types
 WORKDIR /app/office-backend
 
 RUN npm run build
+RUN chmod +x entrypoint.sh
 
 # Expose ports
 EXPOSE 3003
 
 # Set the entry point to the startup script
-ENTRYPOINT ["node", "dist/office-backend/src/app.js"]
+ENTRYPOINT ["./entrypoint.sh"]
