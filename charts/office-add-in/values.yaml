@@ -25,7 +25,7 @@ backend:
   certificate:
     # -- path to ca certificate file. If not specified, a self signed certificate will be generated for localhost
     caPath: ""
-    # -- path to private key file
+    # -- path to private key file. If not specified, a self signed certificate will be generated for localhost
     keyPath: ""
-    # -- path to certificate file
+    # -- path to certificate file. If not specified, a self signed certificate will be generated for localhost
     certPath: ""
