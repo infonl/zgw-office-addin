@@ -31,8 +31,8 @@ The Github workflow will perform helm-linting and will bump the version if neede
 |-----|------|---------|-------------|
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.certificate.caPath | string | `""` | path to ca certificate file. If not specified, a self signed certificate will be generated for localhost |
-| backend.certificate.certPath | string | `""` | path to certificate file |
-| backend.certificate.keyPath | string | `""` | path to private key file |
+| backend.certificate.certPath | string | `""` | path to certificate file. If not specified, a self signed certificate will be generated for localhost |
+| backend.certificate.keyPath | string | `""` | path to private key file. If not specified, a self signed certificate will be generated for localhost |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
 | backend.image.tag | string | `"latest"` |  |
