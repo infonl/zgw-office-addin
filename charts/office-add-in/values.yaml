@@ -19,5 +19,5 @@ backend:
     port: 3003
   # -- Secret key used for generating and validating JWT tokens for secure communication
   jwtSecret: "SECRECT_KEY_PLACEHOLDER"
-  # -- Base URL to the openzaak API 
+  # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
