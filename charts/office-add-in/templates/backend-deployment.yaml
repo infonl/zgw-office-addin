@@ -30,4 +30,4 @@ spec:
             - name: CERT_PATH
               value: {{ .Values.backend.certificate.certPath | default "./cert.pem" | quote }}
             - name: GENERATE_SELF_SIGNED
-              value: {{- if .Values.backend.certificate.certPath }}"false"{{- else }}"true" {{- end }}
+              value: {{ if .Values.backend.certificate.certPath }}"false"{{ else }}"true"{{ end }}
