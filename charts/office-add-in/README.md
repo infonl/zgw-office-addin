@@ -1,6 +1,6 @@
 # podiumd-office-plugin
 
-![Version: 0.0.7](https://img.shields.io/badge/Version-0.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.8](https://img.shields.io/badge/Version-0.0.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the podiumd-office-plugin (frontend and backend)
 
@@ -35,7 +35,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.certificate.keyPath | string | `""` | path to private key file. If not specified, a self signed certificate will be generated for localhost |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.0.126@sha256:7abd7ae9fd81c0dae3264680dda44681c945932cfeb82699ad1b06d5075a0ed0"` |  |
+| backend.image.tag | string | `"v0.0.129@sha256:902aea02051026ad9188c7380c1bc98161dcb078cddeb0035baf914a370bfd94"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
