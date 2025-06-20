@@ -11,7 +11,7 @@
     "office-add-in",
     "office-backend"
   ],
-  "packageManager": "npm@11.4.1",
+  "packageManager": "npm@11.4.2",
   "scripts": {
     "dev": "npm run types && turbo dev",
     "build": "npm run types && turbo build",
