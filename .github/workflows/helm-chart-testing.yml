@@ -6,8 +6,8 @@ name: Helm chart linting and testing
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'charts/**'
+#    paths:
+#      - 'charts/**'
   merge_group:
   workflow_dispatch:
 
