@@ -19,5 +19,13 @@ backend:
     port: 3003
   # -- Secret key used for generating and validating JWT tokens for secure communication
   jwtSecret: "SECRECT_KEY_PLACEHOLDER"
-  # -- Base URL for the backend API to connect to external services
+  # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
+
+  certificate:
+    # -- path to ca certificate file. If not specified, a self signed certificate will be generated for localhost
+    caPath: ""
+    # -- path to private key file. If not specified, a self signed certificate will be generated for localhost
+    keyPath: ""
+    # -- path to certificate file. If not specified, a self signed certificate will be generated for localhost
+    certPath: ""

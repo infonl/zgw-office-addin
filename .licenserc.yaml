@@ -33,4 +33,5 @@ header:
     - "**/manifest.xml"
     - "**/*.example.cnf"
     - ".hintrc"
+    - "**/entrypoint.sh"
   comment: on-failure
