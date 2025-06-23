@@ -27,16 +27,16 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
-    "@fluentui/react-components": "9.65.0",
-    "@fluentui/react-icons": "2.0.302",
+    "@fluentui/react-components": "9.66.2",
+    "@fluentui/react-icons": "2.0.304",
     "@hookform/resolvers": "5.1.1",
-    "@tanstack/react-query": "5.80.6",
+    "@tanstack/react-query": "5.80.10",
     "core-js": "3.43.0",
     "es6-promise": "4.2.8",
     "jwt-decode": "4.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-hook-form": "7.57.0",
+    "react-hook-form": "7.58.1",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
     "zod": "3.25.67"
