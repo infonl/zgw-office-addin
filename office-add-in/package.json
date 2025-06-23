@@ -53,7 +53,7 @@
     "@types/react-dom": "18.3.7",
     "@types/webpack": "5.28.5",
     "acorn": "8.15.0",
-    "babel-loader": "9.2.1",
+    "babel-loader": "10.0.0",
     "copy-webpack-plugin": "13.0.0",
     "eslint-plugin-office-addins": "4.0.3",
     "eslint-plugin-react": "7.37.5",
