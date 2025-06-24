@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: office-add-in-backend
+  name: {{ include "office-add-in.backend.fullname" . }}
 spec:
   type: {{ .Values.backend.service.type }}
   selector:
