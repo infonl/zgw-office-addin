@@ -8,7 +8,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "office-add-in.frontend.selectorLabels" . | nindent 6 }}
+      {{- include "office-add-in.backend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
