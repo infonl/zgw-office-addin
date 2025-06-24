@@ -42,7 +42,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.0.129@sha256:a1d91c536f45fcac1c0b002ec373ca65f777bd0622cd340b962e3bbbf102983a"` |  |
+| frontend.image.tag | string | `"v0.0.140@sha256:eecdecebd2c6af0736bafe7ccf5dae2c9027990253c43cc6a1880b45a6d5e93d"` |  |
 | frontend.service.port | int | `3000` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 
