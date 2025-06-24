@@ -1,16 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: office-add-in-frontend
+  name: {{ include "office-add-in.frontend.fullname" . }}
+  labels:
+    {{- include "office-add-in.frontend.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: office-add-in-frontend
+      {{- include "office-add-in.frontend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: office-add-in-frontend
+        {{- include "office-add-in.frontend.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: frontend

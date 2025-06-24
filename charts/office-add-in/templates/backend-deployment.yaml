@@ -1,16 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: office-add-in-backend
+  name: {{ include "office-add-in.backend.fullname" . }}
+  labels:
+    {{- include "office-add-in.backend.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: office-add-in-backend
+      {{- include "office-add-in.frontend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: office-add-in-backend
+        {{- include "office-add-in.backend.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: backend
