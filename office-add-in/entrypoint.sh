@@ -7,8 +7,7 @@
 # Default to localhost if not set
 FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
 
+echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting manifest"
+
 # Ensure the location is set correctly for the files being served
 find /usr/share/nginx/html -type f -exec sed -i "s|https://localhost:3000|$FRONTEND_URL|g" {} +
-
-# Start NGINX using regular entrypoint to not break available defaults and configuration 
-/docker-entrypoint.sh nginx
