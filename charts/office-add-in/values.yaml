@@ -5,7 +5,7 @@ frontend:
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
-    port: 3000
+    port: 80
   # -- The frontend URL where the manifest.xml and static js file are served
   frontendUrl: "https://localhost:3000"
 

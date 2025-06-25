@@ -10,4 +10,4 @@ spec:
     {{- include "office-add-in.frontend.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.frontend.service.port }}
-      targetPort: 3000
+      targetPort: 80
