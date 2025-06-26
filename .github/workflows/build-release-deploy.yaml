@@ -115,7 +115,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh release create ${{ needs.next-version.outputs.version }} podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }}
+        gh release create ${{ needs.next-version.outputs.version }} podiumd-office-plugin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }} --generate-notes
 
   create-docker-image:
     needs: [build,next-version]
