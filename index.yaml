@@ -3,6 +3,17 @@ entries:
   podiumd-office-plugin:
   - apiVersion: v2
     appVersion: 0.0.70
+    created: "2025-06-26T12:30:47.943637775Z"
+    description: A Helm chart for deploying the podiumd-office-plugin (frontend and
+      backend)
+    digest: 573ef1acded1a1402713f06e387e6c5c63b7cacf03286180abe42a593caefb96
+    name: podiumd-office-plugin
+    type: application
+    urls:
+    - https://github.com/infonl/podiumd-office-plugin/releases/download/podiumd-office-plugin-0.0.11/podiumd-office-plugin-0.0.11.tgz
+    version: 0.0.11
+  - apiVersion: v2
+    appVersion: 0.0.70
     created: "2025-06-24T20:41:22.314231814Z"
     description: A Helm chart for deploying the podiumd-office-plugin (frontend and
       backend)
@@ -100,4 +111,4 @@ entries:
     urls:
     - https://github.com/infonl/podiumd-office-plugin/releases/download/podiumd-office-plugin-0.0.2/podiumd-office-plugin-0.0.2.tgz
     version: 0.0.2
-generated: "2025-06-24T20:41:22.314294582Z"
+generated: "2025-06-26T12:30:47.943678031Z"
