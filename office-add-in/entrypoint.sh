@@ -11,10 +11,10 @@
 # To test this script locally, you can run it with the following command (in the current directory):
 # FRONTEND_URL="https://myfrontend.com" BACKEND_URL="https://mybackend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
 #
-# Mote that for testing on a Mac, you will have to replace `sed -i` with `sed -i ''`, per comment below.
+# Note that for testing on a Mac, you will have to replace `sed -i` with `sed -i ''`, per comment below.
 
 ####
-# Optionally set The location to the NGINX public HTML directory, defaults to /usr/share/nginx/html.
+# Optionally set the location to the NGINX public HTML directory, defaults to /usr/share/nginx/html.
 NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
 
 ####
