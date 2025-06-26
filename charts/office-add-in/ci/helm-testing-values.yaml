@@ -8,6 +8,8 @@ frontend:
     port: 3000
   # -- The frontend URL where the manifest.xml and static js file are served
   frontendUrl: "https://localhost:3000"
+  # -- The backend URL that the frontend will connect with
+  backendUrl: "https://localhost:3003"
 
 backend:
   image:

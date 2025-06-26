@@ -3,11 +3,42 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 #
+####
+# This script is used to set up the environment for the Office Add-in.
+# It will ensure that the manifest file and the useHttp.ts file are correctly configured
+# for the environment they are deployed in.
+#
+# To test this script locally, you can run it with the following command (in the current directory):
+# FRONTEND_URL="https://myfrontend.com" BACKEND_URL="https://mybackend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
+#
+# Note that for testing on a Mac, you will have to replace `sed -i` with `sed -i ''`, per comment below.
 
-# Default to localhost if not set
+####
+# Optionally set the location to the NGINX public HTML directory, defaults to /usr/share/nginx/html.
+NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
+
+####
+# To ensure the manifest for the Office Add-in is correctly configured,
+# we need to rewrite the URLs in the manifest.xml to align with the location
+# that this file is available on.
+
+# Optionally set the frontend URL to use, defaults to https://localhost:3000.
 FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
+FRONTEND_API=$(echo "$FRONTEND_URL" | sed 's/https/api/')
+MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 
-echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting manifest"
+echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
 
-# Ensure the location is set correctly for the files being served
-find /usr/share/nginx/html -type f -exec sed -i -e "s|://localhost:3000|$FRONTEND_URL|g" -e "s|https://www.contoso.com|$FRONTEND_URL|g" {} +
+# To test this command on a Mac, you will have to replace `sed -i` with `sed -i ''`.
+sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g"  -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+
+####
+# To ensure the Office Add-in frontend can communicate with the backend,
+# we need to rewrite the URL in the useHttp.ts file to point to the correct
+# backend service.
+
+# Optionally set the backend URL to use, defaults to https://localhost:3003.
+BACKEND_URL="${BACKEND_URL:-https://localhost:3003}"
+echo "Backend URL is set to ${BACKEND_URL}. Rewriting useHttp.ts."
+find "$NGINX_PUBLIC_HTML" -type f \( -name "useHttp.ts" \) -exec sed -i \
+  -e "s|https://localhost:3003|$BACKEND_URL|g" {} +
