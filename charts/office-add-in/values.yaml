@@ -12,7 +12,7 @@ frontend:
 backend:
   image:
     repository: ghcr.io/infonl/podiumd-office-add-in-backend
-    tag: v0.0.140@sha256:5673621b5ecc7612115141cd55acb8542625adf818192f2cb5199342c702fbff
+    tag: v0.0.152@sha256:a9d8f53ca2b87022d482da5c2d88eafbdad9fd4a5e0546fd2a3c1425c3d4c4bf
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
