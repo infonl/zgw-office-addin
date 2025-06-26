@@ -1,6 +1,6 @@
 # podiumd-office-plugin
 
-![Version: 0.0.10](https://img.shields.io/badge/Version-0.0.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.11](https://img.shields.io/badge/Version-0.0.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the podiumd-office-plugin (frontend and backend)
 
@@ -42,8 +42,8 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.0.140@sha256:eecdecebd2c6af0736bafe7ccf5dae2c9027990253c43cc6a1880b45a6d5e93d"` |  |
-| frontend.service.port | int | `3000` |  |
+| frontend.image.tag | string | `"v0.0.146@sha256:d9ae57431de55b75923819cef83438f40ad73a7ab6e4deb8034f5d9c9b7e2a10"` |  |
+| frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 
 ----------------------------------------------
