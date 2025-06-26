@@ -28,6 +28,19 @@
       "schedule": [
         "every weekend on the 1st through 7th day of the month"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "ghcr.io/infonl/podiumd-office-add-in-backend",
+        "ghcr.io/infonl/podiumd-office-add-in-frontend"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
+      "schedule": [
+        "before 6am every day"
+      ],
+      "automerge": true
     }
   ]
 }
