@@ -38,7 +38,7 @@
         "docker"
       ],
       "schedule": [
-        "before 6am every day"
+        "before 6am"
       ],
       "automerge": true
     }
