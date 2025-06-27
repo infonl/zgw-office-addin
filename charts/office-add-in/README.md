@@ -1,6 +1,6 @@
 # podiumd-office-plugin
 
-![Version: 0.0.13](https://img.shields.io/badge/Version-0.0.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.14](https://img.shields.io/badge/Version-0.0.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the podiumd-office-plugin (frontend and backend)
 
@@ -39,6 +39,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
+| frontend.enableHttps | bool | `false` |  |
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
