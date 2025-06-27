@@ -36,7 +36,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
-| frontend.enableHttps | bool | `false` | and certificate valid for your frontendUrl |
+| frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
