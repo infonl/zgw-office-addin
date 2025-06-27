@@ -30,16 +30,13 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
-| backend.certificate.caPath | string | `""` | path to ca certificate file. If not specified, a self signed certificate will be generated for localhost |
-| backend.certificate.certPath | string | `""` | path to certificate file. If not specified, a self signed certificate will be generated for localhost |
-| backend.certificate.keyPath | string | `""` | path to private key file. If not specified, a self signed certificate will be generated for localhost |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
 | backend.image.tag | string | `"v0.0.152@sha256:a9d8f53ca2b87022d482da5c2d88eafbdad9fd4a5e0546fd2a3c1425c3d4c4bf"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
-| frontend.enableHttps | bool | `false` |  |
+| frontend.enableHttps | bool | `false` | and certificate valid for your frontendUrl |
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
