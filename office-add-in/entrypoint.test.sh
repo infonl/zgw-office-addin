@@ -42,6 +42,7 @@ export -f sed 2>/dev/null  # export for subshells (bash), ignore error in sh
 
 # Set test environment variables
 export FRONTEND_URL="https://testfrontend.com"
+export BACKEND_URL="https://testbackend.com"
 export NGINX_PUBLIC_HTML="$TEST_DIR"
 
 # Run the actual script
