@@ -14,8 +14,6 @@ RUN npm ci
 # Generate the types
 RUN npm run types
 
-RUN apk add openssl
-
 # Set the working directory to the office-backend directory
 WORKDIR /app/office-backend
 
