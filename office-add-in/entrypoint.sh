@@ -9,7 +9,7 @@
 # for the environment they are deployed in.
 #
 # To test this script locally, you can run it with the following command (in the current directory):
-# FRONTEND_URL="https://myfrontend.com" BACKEND_URL="https://mybackend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
+# FRONTEND_URL="https://myfrontend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
 #
 # Note that for testing on a Mac, you will have to replace `sed -i` with `sed -i ''`, per comment below.
 
@@ -30,7 +30,7 @@ MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
 
 # To test this command on a Mac, you will have to replace `sed -i` with `sed -i ''`.
-sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g"  -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,
@@ -38,7 +38,7 @@ sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g"  -e "s|api://localhost:3000
 # backend service.
 
 # Optionally set the backend URL to use, defaults to https://localhost:3003.
-BACKEND_URL="${BACKEND_URL:-https://localhost:3003}"
+BACKEND_URL="${FRONTEND_URL}/backend"
 echo "Backend URL is set to ${BACKEND_URL}. Rewriting useHttp.ts."
 find "$NGINX_PUBLIC_HTML" -type f \( -name "useHttp.ts" \) -exec sed -i \
   -e "s|https://localhost:3003|$BACKEND_URL|g" {} +

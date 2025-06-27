@@ -23,5 +23,3 @@ spec:
           env:
             - name: FRONTEND_URL
               value: {{ .Values.frontend.frontendUrl | quote }}
-            - name: BACKEND_URL
-              value: {{ .Values.frontend.backendUrl | quote }}
