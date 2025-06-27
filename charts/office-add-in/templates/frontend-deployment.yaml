@@ -23,3 +23,7 @@ spec:
           env:
             - name: FRONTEND_URL
               value: {{ .Values.frontend.frontendUrl | quote }}
+            - name: BACKEND_URL
+              value: {{ include "office-add-in.backend.fullname" . }}
+            - name: ENABLE_HTTPS
+              value: {{ .Values.frontend.enableHttps | default "false" | quote }}

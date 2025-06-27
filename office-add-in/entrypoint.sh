@@ -38,7 +38,17 @@ sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|api://localhost:3000|
 # backend service.
 
 # Optionally set the backend URL to use, defaults to https://localhost:3003.
-BACKEND_URL="${FRONTEND_URL}/backend"
+BACKEND_URL="${BACKEND_URL:-http://localhost:3003}"
+ENABLE_HTTPS="${ENABLE_HTTPS:-false}"
+
 echo "Backend URL is set to ${BACKEND_URL}. Rewriting useHttp.ts."
 find "$NGINX_PUBLIC_HTML" -type f \( -name "useHttp.ts" \) -exec sed -i \
-  -e "s|https://localhost:3003|$BACKEND_URL|g" {} +
+  -e "s|http://localhost:3003|$BACKEND_URL|g" {} +
+
+# Create main config from template
+sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
+
+# Optionally append HTTPS config
+if [ "$ENABLE_HTTPS" = "true" ]; then
+  sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.https.template >> /etc/nginx/conf.d/default.conf
+fi
