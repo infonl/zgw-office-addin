@@ -9,7 +9,7 @@
 # for the environment they are deployed in.
 #
 # To test this script locally, you can run it with the following command (in the current directory):
-# FRONTEND_URL="https://myfrontend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
+# FRONTEND_URL="https://myfrontend.com" BACKEND_URL="https://mybackend.com" NGINX_PUBLIC_HTML="." ./entrypoint.sh
 #
 # Note that for testing on a Mac, you will have to replace `sed -i` with `sed -i ''`, per comment below.
 
