@@ -12,7 +12,7 @@
   "license": "EUPL-1.2+",
   "description": "",
   "dependencies": {
-    "dotenv": "16.6.1",
+    "dotenv": "17.0.0",
     "fastify": "5.4.0",
     "jsonwebtoken": "9.0.2"
   },
