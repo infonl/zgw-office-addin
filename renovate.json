@@ -30,6 +30,7 @@
       ]
     },
     {
+      "groupName": "podiumd-docker-images",
       "matchPackageNames": [
         "ghcr.io/infonl/podiumd-office-add-in-backend",
         "ghcr.io/infonl/podiumd-office-add-in-frontend"
