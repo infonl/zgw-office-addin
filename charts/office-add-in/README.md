@@ -1,6 +1,6 @@
 # podiumd-office-plugin
 
-![Version: 0.0.15](https://img.shields.io/badge/Version-0.0.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.16](https://img.shields.io/badge/Version-0.0.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the podiumd-office-plugin (frontend and backend)
 
@@ -35,14 +35,14 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.certificate.keyPath | string | `""` | path to private key file. If not specified, a self signed certificate will be generated for localhost |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.0.167@sha256:06812e432316c0a1efa875b7cd6a96835ea43bc5fbe71a0b8d438d3499e9bad7"` |  |
+| backend.image.tag | string | `"v0.0.173@sha256:cd0c7652abc365eac103c4d39e017154e99395532b8fbfac02ad34dbaae79899"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
 | frontend.frontendUrl | string | `"https://localhost:3000"` | The frontend URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.0.167@sha256:c23077c5a761f89e8718760d079f7ffd86b5e4b0e5bca6d54f8307486bf66113"` |  |
+| frontend.image.tag | string | `"v0.0.173@sha256:969855a76bbfc86cf9f1f2bed6264f10a40e7eb68b0f7cfb4ea6eadb577c42bb"` |  |
 | frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 
