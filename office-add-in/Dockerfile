@@ -11,6 +11,7 @@ COPY ./office-add-in/dist/ /usr/share/nginx/html/
 COPY --chmod=755 ./office-add-in/entrypoint.sh /docker-entrypoint.d/entrypoint.sh
 
 # Copy nginx configuration
-COPY ./office-add-in/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./office-add-in/nginx.conf.template /etc/nginx/
+COPY ./office-add-in/nginx.https.template /etc/nginx/
 
 EXPOSE 80
