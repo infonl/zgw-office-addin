@@ -24,7 +24,7 @@ spec:
             - name: FRONTEND_URL
               value: {{ .Values.frontend.frontendUrl | quote }}
             - name: BACKEND_URL
-              value: {{ include "office-add-in.backend.fullname" . }}
+              value: http://{{ include "office-add-in.backend.fullname" . }}:{{ .Values.backend.service.port }}
             - name: BACKEND_PUBLIC_URL
               value: {{ .Values.frontend.backendPublicUrl | quote }}
             - name: ENABLE_HTTPS
