@@ -10,7 +10,7 @@ frontend:
   frontendUrl: "http://localhost:3000"
   # -- The public URL to the backend service if directly exposed. By default it is
   # proxied via the frontend host
-  backendPublicUrl: "http://localhost:3000/proxy"
+  backendPublicUrl: ""
   # -- If enabled nginx will also listen on port 443. You will need to volume map a key
   # and certificate valid for your frontendUrl
   enableHttps: false

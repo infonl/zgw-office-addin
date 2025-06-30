@@ -26,6 +26,6 @@ spec:
             - name: BACKEND_URL
               value: http://{{ include "office-add-in.backend.fullname" . }}:{{ .Values.backend.service.port }}
             - name: BACKEND_PUBLIC_URL
-              value: {{ .Values.frontend.backendPublicUrl | quote }}
+              value: {{ .Values.frontend.backendPublicUrl | default (printf "%s/proxy/" .Values.frontend.frontendUrl) | quote }}
             - name: ENABLE_HTTPS
               value: {{ .Values.frontend.enableHttps | default "false" | quote }}
