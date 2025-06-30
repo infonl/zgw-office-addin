@@ -41,8 +41,8 @@ sed -i -e "s|https\?://localhost:3000|$FRONTEND_URL|g" -e "s|https\?://www.conto
 BACKEND_PUBLIC_URL="${BACKEND_PUBLIC_URL:-${FRONTEND_URL}/proxy}"
 ENABLE_HTTPS="${ENABLE_HTTPS:-false}"
 
-echo "Backend URL is set to ${BACKEND_PUBLIC_URL}. Rewriting useHttp.ts."
-find "$NGINX_PUBLIC_HTML" -type f \( -name "useHttp.ts" \) -exec sed -i \
+echo "Backend URL is set to ${BACKEND_PUBLIC_URL}. Rewriting references."
+find "$NGINX_PUBLIC_HTML" -type f -exec sed -i \
   -e "s|https\?://localhost:3003|$BACKEND_PUBLIC_URL|g" {} +
 
 # Create main config from template
