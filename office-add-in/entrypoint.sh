@@ -30,7 +30,7 @@ MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
 
 # To test this command on a Mac, you will have to replace `sed -i` with `sed -i ''`.
-sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|https://www.contoso.com|$FRONTEND_URL|g" -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,
