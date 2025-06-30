@@ -7,7 +7,6 @@ import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-import fs from "fs";
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
 import Fastify from "fastify";
@@ -16,18 +15,14 @@ import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 
-const fastify = Fastify({
-  https: {
-    key: fs.readFileSync(process.env.KEY_PATH!),
-    cert: fs.readFileSync(process.env.CERT_PATH!),
-    ca: fs.readFileSync(process.env.CA_CERT_PATH!),
-  },
-});
+const fastify = Fastify({});
+
+const allowedOrigins = process.env.FRONTEND_URL
+  ? [process.env.FRONTEND_URL]
+  : [];
 
 fastify.addHook("onRequest", (request, reply, done) => {
-  const allowedOrigins = ["https://localhost:3000"];
   const origin = request.headers.origin;
-
   if (origin && allowedOrigins.includes(origin)) {
     reply.header("Access-Control-Allow-Origin", origin);
     reply.header(
@@ -61,10 +56,10 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );
 
-fastify.listen({ port: 3003, host: "127.0.0.1" }, (err, address) => {
+fastify.listen({ port: 3003, host: "0.0.0.0" }, (err, address) => {
   if (err) {
     LoggerService.error("Error starting server:", err);
     process.exit(1);
   }
-  LoggerService.log(`🚀 Secure server running at ${address}`);
+  LoggerService.log(`🚀 Server running at ${address}`);
 });

@@ -30,15 +30,25 @@ MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
 
 # To test this command on a Mac, you will have to replace `sed -i` with `sed -i ''`.
-sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g"  -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,
 # we need to rewrite the URL in the useHttp.ts file to point to the correct
 # backend service.
 
-# Optionally set the backend URL to use, defaults to https://localhost:3003.
-BACKEND_URL="${BACKEND_URL:-https://localhost:3003}"
-echo "Backend URL is set to ${BACKEND_URL}. Rewriting useHttp.ts."
+# Optionally set the backend public URL to use, defaults to /proxy on frontend host.
+BACKEND_PUBLIC_URL="${BACKEND_PUBLIC_URL:-${FRONTEND_URL}/proxy}"
+ENABLE_HTTPS="${ENABLE_HTTPS:-false}"
+
+echo "Backend URL is set to ${BACKEND_PUBLIC_URL}. Rewriting useHttp.ts."
 find "$NGINX_PUBLIC_HTML" -type f \( -name "useHttp.ts" \) -exec sed -i \
-  -e "s|https://localhost:3003|$BACKEND_URL|g" {} +
+  -e "s|http://localhost:3003|$BACKEND_PUBLIC_URL|g" {} +
+
+# Create main config from template
+sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
+
+# Optionally append HTTPS config
+if [ "$ENABLE_HTTPS" = "true" ]; then
+  sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.https.template >> /etc/nginx/conf.d/default.conf
+fi

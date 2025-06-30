@@ -6,8 +6,14 @@ frontend:
   service:
     type: ClusterIP
     port: 80
-  # -- The frontend URL where the manifest.xml and static js file are served
-  frontendUrl: "https://localhost:3000"
+  # -- The frontend public URL where the manifest.xml and static js file are served
+  frontendUrl: "http://localhost:3000"
+  # -- The public URL to the backend service if directly exposed. By default it is
+  # proxied via the frontend host
+  backendPublicUrl: "http://localhost:3000/proxy"
+  # -- If enabled nginx will also listen on port 443. You will need to volume map a key
+  # and certificate valid for your frontendUrl
+  enableHttps: false
 
 backend:
   image:
@@ -21,11 +27,3 @@ backend:
   jwtSecret: "SECRECT_KEY_PLACEHOLDER"
   # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
-
-  certificate:
-    # -- path to ca certificate file. If not specified, a self signed certificate will be generated for localhost
-    caPath: ""
-    # -- path to private key file. If not specified, a self signed certificate will be generated for localhost
-    keyPath: ""
-    # -- path to certificate file. If not specified, a self signed certificate will be generated for localhost
-    certPath: ""

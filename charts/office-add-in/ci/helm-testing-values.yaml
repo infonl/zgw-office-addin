@@ -1,20 +1,24 @@
 frontend:
   image:
     repository: ghcr.io/infonl/podiumd-office-add-in-frontend
-    tag: v0.0.112
+    tag: v0.0.173@sha256:969855a76bbfc86cf9f1f2bed6264f10a40e7eb68b0f7cfb4ea6eadb577c42bb
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
-    port: 3000
-  # -- The frontend URL where the manifest.xml and static js file are served
-  frontendUrl: "https://localhost:3000"
-  # -- The backend URL that the frontend will connect with
-  backendUrl: "https://localhost:3003"
+    port: 80
+  # -- The frontend public URL where the manifest.xml and static js file are served
+  frontendUrl: "http://localhost:3000"
+  # -- The public URL to the backend service if directly exposed. By default it is
+  # proxied via the frontend host
+  backendPublicUrl: "http://localhost:3000/proxy"
+  # -- If enabled nginx will also listen on port 443. You will need to volume map a key
+  # and certificate valid for your frontendUrl
+  enableHttps: false
 
 backend:
   image:
     repository: ghcr.io/infonl/podiumd-office-add-in-backend
-    tag: v0.0.112
+    tag: v0.0.173@sha256:cd0c7652abc365eac103c4d39e017154e99395532b8fbfac02ad34dbaae79899
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -23,11 +27,3 @@ backend:
   jwtSecret: "SECRECT_KEY_PLACEHOLDER"
   # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
-
-  certificate:
-    # -- path to ca certificate file. If not specified, a self signed certificate will be generated for localhost
-    caPath: ""
-    # -- path to private key file. If not specified, a self signed certificate will be generated for localhost
-    keyPath: ""
-    # -- path to certificate file. If not specified, a self signed certificate will be generated for localhost
-    certPath: ""
