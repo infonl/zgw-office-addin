@@ -30,10 +30,10 @@
       ]
     },
     {
-      "groupName": "podiumd-docker-images",
+      "groupName": "zgw-office-addin-docker-images",
       "matchPackageNames": [
-        "ghcr.io/infonl/podiumd-office-add-in-backend",
-        "ghcr.io/infonl/podiumd-office-add-in-frontend"
+        "ghcr.io/infonl/zgw-office-add-in-backend",
+        "ghcr.io/infonl/zgw-office-add-in-frontend"
       ],
       "matchDatasources": [
         "docker"
