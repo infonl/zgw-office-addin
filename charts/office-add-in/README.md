@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.21](https://img.shields.io/badge/Version-0.0.21-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.22](https://img.shields.io/badge/Version-0.0.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -32,7 +32,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/podiumd-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.0.181@sha256:568dc72edd766ef9d2acfe233cc6bbf472f518fb382c0ead91a7cf723a9c17ca"` |  |
+| backend.image.tag | string | `"v0.0.186@sha256:be07e4e257c90eb769b257d22dd42cac3da2e8e7bc67d6412f82b91bf3218d17"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
