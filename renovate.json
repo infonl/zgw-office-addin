@@ -16,6 +16,11 @@
     "team:dimpact",
     "hsiliev"
   ],
+  "helm-values": {
+    "managerFilePatterns": [
+      "/(^|/)ci/.+values\\.ya?ml$/"
+    ]
+  },
   "prConcurrentLimit": 5,
   "packageRules": [
     {
