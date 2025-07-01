@@ -210,4 +210,15 @@ entries:
     urls:
     - https://github.com/infonl/podiumd-office-plugin/releases/download/podiumd-office-plugin-0.0.2/podiumd-office-plugin-0.0.2.tgz
     version: 0.0.2
-generated: "2025-06-30T13:18:14.922870516Z"
+  zgw-office-addin:
+  - apiVersion: v2
+    appVersion: 0.0.70
+    created: "2025-07-01T15:06:22.065173908Z"
+    description: A Helm chart for deploying the zgw-office-addin (frontend and backend)
+    digest: bdbf2b4a11f06dde5148a08abb45644d5c0f91d1953d0111f0232fc1136ef315
+    name: zgw-office-addin
+    type: application
+    urls:
+    - https://github.com/infonl/zgw-office-addin/releases/download/zgw-office-addin-0.0.21/zgw-office-addin-0.0.21.tgz
+    version: 0.0.21
+generated: "2025-07-01T15:06:22.06521816Z"
