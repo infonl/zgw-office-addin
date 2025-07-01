@@ -81,4 +81,4 @@ services:
         condition: service_started
 
   redis:
-    image: redis:7.4.4@sha256:386e6c443372b9ba651d593baa881c802f3d3f093e2586602e05d6ba47ea733e
+    image: redis:8.0.2@sha256:b43d2dcbbdb1f9e1582e3a0f37e53bf79038522ccffb56a25858969d7a9b6c11
