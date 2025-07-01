@@ -9,8 +9,8 @@
 
 1. Clone the repository
    ```shell
-   git clone https://github.com/infonl/podiumd-office-plugin/
-   cd podiumd-office-plugin
+   git clone https://github.com/infonl/zgw-office-addin/
+   cd zgw-office-addin
    ```
 
 2. Install dependencies

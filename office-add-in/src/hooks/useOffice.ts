@@ -81,7 +81,7 @@ export function useOffice() {
         reject("No data in slice");
       }
 
-      // https://github.com/infonl/podiumd-office-plugin/pull/112#discussion_r2132179467
+      // https://github.com/infonl/zgw-office-addin/pull/112#discussion_r2132179467
       const binaryString = Array.from(data)
         .map((byte) => String.fromCharCode(Number(byte)))
         .join("");

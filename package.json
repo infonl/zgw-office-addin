@@ -1,11 +1,11 @@
 {
   "private": true,
-  "name": "podiumd-office-plugin",
+  "name": "zgw-office-addin",
   "version": "0.0.1",
   "license": "EUPL-1.2+",
   "repository": {
     "type": "git",
-    "url": "https://github.com/infonl/podiumd-office-plugin.git"
+    "url": "https://github.com/infonl/zgw-office-addin.git"
   },
   "workspaces": [
     "office-add-in",

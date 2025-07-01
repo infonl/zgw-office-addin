@@ -1,4 +1,4 @@
-# PodiumD Office Plugin
+# ZGW Office Addin
 
 Microsoft Office add-in for integration with Dimpact's PodiumD.
 

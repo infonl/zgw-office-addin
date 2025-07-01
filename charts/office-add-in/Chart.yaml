@@ -1,6 +1,6 @@
 apiVersion: v2
-name: podiumd-office-plugin
-description: A Helm chart for deploying the podiumd-office-plugin (frontend and backend)
+name: zgw-office-addin
+description: A Helm chart for deploying the zgw-office-addin (frontend and backend)
 type: application
 version: 0.0.20
 appVersion: 0.0.70
