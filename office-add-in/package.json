@@ -47,7 +47,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@tanstack/eslint-plugin-query": "5.81.2",
     "@types/node": "22.16.0",
-    "@types/office-js": "1.0.514",
+    "@types/office-js": "1.0.515",
     "@types/office-runtime": "1.0.35",
     "@types/react": "18.3.23",
     "@types/react-dom": "18.3.7",
