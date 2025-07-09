@@ -14,8 +14,16 @@ import { ZaakService } from "../service/ZaakService";
 import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
+import fs from "fs";
 
-const fastify = Fastify({});
+const fastify = Fastify({
+  https: {
+    key: fs.readFileSync(path.join(__dirname, process.env.KEY_PATH!)),
+    cert: fs.readFileSync(path.join(__dirname, process.env.CERT_PATH!)),
+    ca: fs.readFileSync(path.join(__dirname, process.env.CA_CERT_PATH!)),
+  },
+});
+
 
 const allowedOrigins = process.env.FRONTEND_URL
   ? [process.env.FRONTEND_URL]
@@ -29,7 +37,7 @@ fastify.addHook("onRequest", (request, reply, done) => {
       "Access-Control-Allow-Methods",
       "GET, POST, PUT, DELETE, OPTIONS",
     );
-    reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, auteur");
     reply.header("Access-Control-Allow-Credentials", "true");
   }
 
