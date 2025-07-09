@@ -1,4 +1,7 @@
-# C4 Context Diagram
+
+# Architectuur
+
+## C4 Context Diagram
 
 The context diagram shows the system under consideration as a single block, together with all external systems that interact with it. The diagram provides a high-level view of the system and its environment, and is typically used to communicate the system's boundaries and scope.
 
@@ -10,15 +13,15 @@ C4Context
         System_Boundary(word, "Microsoft Word") {
             System(WordApp, "Microsoft Word Application")
             System(WordWebApp, "Microsoft Word Web Application")
-            System(WordAddIn, "PodiumD Office Add-In")
+            System(WordAddIn, "ZGW Office Add-In")
         }
     }
 
-    Enterprise_Boundary(b0, "PodiumD") {
-        System(OfficeProxy, "PodiumD Office Nginx")
-        System(OfficeService, "PodiumD Office Backend")
-        System(Objecten, "Objecten")
-        System(OpenZaak, "Open Zaak")
+    Enterprise_Boundary(b0, "Applications Platform") {
+        System(OfficeProxy, "ZGW Office Frontend Proxy")
+        System(OfficeService, "ZGW Office Backend Service")
+        System(Objecten, "Objecten API")
+        System(OpenZaak, "ZGW API")
     }
 
     Rel(Employee, WordApp, "<use>")
@@ -34,6 +37,5 @@ C4Context
     UpdateElementStyle(OfficeProxy, $bgColor="red", $borderColor="red")
     UpdateElementStyle(OfficeService, $bgColor="red", $borderColor="red")
 
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
-
