@@ -10,8 +10,7 @@ APIs mogelijk maakt.
 
 ## Uitgangssituatie
 De uitgangssituatie waar deze handleiding op is gebaseerd, is dat de systeembeheerder werkt met Microsoft 365 Office 
-voor een gemeente die de ZGW Office Add-In heeft geïnstalleerd op een omgeving die toegankelijk is voor de medewerkers 
-van de gemeente.
+voor een gemeente die de ZGW Office Add-In heeft geïnstalleerd.
 
 Om deze uitgangssituatie te bereiken, is het noodzakelijk dat de ZGW Office Add-In componenten geïnstalleerd en 
 geconfigureerd zijn op het Applications Platform van de gemeente. Zie voor meer informatie de 

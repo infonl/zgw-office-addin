@@ -19,7 +19,7 @@ van de add-in is in beide versies gelijk, maar de interface kan iets verschillen
 ### Open Add-in
 De ZGW Office Add-In kan worden geopend vanuit de Microsoft Word applicatie. Dit kan gedaan worden door in de werkbalk
 de optie "Dimpact Office" te selecteren. Houd er rekening mee dat de naam en de locatie van de add-in kan verschillen, 
-afhankelijk van de configuratie bij uw de gemeente.
+afhankelijk van de configuratie bij uw gemeente.
 
 De add-in opent in een zijpaneel aan de rechterkant van het scherm, dat ziet er zo uit:
 ![ZGW Office Add-In](./images/open-add-in.png)
@@ -42,7 +42,7 @@ probeer het opnieuw.
 ![ZGW Office Add-In Gevonden Zaak](./images/zaak-niet-gevonden.png)
 
 ### Documentgegevens invullen
-Wanneer een zaak is gevonden, zullen de documentgegevens in gevuld moeten worden om dit document correct aan de zaak te 
+Wanneer een zaak is gevonden, zullen de documentgegevens ingevuld moeten worden om dit document correct aan de zaak te 
 kunnen koppelen.
 
 ![ZGW Office Add-In Documentgegevens](./images/documentgegevens-leeg.png)

@@ -13,7 +13,7 @@ De ZGW Office Add-In bestaat uit de volgende componenten:
 Zie voor meer informatie de [C4 Context Diagram](https://c4model.com/diagrams/system-context) documentatie.
 
 ## Voorbereiding
-Voordat u begint met de installatie, zorg ervoor dat u de volgende stappen hebt voltooid:
+Voordat je begint met de installatie, zorg ervoor dat de je volgende stappen hebt voltooid:
 
 Zorg dat een URL beschikbaar is waar de ZGW Office Add-In kan worden gehost, deze locatie is nodig voor de 
 configuratie.
