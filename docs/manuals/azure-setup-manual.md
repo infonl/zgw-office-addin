@@ -22,7 +22,7 @@ om een add-in te kunnen registreren en de lijst te zien van registreerde add-in'
 5. Klik op Registreren en er verschijnt een bericht dat de applicatie registratie geslaagd is
 6. Kopieer de waardes van Toepassings-id (client-id) en Map-id (tenant-id). Deze worden in latere procedures gebruikt
 
-### Clientgeheim toevoegen (Client Secret)
+### Clientgeheim toevoegen
 
 Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks die je app kan gebruiken in plaats van een certificaat om zichzelf te identificeren.
 
@@ -56,7 +56,7 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 
 4. Stel de **Status** in op **Ingeschakeld** en selecteer **Bereik toevoegen**.
 
-> 💡 De domeinnaam in de Scope-naam (onder het tekstveld) moet automatisch overeenkomen met de eerder ingestelde **Application ID URI**, met `/access_as_user` eraan toegevoegd.  
+>  De domeinnaam in de Scope-naam (onder het tekstveld) moet automatisch overeenkomen met de eerder ingestelde **Application ID URI**, met `/access_as_user` eraan toegevoegd.  
 > Bijvoorbeeld:  
 > `api://c6c1f32b-5e55-4997-881a-753cc1d563b7/access_as_user`
 
@@ -76,6 +76,24 @@ api://<app-id>/access_as_user
 5. Selecteer **Toepassing toevoegen** (*Add application*).
 
 De toegevoegde clienttoepassing verschijnt nu in het overzicht van geautoriseerde toepassingen.
+
+### Microsoft Machtigingen
+**Let op!** De enige machtiging die de add-in nodig heeft is **User.Read**. Deze staat al standaard in de lijst van machtigingen.
+Er hoeft dus geen extra machtiging toegevoegd te worden
+
+### Stel de versie van het toegangstoken in
+
+1. Selecteer in het linkermenu **Manifest**.
+
+2. Zoek in het JSON-bestand naar de eigenschap `requestedAccessTokenVersion` (deze bevindt zich binnen het `api`-object) en stel deze in op de waarde `2`.
+
+3. Sla het bestand op
+
+De app registratie voor de add-in is compleet!
+
+
+
+
 
 
 
