@@ -27,14 +27,15 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 
 1. Selecteer in het linkerpaneel **Certificaten en geheimen**.
 2. Ga naar het tabblad **Clientgeheimen** en selecteer **Nieuw clientgeheim**.
-![Certificaten en geheimen](./images/azure-registratie/certificaten-en-geheimen.png)
 3. Voeg een nieuw clientgeheim in
 
 4. Voer het volgende in:
    - **Beschrijving**: geef een duidelijke naam voor je geheim.
    - **Vervaldatum**: kies de aanbevolen vervaldatum van 6 maanden
 
-5. Selecteer **Toevoegen**.
+5. Selecteer **Toevoegen**. Er is een nieuw geheim aangemaakt
+![Certificaten en geheimen](./images/azure-registratie/certificaten-en-geheimen.png)
+
 
 > Het nieuwe geheim wordt nu aangemaakt en de **waarde wordt tijdelijk weergegeven**.  
 > 💡 **Kopieer deze waarde direct**, want je kunt deze later niet meer bekijken.
