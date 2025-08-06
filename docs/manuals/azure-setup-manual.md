@@ -13,14 +13,13 @@ om een add-in te kunnen registreren en de lijst te zien van registreerde add-in'
 
 ### De app registreren
 1. Selecteer **App registraties**. Je kunt hier naar navigeren door in de zoekbalk op "App-registraties" te zoeken
-2. Klik op nieuwe registratie
-3. De registreer een applicatie pagina verschijnt
-4. Selecteer en voer het volgende in
-   - Naam: zgw-office-add-in
-   - Ondersteunde accounttypes: Accounts in elke organisatiemap (elke Microsoft Entra ID-tenant: meerdere tenants)
-   - Omleidings-URI mag leeg blijven
-5. Klik op Registreren en er verschijnt een bericht dat de applicatie registratie geslaagd is
-6. Kopieer de waardes van Toepassings-id (client-id) en Map-id (tenant-id). Deze worden in latere procedures gebruikt
+![App-registratie](./images/azure-registratie/app-registratie.png)
+3. Klik op nieuwe registratie
+4. De registreer een applicatie pagina verschijnt
+5. Selecteer en voer het volgende in
+![toepassing-registreren](./images/azure-registratie/toepassing-registreren.png)
+6. Klik op Registreren en er verschijnt een bericht dat de applicatie registratie geslaagd is
+7. Kopieer de waardes van Toepassings-id (client-id) en Map-id (tenant-id). Deze worden in latere procedures gebruikt
 
 ### Clientgeheim toevoegen
 
@@ -28,9 +27,7 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 
 1. Selecteer in het linkerpaneel **Certificaten en geheimen**.
 2. Ga naar het tabblad **Clientgeheimen** en selecteer **Nieuw clientgeheim**.
-
-> Je ziet nu het venster **Certificaten en geheimen**.
-
+![Certificaten en geheimen](./images/azure-registratie/certificaten-en-geheimen.png)
 3. Voeg een nieuw clientgeheim in
 
 4. Voer het volgende in:
@@ -69,11 +66,13 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 3. Er moeten 2 Client-id's aangemaakt worden met de volgende Client-id's
    - 93d53678-613d-4013-afc1-62e9e444a0a5
    - d3590ed6-52b3-4102-aeff-aad2292ab01c
+  
+![Client-id toevoegen](./images/azure-registratie/toevoeg-clienttoepassing.png)
 
 4. Selecteer onder **Geautoriseerde scopes** (*Authorized scopes*) het vakje bij:
 api://<app-id>/access_as_user
 
-5. Selecteer **Toepassing toevoegen** (*Add application*).
+5. Selecteer **Toepassing toevoegen**.
 
 De toegevoegde clienttoepassing verschijnt nu in het overzicht van geautoriseerde toepassingen.
 
@@ -86,6 +85,8 @@ Er hoeft dus geen extra machtiging toegevoegd te worden
 1. Selecteer in het linkermenu **Manifest**.
 
 2. Zoek in het JSON-bestand naar de eigenschap `requestedAccessTokenVersion` (deze bevindt zich binnen het `api`-object) en stel deze in op de waarde `2`.
+
+![Azure Manifest File](./images/azure-registratie/manifest.png)
 
 3. Sla het bestand op
 
