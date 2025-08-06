@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.26](https://img.shields.io/badge/Version-0.0.26-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.27](https://img.shields.io/badge/Version-0.0.27-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -32,7 +32,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.0.242@sha256:87c32547feef24ad3b9741c2cb4c9a9a227319d2bb989b1835a02bb3aaf3d47a"` |  |
+| backend.image.tag | string | `"v0.0.258@sha256:6ec324f958230ff05b63f2562c81d362e923095c14297ca519666cd5e755ff56"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
@@ -41,7 +41,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.0.242@sha256:84e86288135e0f6303a8a814eefb435c237594b74f586004408b488baac1c927"` |  |
+| frontend.image.tag | string | `"v0.0.258@sha256:c3e7eb6b5599fb14810db78a9eb35701cab6bac4d160c4892b7341270cfb63ae"` |  |
 | frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 
