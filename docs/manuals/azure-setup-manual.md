@@ -14,19 +14,26 @@ om een add-in te kunnen registreren en de lijst te zien van registreerde add-in'
 ### De app registreren
 1. Selecteer **App registraties**. Je kunt hier naar navigeren door in de zoekbalk op "App-registraties" te zoeken
 ![App-registratie](./images/azure-registratie/app-registratie.png)
-3. Klik op nieuwe registratie
-4. De registreer een applicatie pagina verschijnt
+
+2. Klik op nieuwe registratie
+
+3. De registreer een applicatie pagina verschijnt
+
 5. Selecteer en voer het volgende in
 ![toepassing-registreren](./images/azure-registratie/toepassing-registreren.png)
-6. Klik op Registreren en er verschijnt een bericht dat de applicatie registratie geslaagd is
-7. Kopieer de waardes van Toepassings-id (client-id) en Map-id (tenant-id). Deze worden in latere procedures gebruikt
+
+4. Klik op Registreren en er verschijnt een bericht dat de applicatie registratie geslaagd is
+
+5. Kopieer de waardes van Toepassings-id (client-id) en Map-id (tenant-id). Deze worden in latere procedures gebruikt
 
 ### Clientgeheim toevoegen
 
 Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks die je app kan gebruiken in plaats van een certificaat om zichzelf te identificeren.
 
 1. Selecteer in het linkerpaneel **Certificaten en geheimen**.
+
 2. Ga naar het tabblad **Clientgeheimen** en selecteer **Nieuw clientgeheim**.
+
 3. Voeg een nieuw clientgeheim in
 
 4. Voer het volgende in:
@@ -43,13 +50,17 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 ### Een web-API beschikbaar maken
 
 1. Selecteer in het linkerpaneel **Een API beschikbaar maken** (*Expose an API*).
+
 2. Het venster **Een API beschikbaar maken** verschijnt.
+
 3. Selecteer bovenaan de pagina **Toevoegen** om een toepassings-ID URI te genereren.
 
 ### Een bereik toevoegen
 
 1. Ga op de pagina **Een API beschikbaar maken** naar **Een bereik toevoegen**.
+
 2. Het venster **Toevoeg een bereik** opent zich.
+
 3. Voer het bereik als volgende in
 
 4. Stel de **Status** in op **Ingeschakeld** en selecteer **Bereik toevoegen**.
@@ -67,10 +78,8 @@ Soms een **toepassingswachtwoord** genoemd, is een *clientgeheim* een tekenreeks
 3. Er moeten 2 Client-id's aangemaakt worden met de volgende Client-id's
    - 93d53678-613d-4013-afc1-62e9e444a0a5
    - d3590ed6-52b3-4102-aeff-aad2292ab01c
-  
-![Client-id toevoegen](./images/azure-registratie/toevoeg-clienttoepassing.png)
 
-4. Selecteer onder **Geautoriseerde scopes** (*Authorized scopes*) het vakje bij:
+4. Selecteer onder **Geautoriseerde bereiken** het vakje bij:
 api://<app-id>/access_as_user
 
 5. Selecteer **Toepassing toevoegen**.
