@@ -17,6 +17,20 @@
     "validate": {
       "cache": false
     },
+    "validate:docker": {
+      "cache": false
+    },
+    "security:docker": {
+      "cache": false
+    },
+    "docker:build": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "docker:build:sbom": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "prettier": {
       "cache": false
     },
