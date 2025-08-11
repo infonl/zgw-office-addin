@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/* global Word console */
-
 export async function insertText(text: string) {
   // Write text to the document.
   try {
