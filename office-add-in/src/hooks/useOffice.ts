@@ -40,16 +40,17 @@ export function useOffice() {
   const getDocumentData = useCallback(async () => {
     DEBUG("Getting document data");
     let file: Office.File | undefined;
-    return new Promise(async (resolve, reject) => {
-      Office.context.document.getFileAsync(Office.FileType.Compressed, async (result) => {
+    return new Promise((resolve, reject) => {
+      Office.context.document.getFileAsync(Office.FileType.Compressed, (result) => {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           WARN("Unable to process file", result);
           reject("Unable to process file");
         }
 
         file = result.value;
-        const slice = await getSlice({ file: result.value, currentSlice: 0 });
-        resolve(slice);
+        getSlice({ file: result.value, currentSlice: 0 })
+          .then((slice) => resolve(slice))
+          .catch((error) => reject(error));
       });
     }).finally(() => {
       closeFile(file);
@@ -59,36 +60,42 @@ export function useOffice() {
   const getSlice = async (state: State) => {
     DEBUG("Getting slice", state);
     return new Promise((resolve, reject) => {
-      state.file.getSliceAsync(state.currentSlice, async (result) => {
+      state.file.getSliceAsync(state.currentSlice, (result) => {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           WARN("Unable to get slice", result);
           reject("Unable to get slice");
         }
 
-        const encoded = await encodeSlice(result.value, state);
-        resolve(encoded);
+        encodeSlice(result.value, state)
+          .then((encoded) => resolve(encoded))
+          .catch((error) => reject(error));
       });
     });
   };
 
   const encodeSlice = async (slice: Office.Slice, state: State) => {
     DEBUG("Encoding slice", slice, state);
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       var data = slice.data;
 
       if (!data) {
         WARN("No data in slice:", slice.index);
         reject("No data in slice");
+        return;
       }
 
-      // https://github.com/infonl/zgw-office-addin/pull/112#discussion_r2132179467
-      const binaryString = Array.from(data)
-        .map((byte) => String.fromCharCode(Number(byte)))
-        .join("");
-      const encoded = btoa(binaryString);
-      DEBUG("Encoded data");
+      try {
+        // https://github.com/infonl/zgw-office-addin/pull/112#discussion_r2132179467
+        const binaryString = Array.from(data)
+          .map((byte) => String.fromCharCode(Number(byte)))
+          .join("");
+        const encoded = btoa(binaryString);
+        DEBUG("Encoded data");
 
-      resolve(encoded);
+        resolve(encoded);
+      } catch (error) {
+        reject(error);
+      }
 
       // TODO: handle bigger files
       // const currentSlice = state.currentSlice + 1;
