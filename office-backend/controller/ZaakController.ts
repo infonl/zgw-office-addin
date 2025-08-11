@@ -11,10 +11,7 @@ import { ExceptionHandler } from "../exception/ExceptionHandler";
 export class ZaakController {
   constructor(private readonly zaakService: ZaakService) {}
 
-  public async getZaak(
-    request: FastifyRequest<{ Params: ZaakParam }>,
-    reply: FastifyReply,
-  ) {
+  public async getZaak(request: FastifyRequest<{ Params: ZaakParam }>, reply: FastifyReply) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
       const response = await this.zaakService.getZaak(zaakIdentificatie);
@@ -33,10 +30,7 @@ export class ZaakController {
   ) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      const data = await this.zaakService.addDocumentToZaak(
-        zaakIdentificatie,
-        request.body,
-      );
+      const data = await this.zaakService.addDocumentToZaak(zaakIdentificatie, request.body);
       reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
