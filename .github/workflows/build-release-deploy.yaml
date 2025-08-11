@@ -31,6 +31,9 @@ jobs:
     - name: Install dependencies
       run: npm install
     
+    - name: Run code validation
+      run: npm run check
+    
     - name: Build project
       run: npm run build
 
@@ -152,6 +155,9 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-frontend:latest
           ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+        attestations: |
+          type=provenance,mode=max
+          type=sbom
 
     - name: Build (and Push) Backend Docker image
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -162,6 +168,9 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-backend:latest
           ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
+        attestations: |
+          type=provenance,mode=max
+          type=sbom
 
   trigger-provision:
     needs: [next-version, create-docker-image]

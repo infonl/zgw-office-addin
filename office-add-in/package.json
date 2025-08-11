@@ -29,6 +29,11 @@
     "start": "office-addin-debugging start manifest.xml",
     "stop": "office-addin-debugging stop manifest.xml",
     "validate": "office-addin-manifest validate manifest.xml",
+    "validate:docker": "docker buildx build --check .",
+    "security:docker": "docker scout cves || echo 'Docker Scout not available or no image built'",
+    "docker:build": "docker buildx build -f Dockerfile -t zgw-office-add-in-frontend:dev ..",
+    "docker:build:sbom": "docker buildx create --use --name sbom-builder --driver docker-container 2>/dev/null || docker buildx use sbom-builder && docker buildx build -f Dockerfile --sbom=true --metadata-file docker-metadata.json -t zgw-office-add-in-frontend:sbom ..",
+    "docker:cleanup": "docker buildx rm sbom-builder 2>/dev/null || true",
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
