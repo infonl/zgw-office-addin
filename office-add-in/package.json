@@ -18,7 +18,12 @@
     "dev-server": "webpack serve --mode development",
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",
-    "prettier": "office-addin-lint prettier",
+    "prettier": "npm run prettier:ts && npm run prettier:xml",
+    "prettier:fix": "npm run prettier:ts:fix && npm run prettier:xml:fix",
+    "prettier:ts": "prettier --check 'src/**/*.{ts,tsx,js,jsx}'",
+    "prettier:ts:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx}'",
+    "prettier:xml": "prettier --check *.xml",
+    "prettier:xml:fix": "prettier --write *.xml",
     "signin": "office-addin-dev-settings m365-account login",
     "signout": "office-addin-dev-settings m365-account logout",
     "start": "office-addin-debugging start manifest.xml",
@@ -45,6 +50,7 @@
     "@babel/core": "7.28.3",
     "@babel/preset-env": "7.28.3",
     "@babel/preset-typescript": "7.27.1",
+    "@prettier/plugin-xml": "^3.4.2",
     "@tanstack/eslint-plugin-query": "5.83.1",
     "@types/node": "22.17.2",
     "@types/office-js": "1.0.525",
@@ -77,7 +83,6 @@
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.2"
   },
-  "prettier": "office-addin-prettier-config",
   "browserslist": [
     "last 2 versions",
     "ie 11"
