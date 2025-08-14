@@ -19,6 +19,7 @@ export function useOffice() {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           WARN("Unable to get file properties", result);
           reject(new Error("Unable to get file properties"));
+          return;
         }
 
         resolve(result.value.url.split("/").at(-1) ?? "");
@@ -45,6 +46,7 @@ export function useOffice() {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           WARN("Unable to process file", result);
           reject("Unable to process file");
+          return;
         }
 
         file = result.value;
@@ -64,6 +66,7 @@ export function useOffice() {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
           WARN("Unable to get slice", result);
           reject("Unable to get slice");
+          return;
         }
 
         encodeSlice(result.value, state)
