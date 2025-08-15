@@ -13,11 +13,7 @@ export class HttpService {
     return this.request<T>("POST", url, { body, headers });
   }
 
-  public async GET<T>(
-    url: string,
-    params?: Record<string, string>,
-    headers: HeadersInit = {},
-  ) {
+  public async GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
     return this.request<T>("GET", url, { headers, params });
   }
 
@@ -30,9 +26,7 @@ export class HttpService {
       params?: Record<string, string>;
     } = { headers: {} },
   ): Promise<T> {
-    const fullUrl = /^https?:\/\//i.test(url)
-      ? url
-      : new URL(url, this.baseUrl);
+    const fullUrl = /^https?:\/\//i.test(url) ? url : new URL(url, this.baseUrl);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }

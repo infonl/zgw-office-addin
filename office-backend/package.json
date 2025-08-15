@@ -5,7 +5,17 @@
   "scripts": {
     "start": "ts-node src/app.ts",
     "dev": "ts-node-dev --respawn ./src/app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "validate": "tsc --noEmit",
+    "validate:docker": "docker buildx build --check .",
+    "security:docker": "docker scout cves || echo 'Docker Scout not available or no image built'",
+    "docker:build": "docker buildx build -f Dockerfile -t zgw-office-add-in-backend:dev ..",
+    "docker:build:sbom": "docker buildx create --use --name sbom-builder --driver docker-container 2>/dev/null || docker buildx use sbom-builder && docker buildx build -f Dockerfile --sbom=true --metadata-file docker-metadata.json -t zgw-office-add-in-backend:sbom ..",
+    "docker:cleanup": "docker buildx rm sbom-builder 2>/dev/null || true",
+    "prettier": "prettier --check \"**/*.{ts,js}\"",
+    "prettier:fix": "prettier --write \"**/*.{ts,js}\""
   },
   "keywords": [],
   "author": "",
@@ -26,6 +36,9 @@
     "@types/send": "0.17.5",
     "@types/serve-static": "1.15.8",
     "@types/wrap-ansi": "8.1.0",
+    "eslint": "9.33.0",
+    "neostandard": "0.12.2",
+    "prettier": "3.6.2",
     "ts-node": "10.9.2",
     "ts-node-dev": "2.0.0",
     "typescript": "5.9.2"
