@@ -79,7 +79,7 @@ export function useOffice() {
   const encodeSlice = async (slice: Office.Slice, state: State) => {
     DEBUG("Encoding slice", slice, state);
     return new Promise((resolve, reject) => {
-      var data = slice.data;
+      const data = slice.data;
 
       if (!data) {
         WARN("No data in slice:", slice.index);
