@@ -155,7 +155,7 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-frontend:latest
           ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
-        attestations: |
+        attests: |
           type=provenance,mode=max
           type=sbom
 
@@ -168,7 +168,7 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-backend:latest
           ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
-        attestations: |
+        attests: |
           type=provenance,mode=max
           type=sbom
 
