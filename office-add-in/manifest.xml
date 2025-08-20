@@ -10,8 +10,8 @@
   <Version>1.0.0</Version>
   <ProviderName>INFO.nl</ProviderName>
   <DefaultLocale>nl-NL</DefaultLocale>
-  <DisplayName DefaultValue="Dimpact Office Add-In" />
-  <Description DefaultValue="Dimpact Office integratie add-in." />
+  <DisplayName DefaultValue="ZGW Office Add-In" />
+  <Description DefaultValue="ZGW Office integratie add-in." />
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
   <SupportUrl DefaultValue="https://www.info.nl/" />
@@ -82,8 +82,8 @@
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Get started with the ZGW Office Add-in!" />
-        <bt:String id="CommandsGroup.Label" DefaultValue="Commands Group" />
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Dimpact Office" />
+        <bt:String id="CommandsGroup.Label" DefaultValue="" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="ZGW Office" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String
