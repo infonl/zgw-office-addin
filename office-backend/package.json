@@ -11,9 +11,7 @@
     "validate": "tsc --noEmit",
     "validate:docker": "docker buildx build --check .",
     "security:docker": "docker scout cves || echo 'Docker Scout not available or no image built'",
-    "docker:build": "docker buildx build -f Dockerfile -t zgw-office-add-in-backend:dev ..",
-    "docker:build:sbom": "docker buildx create --use --name sbom-builder --driver docker-container 2>/dev/null || docker buildx use sbom-builder && docker buildx build -f Dockerfile --sbom=true --metadata-file docker-metadata.json -t zgw-office-add-in-backend:sbom ..",
-    "docker:cleanup": "docker buildx rm sbom-builder 2>/dev/null || true",
+    "docker:build": "docker buildx build -f Dockerfile --load -t ghcr.io/infonl/zgw-office-add-in-backend:dev ..",
     "prettier": "prettier --check \"**/*.{ts,js}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,js}\""
   },
