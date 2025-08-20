@@ -23,14 +23,15 @@ NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
 # that this file is available on.
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
-FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
-FRONTEND_API=$(echo "$FRONTEND_URL" | sed 's/https/api/')
+FRONTEND_URL="${FRONTEND_URL:-https://localhost:3443}"
+FRONTEND_API=$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')
 MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 
 echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
+sed -i -e "s|https\?://localhost:3000|$FRONTEND_URL|g" -e "s|https\?://www.contoso.com|$FRONTEND_URL|g"
 
-# To test this command on a Mac, you will have to replace `sed -i` with `sed -i ''`.
-sed -i -e "s|https\?://localhost:3000|$FRONTEND_URL|g" -e "s|https\?://www.contoso.com|$FRONTEND_URL|g" -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+echo "Frontend API is set to ${FRONTEND_API}. Rewriting '$MANIFEST_FILE'."
+sed -i -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,
@@ -46,9 +47,9 @@ find "$NGINX_PUBLIC_HTML" -type f -exec sed -i \
   -e "s|https\?://localhost:3003|$BACKEND_PUBLIC_URL|g" {} +
 
 # Create main config from template
-sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
+sed "s|__BACKEND_URL__|$BACKEND_PUBLIC_URL|g" /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf
 
 # Optionally append HTTPS config
 if [ "$ENABLE_HTTPS" = "true" ]; then
-  sed "s|__BACKEND_URL__|$BACKEND_URL|g" /etc/nginx/nginx.https.template >> /etc/nginx/conf.d/default.conf
+  sed "s|__BACKEND_URL__|$BACKEND_PUBLIC_URL|g" /etc/nginx/nginx.https.template >> /etc/nginx/conf.d/default.conf
 fi

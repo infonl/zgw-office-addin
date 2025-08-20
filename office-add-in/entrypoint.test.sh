@@ -12,7 +12,7 @@
 # Define paths
 SRC_DIR="./src"
 MANIFEST_FILE="./manifest.xml"
-TEST_DIR="./test"
+TEST_DIR="./build/test"
 TEST_SRC="$TEST_DIR/src"
 TEST_MANIFEST="$TEST_DIR/manifest.xml"
 
@@ -21,7 +21,7 @@ rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
 # Copy source directory and manifest file
-cp -r "$SRC_DIR" "$TEST_SRC"
+#cp -r "$SRC_DIR" "$TEST_SRC"
 cp "$MANIFEST_FILE" "$TEST_MANIFEST"
 
 touch "$TEST_DIR/sed.log"
@@ -42,7 +42,7 @@ export -f sed 2>/dev/null  # export for subshells (bash), ignore error in sh
 
 # Set test environment variables
 export FRONTEND_URL="https://testfrontend.com"
-export BACKEND_URL="https://testbackend.com"
+export BACKEND_PUBLIC_URL="https://testfrontend.com/proxy"
 export NGINX_PUBLIC_HTML="$TEST_DIR"
 
 # Run the actual script
