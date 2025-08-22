@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
 
 jobs:
   build:
@@ -27,10 +28,62 @@ jobs:
       uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
       with:
         node-version-file: '.nvmrc'
-    
+
     - name: Install dependencies
       run: npm install
-    
+
+    - name: Run code validation
+      id: validation
+      run: |
+        set +e  # Don't fail immediately on error
+        npm run check > validation_output.txt 2>&1
+        validation_exit_code=$?
+        echo "exit_code=$validation_exit_code" >> $GITHUB_OUTPUT
+        
+        # Always show the output
+        cat validation_output.txt
+        
+        # Exit with the original exit code
+        exit $validation_exit_code
+
+    - name: Output validation results
+      if: failure() && github.event_name == 'pull_request'
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          let validationOutput = '';
+          try {
+            validationOutput = fs.readFileSync('validation_output.txt', 'utf8');
+          } catch (error) {
+            validationOutput = 'Could not read validation output';
+          }
+          
+          const exitCode = '${{ steps.validation.outputs.exit_code }}';
+          const status = exitCode === '0' ? 'Passed ✅' : 'Failed ❌';
+          const emoji = exitCode === '0' ? '🎉' : '⚠️';
+          
+          const comment = `${emoji} **Build Validation ${status}**
+          
+          <details>
+          <summary>📋 Validation Output</summary>
+          
+          \`\`\`
+          ${validationOutput.slice(0, 4000)}${validationOutput.length > 4000 ? '\n... (output truncated)' : ''}
+          \`\`\`
+          
+          </details>
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
     - name: Build project
       run: npm run build
 
@@ -105,7 +158,7 @@ jobs:
       uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: office-addin-artifacts
-        path: release-${{ needs.next-version.outputs.version }}/ 
+        path: release-${{ needs.next-version.outputs.version }}/
 
     - name: Create zip
       run: |
@@ -127,7 +180,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      
+
     - name: Download office-addin-artifacts for docker build
       uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
@@ -152,6 +205,9 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-frontend:latest
           ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+        attests: |
+          type=provenance,mode=max
+          type=sbom
 
     - name: Build (and Push) Backend Docker image
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -162,6 +218,9 @@ jobs:
         tags: |
           ghcr.io/infonl/zgw-office-add-in-backend:latest
           ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
+        attests: |
+          type=provenance,mode=max
+          type=sbom
 
   trigger-provision:
     needs: [next-version, create-docker-image]

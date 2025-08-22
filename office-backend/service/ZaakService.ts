@@ -15,9 +15,7 @@ export class ZaakService {
   public async getZaak(zaakIdentificatie: string) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
-    const zaaktype = await this.httpService.GET<GeneratedType<"ZaakType">>(
-      zaak.zaaktype,
-    );
+    const zaaktype = await this.httpService.GET<GeneratedType<"ZaakType">>(zaak.zaaktype);
 
     const status = zaak.status
       ? await this.httpService.GET<GeneratedType<"Status">>(zaak.status)
@@ -37,16 +35,11 @@ export class ZaakService {
     };
   }
 
-  public async addDocumentToZaak(
-    zaakIdentificatie: string,
-    body: Record<string, unknown> = {},
-  ) {
+  public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
-    
+
     LoggerService.debug("creating document", zaakIdentificatie);
-    const informatieobject = await this.httpService.POST<
-      GeneratedType<"ZaakInformatieObject">
-    >(
+    const informatieobject = await this.httpService.POST<GeneratedType<"ZaakInformatieObject">>(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
       JSON.stringify({
         ...body,
@@ -54,22 +47,14 @@ export class ZaakService {
         formaat: this.getFileFormat(String(body.titel)),
         taal: "dut",
         bestandsnaam: body.titel,
-        creatiedatum: new Date(String(body.creatiedatum))
-          .toISOString()
-          .split("T")
-          .at(0),
+        creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").at(0),
       }),
     );
-    LoggerService.debug(
-      `adding gebruiksrechten to document ${informatieobject.url}`
-    );
+    LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
     this.createGebruiksrechten(informatieobject.url!, new Date(String(body.creatiedatum)));
 
-    LoggerService.debug(
-      `adding document to zaak ${zaak.url}`,
-      informatieobject,
-    );
+    LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
     await this.httpService.POST(
       "/zaken/api/v1/zaakinformatieobjecten",
       JSON.stringify({
@@ -94,9 +79,10 @@ export class ZaakService {
   }
 
   private async getZaakFromOpenZaak(zaakIdentificatie: string) {
-    const zaken = await this.httpService.GET<
-      GeneratedType<"PaginatedZaakList">
-    >("/zaken/api/v1/zaken", { identificatie: zaakIdentificatie });
+    const zaken = await this.httpService.GET<GeneratedType<"PaginatedZaakList">>(
+      "/zaken/api/v1/zaken",
+      { identificatie: zaakIdentificatie },
+    );
 
     const zaak = zaken.results.at(0);
 
@@ -112,9 +98,9 @@ export class ZaakService {
       "documenten/api/v1/gebruiksrechten",
       JSON.stringify({
         informatieobject: url,
-        startdatum: startdatum,
-        omschrijvingVoorwaarden: "geen"
-      })
+        startdatum,
+        omschrijvingVoorwaarden: "geen",
+      }),
     );
   }
 }
