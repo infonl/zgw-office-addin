@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@fluentui/react-components": "9.68.2",
-    "@fluentui/react-icons": "2.0.307",
+    "@fluentui/react-icons": "2.0.308",
     "@hookform/resolvers": "5.2.1",
     "@tanstack/react-query": "5.84.2",
     "core-js": "3.45.0",
