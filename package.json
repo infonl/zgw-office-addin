@@ -19,7 +19,7 @@
     "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts"
   },
   "devDependencies": {
-    "turbo": "2.5.5"
+    "turbo": "2.5.6"
   },
   "engines": {
     "node": ">=22.0.0"
