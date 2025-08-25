@@ -23,12 +23,12 @@ NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
 # that this file is available on.
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
-FRONTEND_URL="${FRONTEND_URL:-https://localhost:3443}"
+FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
 FRONTEND_API=$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')
 MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
 
 echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
-sed -i -e "s|https\?://localhost:3000|$FRONTEND_URL|g" -e "s|https\?://www.contoso.com|$FRONTEND_URL|g"
+sed -i -e "s|https\?://localhost:3000|$FRONTEND_URL|g" -e "s|https\?://www.contoso.com|$FRONTEND_URL|g" "$MANIFEST_FILE"
 
 echo "Frontend API is set to ${FRONTEND_API}. Rewriting '$MANIFEST_FILE'."
 sed -i -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
