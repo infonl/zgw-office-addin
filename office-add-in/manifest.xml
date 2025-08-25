@@ -82,7 +82,7 @@
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Get started with the ZGW Office Add-in!" />
-        <bt:String id="CommandsGroup.Label" DefaultValue="" />
+        <bt:String id="CommandsGroup.Label" DefaultValue="Start here" />
         <bt:String id="TaskpaneButton.Label" DefaultValue="ZGW Office" />
       </bt:ShortStrings>
       <bt:LongStrings>
