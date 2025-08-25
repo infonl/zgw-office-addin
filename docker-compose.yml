@@ -1,22 +1,18 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
-version: "3.8"
 services:
   frontend:
-    build:
-      context: ./office-add-in
-      dockerfile: Dockerfile
-    image: office-add-in-frontend  
-    container_name: office-add-in-frontend  
+    image: ghcr.io/infonl/zgw-office-add-in-frontend:dev
     ports:
-      - "3000:3000"
+      - "3000:443"
+    environment:
+      - FRONTEND_URL=https://localhost:3000
+      - ENABLE_HTTPS=true
+    volumes:
+      - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
 
   backend:
-    build:
-      context: ./office-backend
-      dockerfile: Dockerfile
-    image: office-add-in-backend  
-    container_name: office-add-in-backend  
+    image: ghcr.io/infonl/zgw-office-add-in-backend:dev
     ports:
       - "3003:3003"
 

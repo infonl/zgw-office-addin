@@ -13,10 +13,18 @@
   ],
   "packageManager": "npm@11.4.2",
   "scripts": {
+    "clean": "sh -c 'read -p \"Clean all project build files? (y/n): \" ans; [ \"$ans\" = \"y\" ] && turbo clean || echo \"Skipped\"'",
+    "clean:deep": "npm run clean && turbo clean:deep && rm -rf node_modules && rm -rf package-lock.json",
     "dev": "npm run types && turbo dev",
     "build": "npm run types && turbo build",
+    "docker:build": "turbo docker:build",
     "lint": "npm run types && turbo lint",
-    "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts"
+    "lint:fix": "turbo lint:fix",
+    "validate": "turbo validate",
+    "prettier": "turbo prettier",
+    "prettier:fix": "turbo prettier:fix",
+    "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts",
+    "check": "npm run types && npm run lint && npm run prettier && npm run validate"
   },
   "devDependencies": {
     "turbo": "2.5.6"

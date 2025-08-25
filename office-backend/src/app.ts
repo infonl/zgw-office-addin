@@ -5,7 +5,6 @@
 
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
@@ -15,8 +14,9 @@ import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-let fastify: FastifyInstance
+let fastify: FastifyInstance;
 const isLocal = process.env.APP_ENV === "local";
 
 if (isLocal) {
@@ -31,18 +31,13 @@ if (isLocal) {
   fastify = Fastify();
 }
 
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL]
-  : [];
+const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
 
 fastify.addHook("onRequest", (request, reply, done) => {
   const origin = request.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     reply.header("Access-Control-Allow-Origin", origin);
-    reply.header(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS",
-    );
+    reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, auteur");
     reply.header("Access-Control-Allow-Credentials", "true");
   }

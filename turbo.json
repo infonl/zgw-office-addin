@@ -1,19 +1,50 @@
 {
-    "tasks": {
-      "build": {
-        "dependsOn": ["^build"],
-        "outputs": ["office-add-in/dist/**", "office-backend/dist/**"]
-      },
-      "dev": {
-        "dependsOn": ["^dev"],
-        "outputs": ["office-add-in/dist/**", "office-backend/dist/**"]
-      },
-      "lint": {
-        "dependsOn": ["^lint"]
-      },
-      "test": {
-        "dependsOn": ["^build"],
-        "outputs": ["office-add-in/dist/**", "office-backend/dist/**"]
-      }
+  "tasks": {
+    "clean": {
+        "cache": false
+    },
+    "clean:deep": {
+        "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "validate": {
+      "cache": false
+    },
+    "docker:build": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "docker:clean": {
+      "cache": false
+    },
+    "docker:security": {
+      "cache": false
+    },
+    "docker:validate": {
+      "cache": false
+    },
+    "prettier": {
+      "cache": false
+    },
+    "prettier:fix": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
     }
   }
+}

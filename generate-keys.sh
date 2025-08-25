@@ -1,19 +1,37 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
-# This script generates a self-signed CA and server certificate for the office backend.
+# This script generates localhost SSL certificates using mkcert for the frontend.
+# mkcert creates certificates that are trusted by browsers and system tools.
 
-# Generate an unencrypted CA private key
-openssl genrsa -out ./office-backend/ca-key.pem 4096
+# Check if mkcert is installed
+if ! command -v mkcert &> /dev/null; then
+    echo "❌ mkcert is not installed. Please install it first:"
+    echo "   brew install mkcert"
+    exit 1
+fi
 
-# Generate the CA certificate
-openssl req -new -x509 -days 9999 -config ./server.example.cnf -key ./office-backend/ca-key.pem -out ./office-backend/ca-cert.pem
+# Re-create ssl-certs directories
+rm -rf ./office-add-in/ssl-certs
+mkdir -p ./office-add-in/ssl-certs
 
-# Generate an unencrypted server private key
-openssl genrsa -out ./office-backend/key.pem 4096
+echo "🔧 Generating localhost SSL certificates with mkcert..."
 
-# Generate the server certificate signing request (CSR)
-openssl req -new -config ./server.example.cnf -key ./office-backend/key.pem -out ./office-backend/csr.pem
+# === FRONTEND CERTIFICATES ===
+echo "📱 Generating frontend certificates..."
+cd ./office-add-in/ssl-certs
+mkcert -key-file key.pem -cert-file cert.pem localhost 127.0.0.1 ::1
+cd ../..
 
-# Generate the server certificate signed by the CA
-openssl x509 -req -extfile ./server.example.cnf -extensions v3_req -days 999 -in ./office-backend/csr.pem -CA ./office-backend/ca-cert.pem -CAkey ./office-backend/ca-key.pem -CAcreateserial -out ./office-backend/cert.pem
+# Copy the mkcert CA certificate
+echo "📋 Copying CA certificate..."
+MKCERT_CA_ROOT=$(mkcert -CAROOT)
+cp "$MKCERT_CA_ROOT/rootCA.pem" ./office-add-in/ssl-certs/ca-cert.pem
+
+echo "✅ Certificate generation complete!"
+echo "📁 Frontend certificates: ./office-add-in/ssl-certs/"
+echo ""
+echo "🔒 To trust these certificates system-wide, run:"
+echo "   mkcert -install"
+echo ""
+echo "🐳 Your Docker Compose setup will automatically use these certificates!"
