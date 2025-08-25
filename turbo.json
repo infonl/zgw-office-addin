@@ -1,5 +1,11 @@
 {
   "tasks": {
+    "clean": {
+        "cache": false
+    },
+    "clean:deep": {
+        "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
@@ -17,14 +23,17 @@
     "validate": {
       "cache": false
     },
-    "validate:docker": {
-      "cache": false
-    },
-    "security:docker": {
-      "cache": false
-    },
     "docker:build": {
       "dependsOn": ["^build"],
+      "cache": false
+    },
+    "docker:clean": {
+      "cache": false
+    },
+    "docker:security": {
+      "cache": false
+    },
+    "docker:validate": {
       "cache": false
     },
     "prettier": {

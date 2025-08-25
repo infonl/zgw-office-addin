@@ -4,9 +4,12 @@ services:
   frontend:
     image: ghcr.io/infonl/zgw-office-add-in-frontend:dev
     ports:
-      - "3000:80"
+      - "3000:443"
     environment:
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=https://localhost:3000
+      - ENABLE_HTTPS=true
+    volumes:
+      - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
 
   backend:
     image: ghcr.io/infonl/zgw-office-add-in-backend:dev

@@ -80,7 +80,6 @@ module.exports = async (env, options) => {
             transform(content) {
                 return content;
               }
-            },
           },
         ],
       }),
