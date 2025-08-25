@@ -6,8 +6,9 @@ name: CodeQL Security Analysis
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # Temporarily disabled for PRs due to pr-diff-range bug
+  # pull_request:
+  #   branches: [ "main" ]
   schedule:
     - cron: '0 6 * * 1'  # Weekly on Mondays at 6 AM UTC
   workflow_dispatch:
