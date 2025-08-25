@@ -49,6 +49,5 @@ jobs:
         uses: github/codeql-action/analyze@4f3212b61783c3c68e8309a0f18a699764811cda # v3.27.1
         with:
           category: "/language:${{ matrix.language }}"
-        env:
-          # Disable automatic PR diff filtering to avoid undefined values error
-          CODEQL_ACTION_DISABLE_PR_DIFF: true
+          # Disable upload-database to avoid PR diff range issues
+          upload-database: false
