@@ -1,14 +1,48 @@
+
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
 server {
     listen 80;
+    server_tokens off;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
 
+    gzip on;
+    gzip_http_version 1.0;
+    gzip_comp_level 2;
+    gzip_min_length 1100;
+    gzip_buffers 4 8k;
+    gzip_proxied any;
+    gzip_types
+        # text/html is always compressed by HttpGzipModule
+        text/css
+        text/javascript
+        text/xml
+        text/plain
+        text/x-component
+        application/javascript
+        application/json
+        application/xml
+        application/rss+xml
+        font/truetypenginc
+        font/opentype
+        application/vnd.ms-fontobject
+        image/svg+xml;
+    gzip_static on;
+    gzip_proxied  expired no-cache no-store private auth;
+    gzip_disable "MSIE [1-6]\.";
+    gzip_vary on;
+
+    add_header Feature-Policy "autoplay 'none'; camera 'none'" always;
+    add_header Referrer-Policy "same-origin";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Strict-Transport-Security max-age=15768000;
+
     location /proxy/ {
-        proxy_pass __BACKEND_URL__/;
+        proxy_pass __BACKEND_URL__;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -20,7 +54,26 @@ server {
     }
 
     location / {
+        client_max_body_size 150M;
         try_files $uri $uri/ /index.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate";
+        
+        # CORS headers for Office Add-ins
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
+        add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always;
+        add_header Access-Control-Allow-Credentials "true" always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+            add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization";
+            add_header Access-Control-Max-Age 1728000;
+            add_header Content-Type "text/plain; charset=utf-8";
+            add_header Content-Length 0;
+            return 204;
+        }
     }
 }
