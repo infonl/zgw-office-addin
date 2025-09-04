@@ -22,6 +22,7 @@ de optie "Dimpact Office" te selecteren. Houd er rekening mee dat de naam en de 
 afhankelijk van de configuratie bij uw gemeente.
 
 De add-in opent in een zijpaneel aan de rechterkant van het scherm, dat ziet er zo uit:
+
 ![ZGW Office Add-In](./images/open-add-in.png)
 
 ### Zoek een zaak
