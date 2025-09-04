@@ -7,7 +7,7 @@ import React, { createContext, PropsWithChildren, useCallback, useContext, useSt
 import { useGetZaak } from "../hooks/useGetZaak";
 
 type ZaakContextType = {
-  setZaakToSearch: (zaaknummer: string) => void;
+  setZaakToSearch: (_zaaknummer: string) => void;
   documentAdded: () => void;
   documentAddedToZaak: string | null;
   reset: () => void;
