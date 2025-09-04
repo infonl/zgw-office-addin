@@ -13,7 +13,8 @@ The name of the add-in is "zgw-office-add-in".
 The redirect URI can be "https://zgw-office-addin-dev-frontend.dimpact.lifely.nl/taskpane.html".
 
 # Expose a web API
-The application ID URI is "https://zgw-office-addin-dev-frontend.dimpact.lifely.nl/proxy".
+The application ID URI is "api//zgw-office-addin-dev-frontend.dimpact.lifely.nl/proxy/client_id".
+Replace client_id with your own generated client_id.
 
 Just like the manual says in the Client ID enter "ea5a67f6-b6f3-4338-b240-c655ddc3cc8e".
 
