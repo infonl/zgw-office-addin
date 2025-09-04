@@ -9,7 +9,8 @@ The manifest file serves as a guide for Outlook on how to install and display th
 
 ## Retrieve the manifest.xml file
 Follow the wollowing steps
-1. Open https://zgw-office-addin-dev-frontend.dimpact.lifely.nl/manifest.xml and copy it's content
+1. Go to this page and copy it's content
+![manifestPage](./images/setup-manifest/manifest-url.png)
 2. Open a new textfile and paste the content in there
 3. In the text file, locate the `<WebApplicationInfo>` section. The values inside this section will need to be updated in the next step.
 4. Save the file as "manifest.xml"
