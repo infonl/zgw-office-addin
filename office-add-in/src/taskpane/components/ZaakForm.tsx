@@ -6,8 +6,6 @@
 import {
   Body1,
   Button,
-  Caption1,
-  Caption2,
   makeStyles,
   Spinner,
   Title1,
@@ -15,7 +13,6 @@ import {
   ToastBody,
   ToastTitle,
   tokens,
-  Subtitle2,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
