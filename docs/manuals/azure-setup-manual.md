@@ -10,7 +10,8 @@ To register a add-in within your azure environment you can follow the official m
 # Register the add-in with Microsoft identity platform
 The name of the add-in is "zgw-office-add-in".
 
-The redirect URI can be "https://zgw-office-addin-dev-frontend.dimpact.lifely.nl/taskpane.html".
+The redirect URI can be the following.
+![Redirect-URI](./images/azure-registratie/redirect_uri.png)
 
 # Expose a web API
 The application ID URI is "api//zgw-office-addin-dev-frontend.dimpact.lifely.nl/proxy/client_id".
