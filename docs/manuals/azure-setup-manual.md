@@ -14,8 +14,8 @@ The redirect URI can be the following.
 ![Redirect-URI](./images/azure-registratie/redirect_uri.png)
 
 ## Expose a web API
-The application ID URI is "api//zgw-office-addin-dev-frontend.dimpact.lifely.nl/<client_id>".
 Replace client_id with your own generated client_id.
+The application ID URI is "api//zgw-office-addin-dev-frontend.dimpact.lifely.nl/<client_id>".
 
 Just like the manual says in the Client ID enter "ea5a67f6-b6f3-4338-b240-c655ddc3cc8e".
 
