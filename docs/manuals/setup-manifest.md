@@ -21,7 +21,7 @@ Inside the `<WebApplicationInfo>` place the following values
 
 ![webAppInfo](./images/setup-manifest/web-app-info.png)
 
-Replace the CLIENT_ID and APP_URI_ID with the correct values from Azure
+Replace the `CLIENT_ID` and `APP_URI_ID` with the correct values from Azure  
 
 ## Loading the add-in into Office
 To load the add-in into office select Add-ins
