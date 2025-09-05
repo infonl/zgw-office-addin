@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'zgw-office-add-in-frontend'
+    static_configs:
+      - targets: ['frontend:443']
+    scheme: https
+    tls_config:
+      ca_file: /etc/prometheus/certs/ca-cert.pem
+      insecure_skip_verify: true
