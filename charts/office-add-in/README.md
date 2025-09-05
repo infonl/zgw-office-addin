@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.29](https://img.shields.io/badge/Version-0.0.29-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.30](https://img.shields.io/badge/Version-0.0.30-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -36,12 +36,12 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
-| frontend.backendPublicUrl | string | `""` | The public URL to the backend service if directly exposed. By default it is proxied via the frontend host |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
 | frontend.image.tag | string | `"v0.0.284@sha256:ee9d57b8c234400177b6c742c2a23a50466be8ef1905cf6ee837c79148bc252a"` |  |
+| frontend.maxFileSize | string | `"80M"` | Maximum file size for uploads (e.g. attachments) |
 | frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 
