@@ -40,7 +40,6 @@ server {
         application/vnd.ms-fontobject
         image/svg+xml;
     gzip_static on;
-    gzip_proxied expired no-cache no-store private auth;
     gzip_disable "MSIE [1-6]\.";
     gzip_vary on;
 
@@ -70,7 +69,7 @@ server {
     }
 
     location / {
-        client_max_body_size __MAX_UPLOAD_SIZE__;
+        client_max_body_size __MAX_BODY_SIZE__;
         try_files $uri $uri/ /index.html;
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
 

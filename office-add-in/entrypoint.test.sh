@@ -48,7 +48,7 @@ export BACKEND_URL="https://testbackend.com/"
 export NGINX_PUBLIC_HTML="$TEST_DIR"
 export NGINX_CONFIG_FILE="$TEST_DIR/test.conf"
 export NGINX_TEMPLATES_DIR="$ROOT_DIR"
-export MAX_UPLOAD_SIZE="555M"
+export MAX_BODY_SIZE="555M"
 
 #Copy source files to test directory
 cp -r "$SRC_DIR" "$TEST_SRC"

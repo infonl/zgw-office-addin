@@ -62,6 +62,6 @@ if [ "$ENABLE_HTTPS" = "true" ]; then
 fi
 
 # Set the maximum upload size to provided value or default to 80M
-MAX_UPLOAD_SIZE="${MAX_UPLOAD_SIZE:-80M}"
-echo "Setting maximum upload size to $MAX_UPLOAD_SIZE."
-sed -i -e "s|__MAX_UPLOAD_SIZE__|$MAX_UPLOAD_SIZE|g" "$NGINX_CONFIG_FILE"
+MAX_BODY_SIZE="${MAX_BODY_SIZE:-80M}"
+echo "Setting maximum upload size to $MAX_BODY_SIZE."
+sed -i -e "s|__MAX_BODY_SIZE__|$MAX_BODY_SIZE|g" "$NGINX_CONFIG_FILE"
