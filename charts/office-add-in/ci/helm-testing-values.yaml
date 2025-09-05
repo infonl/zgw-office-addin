@@ -12,7 +12,7 @@ frontend:
   # and certificate valid for your frontendUrl
   enableHttps: false
   # -- Maximum file size for uploads (e.g. attachments)
-  maxFileSize: 80M
+  maxBodySize: 80M
 
 backend:
   image:
