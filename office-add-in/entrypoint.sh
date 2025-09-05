@@ -40,8 +40,7 @@ sed -i -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
 # backend service.
 
 # Optionally set the backend public URL to use, defaults to /proxy on frontend host.
-BACKEND_PUBLIC_URL="${BACKEND_PUBLIC_URL:-${FRONTEND_URL}/proxy}"
-BACKEND_PUBLIC_URL="${BACKEND_PUBLIC_URL%/}"
+BACKEND_PUBLIC_URL="${FRONTEND_URL}/proxy"
 ENABLE_HTTPS="${ENABLE_HTTPS:-false}"
 
 echo "Backend URL is set to ${BACKEND_PUBLIC_URL}. Rewriting references."
