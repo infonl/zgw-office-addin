@@ -32,7 +32,7 @@
     "signin": "office-addin-dev-settings m365-account login",
     "signout": "office-addin-dev-settings m365-account logout",
     "stop": "office-addin-debugging stop manifest.xml",
-    "docker:build": "docker buildx build -f Dockerfile --load -t ghcr.io/infonl/zgw-office-add-in-frontend:dev ..",
+    "docker:build": "docker buildx build -f Dockerfile --build-arg APP_VERSION=dev --load -t ghcr.io/infonl/zgw-office-add-in-frontend:dev ..",
     "docker:clean": "docker image rm ghcr.io/infonl/zgw-office-add-in-frontend:dev || echo 'Docker image not found, skipping removal'",
     "docker:security": "docker scout cves || echo 'Docker Scout not available or no image built'",
     "docker:validate": "docker buildx build --check ."

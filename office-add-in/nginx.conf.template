@@ -57,6 +57,11 @@ server {
         proxy_read_timeout 60s;
     }
 
+    location /metrics {
+        default_type text/plain;
+        alias /usr/share/nginx/html/metrics.txt;
+    }
+
     location / {
         client_max_body_size __MAX_BODY_SIZE__;
         try_files $uri $uri/ /index.html;
