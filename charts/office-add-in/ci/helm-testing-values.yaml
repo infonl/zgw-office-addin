@@ -8,12 +8,11 @@ frontend:
     port: 80
   # -- The frontend public URL where the manifest.xml and static js file are served
   frontendUrl: "http://localhost:3000"
-  # -- The public URL to the backend service if directly exposed. By default it is
-  # proxied via the frontend host
-  backendPublicUrl: ""
   # -- If enabled nginx will also listen on port 443. You will need to volume map a key
   # and certificate valid for your frontendUrl
   enableHttps: false
+  # -- Maximum file size for uploads (e.g. attachments)
+  maxFileSize: 80M
 
 backend:
   image:

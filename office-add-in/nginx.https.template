@@ -4,14 +4,52 @@
 # HTTPS server block (conditionally enabled)
 server {
     listen 443 ssl;
+    server_tokens off;
     server_name _;
     root /usr/share/nginx/html;
-    index index.html;
 
+    # SSL configuration
     ssl_certificate     /etc/nginx/certs/cert.pem;
     ssl_certificate_key /etc/nginx/certs/key.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
-    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # Gzip compression
+    gzip on;
+    gzip_http_version 1.0;
+    gzip_comp_level 2;
+    gzip_min_length 1100;
+    gzip_buffers 4 8k;
+    gzip_proxied any;
+    gzip_types
+        # text/html is always compressed by HttpGzipModule
+        text/css
+        text/javascript
+        text/xml
+        text/plain
+        text/x-component
+        application/javascript
+        application/json
+        application/xml
+        application/rss+xml
+        font/truetype
+        font/opentype
+        application/vnd.ms-fontobject
+        image/svg+xml;
+    gzip_static on;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_disable "MSIE [1-6]\.";
+    gzip_vary on;
+
+    # Security headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     location /proxy/ {
         proxy_pass __BACKEND_URL__/;
@@ -24,19 +62,25 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_cache_bypass $http_upgrade;
+
+        # Proxy timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }
 
     location / {
+        client_max_body_size __MAX_UPLOAD_SIZE__;
         try_files $uri $uri/ /index.html;
-        add_header Cache-Control "no-store, no-cache, must-revalidate";
-        
+        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+
         # CORS headers for Office Add-ins
         add_header Access-Control-Allow-Origin "*" always;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
         add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
         add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always;
         add_header Access-Control-Allow-Credentials "true" always;
-        
+
         # Handle preflight requests
         if ($request_method = 'OPTIONS') {
             add_header Access-Control-Allow-Origin "*";
@@ -47,5 +91,15 @@ server {
             add_header Content-Length 0;
             return 204;
         }
+    }
+
+    # Block access to hidden files and directories
+    location ~ /\. {
+        deny all;
+    }
+
+    # Block access to backup and source files
+    location ~* \.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)$ {
+        deny all;
     }
 }
