@@ -11,7 +11,7 @@ To register an add-in within your azure environment you can follow the official 
 For the example we use the name of "zgw-office-add-in".
 
 The redirect URI can be the following.
-![Redirect-URI](./images/azure-registratie/redirect_uri.png)
+`https://ontw-office-addin.dimpact.info.nl/manifest.xml`
 
 ## Expose a web API
 Replace `client_id` with your own client_id. This will have been generated and can be found in the overview page under Applicatien (client) ID.
