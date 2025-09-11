@@ -1,0 +1,2 @@
+Manifest URL
+https://ontw-office-addin.dimpact.info.nl/manifest.xml
