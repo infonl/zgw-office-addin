@@ -11,6 +11,9 @@ To register the add-in log into OpenZaak and navigate to Applications. From ther
 ![Applications](./images/open-zaak/applications.png)
 
 Fill the Label & Client-ID with "office-add-in". For the field Geheime Sleutel fill in the secret key from OpenZaak.
+Aslo make sure to check the box with "Heeft alle autorisaties".
 ![Add Application](./images/open-zaak/add-application.png)
 
-Click Opslaan 
+Click Opslaan
+
+The Add-in now has acces to OpenZaak
