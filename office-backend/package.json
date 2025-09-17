@@ -24,7 +24,7 @@
   "description": "",
   "dependencies": {
     "dotenv": "17.2.2",
-    "fastify": "5.5.0",
+    "fastify": "5.6.0",
     "jsonwebtoken": "9.0.2"
   },
   "devDependencies": {
