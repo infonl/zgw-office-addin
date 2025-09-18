@@ -3,4 +3,4 @@ name: zgw-office-addin
 description: A Helm chart for deploying the zgw-office-addin (frontend and backend)
 type: application
 version: 0.0.31
-appVersion: 0.0.70
+appVersion: 0.1.0
