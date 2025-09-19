@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.31](https://img.shields.io/badge/Version-0.0.31-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
+![Version: 0.0.32](https://img.shields.io/badge/Version-0.0.32-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.70](https://img.shields.io/badge/AppVersion-0.0.70-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -32,7 +32,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.0.284@sha256:682680c3dbec45b0ae0d5fb3de5da690ebff0bfcb9be345c0178e5492c64b477"` |  |
+| backend.image.tag | string | `"v0.0.327@sha256:cda11e82c12b0f0e2a8e634836450c19c2f5412ab26e080e83f1b6b231815db9"` |  |
 | backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
@@ -40,7 +40,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest.xml and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.0.284@sha256:ee9d57b8c234400177b6c742c2a23a50466be8ef1905cf6ee837c79148bc252a"` |  |
+| frontend.image.tag | string | `"v0.0.327@sha256:86132f190103fa9d1096855069ad08cd2ced68b0786653e2ed696746f973a657"` |  |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
