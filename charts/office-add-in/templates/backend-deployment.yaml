@@ -11,11 +11,23 @@ spec:
       {{- include "office-add-in.backend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "office-add-in.backend.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.backend.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
       containers:
         - name: backend
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: "{{ .Values.backend.image.pullPolicy }}"
           ports:
@@ -25,3 +37,17 @@ spec:
               value: {{ .Values.backend.jwtSecret | quote }}
             - name: API_BASE_URL
               value: {{ .Values.backend.apiBaseUrl | quote }}
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
