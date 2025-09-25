@@ -13,6 +13,39 @@ frontend:
   enableHttps: false
   # -- Maximum content body size (e.g. for attachments)
   maxBodySize: 80M
+  # -- Resource limits and requests for the frontend container
+  resources: {}
+    # We usually recommend not specifying default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  # -- Pod annotations for the frontend deployment
+  podAnnotations: {}
+  # -- Pod security context for the frontend deployment
+  podSecurityContext: {}
+    # fsGroup: 2000
+  # -- Security context for the frontend container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+  # -- Node selector for the frontend deployment
+  nodeSelector: {}
+  # -- Affinity rules for the frontend deployment
+  affinity: {}
+  # -- Tolerations for the frontend deployment
+  tolerations: []
+  # -- Image pull secrets for the frontend deployment
+  imagePullSecrets: []
 
 backend:
   image:
@@ -23,6 +56,39 @@ backend:
     type: ClusterIP
     port: 3003
   # -- Secret key used for generating and validating JWT tokens for secure communication
-  jwtSecret: "SECRECT_KEY_PLACEHOLDER"
+  jwtSecret: "SECRET_KEY_PLACEHOLDER"
   # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
+  # -- Resource limits and requests for the backend container
+  resources: {}
+    # We usually recommend not specifying default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  # -- Pod annotations for the backend deployment
+  podAnnotations: {}
+  # -- Pod security context for the backend deployment
+  podSecurityContext: {}
+    # fsGroup: 2000
+  # -- Security context for the backend container
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+  # -- Node selector for the backend deployment
+  nodeSelector: {}
+  # -- Affinity rules for the backend deployment
+  affinity: {}
+  # -- Tolerations for the backend deployment
+  tolerations: []
+  # -- Image pull secrets for the backend deployment
+  imagePullSecrets: []
