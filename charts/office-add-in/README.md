@@ -35,7 +35,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
 | backend.image.tag | string | `"v0.1.9@sha256:1e8a5071ebc1ee49cbae9a565308817b2070f7134803914eda16d15f63826426"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
-| backend.jwtSecret | string | `"SECRECT_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
+| backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
