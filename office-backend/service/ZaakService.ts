@@ -95,7 +95,7 @@ export class ZaakService {
 
   private async createGebruiksrechten(url: string, startdatum: Date) {
     await this.httpService.POST(
-      "documenten/api/v1/gebruiksrechten",
+      "/documenten/api/v1/gebruiksrechten",
       JSON.stringify({
         informatieobject: url,
         startdatum,

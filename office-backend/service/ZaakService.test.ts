@@ -170,7 +170,7 @@ describe("ZaakService", () => {
       // Verify gebruiksrechten creation
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         2,
-        "documenten/api/v1/gebruiksrechten",
+        "/documenten/api/v1/gebruiksrechten",
         JSON.stringify({
           informatieobject: mockInformatieobject.url,
           startdatum: new Date("2025-01-15"),
