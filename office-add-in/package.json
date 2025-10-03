@@ -28,6 +28,8 @@
     "prettier:ts:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx}'",
     "prettier:xml": "prettier --check *.xml",
     "prettier:xml:fix": "prettier --write *.xml",
+    "test": "vitest --run",
+    "test:watch": "vitest",
     "validate": "office-addin-manifest validate manifest.xml",
     "signin": "office-addin-dev-settings m365-account login",
     "signout": "office-addin-dev-settings m365-account logout",
