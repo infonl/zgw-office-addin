@@ -38,3 +38,7 @@ generated-client
 generated/types.ts
 /office-add-in/docker-metadata.json
 /office-backend/docker-metadata.json
+
+### Testing ###
+coverage/
+**/coverage/

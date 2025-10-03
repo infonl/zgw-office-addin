@@ -16,7 +16,9 @@
     "docker:security": "docker scout cves || echo 'Docker Scout not available or no image built'",
     "docker:validate": "docker buildx build --check .",
     "prettier": "prettier --check \"**/*.{ts,js}\"",
-    "prettier:fix": "prettier --write \"**/*.{ts,js}\""
+    "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
