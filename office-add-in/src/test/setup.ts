@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import "@testing-library/jest-dom";
 import { fromPartial } from "@total-typescript/shoehorn";
 import React from "react";
