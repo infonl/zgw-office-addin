@@ -1,8 +1,11 @@
-import { defineConfig, mergeConfig } from 'vitest/config'
-import baseConfig from '../vitest.config'
+import { defineConfig, mergeConfig } from "vitest/config";
+import baseConfig from "../vitest.config";
 
-export default mergeConfig(baseConfig, defineConfig({
-  test: {
-    include: ['src/**/*.{test,spec}.{js,ts}']
-  }
-}))
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    test: {
+      include: ["src/**/*.{test,spec}.{js,ts}", "service/**/*.{test,spec}.{js,ts}"],
+    },
+  }),
+);

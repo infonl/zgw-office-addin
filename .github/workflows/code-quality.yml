@@ -1,0 +1,94 @@
+name: Code quality
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate types
+        run: npm run types
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run prettier check
+        run: npm run prettier
+
+      - name: Run validation
+        run: npm run validate
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Comment PR with test results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Try to read coverage summary
+            let coverageComment = '## 🧪 Test Results\n\n✅ All tests passed!\n\n';
+            
+            try {
+              const coverageExists = fs.existsSync('./coverage/coverage-summary.json');
+              if (coverageExists) {
+                const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+                const total = coverage.total;
+                
+                coverageComment += '### Coverage Report\n\n';
+                coverageComment += `| Metric | Coverage |\n`;
+                coverageComment += `|--------|----------|\n`;
+                coverageComment += `| Lines | ${total.lines.pct}% (${total.lines.covered}/${total.lines.total}) |\n`;
+                coverageComment += `| Functions | ${total.functions.pct}% (${total.functions.covered}/${total.functions.total}) |\n`;
+                coverageComment += `| Branches | ${total.branches.pct}% (${total.branches.covered}/${total.branches.total}) |\n`;
+                coverageComment += `| Statements | ${total.statements.pct}% (${total.statements.covered}/${total.statements.total}) |\n`;
+              }
+            } catch (error) {
+              console.log('Could not read coverage report:', error.message);
+            }
+            
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('🧪 Test Results')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: coverageComment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: coverageComment
+              });
+            }
