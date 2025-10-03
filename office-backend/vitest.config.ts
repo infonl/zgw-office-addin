@@ -11,6 +11,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       include: ["src/**/*.{test,spec}.{js,ts}", "service/**/*.{test,spec}.{js,ts}"],
+      setupFiles: ["./test/setup.ts"],
     },
   }),
 );
