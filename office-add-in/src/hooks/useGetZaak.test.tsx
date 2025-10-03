@@ -127,7 +127,7 @@ describe("useGetZaak", () => {
   });
 
   it("should use correct query key", () => {
-    const { result } = renderHook(() => useGetZaak("ZAAK-001"), {
+    renderHook(() => useGetZaak("ZAAK-001"), {
       wrapper: createWrapper,
     });
 
