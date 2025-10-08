@@ -45,7 +45,6 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
   </Rule>
 
-
   <!-- Commands (nested VersionOverrides V1_0 -> V1_1), nesting needed for Outlook validator -->
   <VersionOverrides
     xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
@@ -64,7 +63,7 @@
       <Hosts>
         <Host xsi:type="MailHost">
           <DesktopFormFactor>
-          <!-- GetStarted not allowed in Outlook -->
+            <!-- GetStarted not allowed in Outlook -->
 
             <FunctionFile resid="Commands.Url" />
 
