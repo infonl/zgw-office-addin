@@ -31,6 +31,7 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "validate": "office-addin-manifest validate manifest.xml",
+    "validate:outlook": "office-addin-manifest validate manifest-outlook.xml",
     "signin": "office-addin-dev-settings m365-account login",
     "signout": "office-addin-dev-settings m365-account logout",
     "stop": "office-addin-debugging stop manifest.xml",
