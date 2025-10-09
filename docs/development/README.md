@@ -163,15 +163,39 @@ From within the `office-backend` directory, start the backend service:
   npm run dev
 ```
 
-### Sideloading the Add-in in Word Application
-For more detailed instructions on sideloading the add-in, see the [official documentation](https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-for-testing).
 
-To test the add-in in the Word Application, start the add-in, and it will open the application with the add-in loaded:
+## Sideloading the Add-ins
+
+### Word Add-in
+For detailed instructions on sideloading the Word add-in, refer to the [official Microsoft documentation](https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-for-testing).
+
+**Start locally**
 ```shell
-  npm run start
+npm start
 ```
+This launches the local dev server and opens Microsoft Word with the add-in loaded. You can edit source files and see the changes immediately.
 
-You can edit your source files, and see the changes reflected in the Word Application immediately.
+**Validate / sideload**
+```shell
+npm run validate:office
+```
+To sideload, upload the manifest: `manifest-office.xml` (or fetch it from `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`).
+
+---
+
+### Outlook Add-in (Mail)
+You can sideload the Outlook add-in using the Outlook web or desktop client via [https://aka.ms/olksideload](https://aka.ms/olksideload). Upload the manifest file `manifest-outlook.xml`.
+
+**Start locally**
+```shell
+npm run start:outlook
+```
+This starts the add-in for Outlook. Ensure your development environment uses valid HTTPS certificates generated with mkcert.
+
+**Validate / sideload**
+```shell
+npm run validate:outlook
+```
 
 ## Docker Compose
 
