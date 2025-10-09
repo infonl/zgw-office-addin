@@ -6,7 +6,7 @@ There are two manifest variants — one for Outlook (mail add-in) and one for ot
 Before following this manual make sure that you have [setup the azure registration](./azure-setup-manual.md) first
 
 ## Information about the manifest files
-The manifest files serve as a guide for Outlook and other Office applications on how to install and display the add-in. It contains essential information such as the add-in’s title, description, permissions, and the web location where its content is hosted. In this way, the manifest ensures that the add-in is correctly recognized and made available to users within Outlook.
+The manifest files serve as guides for Outlook and other Office applications on how to install and display the add-in. They contain essential information such as the add-in’s title, description, permissions, and the web location where its content is hosted. In this way, the manifest files ensure that the add-in is correctly recognized and made available to users within Outlook.
 
 ## Retrieve the manifest files
 Follow the following steps:
