@@ -46,7 +46,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
-| frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest.xml and static js file are served |
+| frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
 | frontend.image.tag | string | `"v0.1.22@sha256:f0d62b56c2cff02b4193575b568dc3e6ecf58bf636d1e05d1f8e73910939ccf2"` |  |

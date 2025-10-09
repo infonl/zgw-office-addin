@@ -12,18 +12,20 @@
 # Define paths
 ROOT_DIR="$(pwd)"
 SRC_DIR="$ROOT_DIR/src"
-MANIFEST_FILE="$ROOT_DIR/manifest.xml"
+MANIFEST_OFFICE_FILE="$ROOT_DIR/manifest-office.xml"
+MANIFEST_OUTLOOK_FILE="$ROOT_DIR/manifest-outlook.xml"
 TEST_DIR="$ROOT_DIR/build/test"
 TEST_SRC="$TEST_DIR/src"
-TEST_MANIFEST="$TEST_DIR/manifest.xml"
+TEST_MANIFEST_OFFICE="$TEST_DIR/manifest-office.xml"
+TEST_MANIFEST_OUTLOOK="$TEST_DIR/manifest-outlook.xml"
 
 # Clean and recreate test environment
 rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
-# Copy source directory and manifest file
-#cp -r "$SRC_DIR" "$TEST_SRC"
-cp "$MANIFEST_FILE" "$TEST_MANIFEST"
+# Copy source directory and manifest files
+cp "$MANIFEST_OFFICE_FILE" "$TEST_MANIFEST_OFFICE"
+cp "$MANIFEST_OUTLOOK_FILE" "$TEST_MANIFEST_OUTLOOK"
 
 touch "$TEST_DIR/sed.log"
 # Save the real sed path
@@ -63,6 +65,7 @@ find "$TEST_DIR" -type f -name '*-e' -exec rm {} +
 # Compare the original and test src directories
 diff -ru "$SRC_DIR" "$TEST_SRC"
 
-# Compare the original and test manifest.xml
-diff -u "$MANIFEST_FILE" "$TEST_MANIFEST"
+# Compare the original and test manifest files
+diff -u "$MANIFEST_OFFICE_FILE" "$TEST_MANIFEST_OFFICE"
+diff -u "$MANIFEST_OUTLOOK_FILE" "$TEST_MANIFEST_OUTLOOK"
 diff -u "$ROOT_DIR/nginx.conf.template" "$NGINX_CONFIG_FILE"
