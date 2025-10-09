@@ -31,6 +31,7 @@ header:
     - "**/dist"
     - ".nvmrc"
     - "**/manifest.xml"
+    - "**/manifest-outlook.xml"
     - "**/*.example.cnf"
     - ".hintrc"
     - "**/entrypoint.sh"

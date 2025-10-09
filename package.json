@@ -24,10 +24,20 @@
     "prettier": "turbo prettier",
     "prettier:fix": "turbo prettier:fix",
     "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts",
-    "check": "npm run types && npm run lint && npm run prettier && npm run validate"
+    "test": "turbo test",
+    "test:coverage": "turbo test -- --coverage",
+    "test:ui": "vitest --ui",
+    "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
   "devDependencies": {
-    "turbo": "2.5.8"
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@total-typescript/shoehorn": "^0.1.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "jsdom": "^25.0.1",
+    "turbo": "2.5.8",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": ">=22.0.0"
