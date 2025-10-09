@@ -24,7 +24,15 @@ rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
 # Copy source directory and manifest files
+if [ ! -f "$MANIFEST_OFFICE_FILE" ]; then
+  echo "Error: $MANIFEST_OFFICE_FILE does not exist." >&2
+  exit 1
+fi
 cp "$MANIFEST_OFFICE_FILE" "$TEST_MANIFEST_OFFICE"
+if [ ! -f "$MANIFEST_OUTLOOK_FILE" ]; then
+  echo "Error: $MANIFEST_OUTLOOK_FILE does not exist." >&2
+  exit 1
+fi
 cp "$MANIFEST_OUTLOOK_FILE" "$TEST_MANIFEST_OUTLOOK"
 
 touch "$TEST_DIR/sed.log"
