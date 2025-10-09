@@ -36,7 +36,7 @@
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "9.0.10",
     "@types/node": "22.18.7",
-    "@types/send": "0.17.5",
+    "@types/send": "1.2.0",
     "@types/serve-static": "1.15.9",
     "eslint": "9.36.0",
     "neostandard": "0.12.2",
