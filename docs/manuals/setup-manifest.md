@@ -30,7 +30,7 @@ To load the add-in into office select Add-ins
 ![Add-Ins](./images/setup-manifest/add-ins.png)
 
 From here select **Advanced → Upload My Add-In → Browse** to your saved manifest and upload it:
-- For Word/Excel/PowerPoint: upload `manifest-office.xml`
+- For Word: upload `manifest-office.xml`
 - For Outlook: upload `manifest-outlook.xml`
 
 The add-ins are now available for use. Follow the [user manual](./user-manual.md) for detailed instructions.
