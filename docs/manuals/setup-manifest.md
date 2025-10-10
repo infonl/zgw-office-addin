@@ -2,7 +2,7 @@
 
 ## Introduction
 This user guide is intended for the administrators/users of the microsoft Add-In. This guide will describe how the manifest files can be retrieved and configured to load in the office-add-in.  
-There are two manifest variants — one for Outlook (mail add-in) and one for other Office hosts (Word, Excel, PowerPoint).  
+There are two manifest variants — one for Outlook (mail add-in) and one for other Office hosts (Word).  
 Before following this manual make sure that you have [setup the azure registration](./azure-setup-manual.md) first
 
 ## Information about the manifest files
