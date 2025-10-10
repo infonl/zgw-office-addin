@@ -11,7 +11,7 @@ To register an add-in within your azure environment you can follow the official 
 For the example we use the name of "zgw-office-add-in".
 
 The redirect URI can be one of the following, depending on the Office host:
-- For Word/Excel/PowerPoint: `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`
+- For Word: `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`
 - For Outlook: `https://ontw-office-addin.dimpact.info.nl/manifest-outlook.xml`
 
 ## Expose a web API
