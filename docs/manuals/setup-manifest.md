@@ -10,7 +10,7 @@ The manifest files serve as guides for Outlook and other Office applications on 
 
 ## Retrieve the manifest files
 Follow the following steps:
-1. For Word/Excel/PowerPoint: go to `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`
+1. For Word: go to `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`
 2. For Outlook: go to `https://ontw-office-addin.dimpact.info.nl/manifest-outlook.xml`
 3. Copy the content of the desired manifest URL and paste it into a new text file.
 4. Locate the `<WebApplicationInfo>` section in the text file — these values need to be updated in the next step.
