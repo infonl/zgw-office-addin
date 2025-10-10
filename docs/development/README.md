@@ -171,7 +171,7 @@ For detailed instructions on sideloading the Word add-in, refer to the [official
 
 **Start locally**
 ```shell
-npm start
+npm run start:office
 ```
 This launches the local dev server and opens Microsoft Word with the add-in loaded. You can edit source files and see the changes immediately.
 
