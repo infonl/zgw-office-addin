@@ -7,6 +7,8 @@ services:
       - "3000:443"
     environment:
       - FRONTEND_URL=https://localhost:3000
+      - BACKEND_URL=https://localhost:3003
+      - MAX_BODY_SIZE=20M
       - ENABLE_HTTPS=true
     volumes:
       - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
@@ -15,6 +17,15 @@ services:
     image: ghcr.io/infonl/zgw-office-add-in-backend:dev
     ports:
       - "3003:3003"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./scripts/docker-compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./office-add-in/ssl-certs:/etc/prometheus/certs:ro
+    ports:
+      - "9090:9090"
+
 
   openzaak-database:
     image: docker.io/postgis/postgis:17-3.4@sha256:d0b5a6ecab18997637f55a83cb4a9467391de5645916cfa1b6f2a8d19eee7be5
@@ -39,7 +50,7 @@ services:
   openzaak.local:
     image: docker.io/openzaak/open-zaak:1.24.0@sha256:6ab495e36be11fb59d0286b7a8b58eb981a4b695ed72d670ce43ce00d29e28c0
     platform: linux/amd64
-    environment: &openzaak-env
+    environment:
       - ALLOWED_HOSTS="*"
       - DB_HOST=openzaak-database
       - DB_NAME=openzaak

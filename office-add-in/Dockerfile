@@ -3,6 +3,10 @@
 
 FROM nginx:1.29.2-alpine@sha256:7c1b9a91514d1eb5288d7cd6e91d9f451707911bfaea9307a3acbc811d4aa82e
 
+# Environment variable for application version, this should be supplied during build
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION:-unknown}
+
 # Remove default Nginx website
 RUN rm -rf /usr/share/nginx/html/*
 
@@ -13,5 +17,9 @@ COPY --chmod=755 ./office-add-in/entrypoint.sh /docker-entrypoint.d/entrypoint.s
 # Copy nginx configuration
 COPY ./office-add-in/nginx.conf.template /etc/nginx/
 COPY ./office-add-in/nginx.https.template /etc/nginx/
+
+# Copy optional SSL certificates if they exist (likely for local development)
+COPY ./office-add-in/ssl-certs/cert.pem /etc/nginx/cert.pem
+COPY ./office-add-in/ssl-certs/key.pem /etc/nginx/key.pem
 
 EXPOSE 80
