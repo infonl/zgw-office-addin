@@ -11,7 +11,7 @@
     "office-add-in",
     "office-backend"
   ],
-  "packageManager": "npm@11.6.1",
+  "packageManager": "npm@11.6.2",
   "scripts": {
     "clean": "sh -c 'read -p \"Clean all project build files? (y/n): \" ans; [ \"$ans\" = \"y\" ] && turbo clean || echo \"Skipped\"'",
     "clean:deep": "npm run clean && turbo clean:deep && rm -rf node_modules && rm -rf package-lock.json",
@@ -35,7 +35,7 @@
     "@total-typescript/shoehorn": "0.1.2",
     "@vitest/coverage-v8": "2.1.9",
     "@vitest/ui": "2.1.9",
-    "jsdom": "25.0.1",
+    "jsdom": "27.0.0",
     "turbo": "2.5.8",
     "vitest": "2.1.9"
   },
