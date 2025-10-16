@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
-FROM nginx:1.29.1-alpine@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
+FROM nginx:1.29.2-alpine@sha256:7c1b9a91514d1eb5288d7cd6e91d9f451707911bfaea9307a3acbc811d4aa82e
 
 # Remove default Nginx website
 RUN rm -rf /usr/share/nginx/html/*

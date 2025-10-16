@@ -15,7 +15,7 @@ This folder contains guides for installing, configuring, and using the ZGW Offic
 
 - [Setup Manifest Manual](setup-manifest.md)
   
-	Guide for retrieving, updating, and uploading the manifest.xml file to Office, with details on the `<WebApplicationInfo>` section.
+	Guide for retrieving, updating, and uploading the manifest xml files to Office, with details on the `<WebApplicationInfo>` section.
 
 - [OpenZaak Manual](openzaak-manual.md)
   
