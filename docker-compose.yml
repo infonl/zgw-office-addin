@@ -37,7 +37,7 @@ services:
 
 
   openzaak.local:
-    image: docker.io/openzaak/open-zaak:1.24.0@sha256:6ab495e36be11fb59d0286b7a8b58eb981a4b695ed72d670ce43ce00d29e28c0
+    image: docker.io/openzaak/open-zaak:1.25.0@sha256:79a78bc78419670c8695ac5ba16b0af5e7a6a67d3ecbfe5b9095ded2aba177eb
     platform: linux/amd64
     environment: &openzaak-env
       - ALLOWED_HOSTS="*"
