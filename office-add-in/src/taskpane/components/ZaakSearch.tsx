@@ -38,6 +38,16 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingHorizontalL,
     marginBottom: tokens.spacingHorizontalXL,
   },
+  messageBar: {
+    marginTop: tokens.spacingHorizontalM,
+    marginBottom: tokens.spacingHorizontalM,
+  },
+  messageTitleNoWrap: {
+    whiteSpace: "normal",
+  },
+  messageInline: {
+    fontWeight: tokens.fontWeightRegular,
+  },
 });
 
 const zaakSearchSchema = zod.object({
@@ -93,13 +103,14 @@ function ZaakZoekNotifications() {
   const {
     zaak: { isLoading, isError },
   } = useZaak();
+  const styles = useStyles();
 
   if (isError) {
     return (
       <MessageBar intent="error">
         <MessageBarBody>
-          <MessageBarTitle>Oeps</MessageBarTitle>
-          De zaak kan niet worden gevonden
+          <MessageBarTitle className={styles.messageTitleNoWrap}>Oeps</MessageBarTitle>
+          <span className={styles.messageInline}> De zaak kan niet worden gevonden</span>
         </MessageBarBody>
       </MessageBar>
     );
@@ -109,8 +120,8 @@ function ZaakZoekNotifications() {
     return (
       <MessageBar intent="info">
         <MessageBarBody>
-          <MessageBarTitle>Zaak zoeken</MessageBarTitle>
-          Dit kan even duren...
+          <MessageBarTitle className={styles.messageTitleNoWrap}>Zaak zoeken</MessageBarTitle>
+          <span className={styles.messageInline}> Dit kan even duren...</span>
         </MessageBarBody>
       </MessageBar>
     );
