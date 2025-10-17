@@ -28,8 +28,7 @@ import {
   useAddDocumentToZaak,
 } from "../../hooks/useAddDocumentToZaak";
 import { useOffice } from "../../hooks/useOffice";
-import { Input } from "./form/Input";
-import { Select } from "./form/Select";
+import { CommonDocumentFields } from "./CommonDocumentFields";
 import { useToast } from "../../provider/ToastProvider";
 import { useZaak } from "../../provider/ZaakProvider";
 
@@ -204,29 +203,10 @@ export function ZaakForm() {
       </section>
       {data && (
         <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
-          <Input name="auteur" />
-          <fieldset className={styles.fieldset}>
-            <Select
-              name="informatieobjecttype"
-              label="Document type"
-              options={data.zaakinformatieobjecten.map((zaakinformatieobject) => ({
-                label: zaakinformatieobject.omschrijving,
-                value: zaakinformatieobject.url!,
-              }))}
-            />
-            <Input readOnly name="vertrouwelijkheidaanduiding" />
-          </fieldset>
-          <fieldset className={styles.fieldset}>
-            <Select
-              name="status"
-              label="Status"
-              options={documentstatus.map((status) => ({
-                label: status.replace(/_/g, " "),
-                value: status,
-              }))}
-            />
-            <Input type="date" name="creatiedatum" />
-          </fieldset>
+          <CommonDocumentFields
+            zaakinformatieobjecten={data.zaakinformatieobjecten}
+            statuses={documentstatus}
+          />
           <Button
             disabled={!form.formState.isValid || isPending}
             appearance="primary"
