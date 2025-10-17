@@ -44,6 +44,12 @@ const useStyles = makeStyles({
     marginTop: tokens.spacingHorizontalM,
     marginBottom: tokens.spacingHorizontalM,
   },
+  messageTitleNoWrap: {
+    whiteSpace: "normal",
+  },
+  messageInline: {
+    fontWeight: tokens.fontWeightRegular,
+  },
   form: {
     paddingTop: tokens.spacingVerticalL,
     display: "flex",
@@ -118,7 +124,7 @@ export function ZaakForm() {
     await mutateAsync(formData);
   };
 
-  const { getSignedInUser } = useOffice();
+  const { getSignedInUser, host } = useOffice();
 
   useEffect(() => {
     if (!data?.identificatie) return;
@@ -151,20 +157,47 @@ export function ZaakForm() {
     });
   }, [getSignedInUser, form.setValue]);
 
+  let titleText: string;
+  switch (host) {
+    case Office.HostType.Word:
+      titleText = "Documentgegevens";
+      break;
+    case Office.HostType.Outlook:
+      titleText = "Gegevens E-mail";
+      break;
+    default:
+      titleText = "Documentgegevens";
+  }
+
+  let bodyText: string;
+  switch (host) {
+    case Office.HostType.Word:
+      bodyText = "Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.";
+      break;
+    case Office.HostType.Outlook:
+      bodyText = " Vul de gegevens van deze e-mail in. Daarna kan je deze koppelen aan een zaak.";
+      break;
+    default:
+      bodyText = "Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.";
+  }
+
   return (
     <FormProvider {...form}>
       <section className={styles.title}>
-        <Title1>Documentgegevens</Title1>
-        <Body1>
-          Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
-        </Body1>
+        <Title1>{titleText}</Title1>
+        <Body1>{bodyText}</Body1>
       </section>
       <section className={styles.messageBar}>
         {!data && (
           <MessageBar intent="info">
             <MessageBarBody>
-              <MessageBarTitle>Geen zaak gevonden</MessageBarTitle>
-              Zoek eerst een zaak voordat je deze kunt koppelen
+              <MessageBarTitle className={styles.messageTitleNoWrap}>
+                Geen zaak gevonden
+                <span className={styles.messageInline}>
+                  {" "}
+                  — Zoek eerst een zaak voordat je deze kunt koppelen
+                </span>
+              </MessageBarTitle>
             </MessageBarBody>
           </MessageBar>
         )}

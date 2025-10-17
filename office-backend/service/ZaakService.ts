@@ -73,6 +73,8 @@ export class ZaakService {
       case "doc":
       case "docx":
         return "application/msword";
+      case "eml":
+        return "message/rfc822";
       default:
         throw new FileNotSupported(file);
     }

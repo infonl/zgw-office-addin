@@ -28,11 +28,19 @@ const useStyles = makeStyles({
   },
   messageBar: {
     paddingTop: tokens.spacingHorizontalXL,
+    marginTop: tokens.spacingHorizontalM,
+    marginBottom: tokens.spacingHorizontalM,
   },
   actions: {
     marginTop: tokens.spacingHorizontalXL,
     display: "flex",
     gap: tokens.spacingHorizontalM,
+  },
+  messageTitleNoWrap: {
+    whiteSpace: "normal",
+  },
+  messageInline: {
+    fontWeight: tokens.fontWeightRegular,
   },
 });
 
@@ -67,8 +75,10 @@ function Main() {
         <section className={styles.messageBar}>
           <MessageBar intent="success">
             <MessageBarBody>
-              <MessageBarTitle>Gekoppeld</MessageBarTitle>
-              Het document is successvol gekoppeld aan {documentAddedToZaak}
+              <MessageBarTitle className={styles.messageTitleNoWrap}>Gekoppeld</MessageBarTitle>
+              <span className={styles.messageInline}>
+                Het document is successvol gekoppeld aan {documentAddedToZaak}
+              </span>
             </MessageBarBody>
           </MessageBar>
         </section>
