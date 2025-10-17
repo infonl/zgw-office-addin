@@ -98,6 +98,7 @@ export function useOffice() {
   // Construct EML from Outlook item, probably not the way to go
   const getOutlookDocumentData = useCallback(async () => {
     // ToDo: Only if body text only is needed
+    return "";
   }, []);
 
   const getDocumentData = useCallback(async () => {
