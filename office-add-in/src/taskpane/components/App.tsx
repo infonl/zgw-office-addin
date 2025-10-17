@@ -12,6 +12,7 @@ import {
   MessageBarTitle,
   tokens,
 } from "@fluentui/react-components";
+import { useOffice } from "../../hooks/useOffice";
 import { FluentProvider, webLightTheme, webDarkTheme } from "@fluentui/react-components";
 import { useDarkMode } from "usehooks-ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import { ZaakSearch } from "./ZaakSearch";
 import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
 import { ZaakForm } from "./ZaakForm";
+import { OutlookToZaakForm } from "./OutlookToZaak/OutlookToZaakForm";
 
 const useStyles = makeStyles({
   root: {
@@ -67,6 +69,8 @@ export default App;
 function Main() {
   const styles = useStyles();
 
+  const { isOutlook, isWord } = useOffice();
+
   const { documentAddedToZaak, reset } = useZaak();
 
   if (documentAddedToZaak) {
@@ -77,7 +81,7 @@ function Main() {
             <MessageBarBody>
               <MessageBarTitle className={styles.messageTitleNoWrap}>Gekoppeld</MessageBarTitle>
               <span className={styles.messageInline}>
-                Het document is successvol gekoppeld aan {documentAddedToZaak}
+                Het document is succesvol gekoppeld aan {documentAddedToZaak}
               </span>
             </MessageBarBody>
           </MessageBar>
@@ -94,6 +98,24 @@ function Main() {
     );
   }
 
+  if (isOutlook) {
+    return (
+      <div className={styles.root}>
+        <OutlookToZaakForm />
+      </div>
+    );
+  }
+
+  if (isWord) {
+    return (
+      <div className={styles.root}>
+        <ZaakSearch />
+        <ZaakForm />
+      </div>
+    );
+  }
+
+  // Fallback
   return (
     <div className={styles.root}>
       <ZaakSearch />
