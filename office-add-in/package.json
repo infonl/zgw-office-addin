@@ -63,7 +63,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@prettier/plugin-xml": "3.4.2",
     "@tanstack/eslint-plugin-query": "5.91.2",
-    "@types/node": "22.18.11",
+    "@types/node": "22.18.12",
     "@types/office-js": "1.0.550",
     "@types/office-runtime": "1.0.35",
     "@types/react": "18.3.26",
