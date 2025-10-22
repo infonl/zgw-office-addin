@@ -43,16 +43,16 @@
     "docker:validate": "docker buildx build --check ."
   },
   "dependencies": {
-    "@fluentui/react-components": "9.72.2",
+    "@fluentui/react-components": "9.72.3",
     "@fluentui/react-icons": "2.0.312",
     "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.90.5",
-    "core-js": "3.45.1",
+    "core-js": "3.46.0",
     "es6-promise": "4.2.8",
     "jwt-decode": "4.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-hook-form": "7.63.0",
+    "react-hook-form": "7.65.0",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
     "zod": "3.25.76"
