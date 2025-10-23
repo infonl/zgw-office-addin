@@ -11,7 +11,7 @@ import {
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
-  Title1,
+  Subtitle1,
   tokens,
 } from "@fluentui/react-components";
 import React from "react";
@@ -21,32 +21,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./form/Input";
 import { useZaak } from "../../provider/ZaakProvider";
 import { Zaak } from "../../hooks/useGetZaak";
+import { useOffice } from "../../hooks/useOffice";
+import { mq } from "./styles/layout";
+import { useCommonStyles } from "./styles/shared";
 
 const useStyles = makeStyles({
-  title: {
-    display: "flex",
-    flexDirection: "column",
-    gap: tokens.spacingHorizontalS,
-    paddingTop: tokens.spacingHorizontalXL,
-  },
   form: {
     display: "flex",
-    flexDirection: "row",
-    gap: tokens.spacingHorizontalM,
-    alignItems: "end",
-    justifyContent: "center",
-    marginTop: tokens.spacingHorizontalL,
-    marginBottom: tokens.spacingHorizontalXL,
+    flexDirection: "column",
+    gap: tokens.spacingVerticalM,
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    marginTop: tokens.spacingVerticalL,
+    marginBottom: tokens.spacingVerticalXL,
+    [mq.md]: {
+      flexDirection: "row",
+      alignItems: "end",
+      justifyContent: "center",
+      gap: tokens.spacingHorizontalM,
+    },
   },
-  messageBar: {
-    marginTop: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingHorizontalM,
+  input: {
+    width: "100%",
   },
-  messageTitleNoWrap: {
-    whiteSpace: "normal",
-  },
-  messageInline: {
-    fontWeight: tokens.fontWeightRegular,
+  button: {
+    width: "100%",
+    [mq.md]: {
+      width: "auto",
+    },
   },
 });
 
@@ -58,6 +60,11 @@ type ZaakSearchSchema = zod.infer<typeof zaakSearchSchema>;
 
 export function ZaakSearch() {
   const styles = useStyles();
+  const common = useCommonStyles();
+  const { isOutlook } = useOffice();
+  const helperText = isOutlook
+    ? "Vul het zaaknummer in waar je bestanden aan wil koppelen."
+    : "Vul het zaaknummer in waar je dit document aan wil koppelen.";
 
   const form = useForm({
     resolver: zodResolver(zaakSearchSchema),
@@ -78,13 +85,14 @@ export function ZaakSearch() {
   return (
     <>
       <FormProvider {...form}>
-        <section className={styles.title}>
-          <Title1>Koppelen aan zaak</Title1>
-          <Body1>Vul het zaaknummer in waar je dit document aan wil koppelen.</Body1>
+        <section className={common.title}>
+          <Subtitle1>Koppelen aan zaak</Subtitle1>
+          <Body1>{helperText}</Body1>
         </section>
         <form onSubmit={form.handleSubmit(handleSubmit)} className={styles.form}>
-          <Input name="zaaknummer" />
+          <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
           <Button
+            className={styles.button}
             disabled={!form.formState.isValid || isLoading}
             type="submit"
             appearance={isLoading ? "secondary" : "primary"}
@@ -103,14 +111,14 @@ function ZaakZoekNotifications() {
   const {
     zaak: { isLoading, isError },
   } = useZaak();
-  const styles = useStyles();
+  const common = useCommonStyles();
 
   if (isError) {
     return (
       <MessageBar intent="error">
         <MessageBarBody>
-          <MessageBarTitle className={styles.messageTitleNoWrap}>Oeps</MessageBarTitle>
-          <span className={styles.messageInline}> De zaak kan niet worden gevonden</span>
+          <MessageBarTitle className={common.messageTitleNoWrap}>Oeps</MessageBarTitle>
+          <span className={common.messageInline}> De zaak kan niet worden gevonden</span>
         </MessageBarBody>
       </MessageBar>
     );
@@ -120,12 +128,14 @@ function ZaakZoekNotifications() {
     return (
       <MessageBar intent="info">
         <MessageBarBody>
-          <MessageBarTitle className={styles.messageTitleNoWrap}>Zaak zoeken</MessageBarTitle>
-          <span className={styles.messageInline}> Dit kan even duren...</span>
+          <MessageBarTitle className={common.messageTitleNoWrap}>Zaak zoeken</MessageBarTitle>
+          <span className={common.messageInline}> Dit kan even duren...</span>
         </MessageBarBody>
       </MessageBar>
     );
   }
+
+  // ToDo : return message when zaak is found but user has no rights to attach documents to this zaak.
 
   return null;
 }
@@ -133,10 +143,9 @@ function ZaakZoekNotifications() {
 const zaakdetails = makeStyles({
   table: {
     width: "100%",
-    marginTop: tokens.spacingHorizontalS,
+    marginTop: tokens.spacingVerticalS,
     background: tokens.colorNeutralForegroundInverted,
     borderBottom: `1px solid ${tokens.colorBrandForegroundLink}`,
-    padding: tokens.spacingVerticalM,
   },
 });
 
@@ -147,30 +156,32 @@ function ZaakDetails(props: { zaak: Zaak }) {
     <section>
       <Body1>Gevonden zaak</Body1>
       <table className={styles.table}>
-        <tr>
-          <td>
-            <Body1Strong>Zaaknummer</Body1Strong>
-          </td>
-          <td>{props.zaak.identificatie}</td>
-        </tr>
-        <tr>
-          <td>
-            <Body1Strong>Zaaktype</Body1Strong>
-          </td>
-          <td>{props.zaak.zaaktype.omschrijving}</td>
-        </tr>
-        <tr>
-          <td>
-            <Body1Strong>Status</Body1Strong>
-          </td>
-          <td>{props.zaak.status.statustoelichting}</td>
-        </tr>
-        <tr>
-          <td>
-            <Body1Strong>Omschrijving</Body1Strong>
-          </td>
-          <td>{props.zaak.omschrijving}</td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>
+              <Body1Strong>Zaaknummer</Body1Strong>
+            </td>
+            <td>{props.zaak.identificatie}</td>
+          </tr>
+          <tr>
+            <td>
+              <Body1Strong>Zaaktype</Body1Strong>
+            </td>
+            <td>{props.zaak.zaaktype.omschrijving}</td>
+          </tr>
+          <tr>
+            <td>
+              <Body1Strong>Status</Body1Strong>
+            </td>
+            <td>{props.zaak.status.statustoelichting}</td>
+          </tr>
+          <tr>
+            <td>
+              <Body1Strong>Omschrijving</Body1Strong>
+            </td>
+            <td>{props.zaak.omschrijving}</td>
+          </tr>
+        </tbody>
       </table>
     </section>
   );
