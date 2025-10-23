@@ -131,7 +131,7 @@ export function StepMetadata({
       return;
     }
 
-    // collpase all when all valid
+    // collapse all when all valid
     if (prevAllValidRef.current === false && allValidNow === true) {
       setOpenItem(null);
     }
