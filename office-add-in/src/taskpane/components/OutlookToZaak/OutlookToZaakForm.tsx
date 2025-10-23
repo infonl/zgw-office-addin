@@ -4,11 +4,10 @@
  */
 
 import React from "react";
-import { tokens } from "@fluentui/react-components";
 
 import { useZaak } from "../../../provider/ZaakProvider";
 import { StepZaakSearchAndSelect } from "./steps/StepZaakSearchAndSelect";
-import { StepMetadata } from "./steps/StepMetadata";
+import { StepMetadata, type FormValues } from "./steps/StepMetadata";
 import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
 
 /**
@@ -17,14 +16,16 @@ import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
  */
 
 export function OutlookToZaakForm() {
-  const [step, setStep] = React.useState<"searchAndSelect" | "meta">("searchAndSelect");
-
   const { zaak } = useZaak();
   const hasZaak = !!zaak?.data?.identificatie;
-
   const { files, selectedIds, toggle } = useAttachmentSelection();
-
   const nextStepAllowed = hasZaak && selectedIds.length > 0;
+  const selectedFiles = React.useMemo(
+    () => files.filter((f) => selectedIds.includes(f.id)),
+    [files, selectedIds]
+  );
+  const [metadataValues, setMetadataValues] = React.useState<FormValues | undefined>(undefined);
+  const [step, setStep] = React.useState<"searchAndSelect" | "meta">("searchAndSelect");
 
   const onNext = () => {
     if (nextStepAllowed) setStep("meta");
@@ -32,16 +33,14 @@ export function OutlookToZaakForm() {
 
   const onBack = () => setStep("searchAndSelect");
 
-  const onSubmit = async () => {
-    // TODO, retrieve data per file from Graph API, attach metadata forms and submit
-    console.log("submit selected files", selectedIds);
+  const onSubmit = async (values: FormValues) => {
+    // TODO, retrieve data per file from Graph API (maybe convert id's to rest id's), attach metadata forms and submit
+    console.log("submit selected files with metadata", values);
   };
 
   return (
-    <div
-      style={{ paddingLeft: tokens.spacingHorizontalL, paddingRight: tokens.spacingHorizontalL }}
-    >
-      <div style={{ marginTop: tokens.spacingVerticalL }}>
+    <div>
+      <div>
         {step === "searchAndSelect" ? (
           <StepZaakSearchAndSelect
             files={files}
@@ -52,9 +51,14 @@ export function OutlookToZaakForm() {
           />
         ) : (
           <StepMetadata
-            files={files.filter((f: { id: string }) => selectedIds.includes(f.id))}
+            files={selectedFiles}
+            initialValues={metadataValues}
             onBack={onBack}
-            onSubmit={onSubmit}
+            onChange={setMetadataValues}
+            onSubmit={(values) => {
+              setMetadataValues(values);
+              onSubmit(values);
+            }}
           />
         )}
       </div>

@@ -21,28 +21,19 @@ import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
 import { ZaakForm } from "./ZaakForm";
 import { OutlookToZaakForm } from "./OutlookToZaak/OutlookToZaakForm";
+import { useCommonStyles } from "./styles/shared";
 
 const useStyles = makeStyles({
   root: {
     minHeight: "100vh",
-    paddingLeft: tokens.spacingHorizontalL,
-    paddingRight: tokens.spacingHorizontalL,
+    paddingLeft: tokens.spacingHorizontalXL,
+    paddingRight: tokens.spacingHorizontalXL,
   },
-  messageBar: {
-    paddingTop: tokens.spacingHorizontalXL,
-    marginTop: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingHorizontalM,
-  },
+
   actions: {
-    marginTop: tokens.spacingHorizontalXL,
+    marginTop: tokens.spacingVerticalXL,
     display: "flex",
-    gap: tokens.spacingHorizontalM,
-  },
-  messageTitleNoWrap: {
-    whiteSpace: "normal",
-  },
-  messageInline: {
-    fontWeight: tokens.fontWeightRegular,
+    gap: tokens.spacingVerticalM,
   },
 });
 
@@ -68,6 +59,7 @@ export default App;
 
 function Main() {
   const styles = useStyles();
+  const common = useCommonStyles();
 
   const { isOutlook, isWord } = useOffice();
 
@@ -76,11 +68,11 @@ function Main() {
   if (documentAddedToZaak) {
     return (
       <div className={styles.root}>
-        <section className={styles.messageBar}>
+        <section className={common.messageBar}>
           <MessageBar intent="success">
             <MessageBarBody>
-              <MessageBarTitle className={styles.messageTitleNoWrap}>Gekoppeld</MessageBarTitle>
-              <span className={styles.messageInline}>
+              <MessageBarTitle className={common.messageTitleNoWrap}>Gekoppeld</MessageBarTitle>
+              <span className={common.messageInline}>
                 Het document is succesvol gekoppeld aan {documentAddedToZaak}
               </span>
             </MessageBarBody>
