@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import React from "react";
 import { Button, Checkbox, tokens, Subtitle1, Body1 } from "@fluentui/react-components";
 import { ZaakSearch } from "../../ZaakSearch";
