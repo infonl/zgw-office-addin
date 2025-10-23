@@ -18,8 +18,4 @@ COPY --chmod=755 ./office-add-in/entrypoint.sh /docker-entrypoint.d/entrypoint.s
 COPY ./office-add-in/nginx.conf.template /etc/nginx/
 COPY ./office-add-in/nginx.https.template /etc/nginx/
 
-# Copy optional SSL certificates if they exist (likely for local development)
-COPY ./office-add-in/ssl-certs/cert.pem /etc/nginx/cert.pem
-COPY ./office-add-in/ssl-certs/key.pem /etc/nginx/key.pem
-
 EXPOSE 80
