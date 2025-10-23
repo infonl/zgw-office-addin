@@ -72,7 +72,7 @@ echo "Setting maximum upload size to $MAX_BODY_SIZE."
 sed -i -e "s|__MAX_BODY_SIZE__|$MAX_BODY_SIZE|g" "$NGINX_CONFIG_FILE"
 
 ###
-# Create a static metrix.txt file to expose the current version of the application for prometheus scraping.
+# Create a static metrics.txt file to expose the current version of the application for prometheus scraping.
 cat <<EOF > "$NGINX_PUBLIC_HTML/metrics.txt"
 # HELP app_version Application version
 # TYPE app_version gauge
