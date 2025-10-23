@@ -174,7 +174,7 @@ export function StepMetadata({
     };
   }, [form, onChange]);
 
-  // Key-based sync: add new id's to filesById (not removbing existing ones) 
+  // Key-based sync: add new id's to filesById (not removing existing ones) 
   React.useEffect(() => {
     const current = form.getValues();
     const nextFilesById: Record<string, DocumentRow> = { ...(current.filesById || {}) };
