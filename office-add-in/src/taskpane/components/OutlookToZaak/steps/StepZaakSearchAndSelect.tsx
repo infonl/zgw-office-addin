@@ -6,7 +6,7 @@
 import React from "react";
 import { Button, Checkbox, tokens, Subtitle1, Body1 } from "@fluentui/react-components";
 import { ZaakSearch } from "../../ZaakSearch";
-import { AttachmentFile } from "../../../types/attachement";
+import { AttachmentFile } from "../../../types/attachment";
 
 export function StepZaakSearchAndSelect({
   files,

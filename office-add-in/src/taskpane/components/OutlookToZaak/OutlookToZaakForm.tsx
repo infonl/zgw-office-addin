@@ -7,7 +7,7 @@ import React from "react";
 
 import { useZaak } from "../../../provider/ZaakProvider";
 import { StepZaakSearchAndSelect } from "./steps/StepZaakSearchAndSelect";
-import { StepMetadata, type FormValues } from "./steps/StepMetadata";
+import { StepMetadata, type FormValues, type SubmitPayload } from "./steps/StepMetadata";
 import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
 
 /**
@@ -33,9 +33,9 @@ export function OutlookToZaakForm() {
 
   const onBack = () => setStep("searchAndSelect");
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (payload: SubmitPayload) => {
     // TODO, retrieve data per file from Graph API (maybe convert id's to rest id's), attach metadata forms and submit
-    console.log("submit selected files with metadata", values);
+    console.log("submit selected files with metadata", payload);
   };
 
   return (
@@ -55,10 +55,7 @@ export function OutlookToZaakForm() {
             initialValues={metadataValues}
             onBack={onBack}
             onChange={setMetadataValues}
-            onSubmit={(values) => {
-              setMetadataValues(values);
-              onSubmit(values);
-            }}
+            onSubmit={onSubmit}
           />
         )}
       </div>
