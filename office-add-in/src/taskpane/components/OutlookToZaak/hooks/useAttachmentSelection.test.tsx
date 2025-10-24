@@ -55,7 +55,7 @@ describe("useAttachmentSelection", () => {
           id: "3",
           name: "file2.docx",
           size: 456,
-          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           isInline: false,
         },
       ],
@@ -80,7 +80,9 @@ describe("useAttachmentSelection", () => {
   it("toggles selection IDs", () => {
     mockOfficeItem({
       subject: "Toggle test",
-      attachments: [{ id: "A", name: "a.txt", size: 1, contentType: "text/plain", isInline: false }],
+      attachments: [
+        { id: "A", name: "a.txt", size: 1, contentType: "text/plain", isInline: false },
+      ],
     });
 
     const { result } = renderHook(() => useAttachmentSelection());
