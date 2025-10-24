@@ -12,9 +12,17 @@ export function useAttachmentSelection() {
 
   React.useEffect(() => {
     try {
-      const item: any = (window as any).Office?.context?.mailbox?.item;
-      const emailAttachments = Array.isArray(item?.attachments) ? item.attachments : [];
-      const subject: string = item?.subject || "";
+      const w: any = window as any;
+      const item: any | undefined = w?.Office?.context?.mailbox?.item;
+
+      if (!item) {
+        setFiles([]);
+        return;
+      }
+
+      const emailAttachments = Array.isArray(item.attachments) ? item.attachments : [];
+      const subject: string = item.subject || "";
+
       const emailEntry: AttachmentFile = {
         id: "EmailItself",
         name: `E-mail: ${subject || "(geen onderwerp)"}`,

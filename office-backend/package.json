@@ -35,7 +35,6 @@
     "@types/connect": "3.4.38",
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "22.18.8",
     "@types/node": "22.18.12",
     "@types/send": "1.2.0",
     "@types/serve-static": "1.15.9",
