@@ -4,18 +4,23 @@
  */
 
 import React from "react";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext, useWatch, type FieldValues } from "react-hook-form";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { documentstatus } from "../../../../hooks/useAddDocumentToZaak";
 
+interface DocumentMetadataValues extends FieldValues {
+  auteur?: string;
+  informatieobjecttype?: string;
+  status?: string;
+  creatiedatum?: string;
+}
+
 export function DocumentMetadataPanel({
   fileId,
-  index: _index,
   onValidityChange,
 }: {
   fileId: string;
-  index: number;
   onValidityChange: (_id: string, _isValid: boolean) => void;
 }) {
   const { zaak } = useZaak();
@@ -24,15 +29,19 @@ export function DocumentMetadataPanel({
   const zio = zaak?.data?.zaakinformatieobjecten || [];
 
   // Watch only this file's sub-form
-  const values = useWatch({ control, name: `filesById.${fileId}` });
+  const values = useWatch<DocumentMetadataValues>({ control, name: `filesById.${fileId}` }) as
+    | Partial<DocumentMetadataValues>
+    | undefined;
 
-  const computeValid = React.useCallback((vals: any) => {
+  const computeValid = React.useCallback((vals?: Partial<DocumentMetadataValues>) => {
     return !!vals?.auteur && !!vals?.informatieobjecttype && !!vals?.status && !!vals?.creatiedatum;
   }, []);
 
   // On mount: initial validity for this file row
   React.useEffect(() => {
-    const initVals = getValues(`filesById.${fileId}` as const);
+    const initVals = getValues(`filesById.${fileId}` as const) as
+      | Partial<DocumentMetadataValues>
+      | undefined;
     const initValid = computeValid(initVals);
     onValidityChange(fileId, initValid);
   }, [fileId]);

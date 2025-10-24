@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { AttachmentFile } from "../../../types/attachement";
+import { AttachmentFile } from "../../../types/attachment";
 
 export function useAttachmentSelection() {
   const [files, setFiles] = React.useState<AttachmentFile[]>([]);

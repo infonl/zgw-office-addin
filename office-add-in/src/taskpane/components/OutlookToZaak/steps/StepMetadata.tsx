@@ -18,7 +18,7 @@ import {
   Body1,
 } from "@fluentui/react-components";
 import { useCommonStyles } from "../../styles/shared";
-import { AttachmentFile } from "../../../types/attachement";
+import { AttachmentFile } from "../../../types/attachment";
 
 type DocumentRow = {
   fileId: string;
@@ -34,6 +34,10 @@ export type FormValues = {
   filesById: Record<string, DocumentRow>;
   selected: string[]; // render- en submit-volgorde
   validById?: Record<string, boolean>; // persistent per-bestand valid-state
+};
+
+export type SubmitPayload = {
+  files: DocumentRow[];
 };
 
 const useAccordionStyles = makeStyles({
@@ -73,7 +77,7 @@ export function StepMetadata({
   onBack: () => void;
 
   onChange?: (_values: FormValues) => void;
-  onSubmit: (_values: FormValues) => Promise<void> | void;
+  onSubmit: (_values: SubmitPayload) => Promise<void> | void;
 }) {
   const initialOpenItem = React.useMemo<string | null>(
     () => (files.length ? files[0].id : null),
@@ -220,9 +224,11 @@ export function StepMetadata({
   const allValid = selected.length > 0 && selected.every((fid) => !!validById[fid]);
 
   const submit = form.handleSubmit((values) => {
-    const payload = {
-      files: (values.selected || []).map((fid) => values.filesById[fid]).filter(Boolean),
-    } as any;
+    const files = (values.selected || [])
+      .map((fid) => values.filesById[fid])
+      .filter((row): row is DocumentRow => Boolean(row));
+
+    const payload: SubmitPayload = { files };
     onSubmit(payload);
   });
 
@@ -256,7 +262,7 @@ export function StepMetadata({
             }}
             className={aStyles.accordion}
           >
-            {selected.map((fileId, index) => {
+            {selected.map((fileId) => {
               const displayName = getDisplayName(fileId);
               return (
                 <AccordionItem key={fileId} value={fileId} className={aStyles.item}>
@@ -276,7 +282,6 @@ export function StepMetadata({
                     <DocumentMetadataPanel
                       key={fileId}
                       fileId={fileId}
-                      index={index}
                       onValidityChange={handleValidityChange}
                     />
                   </AccordionPanel>
