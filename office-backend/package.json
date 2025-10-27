@@ -37,7 +37,7 @@
     "@types/jsonwebtoken": "9.0.10",
     "@types/node": "22.18.8",
     "@types/node": "22.18.12",
-    "@types/send": "1.2.0",
+    "@types/send": "1.2.1",
     "@types/serve-static": "1.15.9",
     "eslint": "9.38.0",
     "neostandard": "0.12.2",
