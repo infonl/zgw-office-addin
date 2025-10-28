@@ -2,18 +2,13 @@
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
+
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: true,
-    // Default: Node (no DOM)
     environment: "node",
-    // Force DOM-environmet for Frontend
-    environmentMatchGlobs: [
-      ["office-add-in/**", "happy-dom"],
-      ["office-backend/**", "node"],
-    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],

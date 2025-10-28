@@ -9,10 +9,6 @@ import baseConfig from "../vitest.config";
 export default mergeConfig(
   baseConfig,
   defineConfig({
-    esbuild: {
-      jsx: "automatic",
-      jsxImportSource: "react",
-    },
     test: {
       environment: "happy-dom",
       setupFiles: ["./src/test/setup.ts"],
