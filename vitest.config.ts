@@ -7,6 +7,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    environmentMatchGlobs: [
+      ["office-add-in/src/**", "happy-dom"], //  FE-tests -> DOM
+      ["**", "node"], // default (BE)
+    ],
     globals: true,
     environment: "node",
     coverage: {
