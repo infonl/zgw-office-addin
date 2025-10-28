@@ -6,13 +6,21 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useAttachmentSelection } from "./useAttachmentSelection";
+import { AttachmentFile } from "../../../types/attachment";
 
-function mockOfficeItem(item: any | null) {
-  const w = window as any;
+interface OfficeItem {
+  subject?: string;
+  attachments?: AttachmentFile[];
+}
+
+type OfficeGlobal = { context: { mailbox: { item: OfficeItem } } };
+
+function mockOfficeItem(item: OfficeItem | null) {
+  const globalWithOffice = globalThis as { Office?: OfficeGlobal };
   if (item) {
-    w.Office = { context: { mailbox: { item } } };
+    globalWithOffice.Office = { context: { mailbox: { item } } };
   } else {
-    delete w.Office;
+    delete globalWithOffice.Office;
   }
 }
 
@@ -65,7 +73,7 @@ describe("useAttachmentSelection", () => {
     expect(result.current.files).toHaveLength(3); // email + 2 non-inline
     expect(result.current.files[1]).toMatchObject({ id: "1", name: "file1.pdf" });
     expect(result.current.files[2]).toMatchObject({ id: "3", name: "file2.docx" });
-    expect(result.current.files.find((f) => f.id === "2")).toBeUndefined();
+    expect(result.current.files.find((fileEntry) => fileEntry.id === "2")).toBeUndefined();
   });
 
   it("handles missing Office context gracefully", async () => {

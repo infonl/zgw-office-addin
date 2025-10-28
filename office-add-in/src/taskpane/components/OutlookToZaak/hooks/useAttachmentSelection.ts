@@ -12,9 +12,11 @@ export function useAttachmentSelection() {
 
   React.useEffect(() => {
     try {
-      const w: any = window as any;
-      const item: any | undefined = w?.Office?.context?.mailbox?.item;
+      const win = window as Window & {
+        Office?: typeof Office;
+      };
 
+      const item = win.Office?.context?.mailbox?.item;
       if (!item) {
         setFiles([]);
         return;
@@ -29,26 +31,31 @@ export function useAttachmentSelection() {
         contentType: "text/html",
         isInline: false,
       };
-      const mapped = emailAttachments
-        .filter((a: any) => !a.isInline) // only non-inline attachments
-        .map((a: any) => ({
-          id: a.id,
-          name: a.name,
-          size: a.size,
-          contentType: a.contentType,
+
+      const mapped: AttachmentFile[] = emailAttachments
+        .filter((attachment) => !attachment.isInline) // only non-inline attachments
+        .map((attachment) => ({
+          id: attachment.id,
+          name: attachment.name,
+          size: attachment.size,
+          contentType: attachment.contentType,
           isInline: false,
         }));
 
       setFiles([emailEntry, ...mapped]);
-    } catch (err) {
-      console.warn("Kon attachments niet laden uit Outlook context", err);
+    } catch (error) {
+      console.warn("Kon attachments niet laden uit Outlook context", error);
       setFiles([]);
     }
   }, []);
 
   const toggle = React.useCallback(
-    (id: string) =>
-      setSelectedIds((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id])),
+    (attachmentId: string) =>
+      setSelectedIds((prevSelected) =>
+        prevSelected.includes(attachmentId)
+          ? prevSelected.filter((id) => id !== attachmentId)
+          : [...prevSelected, attachmentId]
+      ),
     []
   );
 
