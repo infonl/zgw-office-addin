@@ -30,6 +30,7 @@
     "prettier:xml": "prettier --check *.xml",
     "prettier:xml:fix": "prettier --write *.xml",
     "test": "vitest --run",
+    "test:ui": "vitest --ui",
     "test:watch": "vitest",
     "validate:office": "office-addin-manifest validate manifest-office.xml",
     "validate:outlook": "office-addin-manifest validate manifest-outlook.xml",
