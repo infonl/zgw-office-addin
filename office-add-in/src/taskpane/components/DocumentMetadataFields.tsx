@@ -23,8 +23,8 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     gap: tokens.spacingVerticalM,
-    padding: 0,
-    border: 0,
+    padding: tokens.spacingHorizontalNone,
+    border: tokens.spacingVerticalNone,
     [mq.md]: {
       flexDirection: "row",
     },
@@ -86,7 +86,7 @@ export function DocumentMetadataFields({
         />
         <Input
           className={styles.field}
-          readOnly // ToDo
+          readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
           name={pn("vertrouwelijkheidaanduiding")}
           label={fieldLabels["vertrouwelijkheidaanduiding"]}
           defaultValue=""

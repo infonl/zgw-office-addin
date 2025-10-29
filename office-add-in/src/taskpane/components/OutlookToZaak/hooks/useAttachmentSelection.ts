@@ -26,7 +26,7 @@ export function useAttachmentSelection() {
       const subject: string = item.subject || "";
 
       const emailEntry: AttachmentFile = {
-        id: "EmailItself",
+        id: `EmailItself-${item.itemId}`,
         name: `E-mail: ${subject || "(geen onderwerp)"}`,
         contentType: "text/html",
         isInline: false,

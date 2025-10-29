@@ -42,26 +42,28 @@ export type SubmitPayload = {
 
 const useAccordionStyles = makeStyles({
   item: {
-    marginBlockEnd: "0",
-    borderRadius: "0px",
+    marginBlockEnd: tokens.spacingVerticalNone,
+    borderRadius: tokens.borderRadiusNone,
   },
   header: {
     backgroundColor: tokens.colorNeutralBackground2,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+    borderBottomWidth: tokens.strokeWidthThin,
+    borderBottomStyle: 'solid',
+    borderBottomColor: tokens.colorNeutralStroke1,
     minHeight: tokens.spacingVerticalXXL,
     paddingBlock: tokens.spacingVerticalXS,
-    borderRadius: "0px",
+    borderRadius: tokens.borderRadiusNone,
   },
   panel: {
     display: "flex",
     flexDirection: "column",
     gap: tokens.spacingVerticalXS,
     marginBlock: tokens.spacingVerticalM,
-    marginInline: "0",
+    marginInline: tokens.spacingHorizontalNone,
   },
   accordion: {
     marginBlock: tokens.spacingVerticalL,
-    marginInline: "0",
+    marginInline: tokens.spacingHorizontalNone,
   },
 });
 
@@ -89,16 +91,16 @@ export function StepMetadata({
   // Track previous all-valid state to detect transitions precisely
   const prevAllValidRef = React.useRef<boolean>(false);
   const common = useCommonStyles();
-  const aStyles = useAccordionStyles();
+  const accordionStyles = useAccordionStyles();
 
   const form = useForm<FormValues>({
     mode: "onChange",
     shouldUnregister: false,
     defaultValues: initialValues ?? {
       filesById: Object.fromEntries(
-        files.map((f) => [f.id, { fileId: f.id, name: f.name }] as const)
+        files.map((file) => [file.id, { fileId: file.id, name: file.name }] as const)
       ),
-      selected: files.map((f) => f.id),
+      selected: files.map((file) => file.id),
       validById: {},
     },
   });
@@ -117,7 +119,7 @@ export function StepMetadata({
       setOpenItem(selected.length ? selected[0] : null);
     }
 
-    const allValidNow = selected.length > 0 && selected.every((fid) => validById[fid] === true);
+    const allValidNow = selected.length > 0 && selected.every((fileId) => validById[fileId] === true);
 
     // First entry
     if (!initialized) {
@@ -125,7 +127,7 @@ export function StepMetadata({
         // All valid, all closed
         setOpenItem(null);
       } else if (selected.length > 0) {
-        const firstInvalid = selected.find((fid) => validById[fid] !== true);
+        const firstInvalid = selected.find((fileId) => validById[fileId] !== true);
         setOpenItem(firstInvalid ?? selected[0]);
       } else {
         setOpenItem(null);
@@ -142,7 +144,7 @@ export function StepMetadata({
 
     // Not all-valid
     if (!allValidNow) {
-      const firstInvalid = selected.find((fid) => validById[fid] !== true);
+      const firstInvalid = selected.find((fileId) => validById[fileId] !== true);
 
       if (openItem === null) {
         if (suppressNextAutoOpenRef.current) {
@@ -156,9 +158,9 @@ export function StepMetadata({
     prevAllValidRef.current = allValidNow;
   }, [selected, validById, openItem, initialized]);
 
-  const fileIds = React.useMemo(() => files.map((f) => f.id), [files]);
+  const fileIds = React.useMemo(() => files.map((file) => file.id), [files]);
   const fileById = React.useMemo(() => {
-    return Object.fromEntries(files.map((f) => [f.id, f]));
+    return Object.fromEntries(files.map((file) => [file.id, file]));
   }, [files]);
 
   const getDisplayName = React.useCallback(
@@ -170,11 +172,11 @@ export function StepMetadata({
   );
 
   React.useEffect(() => {
-    const sub = form.watch((values) => {
+    const subscription = form.watch((values) => {
       onChange?.(values as FormValues);
     });
     return () => {
-      sub?.unsubscribe?.();
+      subscription?.unsubscribe?.();
     };
   }, [form, onChange]);
 
@@ -183,9 +185,9 @@ export function StepMetadata({
     const current = form.getValues();
     const nextFilesById: Record<string, DocumentRow> = { ...(current.filesById || {}) };
     // add missing one
-    fileIds.forEach((fid) => {
-      if (!nextFilesById[fid]) {
-        nextFilesById[fid] = { fileId: fid, name: fileById[fid]?.name };
+    fileIds.forEach((fileId) => {
+      if (!nextFilesById[fileId]) {
+        nextFilesById[fileId] = { fileId: fileId, name: fileById[fileId]?.name };
       }
     });
     // limit rerenders by checking for actual changes
@@ -211,9 +213,9 @@ export function StepMetadata({
 
       // If the current open panel is valid, move to the next invalid (if any)
       if (isValid && id === openItem) {
-        const sel = (form.getValues("selected") || []) as string[];
-        const vmap = (form.getValues("validById") || {}) as Record<string, boolean>;
-        const nextInvalid = sel.find((fid) => vmap[fid] !== true && fid !== id);
+        const selected = (form.getValues("selected") || []) as string[];
+        const validityMap = (form.getValues("validById") || {}) as Record<string, boolean>;
+        const nextInvalid = selected.find((fileId) => validityMap[fileId] !== true && fileId !== id);
         if (nextInvalid) setOpenItem(nextInvalid);
         else setOpenItem(null);
       }
@@ -221,11 +223,11 @@ export function StepMetadata({
     [form, openItem]
   );
 
-  const allValid = selected.length > 0 && selected.every((fid) => !!validById[fid]);
+  const allValid = selected.length > 0 && selected.every((fileId) => !!validById[fileId]);
 
   const submit = form.handleSubmit((values) => {
     const files = (values.selected || [])
-      .map((fid) => values.filesById[fid])
+      .map((fileId) => values.filesById[fileId])
       .filter((row): row is DocumentRow => Boolean(row));
 
     const payload: SubmitPayload = { files };
@@ -260,13 +262,13 @@ export function StepMetadata({
               const next = items[0] ?? null;
               setOpenItem(next === null ? null : String(next));
             }}
-            className={aStyles.accordion}
+            className={accordionStyles.accordion}
           >
             {selected.map((fileId) => {
               const displayName = getDisplayName(fileId);
               return (
-                <AccordionItem key={fileId} value={fileId} className={aStyles.item}>
-                  <AccordionHeader className={aStyles.header} expandIconPosition="end">
+                <AccordionItem key={fileId} value={fileId} className={accordionStyles.item}>
+                  <AccordionHeader className={accordionStyles.header} expandIconPosition="end">
                     <span>{displayName}</span>
                     {validById[fileId] && (
                       <span
@@ -278,7 +280,7 @@ export function StepMetadata({
                       </span>
                     )}
                   </AccordionHeader>
-                  <AccordionPanel className={aStyles.panel}>
+                  <AccordionPanel className={accordionStyles.panel}>
                     <DocumentMetadataPanel
                       key={fileId}
                       fileId={fileId}
