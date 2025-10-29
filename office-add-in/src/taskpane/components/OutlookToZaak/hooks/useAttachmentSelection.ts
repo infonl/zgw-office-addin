@@ -22,9 +22,7 @@ export function useAttachmentSelection() {
         return;
       }
 
-      const emailAttachments: AttachmentFile[] = Array.isArray(item.attachments)
-        ? (item.attachments as AttachmentFile[])
-        : [];
+      const emailAttachments = Array.isArray(item.attachments) ? item.attachments : [];
       const subject: string = item.subject || "";
 
       const emailEntry: AttachmentFile = {

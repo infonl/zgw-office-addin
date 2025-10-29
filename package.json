@@ -26,7 +26,7 @@
     "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts",
     "test": "turbo test",
     "test:coverage": "turbo test -- --coverage",
-    "test:ui": "vitest --config ./office-add-in/vitest.config.ts --ui",
+    "test:ui": "vitest --ui",
     "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
   "devDependencies": {
