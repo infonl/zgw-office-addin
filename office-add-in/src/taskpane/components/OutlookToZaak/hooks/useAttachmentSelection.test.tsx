@@ -9,6 +9,7 @@ import { useAttachmentSelection } from "./useAttachmentSelection";
 import { AttachmentFile } from "../../../types/attachment";
 
 interface OfficeItem {
+  itemId?: string
   subject?: string;
   attachments?: AttachmentFile[];
 }
@@ -39,6 +40,7 @@ describe("useAttachmentSelection", () => {
 
   it("includes the email itself as the first entry", () => {
     mockOfficeItem({
+      itemId: "ABC123",
       subject: "Test mail",
       attachments: [],
     });
@@ -46,7 +48,7 @@ describe("useAttachmentSelection", () => {
     const { result } = renderHook(() => useAttachmentSelection());
     expect(result.current.files).toHaveLength(1);
     expect(result.current.files[0]).toMatchObject({
-      id: "EmailItself",
+      id: "EmailItself-ABC123",
       name: "E-mail: Test mail",
       contentType: "text/html",
       isInline: false,
