@@ -9,7 +9,7 @@ import { useAttachmentSelection } from "./useAttachmentSelection";
 import { AttachmentFile } from "../../../types/attachment";
 
 interface OfficeItem {
-  itemId?: string
+  itemId?: string;
   subject?: string;
   attachments?: AttachmentFile[];
 }
