@@ -9,7 +9,7 @@ import { Input } from "./form/Input";
 import { Select } from "./form/Select";
 import { documentstatus } from "../../hooks/useAddDocumentToZaak";
 import { mq, dims } from "./styles/layout";
-import { format } from 'date-fns'
+import { format } from "date-fns";
 
 const fieldLabels: Record<string, string> = {
   auteur: "Auteur",
@@ -56,7 +56,7 @@ export function DocumentMetadataFields({
   const styles = useStyles();
   const pn = (n: string) => (namePrefix ? `${namePrefix}.${n}` : n);
 
-  const getToday = React.useCallback(() => format(new Date(), 'yyyy-MM-dd'), []);
+  const getToday = React.useCallback(() => format(new Date(), "yyyy-MM-dd"), []);
 
   return (
     <>

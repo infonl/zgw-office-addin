@@ -67,9 +67,9 @@ function computeInitialOpenPanel(
   selectedItemIds: string[],
   validityMap: Record<string, boolean>
 ): string | null {
-  if (selectedItemIds.length === 0) return null
-  const firstInvalidPanel = selectedItemIds.find((fileId) => validityMap[fileId] !== true)
-  return firstInvalidPanel ?? null
+  if (selectedItemIds.length === 0) return null;
+  const firstInvalidPanel = selectedItemIds.find((fileId) => validityMap[fileId] !== true);
+  return firstInvalidPanel ?? null;
 }
 
 const useAccordionStyles = makeStyles({
