@@ -32,13 +32,45 @@ type DocumentRow = {
 
 export type FormValues = {
   filesById: Record<string, DocumentRow>;
-  selected: string[]; // render- en submit-volgorde
-  validById?: Record<string, boolean>; // persistent per-bestand valid-state
+  selectedItems: string[];
+  validById?: Record<string, boolean>;
 };
 
 export type SubmitPayload = {
   files: DocumentRow[];
 };
+
+type OpenValue = string | number;
+type OpenItems = OpenValue | OpenValue[] | undefined;
+
+function arraysEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function getFirstOpenValue(openItems: OpenItems): string | null {
+  if (openItems == null) return null;
+  const first = Array.isArray(openItems) ? openItems[0] : openItems;
+  return first == null ? null : String(first);
+}
+
+function handleAccordionToggle(
+  openItems: OpenItems,
+  setOpenItemPanel: React.Dispatch<React.SetStateAction<string | null>>,
+  userCollapsedActionRef: React.MutableRefObject<boolean>
+) {
+  const next = getFirstOpenValue(openItems);
+  userCollapsedActionRef.current = next === null;
+  setOpenItemPanel(next);
+}
+
+function computeInitialOpenPanel(
+  selectedItemIds: string[],
+  validityMap: Record<string, boolean>
+): string | null {
+  if (selectedItemIds.length === 0) return null
+  const firstInvalidPanel = selectedItemIds.find((fileId) => validityMap[fileId] !== true)
+  return firstInvalidPanel ?? null
+}
 
 const useAccordionStyles = makeStyles({
   item: {
@@ -48,7 +80,7 @@ const useAccordionStyles = makeStyles({
   header: {
     backgroundColor: tokens.colorNeutralBackground2,
     borderBottomWidth: tokens.strokeWidthThin,
-    borderBottomStyle: 'solid',
+    borderBottomStyle: "solid",
     borderBottomColor: tokens.colorNeutralStroke1,
     minHeight: tokens.spacingVerticalXXL,
     paddingBlock: tokens.spacingVerticalXS,
@@ -81,17 +113,16 @@ export function StepMetadata({
   onChange?: (_values: FormValues) => void;
   onSubmit: (_values: SubmitPayload) => Promise<void> | void;
 }) {
-  const initialOpenItem = React.useMemo<string | null>(
-    () => (files.length ? files[0].id : null),
-    [files]
-  );
-  const [openItem, setOpenItem] = React.useState<string | null>(initialOpenItem);
-  const [initialized, setInitialized] = React.useState(false);
-  const suppressNextAutoOpenRef = React.useRef(false);
-  // Track previous all-valid state to detect transitions precisely
-  const prevAllValidRef = React.useRef<boolean>(false);
+  const [openItemPanel, setOpenItemPanel] = React.useState<string | null>(null);
+  const userCollapsedActionRef = React.useRef(false);
   const common = useCommonStyles();
   const accordionStyles = useAccordionStyles();
+
+  const onAccordionToggle = React.useCallback(
+    (openItems: OpenItems) =>
+      handleAccordionToggle(openItems, setOpenItemPanel, userCollapsedActionRef),
+    []
+  );
 
   const form = useForm<FormValues>({
     mode: "onChange",
@@ -100,63 +131,26 @@ export function StepMetadata({
       filesById: Object.fromEntries(
         files.map((file) => [file.id, { fileId: file.id, name: file.name }] as const)
       ),
-      selected: files.map((file) => file.id),
+      selectedItems: files.map((file) => file.id),
       validById: {},
     },
   });
 
-  const selected = useWatch({ control: form.control, name: "selected" }) ?? [];
+  const selectedItems = useWatch({ control: form.control, name: "selectedItems" }) ?? [];
   const filesById =
     useWatch({ control: form.control, name: "filesById" }) ?? ({} as Record<string, DocumentRow>);
   const validById =
     useWatch({ control: form.control, name: "validById" }) ?? ({} as Record<string, boolean>);
 
+  // Calculate open panel
   React.useEffect(() => {
-    const idSet = new Set(selected);
+    if (openItemPanel && selectedItems.includes(openItemPanel)) return;
 
-    // if current selected item is no longer part of the selection, set another one
-    if (openItem !== null && !idSet.has(String(openItem))) {
-      setOpenItem(selected.length ? selected[0] : null);
-    }
+    if (openItemPanel === null && userCollapsedActionRef.current) return;
 
-    const allValidNow = selected.length > 0 && selected.every((fileId) => validById[fileId] === true);
-
-    // First entry
-    if (!initialized) {
-      if (allValidNow) {
-        // All valid, all closed
-        setOpenItem(null);
-      } else if (selected.length > 0) {
-        const firstInvalid = selected.find((fileId) => validById[fileId] !== true);
-        setOpenItem(firstInvalid ?? selected[0]);
-      } else {
-        setOpenItem(null);
-      }
-      setInitialized(true);
-      prevAllValidRef.current = allValidNow;
-      return;
-    }
-
-    // collapse all when all valid
-    if (prevAllValidRef.current === false && allValidNow === true) {
-      setOpenItem(null);
-    }
-
-    // Not all-valid
-    if (!allValidNow) {
-      const firstInvalid = selected.find((fileId) => validById[fileId] !== true);
-
-      if (openItem === null) {
-        if (suppressNextAutoOpenRef.current) {
-          suppressNextAutoOpenRef.current = false;
-        } else if (firstInvalid) {
-          setOpenItem(firstInvalid);
-        }
-      }
-    }
-
-    prevAllValidRef.current = allValidNow;
-  }, [selected, validById, openItem, initialized]);
+    const next = computeInitialOpenPanel(selectedItems, validById);
+    setOpenItemPanel(next);
+  }, [selectedItems, validById, openItemPanel]);
 
   const fileIds = React.useMemo(() => files.map((file) => file.id), [files]);
   const fileById = React.useMemo(() => {
@@ -182,51 +176,51 @@ export function StepMetadata({
 
   // Key-based sync: add new id's to filesById (not removing existing ones)
   React.useEffect(() => {
-    const current = form.getValues();
-    const nextFilesById: Record<string, DocumentRow> = { ...(current.filesById || {}) };
-    // add missing one
-    fileIds.forEach((fileId) => {
+    const currentFormValues = form.getValues();
+    const currentFilesById = currentFormValues.filesById ?? {};
+
+    let addedMissingFile = false;
+    const nextFilesById: Record<string, DocumentRow> = { ...currentFilesById };
+
+    for (const fileId of fileIds) {
       if (!nextFilesById[fileId]) {
-        nextFilesById[fileId] = { fileId: fileId, name: fileById[fileId]?.name };
+        nextFilesById[fileId] = { fileId, name: fileById[fileId]?.name };
+        addedMissingFile = true;
       }
-    });
-    // limit rerenders by checking for actual changes
-    const changedMap = JSON.stringify(nextFilesById) !== JSON.stringify(current.filesById || {});
-    const nextSelected = fileIds.slice();
-    const changedSel = JSON.stringify(nextSelected) !== JSON.stringify(current.selected || []);
-    if (changedMap)
+    }
+
+    if (addedMissingFile) {
       form.setValue("filesById", nextFilesById, { shouldDirty: false, shouldValidate: false });
-    if (changedSel)
-      form.setValue("selected", nextSelected, { shouldDirty: false, shouldValidate: true });
-  }, [fileIds.join("|"), fileById, form]);
+    }
+
+    // Keep  same order
+    const nextSelectedItems = fileIds;
+    const currentSelectedItems = currentFormValues.selectedItems ?? [];
+
+    if (!arraysEqual(nextSelectedItems, currentSelectedItems)) {
+      form.setValue("selectedItems", nextSelectedItems, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+    }
+  }, [fileIds, fileById, form]);
 
   const handleValidityChange = React.useCallback(
     (id: string, isValid: boolean) => {
       const current = form.getValues("validById") || {};
       if (current[id] === isValid) return;
-
-      // update validity in form state
       form.setValue(`validById.${id}` as const, isValid, {
         shouldDirty: false,
         shouldValidate: false,
       });
-
-      // If the current open panel is valid, move to the next invalid (if any)
-      if (isValid && id === openItem) {
-        const selected = (form.getValues("selected") || []) as string[];
-        const validityMap = (form.getValues("validById") || {}) as Record<string, boolean>;
-        const nextInvalid = selected.find((fileId) => validityMap[fileId] !== true && fileId !== id);
-        if (nextInvalid) setOpenItem(nextInvalid);
-        else setOpenItem(null);
-      }
     },
-    [form, openItem]
+    [form]
   );
 
-  const allValid = selected.length > 0 && selected.every((fileId) => !!validById[fileId]);
+  const allValid = selectedItems.length > 0 && selectedItems.every((fileId) => !!validById[fileId]);
 
   const submit = form.handleSubmit((values) => {
-    const files = (values.selected || [])
+    const files = (values.selectedItems || [])
       .map((fileId) => values.filesById[fileId])
       .filter((row): row is DocumentRow => Boolean(row));
 
@@ -245,26 +239,11 @@ export function StepMetadata({
           <Accordion
             multiple={false}
             collapsible
-            // always provide an array: [] means nothing open
-            openItems={openItem === null ? [] : [openItem]}
-            onToggle={(_, data) => {
-              const items = Array.isArray(data.openItems)
-                ? (data.openItems as (string | number)[])
-                : data.openItems == null
-                  ? []
-                  : [data.openItems as string | number];
-
-              // if closing the last open item, suppress auto-open on next validity change
-              if (items.length === 0) {
-                suppressNextAutoOpenRef.current = true;
-              }
-
-              const next = items[0] ?? null;
-              setOpenItem(next === null ? null : String(next));
-            }}
+            openItems={openItemPanel === null ? [] : [openItemPanel]}
+            onToggle={(_, { openItems }) => onAccordionToggle(openItems as OpenItems)}
             className={accordionStyles.accordion}
           >
-            {selected.map((fileId) => {
+            {selectedItems.map((fileId) => {
               const displayName = getDisplayName(fileId);
               return (
                 <AccordionItem key={fileId} value={fileId} className={accordionStyles.item}>
