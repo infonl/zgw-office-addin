@@ -75,7 +75,7 @@ Without proper SSL certificates, you'll encounter:
    This installs mkcert's root certificate in your system trust store.
 
 3. **Generate certificates for the project**
-   Before executing fill in the path to the project in the `generate-keys-backend.sh`
+   Before executing, fill in the path to the project in the `generate-keys-backend.sh`
    ```shell
    ./generate-keys-frontend.sh
    ./generate-keys-backend.sh
