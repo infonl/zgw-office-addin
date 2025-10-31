@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useAttachmentSelection } from "./useAttachmentSelection";
 import { AttachmentFile } from "../../../types/attachment";
 
@@ -85,49 +85,5 @@ describe("useAttachmentSelection", () => {
     await waitFor(() => {
       expect(result.current.files).toEqual([]);
     });
-  });
-
-  it("toggles selection IDs", () => {
-    mockOfficeItem({
-      subject: "Toggle test",
-      attachments: [
-        { id: "A", name: "a.txt", size: 1, contentType: "text/plain", isInline: false },
-      ],
-    });
-
-    const { result } = renderHook(() => useAttachmentSelection());
-    expect(result.current.selectedIds).toEqual([]);
-
-    act(() => {
-      result.current.toggle("A");
-    });
-    expect(result.current.selectedIds).toEqual(["A"]);
-
-    act(() => {
-      result.current.toggle("A");
-    });
-    expect(result.current.selectedIds).toEqual([]);
-  });
-
-  it("clears selection", () => {
-    mockOfficeItem({
-      subject: "Clear test",
-      attachments: [
-        { id: "A", name: "a.txt", size: 1, contentType: "text/plain", isInline: false },
-        { id: "B", name: "b.txt", size: 1, contentType: "text/plain", isInline: false },
-      ],
-    });
-
-    const { result } = renderHook(() => useAttachmentSelection());
-    act(() => {
-      result.current.toggle("A");
-      result.current.toggle("B");
-    });
-    expect(result.current.selectedIds.sort()).toEqual(["A", "B"]);
-
-    act(() => {
-      result.current.clearSelection();
-    });
-    expect(result.current.selectedIds).toEqual([]);
   });
 });

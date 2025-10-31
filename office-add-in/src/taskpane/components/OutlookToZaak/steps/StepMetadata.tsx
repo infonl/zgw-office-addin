@@ -22,18 +22,23 @@ import { AttachmentFile } from "../../../types/attachment";
 import { addDocumentSchema } from "../../../../hooks/useAddDocumentToZaak";
 import * as z from "zod";
 
-const documentRowSchema = addDocumentSchema;
+const validFileMetadataSchema = addDocumentSchema;
 
 export const formValuesSchema = z.object({
-  filesById: z.record(z.string(), documentRowSchema.partial()),
+  filesById: z.record(z.string(), validFileMetadataSchema.partial()),
   selectedItems: z.array(z.string()),
 });
 
+const submitValidationSchema = z.object({
+  filesById: z.record(z.string(), validFileMetadataSchema),
+  selectedItems: z.array(z.string()).min(1),
+});
+
 export type FormValues = z.infer<typeof formValuesSchema>;
-type DocumentRow = z.infer<typeof documentRowSchema>;
+type CompleteFileMetadata = z.infer<typeof validFileMetadataSchema>;
 
 export type SubmitPayload = {
-  files: DocumentRow[];
+  files: CompleteFileMetadata[];
 };
 
 type OpenValue = string | number;
@@ -114,6 +119,7 @@ export function StepMetadata({
   const { control } = useFormContext<FormValues>();
 
   const selectedItems = useWatch({ control, name: "selectedItems" });
+
   const filesById = useWatch({ control, name: "filesById" });
 
   const isFileValid = React.useCallback(
@@ -121,7 +127,7 @@ export function StepMetadata({
       const fileData = filesById[fileId];
       if (!fileData) return false;
 
-      return documentRowSchema.safeParse(fileData).success;
+      return validFileMetadataSchema.safeParse(fileData).success;
     },
     [filesById]
   );
@@ -147,8 +153,14 @@ export function StepMetadata({
     return Object.fromEntries(files.map((file) => [file.id, file]));
   }, [files]);
 
-  const allValid = selectedItems.length > 0 && selectedItems.every((fileId) => isFileValid(fileId));
+  const selectedFilesOnly = Object.fromEntries(
+    selectedItems.filter((fileId) => filesById[fileId]).map((fileId) => [fileId, filesById[fileId]])
+  );
 
+  const isFormValid = submitValidationSchema.safeParse({
+    filesById: selectedFilesOnly,
+    selectedItems,
+  }).success;
   return (
     <>
       <section className={common.title}>
@@ -190,7 +202,7 @@ export function StepMetadata({
           <Button appearance="secondary" type="button" onClick={onBack}>
             Vorige stap
           </Button>
-          <Button appearance="primary" type="button" disabled={!allValid} onClick={onSubmit}>
+          <Button appearance="primary" type="button" disabled={!isFormValid} onClick={onSubmit}>
             Bestanden koppelen
           </Button>
         </div>

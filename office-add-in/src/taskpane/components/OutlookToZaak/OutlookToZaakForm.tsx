@@ -25,12 +25,7 @@ import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
 export function OutlookToZaakForm() {
   const { zaak } = useZaak();
   const hasZaak = !!zaak?.data?.identificatie;
-  const { files, selectedIds, toggle } = useAttachmentSelection();
-  const nextStepAllowed = hasZaak && selectedIds.length > 0;
-  const selectedFiles = React.useMemo(
-    () => files.filter((f) => selectedIds.includes(f.id)),
-    [files, selectedIds]
-  );
+  const { files } = useAttachmentSelection();
   const [step, setStep] = React.useState<"searchAndSelect" | "meta">("searchAndSelect");
 
   const form = useForm<FormValues>({
@@ -43,37 +38,47 @@ export function OutlookToZaakForm() {
     },
   });
 
+  const selectedItems = form.watch("selectedItems");
+  const selectedFiles = React.useMemo(
+    () => files.filter((f) => selectedItems.includes(f.id)),
+    [files, selectedItems]
+  );
+  const nextStepAllowed = hasZaak && selectedItems.length > 0;
+
   React.useEffect(() => {
     const currentFilesById = form.getValues("filesById");
-    const currentSelectedItems = form.getValues("selectedItems");
+    const newFiles = selectedItems.filter((fileId) => !currentFilesById[fileId]);
 
-    const newFiles = selectedFiles.filter((file) => !currentFilesById[file.id]);
-    const newFilesById = Object.fromEntries(
-      newFiles.map((file) => [
-        file.id,
-        {
-          vertrouwelijkheidaanduiding: "openbaar",
-          zaakidentificatie: zaak?.data?.identificatie!,
-        },
-      ])
-    );
+    if (newFiles.length > 0) {
+      const newFilesById = Object.fromEntries(
+        newFiles.map((fileId) => [
+          fileId,
+          {
+            vertrouwelijkheidaanduiding: "openbaar",
+            zaakidentificatie: zaak?.data?.identificatie!,
+          },
+        ])
+      );
 
-    const filesById = { ...currentFilesById, ...newFilesById };
-    const selectedItems = selectedFiles.map((file) => file.id);
-
-    const selectedItemsChanged =
-      currentSelectedItems.length !== selectedItems.length ||
-      currentSelectedItems.some((id, index) => id !== selectedItems[index]);
-
-    if (selectedItemsChanged) {
-      form.setValue("selectedItems", selectedItems, { shouldDirty: false });
+      form.setValue("filesById", { ...currentFilesById, ...newFilesById });
     }
+  }, [selectedItems, form, zaak?.data?.identificatie]);
 
-    const hasNewFiles = newFiles.length > 0;
-    if (hasNewFiles) {
-      form.setValue("filesById", filesById, { shouldDirty: false });
-    }
-  }, [selectedFiles, form]);
+  const toggleFileSelection = React.useCallback(
+    (fileId: string) => {
+      const isSelected = selectedItems.includes(fileId);
+
+      if (isSelected) {
+        const updated = selectedItems.filter((id) => id !== fileId);
+        form.setValue("selectedItems", updated);
+      } else {
+        const allFileIds = files.map((f) => f.id);
+        const updated = allFileIds.filter((id) => selectedItems.includes(id) || id === fileId);
+        form.setValue("selectedItems", updated);
+      }
+    },
+    [selectedItems, form, files]
+  );
 
   const onNext = () => {
     if (nextStepAllowed) setStep("meta");
@@ -81,24 +86,23 @@ export function OutlookToZaakForm() {
 
   const onBack = () => setStep("searchAndSelect");
 
-  const onSubmit = React.useCallback(() => {
-    const values = form.getValues();
-    const files = values.selectedItems
-      .map((fileId) => values.filesById[fileId])
-      .filter((row): row is SubmitPayload["files"][number] => Boolean(row));
+  const onSubmit = form.handleSubmit((values) => {
+    const files = values.selectedItems.map(
+      (fileId) => values.filesById[fileId]
+    ) as SubmitPayload["files"];
 
     const payload: SubmitPayload = { files };
     // https://dimpact.atlassian.net/browse/PZ-8370, retrieve data per file from Graph API (maybe convert id's to rest id's), attach metadata forms and submit
     console.log("submit selected files with metadata", payload);
-  }, [form]);
+  });
 
   return (
     <FormProvider {...form}>
       {step === "searchAndSelect" ? (
         <StepZaakSearchAndSelect
           files={files}
-          selectedIds={selectedIds}
-          onToggle={toggle}
+          selectedIds={selectedItems}
+          onToggle={toggleFileSelection}
           onNext={onNext}
           hasZaak={hasZaak}
         />

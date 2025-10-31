@@ -8,7 +8,6 @@ import { AttachmentFile } from "../../../types/attachment";
 
 export function useAttachmentSelection() {
   const [files, setFiles] = React.useState<AttachmentFile[]>([]);
-  const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     try {
@@ -42,17 +41,5 @@ export function useAttachmentSelection() {
     }
   }, []);
 
-  const toggle = React.useCallback(
-    (attachmentId: string) =>
-      setSelectedIds((prevSelected) =>
-        prevSelected.includes(attachmentId)
-          ? prevSelected.filter((id) => id !== attachmentId)
-          : [...prevSelected, attachmentId]
-      ),
-    []
-  );
-
-  const clearSelection = React.useCallback(() => setSelectedIds([]), []);
-
-  return { files, selectedIds, toggle, clearSelection };
+  return { files };
 }
