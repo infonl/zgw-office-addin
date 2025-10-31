@@ -23,8 +23,6 @@ export function StepZaakSearchAndSelect({
 }) {
   return (
     <div>
-      <ZaakSearch />
-
       {hasZaak && (
         <>
           <section

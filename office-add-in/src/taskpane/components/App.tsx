@@ -63,7 +63,7 @@ function Main() {
 
   const { isOutlook, isWord } = useOffice();
 
-  const { documentAddedToZaak, reset } = useZaak();
+  const { documentAddedToZaak, zaak, reset } = useZaak();
 
   if (documentAddedToZaak) {
     return (
@@ -90,28 +90,11 @@ function Main() {
     );
   }
 
-  if (isOutlook) {
-    return (
-      <div className={styles.root}>
-        <OutlookToZaakForm />
-      </div>
-    );
-  }
-
-  if (isWord) {
-    return (
-      <div className={styles.root}>
-        <ZaakSearch />
-        <ZaakForm />
-      </div>
-    );
-  }
-
-  // Fallback
   return (
     <div className={styles.root}>
       <ZaakSearch />
-      <ZaakForm />
+      {isWord && <ZaakForm />}
+      {isOutlook && <OutlookToZaakForm />}
     </div>
   );
 }

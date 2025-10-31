@@ -12,24 +12,24 @@ if ! command -v mkcert &> /dev/null; then
 fi
 
 # Re-create ssl-certs directories
-rm -rf ./office-add-in/ssl-certs
-mkdir -p ./office-add-in/ssl-certs
+rm -rf ./office-backend/ssl-certs
+mkdir -p ./office-backend/ssl-certs
 
 echo "🔧 Generating localhost SSL certificates with mkcert..."
 
 # === FRONTEND CERTIFICATES ===
 echo "📱 Generating frontend certificates..."
-cd ./office-add-in/ssl-certs
+cd ./office-backend/ssl-certs
 mkcert -key-file key.pem -cert-file cert.pem localhost 127.0.0.1 ::1
 cd ../..
 
 # Copy the mkcert CA certificate
 echo "📋 Copying CA certificate..."
 MKCERT_CA_ROOT=$(mkcert -CAROOT)
-cp "$MKCERT_CA_ROOT/rootCA.pem" ./office-add-in/ssl-certs/ca-cert.pem
+cp "$MKCERT_CA_ROOT/rootCA.pem" ./office-backend/ssl-certs/ca-cert.pem
 
 echo "✅ Certificate generation complete!"
-echo "📁 Frontend certificates: ./office-add-in/ssl-certs/"
+echo "📁 Office certificates: ./office-backend/ssl-certs/"
 echo ""
 echo "🔒 To trust these certificates system-wide, run:"
 echo "   mkcert -install"
