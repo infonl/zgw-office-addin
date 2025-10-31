@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     flexDirection: "column",
     gap: tokens.spacingVerticalM,
     padding: tokens.spacingHorizontalNone,
-    border: tokens.spacingVerticalNone,
+    border: 0,
     [mq.md]: {
       flexDirection: "row",
     },
@@ -54,7 +54,7 @@ export function DocumentMetadataFields({
   namePrefix = "",
 }: DocumentMetadataFieldsProps) {
   const styles = useStyles();
-  const pn = (n: string) => (namePrefix ? `${namePrefix}.${n}` : n);
+  const prefixName = (fieldName: string) => (namePrefix ? `${namePrefix}.${fieldName}` : fieldName);
 
   const getToday = React.useCallback(() => format(new Date(), "yyyy-MM-dd"), []);
 
@@ -62,7 +62,7 @@ export function DocumentMetadataFields({
     <>
       <Input
         className={styles.field}
-        name={pn("auteur")}
+        name={prefixName("auteur")}
         label={requiredLabel("auteur")}
         required
         defaultValue=""
@@ -70,19 +70,19 @@ export function DocumentMetadataFields({
       <fieldset className={styles.fieldset}>
         <Select
           className={styles.field}
-          name={pn("informatieobjecttype")}
+          name={prefixName("informatieobjecttype")}
           label={requiredLabel("informatieobjecttype")}
           required
           defaultValue=""
-          options={zaakinformatieobjecten.map((zio) => ({
-            label: zio.omschrijving,
-            value: zio.url || "",
+          options={zaakinformatieobjecten.map((zaakinformatieobject) => ({
+            label: zaakinformatieobject.omschrijving,
+            value: zaakinformatieobject.url || "",
           }))}
         />
         <Input
           className={styles.field}
           readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
-          name={pn("vertrouwelijkheidaanduiding")}
+          name={prefixName("vertrouwelijkheidaanduiding")}
           label={fieldLabels["vertrouwelijkheidaanduiding"]}
           defaultValue=""
         />
@@ -90,7 +90,7 @@ export function DocumentMetadataFields({
       <fieldset className={styles.fieldset}>
         <Select
           className={styles.field}
-          name={pn("status")}
+          name={prefixName("status")}
           label={requiredLabel("status")}
           required
           defaultValue=""
@@ -102,7 +102,7 @@ export function DocumentMetadataFields({
         <Input
           className={styles.field}
           type="date"
-          name={pn("creatiedatum")}
+          name={prefixName("creatiedatum")}
           label={requiredLabel("creatiedatum")}
           required
           defaultValue={getToday()}

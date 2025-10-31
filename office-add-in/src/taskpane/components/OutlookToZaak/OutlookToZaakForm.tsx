@@ -4,10 +4,17 @@
  */
 
 import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useZaak } from "../../../provider/ZaakProvider";
 import { StepZaakSearchAndSelect } from "./steps/StepZaakSearchAndSelect";
-import { StepMetadata, type FormValues, type SubmitPayload } from "./steps/StepMetadata";
+import {
+  StepMetadata,
+  type FormValues,
+  type SubmitPayload,
+  formValuesSchema,
+} from "./steps/StepMetadata";
 import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
 
 /**
@@ -24,8 +31,49 @@ export function OutlookToZaakForm() {
     () => files.filter((f) => selectedIds.includes(f.id)),
     [files, selectedIds]
   );
-  const [metadataValues, setMetadataValues] = React.useState<FormValues | undefined>(undefined);
   const [step, setStep] = React.useState<"searchAndSelect" | "meta">("searchAndSelect");
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formValuesSchema),
+    mode: "onChange",
+    shouldUnregister: false,
+    defaultValues: {
+      filesById: {},
+      selectedItems: [],
+    },
+  });
+
+  React.useEffect(() => {
+    const currentFilesById = form.getValues("filesById");
+    const currentSelectedItems = form.getValues("selectedItems");
+
+    const newFiles = selectedFiles.filter((file) => !currentFilesById[file.id]);
+    const newFilesById = Object.fromEntries(
+      newFiles.map((file) => [
+        file.id,
+        {
+          vertrouwelijkheidaanduiding: "openbaar",
+          zaakidentificatie: zaak?.data?.identificatie!,
+        },
+      ])
+    );
+
+    const filesById = { ...currentFilesById, ...newFilesById };
+    const selectedItems = selectedFiles.map((file) => file.id);
+
+    const selectedItemsChanged =
+      currentSelectedItems.length !== selectedItems.length ||
+      currentSelectedItems.some((id, index) => id !== selectedItems[index]);
+
+    if (selectedItemsChanged) {
+      form.setValue("selectedItems", selectedItems, { shouldDirty: false });
+    }
+
+    const hasNewFiles = newFiles.length > 0;
+    if (hasNewFiles) {
+      form.setValue("filesById", filesById, { shouldDirty: false });
+    }
+  }, [selectedFiles, form]);
 
   const onNext = () => {
     if (nextStepAllowed) setStep("meta");
@@ -33,33 +81,31 @@ export function OutlookToZaakForm() {
 
   const onBack = () => setStep("searchAndSelect");
 
-  const onSubmit = async (payload: SubmitPayload) => {
-    // TODO, retrieve data per file from Graph API (maybe convert id's to rest id's), attach metadata forms and submit
+  const onSubmit = React.useCallback(() => {
+    const values = form.getValues();
+    const files = values.selectedItems
+      .map((fileId) => values.filesById[fileId])
+      .filter((row): row is SubmitPayload["files"][number] => Boolean(row));
+
+    const payload: SubmitPayload = { files };
+    // https://dimpact.atlassian.net/browse/PZ-8370, retrieve data per file from Graph API (maybe convert id's to rest id's), attach metadata forms and submit
     console.log("submit selected files with metadata", payload);
-  };
+  }, [form]);
 
   return (
-    <div>
-      <div>
-        {step === "searchAndSelect" ? (
-          <StepZaakSearchAndSelect
-            files={files}
-            selectedIds={selectedIds}
-            onToggle={toggle}
-            onNext={onNext}
-            hasZaak={hasZaak}
-          />
-        ) : (
-          <StepMetadata
-            files={selectedFiles}
-            initialValues={metadataValues}
-            onBack={onBack}
-            onChange={setMetadataValues}
-            onSubmit={onSubmit}
-          />
-        )}
-      </div>
-    </div>
+    <FormProvider {...form}>
+      {step === "searchAndSelect" ? (
+        <StepZaakSearchAndSelect
+          files={files}
+          selectedIds={selectedIds}
+          onToggle={toggle}
+          onNext={onNext}
+          hasZaak={hasZaak}
+        />
+      ) : (
+        <StepMetadata files={selectedFiles} onBack={onBack} onSubmit={onSubmit} />
+      )}
+    </FormProvider>
   );
 }
 

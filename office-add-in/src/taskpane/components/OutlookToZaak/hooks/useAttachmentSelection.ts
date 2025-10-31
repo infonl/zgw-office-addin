@@ -12,27 +12,20 @@ export function useAttachmentSelection() {
 
   React.useEffect(() => {
     try {
-      const win = window as Window & {
-        Office?: typeof Office;
-      };
-
-      const item = win.Office?.context?.mailbox?.item;
+      const item = Office?.context?.mailbox?.item;
       if (!item) {
         setFiles([]);
         return;
       }
 
-      const emailAttachments = item.attachments ?? [];
-      const subject: string = item.subject || "";
-
       const emailEntry: AttachmentFile = {
         id: `EmailItself-${item.itemId}`,
-        name: `E-mail: ${subject || "(geen onderwerp)"}`,
+        name: `E-mail: ${item.subject || "(geen onderwerp)"}`,
         contentType: "text/html",
         isInline: false,
       };
 
-      const mapped: AttachmentFile[] = emailAttachments
+      const mapped: AttachmentFile[] = item.attachments
         .filter((attachment) => !attachment.isInline) // only non-inline attachments
         .map((attachment) => ({
           id: attachment.id,
