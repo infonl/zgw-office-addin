@@ -27,7 +27,9 @@ describe("useGetZaak", () => {
   let mockGet: ReturnType<typeof vi.fn>;
 
   const createWrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <>{children}</>
+    </QueryClientProvider>
   );
 
   const mockZaak = fromPartial<Zaak>({

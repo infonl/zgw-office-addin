@@ -3,13 +3,9 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import "@testing-library/jest-dom";
+import "@testing-library/dom";
 import { fromPartial } from "@total-typescript/shoehorn";
-import React from "react";
 import { vi } from "vitest";
-
-// Make React available globally for JSX
-global.React = React;
 
 // Mock window.matchMedia for jsdom
 Object.defineProperty(window, "matchMedia", {

@@ -1,10 +1,10 @@
 {
   "tasks": {
     "clean": {
-        "cache": false
+      "cache": false
     },
     "clean:deep": {
-        "cache": false
+      "cache": false
     },
     "build": {
       "dependsOn": ["^build"],
@@ -45,6 +45,9 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
+    },
+    "test:ui": {
+      "dependsOn": ["^build"]
     }
   }
 }

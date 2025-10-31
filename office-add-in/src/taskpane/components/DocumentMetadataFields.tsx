@@ -1,0 +1,113 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
+import React from "react";
+import { makeStyles, tokens } from "@fluentui/react-components";
+import { Input } from "./form/Input";
+import { Select } from "./form/Select";
+import { documentstatus } from "../../hooks/useAddDocumentToZaak";
+import { mq, dims } from "./styles/layout";
+import { format } from "date-fns";
+
+const fieldLabels: Record<string, string> = {
+  auteur: "Auteur",
+  informatieobjecttype: "Informatieobjecttype",
+  vertrouwelijkheidaanduiding: "Vertrouwelijkheid",
+  creatiedatum: "Creatiedatum",
+  status: "Status",
+};
+
+const useStyles = makeStyles({
+  fieldset: {
+    display: "flex",
+    flexDirection: "column",
+    gap: tokens.spacingVerticalM,
+    padding: tokens.spacingHorizontalNone,
+    border: 0,
+    [mq.md]: {
+      flexDirection: "row",
+    },
+  },
+  field: {
+    width: "100%",
+    [mq.md]: {
+      minWidth: dims.fieldMinWidth,
+      flex: 1,
+    },
+  },
+});
+
+const requiredLabel = (key: keyof typeof fieldLabels) => `${fieldLabels[key]} *`;
+
+export type DocumentMetadataFieldsProps = {
+  zaakinformatieobjecten: { omschrijving: string; url?: string }[];
+  statuses: typeof documentstatus;
+  namePrefix?: string;
+};
+
+// To be used within a react-hook-form FormProvider
+export function DocumentMetadataFields({
+  zaakinformatieobjecten,
+  statuses,
+  namePrefix = "",
+}: DocumentMetadataFieldsProps) {
+  const styles = useStyles();
+  const prefixName = (fieldName: string) => (namePrefix ? `${namePrefix}.${fieldName}` : fieldName);
+
+  const getToday = React.useCallback(() => format(new Date(), "yyyy-MM-dd"), []);
+
+  return (
+    <>
+      <Input
+        className={styles.field}
+        name={prefixName("auteur")}
+        label={requiredLabel("auteur")}
+        required
+        defaultValue=""
+      />
+      <fieldset className={styles.fieldset}>
+        <Select
+          className={styles.field}
+          name={prefixName("informatieobjecttype")}
+          label={requiredLabel("informatieobjecttype")}
+          required
+          defaultValue=""
+          options={zaakinformatieobjecten.map((zaakinformatieobject) => ({
+            label: zaakinformatieobject.omschrijving,
+            value: zaakinformatieobject.url || "",
+          }))}
+        />
+        <Input
+          className={styles.field}
+          readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
+          name={prefixName("vertrouwelijkheidaanduiding")}
+          label={fieldLabels["vertrouwelijkheidaanduiding"]}
+          defaultValue=""
+        />
+      </fieldset>
+      <fieldset className={styles.fieldset}>
+        <Select
+          className={styles.field}
+          name={prefixName("status")}
+          label={requiredLabel("status")}
+          required
+          defaultValue=""
+          options={statuses.map((status) => ({
+            label: status.replace(/_/g, " "),
+            value: status,
+          }))}
+        />
+        <Input
+          className={styles.field}
+          type="date"
+          name={prefixName("creatiedatum")}
+          label={requiredLabel("creatiedatum")}
+          required
+          defaultValue={getToday()}
+        />
+      </fieldset>
+    </>
+  );
+}
