@@ -91,7 +91,7 @@ Both the `generate-keys.sh` scripts automatically:
    - `::1` (IPv6 localhost)
 3. Copies the CA certificate to both directories
 4. Sets up certificates ready for Docker Compose
-5. Trusts the backend scripts on your local machine
+5. Trusts the backend certificates on your local machine
 
 #### Generated Certificate Files
 
