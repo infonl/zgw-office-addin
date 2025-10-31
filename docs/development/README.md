@@ -81,7 +81,7 @@ Without proper SSL certificates, you'll encounter:
    ./generate-keys-backend.sh
    ```
 
-### What both the generate-keys.sh Script Do
+### What both the generate-keys.sh Scripts Do
 
 Both the `generate-keys.sh` scripts automatically:
 1. Creates SSL certificate directories for both frontend and backend
