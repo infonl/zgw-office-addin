@@ -15,7 +15,7 @@ import {
   type SubmitPayload,
   formValuesSchema,
 } from "./steps/StepMetadata";
-import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
+import { useAttachment } from "./hooks/useAttachment";
 
 /**
  * - Step 1: Search Zaak and select email and/or attachments to attach
@@ -25,7 +25,7 @@ import { useAttachmentSelection } from "./hooks/useAttachmentSelection";
 export function OutlookToZaakForm() {
   const { zaak } = useZaak();
   const hasZaak = !!zaak?.data?.identificatie;
-  const { files } = useAttachmentSelection();
+  const { files } = useAttachment();
   const [step, setStep] = React.useState<"searchAndSelect" | "meta">("searchAndSelect");
 
   const form = useForm<FormValues>({

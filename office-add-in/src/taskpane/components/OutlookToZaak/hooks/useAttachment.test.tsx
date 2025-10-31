@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useAttachmentSelection } from "./useAttachmentSelection";
+import { useAttachment } from "./useAttachment";
 import { AttachmentFile } from "../../../types/attachment";
 
 interface OfficeItem {
@@ -25,7 +25,7 @@ function mockOfficeItem(item: OfficeItem | null) {
   }
 }
 
-describe("useAttachmentSelection", () => {
+describe("useAttachment", () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe("useAttachmentSelection", () => {
       attachments: [],
     });
 
-    const { result } = renderHook(() => useAttachmentSelection());
+    const { result } = renderHook(() => useAttachment());
     expect(result.current.files).toHaveLength(1);
     expect(result.current.files[0]).toMatchObject({
       id: "EmailItself-ABC123",
@@ -71,7 +71,7 @@ describe("useAttachmentSelection", () => {
       ],
     });
 
-    const { result } = renderHook(() => useAttachmentSelection());
+    const { result } = renderHook(() => useAttachment());
     expect(result.current.files).toHaveLength(3); // email + 2 non-inline
     expect(result.current.files[1]).toMatchObject({ id: "1", name: "file1.pdf" });
     expect(result.current.files[2]).toMatchObject({ id: "3", name: "file2.docx" });
@@ -80,7 +80,7 @@ describe("useAttachmentSelection", () => {
 
   it("handles missing Office context gracefully", async () => {
     mockOfficeItem(null);
-    const { result } = renderHook(() => useAttachmentSelection());
+    const { result } = renderHook(() => useAttachment());
 
     await waitFor(() => {
       expect(result.current.files).toEqual([]);
