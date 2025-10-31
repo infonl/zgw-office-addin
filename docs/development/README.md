@@ -75,13 +75,15 @@ Without proper SSL certificates, you'll encounter:
    This installs mkcert's root certificate in your system trust store.
 
 3. **Generate certificates for the project**
+   Before executing fill in the path to the project in the `generate-keys-backend.sh`
    ```shell
-   ./generate-keys.sh
+   ./generate-keys-frontend.sh
+   ./generate-keys-backend.sh
    ```
 
-### What the generate-keys.sh Script Does
+### What both the generate-keys.sh Script Do
 
-The `generate-keys.sh` script automatically:
+Both the `generate-keys.sh` scripts automatically:
 1. Creates SSL certificate directories for both frontend and backend
 2. Generates localhost certificates using mkcert for:
    - `localhost`
@@ -89,6 +91,7 @@ The `generate-keys.sh` script automatically:
    - `::1` (IPv6 localhost)
 3. Copies the CA certificate to both directories
 4. Sets up certificates ready for Docker Compose
+5. Trusts the backend scripts on your local machine
 
 #### Generated Certificate Files
 
@@ -115,10 +118,10 @@ office-backend/ssl-certs/
 **Solution:** Ensure certificates are generated and `mkcert -install` has been run
 
 **Problem:** Docker containers can't access certificates
-**Solution:** Certificates are mounted from host - ensure `./generate-keys.sh` has been run
+**Solution:** Certificates are mounted from host - ensure both `./generate-keys.sh` commands have been run
 
 **Problem:** Certificates expired
-**Solution:** Re-run `./generate-keys.sh` to generate new certificates
+**Solution:** Re-run both `./generate-keys.sh` scripts to generate new certificates
 
 #### Alternative: Manual Certificate Trust (Not Recommended)
 
@@ -213,7 +216,9 @@ To delete the containers run
 
 ```shell
 # Generate/regenerate SSL certificates
-./generate-keys.sh
+./generate-keys-frontend.sh
+./generate-keys-backend.sh
+
 
 # Start development (local)
 npm run dev
