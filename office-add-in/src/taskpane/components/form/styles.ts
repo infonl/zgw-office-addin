@@ -12,6 +12,11 @@ export const formStyles = makeStyles({
     gap: tokens.spacingVerticalS,
     flexGrow: 1,
   },
+  checkboxInput: {
+    flexDirection: "row-reverse",
+    justifyContent: "start",
+    alignItems: "center",
+  },
   error: {
     color: tokens.colorStatusDangerForeground1,
   },

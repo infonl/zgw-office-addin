@@ -5,15 +5,15 @@
 
 import {
   Caption1,
-  Label,
-  Input as FluentUiInput,
   InputProps,
   Checkbox as FluentUiCheckbox,
+  mergeClasses,
 } from "@fluentui/react-components";
 import { useFormError } from "./hooks/useFormError";
 import { formStyles } from "./styles";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import { Label } from "./Label";
 
 export function CheckBox(props: Props) {
   const styles = formStyles();
@@ -21,8 +21,8 @@ export function CheckBox(props: Props) {
   const { control } = useFormContext();
 
   return (
-    <section className={styles.input}>
-      <Label htmlFor={props.name}>{props.label ?? props.name}</Label>
+    <section className={mergeClasses(styles.input, styles.checkboxInput)}>
+      <Label required={props.required} label={props.label} name={props.name} />
       <Controller
         render={({ field }) => (
           <FluentUiCheckbox

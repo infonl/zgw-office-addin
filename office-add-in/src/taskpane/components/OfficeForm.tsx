@@ -45,7 +45,7 @@ const useStyles = makeStyles({
   },
 });
 
-export function ZaakForm() {
+export function OfficeForm() {
   const styles = useStyles();
   const common = useCommonStyles();
 

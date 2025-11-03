@@ -7,17 +7,8 @@ import React from "react";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
-import { documentstatus } from "../../hooks/useAddDocumentToZaak";
+import { addDocumentSchema, documentstatus } from "../../hooks/useAddDocumentToZaak";
 import { mq, dims } from "./styles/layout";
-import { format } from "date-fns";
-
-const fieldLabels: Record<string, string> = {
-  auteur: "Auteur",
-  informatieobjecttype: "Informatieobjecttype",
-  vertrouwelijkheidaanduiding: "Vertrouwelijkheid",
-  creatiedatum: "Creatiedatum",
-  status: "Status",
-};
 
 const useStyles = makeStyles({
   fieldset: {
@@ -39,8 +30,6 @@ const useStyles = makeStyles({
   },
 });
 
-const requiredLabel = (key: keyof typeof fieldLabels) => `${fieldLabels[key]} *`;
-
 export type DocumentMetadataFieldsProps = {
   zaakinformatieobjecten: { omschrijving: string; url?: string }[];
   statuses: typeof documentstatus;
@@ -54,58 +43,51 @@ export function DocumentMetadataFields({
   namePrefix = "",
 }: DocumentMetadataFieldsProps) {
   const styles = useStyles();
-  const pn = (n: string) => (namePrefix ? `${namePrefix}.${n}` : n);
-
-  const getToday = React.useCallback(() => format(new Date(), "yyyy-MM-dd"), []);
 
   return (
     <>
       <Input
         className={styles.field}
-        name={pn("auteur")}
-        label={requiredLabel("auteur")}
-        required
-        defaultValue=""
+        name={`${namePrefix}auteur`}
+        label="Auteur"
+        required={!addDocumentSchema.shape.auteur.isOptional()}
       />
       <fieldset className={styles.fieldset}>
         <Select
           className={styles.field}
-          name={pn("informatieobjecttype")}
-          label={requiredLabel("informatieobjecttype")}
-          required
-          defaultValue=""
+          name={`${namePrefix}informatieobjecttype`}
+          label="Informatieobjecttype"
           options={zaakinformatieobjecten.map((zio) => ({
             label: zio.omschrijving,
             value: zio.url || "",
           }))}
+          required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
         />
         <Input
           className={styles.field}
           readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
-          name={pn("vertrouwelijkheidaanduiding")}
-          label={fieldLabels["vertrouwelijkheidaanduiding"]}
-          defaultValue=""
+          name={`${namePrefix}vertrouwelijkheidaanduiding`}
+          label="Vertrouwelijkheid"
+          required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
         />
       </fieldset>
       <fieldset className={styles.fieldset}>
         <Select
           className={styles.field}
-          name={pn("status")}
-          label={requiredLabel("status")}
-          required
-          defaultValue=""
+          name={`${namePrefix}status`}
+          label="Status"
           options={statuses.map((status) => ({
             label: status.replace(/_/g, " "),
             value: status,
           }))}
+          required={!addDocumentSchema.shape.status.isOptional()}
         />
         <Input
           className={styles.field}
           type="date"
-          name={pn("creatiedatum")}
-          label={requiredLabel("creatiedatum")}
-          required
-          defaultValue={getToday()}
+          name={`${namePrefix}creatiedatum`}
+          label="Creatiedatum"
+          required={!addDocumentSchema.shape.creatiedatum.isOptional()}
         />
       </fieldset>
     </>

@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { Caption1, Label, Select as FluentUiSelect, SelectProps } from "@fluentui/react-components";
+import { Caption1, Select as FluentUiSelect, SelectProps } from "@fluentui/react-components";
 import { useFormError } from "./hooks/useFormError";
 import { formStyles } from "./styles";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import { Label } from "./Label";
 
 export function Select(props: Props) {
   const styles = formStyles();
@@ -16,7 +17,7 @@ export function Select(props: Props) {
 
   return (
     <section className={styles.input}>
-      <Label htmlFor={props.name}>{props.label ?? props.name}</Label>
+      <Label required={props.required} label={props.label} name={props.name} />
       <Controller
         render={({ field }) => (
           <FluentUiSelect {...field} id={props.name}>

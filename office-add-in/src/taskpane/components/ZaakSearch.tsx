@@ -24,6 +24,7 @@ import { Zaak } from "../../hooks/useGetZaak";
 import { useOffice } from "../../hooks/useOffice";
 import { mq } from "./styles/layout";
 import { useCommonStyles } from "./styles/shared";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useStyles = makeStyles({
   form: {
@@ -84,23 +85,25 @@ export function ZaakSearch() {
 
   return (
     <>
-      <FormProvider {...form}>
-        <section className={common.title}>
-          <Subtitle1>Koppelen aan zaak</Subtitle1>
-          <Body1>{helperText}</Body1>
-        </section>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className={styles.form}>
-          <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
-          <Button
-            className={styles.button}
-            disabled={!form.formState.isValid || isLoading}
-            type="submit"
-            appearance={isLoading ? "secondary" : "primary"}
-          >
-            Zaak zoeken
-          </Button>
-        </form>
-      </FormProvider>
+      <section className={common.title}>
+        <Subtitle1>Koppelen aan zaak</Subtitle1>
+        <Body1>{helperText}</Body1>
+      </section>
+      {!data && (
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className={styles.form}>
+            <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
+            <Button
+              className={styles.button}
+              disabled={!form.formState.isValid || isLoading}
+              type="submit"
+              appearance={isLoading ? "secondary" : "primary"}
+            >
+              Zaak zoeken
+            </Button>
+          </form>
+        </FormProvider>
+      )}
       <ZaakZoekNotifications />
       {data && <ZaakDetails zaak={data} />}
     </>
@@ -152,9 +155,25 @@ const zaakdetails = makeStyles({
 function ZaakDetails(props: { zaak: Zaak }) {
   const styles = zaakdetails();
 
+  const queryClient = useQueryClient();
+  const { setZaakToSearch } = useZaak();
+
   return (
-    <section>
-      <Body1>Gevonden zaak</Body1>
+    <section style={{ marginTop: tokens.spacingVerticalL }}>
+      <Body1 style={{ display: "flex", justifyContent: "space-between" }}>
+        Gevonden zaak
+        <Button
+          appearance="secondary"
+          onClick={() => {
+            setZaakToSearch("");
+            queryClient.invalidateQueries({
+              queryKey: ["zaak"],
+            });
+          }}
+        >
+          Opnieuw zoeken
+        </Button>
+      </Body1>
       <table className={styles.table}>
         <tbody>
           <tr>

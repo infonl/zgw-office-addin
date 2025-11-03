@@ -19,8 +19,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ZaakSearch } from "./ZaakSearch";
 import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
-import { ZaakForm } from "./ZaakForm";
-import { OutlookToZaakForm } from "./OutlookToZaak/OutlookToZaakForm";
+import { OfficeForm } from "./OfficeForm";
+import { OutlookForm } from "./OutlookForm";
 import { useCommonStyles } from "./styles/shared";
 
 const useStyles = makeStyles({
@@ -63,7 +63,7 @@ function Main() {
 
   const { isOutlook, isWord } = useOffice();
 
-  const { documentAddedToZaak, zaak, reset } = useZaak();
+  const { documentAddedToZaak, reset } = useZaak();
 
   if (documentAddedToZaak) {
     return (
@@ -93,8 +93,9 @@ function Main() {
   return (
     <div className={styles.root}>
       <ZaakSearch />
-      {isWord && <ZaakForm />}
-      {isOutlook && <OutlookToZaakForm />}
+      <OutlookForm />
+      {isWord && <OfficeForm />}
+      {isOutlook && <OutlookForm />}
     </div>
   );
 }
