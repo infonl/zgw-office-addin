@@ -3,26 +3,27 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import {
-  Caption1,
-  InputProps,
-  Checkbox as FluentUiCheckbox,
-  mergeClasses,
-} from "@fluentui/react-components";
+import { InputProps, Checkbox as FluentUiCheckbox, Field } from "@fluentui/react-components";
 import { useFormError } from "./hooks/useFormError";
-import { formStyles } from "./styles";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { Label } from "./Label";
 
 export function CheckBox(props: Props) {
-  const styles = formStyles();
   const error = useFormError(props.name);
   const { control } = useFormContext();
 
+  const { style, className, ...rest } = props;
+
   return (
-    <section className={mergeClasses(styles.input, styles.checkboxInput)}>
-      <Label required={props.required} label={props.label} name={props.name} />
+    <Field
+      label={props.label ?? props.name}
+      required={props.required}
+      validationState={error ? "error" : "none"}
+      validationMessage={error}
+      orientation="horizontal"
+      style={style}
+      className={className}
+    >
       <Controller
         render={({ field }) => (
           <FluentUiCheckbox
@@ -30,16 +31,13 @@ export function CheckBox(props: Props) {
             onChange={(_event, data) => field.onChange(data.checked)}
             onBlur={field.onBlur}
             name={field.name}
-            id={field.name}
           />
         )}
         control={control}
         disabled={props.readOnly}
-        {...props}
+        {...rest}
       />
-
-      {error && <Caption1 className={styles.error}>{error}</Caption1>}
-    </section>
+    </Field>
   );
 }
 

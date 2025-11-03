@@ -26,8 +26,8 @@ import { useCommonStyles } from "./styles/shared";
 const useStyles = makeStyles({
   root: {
     minHeight: "100vh",
-    paddingLeft: tokens.spacingHorizontalXL,
-    paddingRight: tokens.spacingHorizontalXL,
+    paddingLeft: tokens.spacingHorizontalM,
+    paddingRight: tokens.spacingHorizontalM,
   },
 
   actions: {

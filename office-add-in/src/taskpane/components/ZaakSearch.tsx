@@ -43,7 +43,7 @@ const useStyles = makeStyles({
     },
   },
   input: {
-    width: "100%",
+    flexGrow: 1,
   },
   button: {
     width: "100%",

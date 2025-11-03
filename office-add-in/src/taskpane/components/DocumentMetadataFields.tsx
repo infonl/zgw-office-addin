@@ -11,21 +11,22 @@ import { addDocumentSchema, documentstatus } from "../../hooks/useAddDocumentToZ
 import { mq, dims } from "./styles/layout";
 
 const useStyles = makeStyles({
-  fieldset: {
-    display: "flex",
-    flexDirection: "column",
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr",
     gap: tokens.spacingVerticalM,
-    padding: tokens.spacingHorizontalNone,
-    border: tokens.spacingVerticalNone,
+    gridAutoFlow: "dense",
     [mq.md]: {
-      flexDirection: "row",
+      gridTemplateColumns: "1fr 1fr",
     },
   },
-  field: {
-    width: "100%",
+  gridColumnSpan1: {
+    gridColumn: "auto / span 1",
+  },
+  gridColumnSpan2: {
+    gridColumn: "auto / span 1",
     [mq.md]: {
-      minWidth: dims.fieldMinWidth,
-      flex: 1,
+      gridColumn: "auto / span 2",
     },
   },
 });
@@ -45,51 +46,47 @@ export function DocumentMetadataFields({
   const styles = useStyles();
 
   return (
-    <>
+    <section className={styles.grid}>
       <Input
-        className={styles.field}
+        className={styles.gridColumnSpan2}
         name={`${namePrefix}auteur`}
         label="Auteur"
         required={!addDocumentSchema.shape.auteur.isOptional()}
       />
-      <fieldset className={styles.fieldset}>
-        <Select
-          className={styles.field}
-          name={`${namePrefix}informatieobjecttype`}
-          label="Informatieobjecttype"
-          options={zaakinformatieobjecten.map((zio) => ({
-            label: zio.omschrijving,
-            value: zio.url || "",
-          }))}
-          required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
-        />
-        <Input
-          className={styles.field}
-          readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
-          name={`${namePrefix}vertrouwelijkheidaanduiding`}
-          label="Vertrouwelijkheid"
-          required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
-        />
-      </fieldset>
-      <fieldset className={styles.fieldset}>
-        <Select
-          className={styles.field}
-          name={`${namePrefix}status`}
-          label="Status"
-          options={statuses.map((status) => ({
-            label: status.replace(/_/g, " "),
-            value: status,
-          }))}
-          required={!addDocumentSchema.shape.status.isOptional()}
-        />
-        <Input
-          className={styles.field}
-          type="date"
-          name={`${namePrefix}creatiedatum`}
-          label="Creatiedatum"
-          required={!addDocumentSchema.shape.creatiedatum.isOptional()}
-        />
-      </fieldset>
-    </>
+      <Select
+        className={styles.gridColumnSpan1}
+        name={`${namePrefix}informatieobjecttype`}
+        label="Informatieobjecttype"
+        options={zaakinformatieobjecten.map((zio) => ({
+          label: zio.omschrijving,
+          value: zio.url || "",
+        }))}
+        required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
+      />
+      <Input
+        className={styles.gridColumnSpan1}
+        readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
+        name={`${namePrefix}vertrouwelijkheidaanduiding`}
+        label="Vertrouwelijkheid"
+        required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
+      />
+      <Select
+        className={styles.gridColumnSpan1}
+        name={`${namePrefix}status`}
+        label="Status"
+        options={statuses.map((status) => ({
+          label: status.replace(/_/g, " "),
+          value: status,
+        }))}
+        required={!addDocumentSchema.shape.status.isOptional()}
+      />
+      <Input
+        className={styles.gridColumnSpan1}
+        type="date"
+        name={`${namePrefix}creatiedatum`}
+        label="Creatiedatum"
+        required={!addDocumentSchema.shape.creatiedatum.isOptional()}
+      />
+    </section>
   );
 }

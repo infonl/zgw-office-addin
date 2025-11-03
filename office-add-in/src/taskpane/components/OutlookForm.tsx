@@ -16,6 +16,8 @@ import {
   AccordionItem,
   AccordionPanel,
   Button,
+  List,
+  ListItem,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
@@ -161,15 +163,13 @@ function SelectItems() {
   const documents = form.watch("documents");
 
   return (
-    <section>
+    <List>
       {documents.map((document, index) => (
-        <CheckBox
-          key={document.attachment.id}
-          name={`documents.${index}.selected`}
-          label={document.attachment.name}
-        />
+        <ListItem key={document.attachment.id}>
+          <CheckBox name={`documents.${index}.selected`} label={document.attachment.name} />
+        </ListItem>
       ))}
-    </section>
+    </List>
   );
 }
 
