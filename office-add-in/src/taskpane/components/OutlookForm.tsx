@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React, { useEffect } from "react";
+import React from "react";
 
 import { useZaak } from "../../provider/ZaakProvider";
 import z from "zod";
@@ -24,6 +24,7 @@ import {
 import { useOutlook } from "../../hooks/useOutlook";
 import { CheckBox } from "./form/Checkbox";
 import { DocumentMetadataFields } from "./DocumentMetadataFields";
+import { ZaakSearch } from "./ZaakSearch";
 
 /**
  * - Step 1: Search Zaak and select email and/or attachments to attach
@@ -92,7 +93,7 @@ export function OutlookForm() {
 
   // Initialize form with default values when files are available
   React.useEffect(() => {
-    if (files.length === 0) return;
+    if (!files.length) return;
 
     const documents = form.getValues("documents");
 
@@ -119,13 +120,14 @@ export function OutlookForm() {
     }
   }, [files, form, zaak.data?.identificatie]);
 
-  if (!zaak.data) return null;
+  if (!zaak.data) return <ZaakSearch />;
 
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {step === "selectItems" && (
           <>
+            <ZaakSearch />
             <SelectItems />
             <section className={styles.actions}>
               <Button
@@ -139,6 +141,7 @@ export function OutlookForm() {
         )}
         {step === "metaData" && (
           <>
+            ZAAKID {zaak.data?.identificatie}
             <Metadata />
             <section className={styles.actions}>
               <Button onClick={() => setStep("selectItems")}>Vorrige stap</Button>

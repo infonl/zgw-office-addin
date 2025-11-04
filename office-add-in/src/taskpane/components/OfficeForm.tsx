@@ -29,6 +29,7 @@ import { DocumentMetadataFields } from "./DocumentMetadataFields";
 import { useToast } from "../../provider/ToastProvider";
 import { useZaak } from "../../provider/ZaakProvider";
 import { useCommonStyles } from "./styles/shared";
+import { ZaakSearch } from "./ZaakSearch";
 
 const useStyles = makeStyles({
   form: {
@@ -140,32 +141,35 @@ export function OfficeForm() {
   }, [getSignedInUser, form.setValue]);
 
   if (!data) {
-    return null;
+    return <ZaakSearch />;
   }
 
   return (
-    <FormProvider {...form}>
-      <section className={common.title}>
-        <Subtitle1>Documentgegevens</Subtitle1>
-        <Body1>
-          Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
-        </Body1>
-      </section>
-      {data && (
-        <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
-          <DocumentMetadataFields
-            zaakinformatieobjecten={data.zaakinformatieobjecten}
-            statuses={documentstatus}
-          />
-          <Button
-            disabled={!form.formState.isValid || isPending}
-            appearance="primary"
-            type="submit"
-          >
-            Document koppelen
-          </Button>
-        </form>
-      )}
-    </FormProvider>
+    <>
+      <ZaakSearch />
+      <FormProvider {...form}>
+        <section className={common.title}>
+          <Subtitle1>Documentgegevens</Subtitle1>
+          <Body1>
+            Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
+          </Body1>
+        </section>
+        {data && (
+          <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+            <DocumentMetadataFields
+              zaakinformatieobjecten={data.zaakinformatieobjecten}
+              statuses={documentstatus}
+            />
+            <Button
+              disabled={!form.formState.isValid || isPending}
+              appearance="primary"
+              type="submit"
+            >
+              Document koppelen
+            </Button>
+          </form>
+        )}
+      </FormProvider>
+    </>
   );
 }

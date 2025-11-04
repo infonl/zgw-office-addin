@@ -24,7 +24,6 @@ import { Zaak } from "../../hooks/useGetZaak";
 import { useOffice } from "../../hooks/useOffice";
 import { mq } from "./styles/layout";
 import { useCommonStyles } from "./styles/shared";
-import { useQueryClient } from "@tanstack/react-query";
 
 const useStyles = makeStyles({
   form: {
@@ -89,21 +88,19 @@ export function ZaakSearch() {
         <Subtitle1>Koppelen aan zaak</Subtitle1>
         <Body1>{helperText}</Body1>
       </section>
-      {!data && (
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className={styles.form}>
-            <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
-            <Button
-              className={styles.button}
-              disabled={!form.formState.isValid || isLoading}
-              type="submit"
-              appearance={isLoading ? "secondary" : "primary"}
-            >
-              Zaak zoeken
-            </Button>
-          </form>
-        </FormProvider>
-      )}
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className={styles.form}>
+          <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
+          <Button
+            className={styles.button}
+            disabled={!form.formState.isValid || isLoading}
+            type="submit"
+            appearance={isLoading ? "secondary" : "primary"}
+          >
+            Zaak zoeken
+          </Button>
+        </form>
+      </FormProvider>
       <ZaakZoekNotifications />
       {data && <ZaakDetails zaak={data} />}
     </>
@@ -138,7 +135,7 @@ function ZaakZoekNotifications() {
     );
   }
 
-  // ToDo : return message when zaak is found but user has no rights to attach documents to this zaak.
+  // TODO https://dimpact.atlassian.net/browse/PZ-9218
 
   return null;
 }
@@ -155,25 +152,8 @@ const zaakdetails = makeStyles({
 function ZaakDetails(props: { zaak: Zaak }) {
   const styles = zaakdetails();
 
-  const queryClient = useQueryClient();
-  const { setZaakToSearch } = useZaak();
-
   return (
     <section style={{ marginTop: tokens.spacingVerticalL }}>
-      <Body1 style={{ display: "flex", justifyContent: "space-between" }}>
-        Gevonden zaak
-        <Button
-          appearance="secondary"
-          onClick={() => {
-            setZaakToSearch("");
-            queryClient.invalidateQueries({
-              queryKey: ["zaak"],
-            });
-          }}
-        >
-          Opnieuw zoeken
-        </Button>
-      </Body1>
       <table className={styles.table}>
         <tbody>
           <tr>
