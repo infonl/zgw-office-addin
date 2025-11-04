@@ -4,27 +4,20 @@ export function useOutlook() {
   const files = useMemo(() => {
     const email = Office.context.mailbox?.item;
 
-    return (
-      email?.attachments.filter((attachment) => !attachment.isInline) ??
-      ([
-        {
-          id: "placeholder-id",
-          isInline: false,
-          name: "placeholder.eml",
-          size: 0,
-          contentType: "message/rfc822",
-          attachmentType: "file",
-        },
-        {
-          id: "placeholder-id-2",
-          isInline: false,
-          name: "placeholder-2.eml",
-          size: 0,
-          contentType: "message/rfc822",
-          attachmentType: "file",
-        },
-      ] satisfies Office.AttachmentDetails[])
-    );
+    const attachements = email?.attachments.filter((attachment) => !attachment.isInline) ?? [];
+
+    if (!email) return attachements;
+
+    const emailAsAttachment: Office.AttachmentDetails = {
+      id: `EmailItself-${email.itemId}`,
+      name: `E-mail: ${email.subject || "(geen onderwerp)"}`,
+      contentType: "text/html",
+      isInline: false,
+      size: 0,
+      attachmentType: "email",
+    };
+
+    return [emailAsAttachment, ...attachements];
   }, [Office.context.mailbox?.item]);
 
   return { files };

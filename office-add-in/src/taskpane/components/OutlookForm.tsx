@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useZaak } from "../../provider/ZaakProvider";
 import z from "zod";
@@ -44,17 +44,15 @@ const useStyles = makeStyles({
   },
 });
 
-const withAttachmentSchema = addDocumentSchema.extend({
-  attachment: z.custom<Office.AttachmentDetails>(),
-});
-
 const document = z.discriminatedUnion("selected", [
-  withAttachmentSchema.extend({
+  addDocumentSchema.extend({
     selected: z.literal(true),
+    attachment: z.custom<Office.AttachmentDetails>(),
   }),
-  withAttachmentSchema
-    .extend({
+  z
+    .object({
       selected: z.literal(false),
+      attachment: z.custom<Office.AttachmentDetails>(),
     })
     .passthrough(),
 ]);
@@ -106,7 +104,7 @@ export function OutlookForm() {
             selected: false,
             vertrouwelijkheidaanduiding: "openbaar",
             informatieobjecttype: "",
-            status: documentstatus[0],
+            status: "",
             creatiedatum: new Date(),
             zaakidentificatie: zaak.data?.identificatie || "",
             auteur: "",
@@ -176,17 +174,17 @@ function SelectItems() {
 function Metadata() {
   const form = useFormContext<Schema>();
   const styles = useStyles();
+  const { zaak } = useZaak();
 
   const documents = form.watch("documents");
-
   const defaultOpenItems = React.useMemo(() => {
     return documents
-      .filter((_document, index) => !!form.formState.errors.documents?.[index])
+      .filter((document) => document.selected && !addDocumentSchema.safeParse(document).success)
       .map(({ attachment }) => attachment.id);
-  }, [documents, form.formState.errors]);
+  }, [documents]);
 
   return (
-    <Accordion multiple={false} defaultOpenItems={defaultOpenItems}>
+    <Accordion collapsible defaultOpenItems={defaultOpenItems}>
       {documents.map(
         (document, index) =>
           // We only render the selected documents
@@ -196,21 +194,13 @@ function Metadata() {
               <AccordionHeader>
                 <section className={styles.accordionHeader}>
                   {document.attachment.name}
-                  <div>
-                    {form.formState.errors.documents?.[index] && " ⚠️"}
-                    {!form.formState.errors.documents?.[index] && " ✅"}
-                  </div>
+                  <DocumentIndicator index={index} />
                 </section>
               </AccordionHeader>
               <AccordionPanel>
                 <DocumentMetadataFields
                   namePrefix={`documents.${index}.`}
-                  zaakinformatieobjecten={[
-                    {
-                      url: "https://example.com/informatieobjecttype/1",
-                      omschrijving: "Voorbeeld informatieobjecttype",
-                    },
-                  ]}
+                  zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
                   statuses={documentstatus}
                 />
               </AccordionPanel>
@@ -219,4 +209,15 @@ function Metadata() {
       )}
     </Accordion>
   );
+}
+
+function DocumentIndicator(props: { index: number }) {
+  const form = useFormContext<Schema>();
+  const document = form.watch(`documents.${props.index}`);
+
+  const isValid = addDocumentSchema.safeParse(document).success;
+
+  if (!isValid) return null;
+
+  return <div>✅</div>;
 }

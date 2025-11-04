@@ -93,7 +93,6 @@ function Main() {
   return (
     <div className={styles.root}>
       <ZaakSearch />
-      <OutlookForm />
       {isWord && <OfficeForm />}
       {isOutlook && <OutlookForm />}
     </div>

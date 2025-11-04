@@ -26,9 +26,7 @@ export function Select(props: Props) {
       <Controller
         render={({ field }) => (
           <FluentUiSelect {...field} id={props.name}>
-            <option value="" disabled>
-              -
-            </option>
+            {((props.required && !field.value) || !props.required) && <option value="">-</option>}
             {props.options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -37,7 +35,7 @@ export function Select(props: Props) {
           </FluentUiSelect>
         )}
         control={control}
-        {...props}
+        {...rest}
       />
     </Field>
   );
