@@ -3,47 +3,34 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useOutlook } from "./useOutlook";
+import { fromPartial } from "@total-typescript/shoehorn";
 
-interface OfficeItem {
-  itemId?: string;
-  subject?: string;
-  attachments?: Office.AttachmentDetails[];
-}
-
-type OfficeGlobal = { context: { mailbox: { item: OfficeItem } } };
-
-function mockOfficeItem(item: OfficeItem | null) {
-  const globalWithOffice = globalThis as { Office?: OfficeGlobal };
-  if (item) {
-    globalWithOffice.Office = { context: { mailbox: { item } } };
-  } else {
-    delete globalWithOffice.Office;
-  }
+type Item = typeof Office.context.mailbox.item;
+function mockOfficeItem(item?: Item) {
+  Office.context.mailbox.item = item;
 }
 
 describe("useOutlook", () => {
-  let warnSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
-    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    mockOfficeItem(null);
+    mockOfficeItem();
   });
 
   afterEach(() => {
-    warnSpy.mockRestore();
-    mockOfficeItem(null);
+    mockOfficeItem();
   });
 
   // -------------
   it("includes the email itself as the first entry", () => {
-    mockOfficeItem({
-      itemId: "ABC123",
-      subject: "Test mail",
-      attachments: [],
-    });
+    mockOfficeItem(
+      fromPartial<Item>({
+        itemId: "ABC123",
+        subject: "Test mail",
+        attachments: [],
+      })
+    );
 
     const { result } = renderHook(() => useOutlook());
     expect(result.current.files).toHaveLength(1);
@@ -53,16 +40,18 @@ describe("useOutlook", () => {
       contentType: "message/rfc822",
       isInline: false,
       size: 0,
-      attachmentType: "email",
+      attachmentType: Office.MailboxEnums.AttachmentType.Item,
     });
   });
 
   it("handles email without subject", () => {
-    mockOfficeItem({
-      itemId: "ABC123",
-      subject: undefined,
-      attachments: [],
-    });
+    mockOfficeItem(
+      fromPartial<Item>({
+        itemId: "ABC123",
+        subject: undefined,
+        attachments: [],
+      })
+    );
 
     const { result } = renderHook(() => useOutlook());
     expect(result.current.files).toHaveLength(1);
@@ -72,40 +61,42 @@ describe("useOutlook", () => {
       contentType: "message/rfc822",
       isInline: false,
       size: 0,
-      attachmentType: "email",
+      attachmentType: Office.MailboxEnums.AttachmentType.Item,
     });
   });
 
   it("maps only non-inline attachments", () => {
-    mockOfficeItem({
-      subject: "With attachments",
-      attachments: [
-        {
-          id: "1",
-          name: "file1.pdf",
-          size: 123,
-          contentType: "application/pdf",
-          isInline: false,
-          attachmentType: "file",
-        },
-        {
-          id: "2",
-          name: "inline.png",
-          size: 200,
-          contentType: "image/png",
-          isInline: true,
-          attachmentType: "file",
-        },
-        {
-          id: "3",
-          name: "file2.docx",
-          size: 456,
-          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          isInline: false,
-          attachmentType: "file",
-        },
-      ],
-    });
+    mockOfficeItem(
+      fromPartial<Item>({
+        subject: "With attachments",
+        attachments: [
+          {
+            id: "1",
+            name: "file1.pdf",
+            size: 123,
+            contentType: "application/pdf",
+            isInline: false,
+            attachmentType: Office.MailboxEnums.AttachmentType.File,
+          },
+          {
+            id: "2",
+            name: "inline.png",
+            size: 200,
+            contentType: "image/png",
+            isInline: true,
+            attachmentType: Office.MailboxEnums.AttachmentType.File,
+          },
+          {
+            id: "3",
+            name: "file2.docx",
+            size: 456,
+            contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            isInline: false,
+            attachmentType: Office.MailboxEnums.AttachmentType.File,
+          },
+        ],
+      })
+    );
 
     const { result } = renderHook(() => useOutlook());
     expect(result.current.files).toHaveLength(3); // email + 2 non-inline
@@ -115,10 +106,7 @@ describe("useOutlook", () => {
   });
 
   it("handles missing Office context gracefully", async () => {
-    // Mock Office with empty context instead of deleting it
-    const globalWithOffice = globalThis as { Office?: OfficeGlobal };
-    globalWithOffice.Office = { context: { mailbox: { item: null as any } } };
-
+    mockOfficeItem();
     const { result } = renderHook(() => useOutlook());
 
     await waitFor(() => {

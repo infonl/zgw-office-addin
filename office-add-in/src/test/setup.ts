@@ -31,4 +31,19 @@ global.Office = fromPartial({
       item: undefined,
     }),
   }),
+  MailboxEnums: {
+    AttachmentType: {
+      File: "file" as Office.MailboxEnums.AttachmentType.File,
+      Item: "item" as Office.MailboxEnums.AttachmentType.Item,
+      Cloud: "cloud" as Office.MailboxEnums.AttachmentType.Cloud,
+      Base64: "base64" as Office.MailboxEnums.AttachmentType.Base64,
+    },
+    ItemNotificationMessageType: {
+      InformationalMessage:
+        "informationalMessage" as Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
+      ErrorMessage: "errorMessage" as Office.MailboxEnums.ItemNotificationMessageType.ErrorMessage,
+      ProgressIndicator:
+        "progressIndicator" as Office.MailboxEnums.ItemNotificationMessageType.ProgressIndicator,
+    },
+  },
 });
