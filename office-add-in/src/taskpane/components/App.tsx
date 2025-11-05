@@ -16,7 +16,6 @@ import { useOffice } from "../../hooks/useOffice";
 import { FluentProvider, webLightTheme, webDarkTheme } from "@fluentui/react-components";
 import { useDarkMode } from "usehooks-ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ZaakSearch } from "./ZaakSearch";
 import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
 import { OfficeForm } from "./OfficeForm";
