@@ -7,7 +7,7 @@ import "@testing-library/dom";
 import { fromPartial } from "@total-typescript/shoehorn";
 import { vi } from "vitest";
 
-// Mock window.matchMedia for jsdom
+// Mock window.matchMedia for happy-dom
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({

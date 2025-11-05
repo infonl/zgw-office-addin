@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import { useMemo } from "react";
 
 export function useOutlook() {
@@ -14,11 +19,11 @@ export function useOutlook() {
       contentType: "message/rfc822",
       isInline: false,
       size: 0,
-      attachmentType: "email",
+      attachmentType: Office.MailboxEnums.AttachmentType.Item,
     };
 
     return [emailAsAttachment, ...attachments];
-  }, [Office.context.mailbox?.item]);
+  }, [Office.context.mailbox?.item?.itemId]);
 
   return { files };
 }
