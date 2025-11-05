@@ -24,7 +24,7 @@ The project is organized as a monorepo using npm workspaces:
 This project uses the following build tools and technologies:
 
 - **Turborepo**: For build orchestration and monorepo management
-- **npm**: Package manager (requires version 10.9.2 or higher)
+- **npm**: Package manager (requires version 10.9.4 or higher)
 - **TypeScript**: For type-safe JavaScript development
 - **Webpack**: For bundling the Office add-in
 - **Fastify**: For the backend API server
