@@ -20,14 +20,14 @@ import { ZaakSearch } from "./ZaakSearch";
 import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
 import { OfficeForm } from "./OfficeForm";
-import { OutlookForm } from "./OutlookForm";
+import { OutlookForm } from "./OutlookForm/OutlookForm";
 import { useCommonStyles } from "./styles/shared";
 
 const useStyles = makeStyles({
   root: {
     minHeight: "100vh",
-    paddingLeft: tokens.spacingHorizontalM,
-    paddingRight: tokens.spacingHorizontalM,
+    paddingLeft: tokens.spacingHorizontalXL,
+    paddingRight: tokens.spacingHorizontalXL,
   },
 
   actions: {

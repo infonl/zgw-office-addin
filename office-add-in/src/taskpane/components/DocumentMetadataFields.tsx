@@ -8,7 +8,7 @@ import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
 import { addDocumentSchema, documentstatus } from "../../hooks/useAddDocumentToZaak";
-import { mq, dims } from "./styles/layout";
+import { mq } from "./styles/layout";
 
 const useStyles = makeStyles({
   grid: {

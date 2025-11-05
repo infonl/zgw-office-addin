@@ -154,6 +154,7 @@ function ZaakDetails(props: { zaak: Zaak }) {
 
   return (
     <section style={{ marginTop: tokens.spacingVerticalL }}>
+      <Body1Strong>Gevonden zaak</Body1Strong>
       <table className={styles.table}>
         <tbody>
           <tr>

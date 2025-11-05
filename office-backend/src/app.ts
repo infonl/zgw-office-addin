@@ -20,21 +20,11 @@ let fastify: FastifyInstance;
 const isLocal = process.env.APP_ENV === "local";
 
 if (isLocal) {
-  // Read certificate files
-  const key = fs.readFileSync(path.join(__dirname, process.env.KEY_PATH!));
-  const cert = fs.readFileSync(path.join(__dirname, process.env.CERT_PATH!));
-  const caCert = fs.readFileSync(path.join(__dirname, process.env.CA_CERT_PATH!));
-
-  // Concatenate server certificate with CA certificate to form the full chain
-  // This is required for browsers to properly validate the certificate
-  // PEM files need to be concatenated as strings to preserve formatting
-  const certChain = cert.toString() + "\n" + caCert.toString();
-
   fastify = Fastify({
     https: {
-      key,
-      cert: certChain,
-      ca: caCert, // Keep CA for client certificate verification if needed
+      key: fs.readFileSync(path.join(__dirname, process.env.KEY_PATH!)),
+      cert: fs.readFileSync(path.join(__dirname, process.env.CERT_PATH!)),
+      ca: fs.readFileSync(path.join(__dirname, process.env.CA_CERT_PATH!)),
     },
   });
 } else {
