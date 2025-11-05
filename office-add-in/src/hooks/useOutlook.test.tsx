@@ -118,7 +118,7 @@ describe("useOutlook", () => {
     // Mock Office with empty context instead of deleting it
     const globalWithOffice = globalThis as { Office?: OfficeGlobal };
     globalWithOffice.Office = { context: { mailbox: { item: null as any } } };
-    
+
     const { result } = renderHook(() => useOutlook());
 
     await waitFor(() => {
