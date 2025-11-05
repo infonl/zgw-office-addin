@@ -27,5 +27,8 @@ global.Office = fromPartial({
   onReady: vi.fn().mockResolvedValue({}),
   context: fromPartial({
     document: fromPartial({}),
+    mailbox: fromPartial({
+      item: undefined,
+    }),
   }),
 });

@@ -11,7 +11,7 @@ export function useOutlook() {
     const emailAsAttachment: Office.AttachmentDetails = {
       id: `EmailItself-${email.itemId}`,
       name: `E-mail: ${email.subject || "(geen onderwerp)"}`,
-      contentType: "text/html",
+      contentType: "message/rfc822",
       isInline: false,
       size: 0,
       attachmentType: "email",
