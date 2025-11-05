@@ -4,9 +4,9 @@ export function useOutlook() {
   const files = useMemo(() => {
     const email = Office.context.mailbox?.item;
 
-    const attachements = email?.attachments.filter((attachment) => !attachment.isInline) ?? [];
+    const attachments = email?.attachments.filter((attachment) => !attachment.isInline) ?? [];
 
-    if (!email) return attachements;
+    if (!email) return attachments;
 
     const emailAsAttachment: Office.AttachmentDetails = {
       id: `EmailItself-${email.itemId}`,
@@ -17,7 +17,7 @@ export function useOutlook() {
       attachmentType: "email",
     };
 
-    return [emailAsAttachment, ...attachements];
+    return [emailAsAttachment, ...attachments];
   }, [Office.context.mailbox?.item]);
 
   return { files };
