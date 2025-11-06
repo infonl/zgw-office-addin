@@ -27,7 +27,9 @@ describe("useGetZaak", () => {
   let mockGet: ReturnType<typeof vi.fn>;
 
   const createWrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <>{children}</>
+    </QueryClientProvider>
   );
 
   const mockZaak = fromPartial<Zaak>({
@@ -72,7 +74,11 @@ describe("useGetZaak", () => {
     });
     mockGet = vi.fn();
     vi.mocked(useHttp).mockReturnValue({
-      GET: mockGet,
+      GET: mockGet as <T>(
+        _url: string,
+        _params?: Record<string, string>,
+        _headers?: HeadersInit
+      ) => Promise<T>,
       POST: vi.fn(),
     });
     vi.clearAllMocks();
