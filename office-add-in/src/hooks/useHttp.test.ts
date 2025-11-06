@@ -26,10 +26,10 @@ describe("useHttp", () => {
     mockError = vi.fn();
 
     vi.mocked(useLogger).mockReturnValue({
-      DEBUG: mockDebug,
-      LOG: vi.fn(),
-      WARN: vi.fn(),
-      ERROR: mockError,
+      DEBUG: mockDebug as (message: string, ...optionalParams: unknown[]) => void,
+      LOG: vi.fn() as (message: string, ...optionalParams: unknown[]) => void,
+      WARN: vi.fn() as (message: string, ...optionalParams: unknown[]) => void,
+      ERROR: mockError as (message: string, ...optionalParams: unknown[]) => void,
     });
 
     vi.clearAllMocks();
