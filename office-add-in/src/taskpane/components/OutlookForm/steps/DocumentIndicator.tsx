@@ -26,7 +26,7 @@ export function DocumentIndicator({ index }: DocumentIndicatorProps) {
     <span
       aria-label="volledig"
       title="Formulier compleet"
-      style={{ marginLeft: 8, color: tokens.colorPaletteGreenForeground1 }}
+      style={{ marginLeft: tokens.spacingHorizontalS, color: tokens.colorPaletteGreenForeground1 }}
     >
       <Checkmark16Filled />
     </span>

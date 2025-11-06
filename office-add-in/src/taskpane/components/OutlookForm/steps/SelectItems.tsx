@@ -4,9 +4,10 @@
  */
 
 import React from "react";
-import { tokens, Subtitle1, Body1, Checkbox } from "@fluentui/react-components";
-import { useFormContext, Controller } from "react-hook-form";
+import { tokens, Subtitle1, Body1 } from "@fluentui/react-components";
+import { useFormContext } from "react-hook-form";
 import { Schema } from "../hooks/useOutlookForm";
+import { CheckBox } from "../../form/Checkbox";
 
 export function SelectItems() {
   const form = useFormContext<Schema>();
@@ -39,17 +40,10 @@ export function SelectItems() {
           const label = document.attachment.name;
 
           return (
-            <Controller
+            <CheckBox
               key={document.attachment.id}
-              name={fieldName as any}
-              control={form.control}
-              render={({ field }) => (
-                <Checkbox
-                  label={label}
-                  checked={Boolean(field.value)}
-                  onChange={(_event, data) => field.onChange(data.checked)}
-                />
-              )}
+              name={fieldName as `documents.${number}.selected`}
+              label={label}
             />
           );
         })}

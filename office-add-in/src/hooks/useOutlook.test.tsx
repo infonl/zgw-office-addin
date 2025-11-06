@@ -22,7 +22,6 @@ describe("useOutlook", () => {
     mockOfficeItem();
   });
 
-  // -------------
   it("includes the email itself as the first entry", () => {
     mockOfficeItem(
       fromPartial<Item>({

@@ -34,8 +34,6 @@ const schema = z.object({
 export type Schema = z.infer<typeof schema>;
 
 export function useOutlookForm() {
-  const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
-
   const { zaak } = useZaak();
   const { files } = useOutlook();
 
@@ -51,7 +49,6 @@ export function useOutlookForm() {
   const documents = form.watch("documents");
 
   const handleSubmit = (data: Schema) => {
-    console.log("Form data", data);
     const selectedDocuments = data.documents.filter(({ selected }) => selected);
     // TODO https://dimpact.atlassian.net/browse/PZ-8370
     console.log("Submitting", selectedDocuments);
@@ -88,8 +85,6 @@ export function useOutlookForm() {
 
   return {
     form,
-    step,
-    setStep,
     documents,
     handleSubmit,
     zaak,

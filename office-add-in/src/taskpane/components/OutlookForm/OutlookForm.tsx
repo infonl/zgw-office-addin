@@ -26,7 +26,8 @@ const useStyles = makeStyles({
 
 export function OutlookForm() {
   const styles = useStyles();
-  const { form, step, setStep, handleSubmit, zaak, hasSelectedDocuments } = useOutlookForm();
+  const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
+  const { form, zaak, hasSelectedDocuments, handleSubmit } = useOutlookForm();
 
   if (!zaak.data) return <ZaakSearch />;
 

@@ -12,21 +12,20 @@ export function CheckBox(props: Props) {
   const error = useFormError(props.name);
   const { control } = useFormContext();
 
-  const { style, className, ...rest } = props;
+  const { label, style, className, ...rest } = props;
 
   return (
     <Field
-      label={props.label ?? props.name}
       required={props.required}
       validationState={error ? "error" : "none"}
       validationMessage={error}
-      orientation="horizontal"
       style={style}
       className={className}
     >
       <Controller
         render={({ field }) => (
           <FluentUiCheckbox
+            label={label ?? props.name}
             checked={field.value ?? false}
             onChange={(_event, data) => field.onChange(data.checked)}
             onBlur={field.onBlur}
