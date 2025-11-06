@@ -47,7 +47,7 @@
     "@fluentui/react-components": "9.72.5",
     "@fluentui/react-icons": "2.0.313",
     "@hookform/resolvers": "5.2.2",
-    "@tanstack/react-query": "5.90.6",
+    "@tanstack/react-query": "5.90.7",
     "core-js": "3.46.0",
     "es6-promise": "4.2.8",
     "jwt-decode": "4.0.0",
@@ -56,7 +56,7 @@
     "react-hook-form": "7.65.0",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
-    "zod": "4.1.11"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
@@ -83,7 +83,7 @@
     "less-loader": "12.3.0",
     "office-addin-cli": "2.0.5",
     "office-addin-debugging": "6.0.5",
-    "office-addin-dev-certs": "2.0.3",
+    "office-addin-dev-certs": "2.0.5",
     "office-addin-lint": "3.0.5",
     "office-addin-manifest": "2.0.3",
     "office-addin-prettier-config": "2.0.1",
