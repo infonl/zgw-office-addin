@@ -18,6 +18,7 @@
     "prettier": "prettier --check \"**/*.{ts,js}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
     "test": "vitest --run",
+    "test:ui": "vitest --ui",
     "test:watch": "vitest"
   },
   "keywords": [],
@@ -35,7 +36,6 @@
     "@types/connect": "3.4.38",
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "22.18.8",
     "@types/node": "22.19.0",
     "@types/send": "1.2.1",
     "@types/serve-static": "1.15.10",

@@ -24,19 +24,34 @@ The project is organized as a monorepo using npm workspaces:
 This project uses the following build tools and technologies:
 
 - **Turborepo**: For build orchestration and monorepo management
-- **npm**: Package manager (requires version 10.9.2 or higher)
+- **npm**: Package manager (version managed via Node.js installation)
 - **TypeScript**: For type-safe JavaScript development
 - **Webpack**: For bundling the Office add-in
 - **Fastify**: For the backend API server
 
 ## Development Setup
+
 More details on the development setup can be found in the [development setup documentation](docs/development/README.md).
 
 ### Prerequisites
 
-- Node.js (per version in `.nvmrc`)
-- Microsoft Office (desktop version for local testing)
+- **Node.js**: Use the version specified in `.nvmrc`
+  ```bash
+  # Install and use the correct Node.js version with nvm
+  nvm install  
+  nvm use       
+  ```
+- **npm**: Comes bundled with Node.js, (version is specified in `packageManager` field)
 
+  ```bash
+  # Check npm version
+  npm --version
+
+  # Update npm if needed
+  npm install -g npm@latest
+  ```
+
+- **Microsoft Office**: Desktop version for local testing
 
 ## License
 

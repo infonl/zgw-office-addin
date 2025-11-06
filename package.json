@@ -26,20 +26,23 @@
     "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts",
     "test": "turbo test",
     "test:coverage": "turbo test -- --coverage",
-    "test:ui": "vitest --ui",
+    "test:ui": "turbo test:ui",
     "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "16.3.0",
     "@total-typescript/shoehorn": "0.1.2",
     "@vitest/coverage-v8": "2.1.9",
     "@vitest/ui": "2.1.9",
-    "jsdom": "27.1.0",
+    "happy-dom": "^20.0.8",
     "turbo": "2.5.8",
     "vitest": "2.1.9"
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0"
   }
 }
