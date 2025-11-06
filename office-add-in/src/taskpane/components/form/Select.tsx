@@ -3,26 +3,30 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { Caption1, Label, Select as FluentUiSelect, SelectProps } from "@fluentui/react-components";
+import { Field, Select as FluentUiSelect, SelectProps } from "@fluentui/react-components";
 import { useFormError } from "./hooks/useFormError";
-import { formStyles } from "./styles";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 export function Select(props: Props) {
-  const styles = formStyles();
   const error = useFormError(props.name);
   const { control } = useFormContext();
 
+  const { style, className, ...rest } = props;
+
   return (
-    <section className={styles.input}>
-      <Label htmlFor={props.name}>{props.label ?? props.name}</Label>
+    <Field
+      label={props.label ?? props.name}
+      required={props.required}
+      validationState={error ? "error" : "none"}
+      validationMessage={error}
+      style={style}
+      className={className}
+    >
       <Controller
         render={({ field }) => (
           <FluentUiSelect {...field} id={props.name}>
-            <option value="" disabled>
-              -
-            </option>
+            {((props.required && !field.value) || !props.required) && <option value="">-</option>}
             {props.options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -31,10 +35,9 @@ export function Select(props: Props) {
           </FluentUiSelect>
         )}
         control={control}
-        {...props}
+        {...rest}
       />
-      {error && <Caption1 className={styles.error}>{error}</Caption1>}
-    </section>
+    </Field>
   );
 }
 
