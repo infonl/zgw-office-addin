@@ -78,3 +78,74 @@ services:
 
   redis:
     image: redis:8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021
+
+  keycloak-database:
+    image: docker.io/postgres:17.6@sha256:a7fdfd815005ea658281c60b06020f49ab8a6bbe21434d3a59fe14654f6d4293
+    platform: linux/amd64
+    ports:
+      - "55000:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
+    volumes:
+      - ./scripts/docker-compose/keycloak/keycloak-database-data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.5@sha256:357829ec7c4693397533035092ad13b0644bcc95ded311f33a3738c4d9e9bdba
+    depends_on:
+      keycloak-database:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8082:8080"
+      - "9002:9000"
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;cat <&3 | grep -q '\"status\": \"UP\"' && exit 0 || exit 1"
+      ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_HEALTH_ENABLED=true
+      - KC_HOSTNAME=http://localhost:8082
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=keycloak-database
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak
+      - KC_IMPORT=/opt/keycloak/data/import/office-add-in-realm.json
+      - ZAC_TESTUSER1_EMAIL_ADDRESS=${DOCKER_COMPOSE_TEST_USER_1_EMAIL_ADDRESS:-testuser1@example.com}
+      - ZAC_TESTUSER2_EMAIL_ADDRESS=${DOCKER_COMPOSE_TEST_USER_2_EMAIL_ADDRESS:-testuser2@example.com}
+      - ZAC_TESTUSER_DOMEIN_TEST_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_TESTUSER_DOMEIN_TEST_1_EMAIL_ADDRESS:-testuserdomaintest1@example.com}
+      - ZAC_TESTUSER_DOMEIN_TEST_2_EMAIL_ADDRESS=${DOCKER_COMPOSE_TESTUSER_DOMEIN_TEST_2_EMAIL_ADDRESS:-testuserdomaintest2@example.com}
+      - ZAC_RECORD_MANAGER_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_RECORD_MANAGER_1_EMAIL_ADDRESS:-recordmanager1@example.com}
+      - ZAC_FUNCTIONAL_ADMIN_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_FUNCTIONAL_ADMIN_1_EMAIL_ADDRESS:-functionaladmin1@example.com}
+      - ZAC_TEST_USER_DOMEIN_TEST_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_TESTUSER_DOMEIN_TEST_1_EMAIL_ADDRESS:-testuser-domein-test-1@example.com}
+      - ZAC_COORDINATOR_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_COORDINATOR_1_EMAIL_ADDRESS:-coordinator1@example.com}
+      - ZAC_BEHANDELAAR_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_BEHANDELAAR_1_EMAIL_ADDRESS:-behandelaar1@example.com}
+      - ZAC_BEHANDELAAR_2_EMAIL_ADDRESS=${DOCKER_COMPOSE_BEHANDELAAR_2_EMAIL_ADDRESS:-behandelaar2@example.com}
+      - ZAC_RAADPLEGER_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_RAADPLEGER_1_EMAIL_ADDRESS:-raadpleger1@example.com}
+      - ZAC_GROUP_A_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_A_EMAIL_ADDRESS:-test-group-a@example.com}
+      - ZAC_GROUP_FUNCTIONEEL_BEHEERDERS_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_FUNCTIONEEL_BEHEERDERS_EMAIL_ADDRESS:-test-group-functioneel-beheerders@example.com}
+      - ZAC_GROUP_RECORD_MANAGERS_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_RECORD_MANAGERS_EMAIL_ADDRESS:-test-group-record-managers@example.com}
+      - ZAC_GROUP_COORDINATORS_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_COORDINATORS_EMAIL_ADDRESS:-test-group-coordinators@example.com}
+      - ZAC_GROUP_BEHANDELAARS_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_BEHANDELAARS_EMAIL_ADDRESS:-test-group-behandelaars@example.com}
+      - ZAC_GROUP_DOMEIN_TEST_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_DOMEIN_TEST_1_EMAIL_ADDRESS:-test-group-domein-test-1@example.com}
+      - ZAC_GROUP_RAADPLEGERS_1_EMAIL_ADDRESS=${DOCKER_COMPOSE_GROUP_RAADPLEGERS_1_EMAIL_ADDRESS:-test-group-raadplegers@example.com}
+    volumes:
+      - ./scripts/docker-compose/imports/keycloak/realms:/opt/keycloak/data/import
+    command:
+      - "start-dev"
+      - "--import-realm"

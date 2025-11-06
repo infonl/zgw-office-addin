@@ -34,6 +34,7 @@ node_modules/
 *.pem
 *.srl
 openzaak-database-data
+keycloak-database-data
 generated-client
 generated/types.ts
 /office-add-in/docker-metadata.json
