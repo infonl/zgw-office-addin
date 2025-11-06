@@ -3,15 +3,11 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import "@testing-library/jest-dom";
+import "@testing-library/dom";
 import { fromPartial } from "@total-typescript/shoehorn";
-import React from "react";
 import { vi } from "vitest";
 
-// Make React available globally for JSX
-global.React = React;
-
-// Mock window.matchMedia for jsdom
+// Mock window.matchMedia for happy-dom
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
@@ -31,5 +27,23 @@ global.Office = fromPartial({
   onReady: vi.fn().mockResolvedValue({}),
   context: fromPartial({
     document: fromPartial({}),
+    mailbox: fromPartial({
+      item: undefined,
+    }),
   }),
+  MailboxEnums: {
+    AttachmentType: {
+      File: "file" as Office.MailboxEnums.AttachmentType.File,
+      Item: "item" as Office.MailboxEnums.AttachmentType.Item,
+      Cloud: "cloud" as Office.MailboxEnums.AttachmentType.Cloud,
+      Base64: "base64" as Office.MailboxEnums.AttachmentType.Base64,
+    },
+    ItemNotificationMessageType: {
+      InformationalMessage:
+        "informationalMessage" as Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
+      ErrorMessage: "errorMessage" as Office.MailboxEnums.ItemNotificationMessageType.ErrorMessage,
+      ProgressIndicator:
+        "progressIndicator" as Office.MailboxEnums.ItemNotificationMessageType.ProgressIndicator,
+    },
+  },
 });

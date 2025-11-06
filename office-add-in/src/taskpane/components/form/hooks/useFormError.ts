@@ -3,12 +3,25 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { useFormContext } from "react-hook-form";
+import { FieldError, useFormContext, type FieldErrors, type FieldValues } from "react-hook-form";
 
 export function useFormError(name: string) {
   const {
     formState: { errors },
   } = useFormContext();
 
-  return errors[name]?.message?.toString() ?? null;
+  const error = name.split(".").reduce(
+    (acc, segment) => {
+      if (!acc) return null;
+      if (typeof acc === "string") return acc;
+      if ("message" in acc) return acc.message?.toString() ?? null;
+      return (acc as FieldErrors<FieldValues>)[segment] ?? null;
+    },
+    errors as FieldErrors<FieldValues> | FieldError | string | null
+  );
+
+  if (!error) return null;
+  if (typeof error === "string") return error;
+
+  return "message" in error ? error.message?.toString() : null;
 }

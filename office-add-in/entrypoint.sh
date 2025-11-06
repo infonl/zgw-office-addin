@@ -19,20 +19,21 @@ NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 
 ####
 # To ensure the manifest for the Office Add-in is correctly configured,
-# we need to rewrite the URLs in the manifest.xml to align with the location
-# that this file is available on.
+# we need to rewrite the URLs in the manifests manifest-office.xml and manifest-outlook.xml.
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
 FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
 FRONTEND_API=$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')
-MANIFEST_FILE="$NGINX_PUBLIC_HTML/manifest.xml"
+MANIFEST_OFFICE_FILE="$NGINX_PUBLIC_HTML/manifest-office.xml"
+MANIFEST_OUTLOOK_FILE="$NGINX_PUBLIC_HTML/manifest-outlook.xml"
 
-echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting '$MANIFEST_FILE'."
-sed -i -e "s|http://localhost:3000|$FRONTEND_URL|g" -e "s|http://www.contoso.com|$FRONTEND_URL|g" "$MANIFEST_FILE"
-sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|https://www.contoso.com|$FRONTEND_URL|g" "$MANIFEST_FILE"
-
-echo "Frontend API is set to ${FRONTEND_API}. Rewriting '$MANIFEST_FILE'."
-sed -i -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+echo "Frontend URL is set to ${FRONTEND_URL}. Rewriting manifests."
+for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
+  [ -f "$MANIFEST_FILE" ] || continue
+  sed -i -e "s|http://localhost:3000|$FRONTEND_URL|g" -e "s|http://www.contoso.com|$FRONTEND_URL|g" "$MANIFEST_FILE"
+  sed -i -e "s|https://localhost:3000|$FRONTEND_URL|g" -e "s|https://www.contoso.com|$FRONTEND_URL|g" "$MANIFEST_FILE"
+  sed -i -e "s|api://localhost:3000|$FRONTEND_API|g" "$MANIFEST_FILE"
+done
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,

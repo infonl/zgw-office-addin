@@ -16,16 +16,14 @@ export const documentstatus = [
   "gearchiveerd",
 ] as const;
 
-export const addDocumentSchema = zod
-  .object({
-    vertrouwelijkheidaanduiding: zod.string(),
-    informatieobjecttype: zod.string().url(),
-    status: zod.enum(documentstatus),
-    creatiedatum: zod.date({ coerce: true }),
-    zaakidentificatie: zod.string(),
-    auteur: zod.string().min(1),
-  })
-  .required();
+export const addDocumentSchema = zod.object({
+  vertrouwelijkheidaanduiding: zod.string(),
+  informatieobjecttype: zod.string().url(),
+  status: zod.enum(documentstatus),
+  creatiedatum: zod.date(),
+  zaakidentificatie: zod.string(),
+  auteur: zod.string().min(1),
+});
 
 export type AddDocumentSchema = zod.infer<typeof addDocumentSchema>;
 
