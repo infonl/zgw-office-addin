@@ -74,7 +74,11 @@ describe("useGetZaak", () => {
     });
     mockGet = vi.fn();
     vi.mocked(useHttp).mockReturnValue({
-      GET: mockGet,
+      GET: mockGet as <T>(
+        _url: string,
+        _params?: Record<string, string>,
+        _headers?: HeadersInit
+      ) => Promise<T>,
       POST: vi.fn(),
     });
     vi.clearAllMocks();
