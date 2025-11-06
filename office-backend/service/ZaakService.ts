@@ -73,6 +73,8 @@ export class ZaakService {
       case "doc":
       case "docx":
         return "application/msword";
+      case "eml":
+        return "message/rfc822";
       default:
         throw new FileNotSupported(file);
     }
@@ -95,7 +97,7 @@ export class ZaakService {
 
   private async createGebruiksrechten(url: string, startdatum: Date) {
     await this.httpService.POST(
-      "documenten/api/v1/gebruiksrechten",
+      "/documenten/api/v1/gebruiksrechten",
       JSON.stringify({
         informatieobject: url,
         startdatum,

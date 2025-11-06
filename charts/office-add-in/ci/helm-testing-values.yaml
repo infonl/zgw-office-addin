@@ -1,12 +1,12 @@
 frontend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-frontend
-    tag: v0.1.16@sha256:a180f076f01583b276316bed957464f266745d875cdc99fa5151cb1a59c6b67d
+    tag: v0.2.53@sha256:32de7a13b3b3dcdea9cbe166eb4722a58d738ecd58d570994fc3da432812af13
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 80
-  # -- The frontend public URL where the manifest.xml and static js file are served
+  # -- The frontend public URL where the manifest files and static js file are served
   frontendUrl: "http://localhost:3000"
   # -- If enabled nginx will also listen on port 443. You will need to volume map a key
   # and certificate valid for your frontendUrl
@@ -17,7 +17,7 @@ frontend:
 backend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-backend
-    tag: v0.1.16@sha256:b19602fca1d06888bae2380d3ea4b656863f4d60692734087459136ef6bf3cff
+    tag: v0.2.53@sha256:ed7f510dd341a18c688f49e8ddee9a68dba1c33f4764094fcc83f546feea7401
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP

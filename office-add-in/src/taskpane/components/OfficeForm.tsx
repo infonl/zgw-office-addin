@@ -8,14 +8,11 @@ import {
   Button,
   makeStyles,
   Spinner,
-  Title1,
+  Subtitle1,
   Toast,
   ToastBody,
   ToastTitle,
   tokens,
-  MessageBar,
-  MessageBarBody,
-  MessageBarTitle,
 } from "@fluentui/react-components";
 import { useEffect } from "react";
 import React from "react";
@@ -28,22 +25,13 @@ import {
   useAddDocumentToZaak,
 } from "../../hooks/useAddDocumentToZaak";
 import { useOffice } from "../../hooks/useOffice";
-import { Input } from "./form/Input";
-import { Select } from "./form/Select";
+import { DocumentMetadataFields } from "./DocumentMetadataFields";
 import { useToast } from "../../provider/ToastProvider";
 import { useZaak } from "../../provider/ZaakProvider";
+import { useCommonStyles } from "./styles/shared";
+import { ZaakSearch } from "./ZaakSearch";
 
 const useStyles = makeStyles({
-  title: {
-    display: "flex",
-    flexDirection: "column",
-    gap: tokens.spacingHorizontalS,
-    marginTop: tokens.spacingHorizontalXXXL,
-  },
-  messageBar: {
-    marginTop: tokens.spacingHorizontalM,
-    marginBottom: tokens.spacingHorizontalM,
-  },
   form: {
     paddingTop: tokens.spacingVerticalL,
     display: "flex",
@@ -58,8 +46,9 @@ const useStyles = makeStyles({
   },
 });
 
-export function ZaakForm() {
+export function OfficeForm() {
   const styles = useStyles();
+  const common = useCommonStyles();
 
   const { dispatchToast, dismissToast } = useToast();
   const {
@@ -151,58 +140,36 @@ export function ZaakForm() {
     });
   }, [getSignedInUser, form.setValue]);
 
+  if (!data) {
+    return <ZaakSearch />;
+  }
+
   return (
-    <FormProvider {...form}>
-      <section className={styles.title}>
-        <Title1>Documentgegevens</Title1>
-        <Body1>
-          Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
-        </Body1>
-      </section>
-      <section className={styles.messageBar}>
-        {!data && (
-          <MessageBar intent="info">
-            <MessageBarBody>
-              <MessageBarTitle>Geen zaak gevonden</MessageBarTitle>
-              Zoek eerst een zaak voordat je deze kunt koppelen
-            </MessageBarBody>
-          </MessageBar>
+    <>
+      <ZaakSearch />
+      <FormProvider {...form}>
+        <section className={common.title}>
+          <Subtitle1>Documentgegevens</Subtitle1>
+          <Body1>
+            Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
+          </Body1>
+        </section>
+        {data && (
+          <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+            <DocumentMetadataFields
+              zaakinformatieobjecten={data.zaakinformatieobjecten}
+              statuses={documentstatus}
+            />
+            <Button
+              disabled={!form.formState.isValid || isPending}
+              appearance="primary"
+              type="submit"
+            >
+              Document koppelen
+            </Button>
+          </form>
         )}
-      </section>
-      {data && (
-        <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
-          <Input name="auteur" />
-          <fieldset className={styles.fieldset}>
-            <Select
-              name="informatieobjecttype"
-              label="Document type"
-              options={data.zaakinformatieobjecten.map((zaakinformatieobject) => ({
-                label: zaakinformatieobject.omschrijving,
-                value: zaakinformatieobject.url!,
-              }))}
-            />
-            <Input readOnly name="vertrouwelijkheidaanduiding" />
-          </fieldset>
-          <fieldset className={styles.fieldset}>
-            <Select
-              name="status"
-              label="Status"
-              options={documentstatus.map((status) => ({
-                label: status.replace(/_/g, " "),
-                value: status,
-              }))}
-            />
-            <Input type="date" name="creatiedatum" />
-          </fieldset>
-          <Button
-            disabled={!form.formState.isValid || isPending}
-            appearance="primary"
-            type="submit"
-          >
-            Document koppelen
-          </Button>
-        </form>
-      )}
-    </FormProvider>
+      </FormProvider>
+    </>
   );
 }

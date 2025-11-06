@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.38](https://img.shields.io/badge/Version-0.0.38-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.0.42](https://img.shields.io/badge/Version-0.0.42-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -33,7 +33,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.1.16@sha256:b19602fca1d06888bae2380d3ea4b656863f4d60692734087459136ef6bf3cff"` |  |
+| backend.image.tag | string | `"v0.2.53@sha256:ed7f510dd341a18c688f49e8ddee9a68dba1c33f4764094fcc83f546feea7401"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
@@ -46,10 +46,10 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
-| frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest.xml and static js file are served |
+| frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.1.16@sha256:a180f076f01583b276316bed957464f266745d875cdc99fa5151cb1a59c6b67d"` |  |
+| frontend.image.tag | string | `"v0.2.53@sha256:32de7a13b3b3dcdea9cbe166eb4722a58d738ecd58d570994fc3da432812af13"` |  |
 | frontend.imagePullSecrets | list | `[]` | Image pull secrets for the frontend deployment |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |

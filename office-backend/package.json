@@ -16,14 +16,17 @@
     "docker:security": "docker scout cves || echo 'Docker Scout not available or no image built'",
     "docker:validate": "docker buildx build --check .",
     "prettier": "prettier --check \"**/*.{ts,js}\"",
-    "prettier:fix": "prettier --write \"**/*.{ts,js}\""
+    "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
+    "test": "vitest --run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
   "license": "EUPL-1.2+",
   "description": "",
   "dependencies": {
-    "dotenv": "17.2.2",
+    "dotenv": "17.2.3",
     "fastify": "5.6.1",
     "jsonwebtoken": "9.0.2"
   },
@@ -33,14 +36,14 @@
     "@types/connect": "3.4.38",
     "@types/jsonfile": "6.1.4",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "22.18.6",
-    "@types/send": "0.17.5",
-    "@types/serve-static": "1.15.8",
-    "eslint": "9.36.0",
+    "@types/node": "22.19.0",
+    "@types/send": "1.2.1",
+    "@types/serve-static": "1.15.10",
+    "eslint": "9.39.1",
     "neostandard": "0.12.2",
     "prettier": "3.6.2",
     "ts-node": "10.9.2",
     "ts-node-dev": "2.0.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   }
 }
