@@ -122,6 +122,7 @@
         <Id>e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Id>
         <Resource>api://localhost:3000/e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Resource>
         <Scopes>
+          <Scope>access_as_user</Scope>
           <Scope>openid</Scope>
           <Scope>user.read</Scope>
           <Scope>profile</Scope>
