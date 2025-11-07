@@ -11,7 +11,7 @@
 # To test this script locally, you can use the entrypoint.test.sh script.
 
 # Application version for metrics. This can be set via environment variable or defaults to 'unknown'.
-# The dockerfile sets this variable during build time, and the CI build pipeline sets in to the determined version.
+# The dockerfile sets this variable during build time, and the CI build pipeline sets it to the determined version.
 APP_VERSION="${APP_VERSION:-unknown}"
 echo "Starting ZGW Office Add-in version $APP_VERSION"
 
