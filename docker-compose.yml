@@ -19,7 +19,7 @@ services:
       - "3003:3003"
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus@sha256:49214755b6153f90a597adcbff0252cc61069f8ab69ce8411285cd4a560e8038
     volumes:
       - ./scripts/docker-compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./office-add-in/ssl-certs:/etc/prometheus/certs:ro
