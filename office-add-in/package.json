@@ -44,7 +44,7 @@
     "docker:validate": "docker buildx build --check ."
   },
   "dependencies": {
-    "@fluentui/react-components": "9.72.5",
+    "@fluentui/react-components": "9.72.6",
     "@fluentui/react-icons": "2.0.313",
     "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.90.7",
@@ -74,7 +74,7 @@
     "babel-loader": "10.0.0",
     "copy-webpack-plugin": "13.0.1",
     "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-office-addins": "4.0.5",
+    "eslint-plugin-office-addins": "4.0.6",
     "eslint-plugin-react": "7.37.5",
     "file-loader": "6.2.0",
     "html-loader": "5.1.0",
