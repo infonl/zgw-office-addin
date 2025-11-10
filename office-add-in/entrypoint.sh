@@ -10,6 +10,11 @@
 #
 # To test this script locally, you can use the entrypoint.test.sh script.
 
+# Application version for metrics. This can be set via environment variable or defaults to 'unknown'.
+# The dockerfile sets this variable during build time, and the CI build pipeline sets it to the determined version.
+APP_VERSION="${APP_VERSION:-unknown}"
+echo "Starting ZGW Office Add-in version $APP_VERSION"
+
 ####
 # Optionally set the location to the NGINX public HTML directory, defaults to /usr/share/nginx/html.
 NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
@@ -65,3 +70,11 @@ fi
 MAX_BODY_SIZE="${MAX_BODY_SIZE:-80M}"
 echo "Setting maximum upload size to $MAX_BODY_SIZE."
 sed -i -e "s|__MAX_BODY_SIZE__|$MAX_BODY_SIZE|g" "$NGINX_CONFIG_FILE"
+
+###
+# Create a static metrics.txt file to expose the current version of the application for prometheus scraping.
+cat <<EOF > "$NGINX_PUBLIC_HTML/metrics.txt"
+# HELP app_version Application version
+# TYPE app_version gauge
+app_version{version="$APP_VERSION"} 1
+EOF
