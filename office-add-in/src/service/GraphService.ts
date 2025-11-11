@@ -53,6 +53,45 @@ export interface GraphMessage {
  * Handles authentication, rate limiting, and file operations
  */
 export class GraphService {
+  /**
+   * Zoekt een Graph message ID op basis van een Office itemId en optionele eigenschappen
+   * Vergelijkt Office itemId met Graph message IDs en logt matches
+   * @param officeItemId - De Office API itemId
+   * @param opts - Optioneel: subject, sender, receivedDateTime
+   */
+  async findGraphMessageIdByOfficeId(
+    officeItemId: string,
+    opts?: { subject?: string; sender?: string; receivedDateTime?: string }
+  ): Promise<string | null> {
+    // Haal de eerste 50 berichten op (pas $top aan indien nodig)
+    const messagesResp = await this.graphRequest<{ value: GraphMessage[] }>(`/me/messages?$top=50`);
+    const messages = messagesResp.value;
+    // Log alle Graph IDs ter vergelijking
+    console.debug("[GraphService] Vergelijk Office itemId met Graph message IDs:", {
+      officeItemId,
+      graphIds: messages.map((m) => m.id),
+    });
+    // Directe match op ID
+    const directMatch = messages.find((m) => m.id === officeItemId);
+    if (directMatch) {
+      console.debug("[GraphService] Directe match gevonden:", directMatch.id);
+      return directMatch.id;
+    }
+    // Optionele match op eigenschappen
+    const propMatch = messages.find((m) => {
+      if (opts?.subject && m.subject !== opts.subject) return false;
+      if (opts?.sender && m.from?.emailAddress?.address !== opts.sender) return false;
+      if (opts?.receivedDateTime && (m as any).receivedDateTime !== opts.receivedDateTime)
+        return false;
+      return true;
+    });
+    if (propMatch) {
+      console.debug("[GraphService] Eigenschappen-match gevonden:", propMatch.id);
+      return propMatch.id;
+    }
+    console.warn("[GraphService] Geen match gevonden voor Office itemId:", officeItemId);
+    return null;
+  }
   private readonly baseUrl = "https://graph.microsoft.com/v1.0";
   private authProvider: GraphAuthProvider;
 
@@ -142,7 +181,9 @@ export class GraphService {
    * Gets the current user's email message by ID
    */
   async getMessage(messageId: string): Promise<GraphMessage> {
-    return this.graphRequest<GraphMessage>(`/me/messages/${messageId}`);
+    const encodedId = encodeURIComponent(messageId);
+    console.debug("[GraphService] getMessage: originalId=", messageId, "encodedId=", encodedId);
+    return this.graphRequest<GraphMessage>(`/me/messages/${encodedId}`);
   }
 
   /**
@@ -151,16 +192,27 @@ export class GraphService {
    */
   async getAttachmentContent(messageId: string, attachmentId: string): Promise<string> {
     return retryWithAdaptiveBackoff(async () => {
+      const encodedMessageId = encodeURIComponent(messageId);
+      const encodedAttachmentId = encodeURIComponent(attachmentId);
+      console.debug(
+        "[GraphService] getAttachmentContent: originalMessageId=",
+        messageId,
+        "encodedMessageId=",
+        encodedMessageId,
+        "originalAttachmentId=",
+        attachmentId,
+        "encodedAttachmentId=",
+        encodedAttachmentId
+      );
       const token = await this.authProvider.getAccessToken();
 
-      const response = await fetch(
-        `${this.baseUrl}/me/messages/${messageId}/attachments/${attachmentId}/$value`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const url = `${this.baseUrl}/me/messages/${encodedMessageId}/attachments/${encodedAttachmentId}/$value`;
+      console.debug("[GraphService] getAttachmentContent: url=", url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const retryAfter = response.headers.get("Retry-After");
@@ -195,9 +247,18 @@ export class GraphService {
    */
   async getEmailAsEML(messageId: string): Promise<string> {
     return retryWithAdaptiveBackoff(async () => {
+      const encodedId = encodeURIComponent(messageId);
+      console.debug(
+        "[GraphService] getEmailAsEML: originalId=",
+        messageId,
+        "encodedId=",
+        encodedId
+      );
       const token = await this.authProvider.getAccessToken();
 
-      const response = await fetch(`${this.baseUrl}/me/messages/${messageId}/$value`, {
+      const url = `${this.baseUrl}/me/messages/${encodedId}/$value`;
+      console.debug("[GraphService] getEmailAsEML: url=", url);
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

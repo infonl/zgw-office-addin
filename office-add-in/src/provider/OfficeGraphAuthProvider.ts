@@ -92,8 +92,13 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           // --- Inspect the token we received from Office SSO
           let payload = this.decodeJwtPayload(token);
 
+          // Log scopes
+          console.log("🔎 TOKEN.SCP (scopes):", payload?.scp);
+          if (!payload?.scp || !payload.scp.includes("Mail.Read")) {
+            console.warn("⚠️ JWT token mist Mail.Read scope! Scopes:", payload?.scp);
+          }
+
           console.log("🔎 TOKEN.AUD:", payload?.aud);
-          console.log("🔎 TOKEN.SCP:", payload?.scp);
           console.log("🔎 TOKEN.APPID / ROLES:", payload?.appid ?? payload?.azp, payload?.roles);
           console.log("🔎 TOKEN.EXP:", payload?.exp, "iat:", payload?.iat);
 

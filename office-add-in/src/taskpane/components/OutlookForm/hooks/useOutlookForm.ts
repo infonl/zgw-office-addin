@@ -53,6 +53,25 @@ export function useOutlookForm() {
     const selectedDocuments = data.documents.filter(({ selected }) => selected);
     console.log("🚀 Starting upload of selected documents:", selectedDocuments.length);
 
+    // Test: vergelijk Office itemId met Graph message IDs
+    const currentEmail = Office.context.mailbox?.item;
+    if (currentEmail) {
+      try {
+        const graphService = await graphServiceManager.getGraphService();
+        const graphId = await graphService.findGraphMessageIdByOfficeId(currentEmail.itemId, {
+          subject: currentEmail.subject,
+          sender: currentEmail.from?.emailAddress,
+          receivedDateTime: currentEmail.dateTimeCreated?.toISOString(),
+        });
+        console.log("🔎 [Test] Graph ID match voor Office itemId:", {
+          officeItemId: currentEmail.itemId,
+          graphId,
+        });
+      } catch (e) {
+        console.warn("[Test] Kan Graph ID niet vinden voor Office itemId:", e);
+      }
+    }
+
     // Log detailed information about each selected file
     selectedDocuments.forEach((doc, index) => {
       console.log(`📋 File ${index + 1}:`, {
