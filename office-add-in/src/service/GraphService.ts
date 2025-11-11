@@ -54,6 +54,27 @@ export interface GraphMessage {
  */
 export class GraphService {
   /**
+   * Converteer een Office itemId naar een Graph messageId formaat
+   * Vervangt / door _ en + door -
+   */
+  static officeIdToGraphId(officeId: string): string {
+    return officeId.replace(/\+/g, "_").replace(/\//g, "-");
+  }
+
+  /**
+   * Converteer een Graph messageId naar een Office itemId formaat
+   * Vervangt _ door / en - door +
+   */
+  static graphIdToOfficeId(graphId: string): string {
+    return graphId.replace(/_/g, "/").replace(/-/g, "+");
+  }
+  /**
+   * Simpele test: haal de huidige gebruiker op via Graph API /me
+   */
+  async getCurrentUser(): Promise<any> {
+    return this.graphRequest<any>(`/me`);
+  }
+  /**
    * Zoekt een Graph message ID op basis van een Office itemId en optionele eigenschappen
    * Vergelijkt Office itemId met Graph message IDs en logt matches
    * @param officeItemId - De Office API itemId
@@ -64,17 +85,28 @@ export class GraphService {
     opts?: { subject?: string; sender?: string; receivedDateTime?: string }
   ): Promise<string | null> {
     // Haal de eerste 50 berichten op (pas $top aan indien nodig)
-    const messagesResp = await this.graphRequest<{ value: GraphMessage[] }>(`/me/messages?$top=50`);
+    const messagesResp = await this.graphRequest<{ value: GraphMessage[] }>(
+      `/me/messages?$top=500`
+    );
     const messages = messagesResp.value;
     // Log alle Graph IDs ter vergelijking
     console.debug("[GraphService] Vergelijk Office itemId met Graph message IDs:", {
       officeItemId,
       graphIds: messages.map((m) => m.id),
     });
-    // Directe match op ID
-    const directMatch = messages.find((m) => m.id === officeItemId);
+    // Directe match op ID (met conversie)
+    const convertedOfficeId = GraphService.officeIdToGraphId(officeItemId);
+    console.debug("[GraphService] Geconverteerd Office itemId naar Graph ID:", {
+      officeItemId,
+      convertedOfficeId,
+    });
+    const directMatch = messages.find((m) => m.id === convertedOfficeId);
     if (directMatch) {
-      console.debug("[GraphService] Directe match gevonden:", directMatch.id);
+      console.debug("[GraphService] Directe match gevonden in top 500:", {
+        officeItemId,
+        convertedOfficeId,
+        graphId: directMatch.id,
+      });
       return directMatch.id;
     }
     // Optionele match op eigenschappen
@@ -181,8 +213,16 @@ export class GraphService {
    * Gets the current user's email message by ID
    */
   async getMessage(messageId: string): Promise<GraphMessage> {
-    const encodedId = encodeURIComponent(messageId);
-    console.debug("[GraphService] getMessage: originalId=", messageId, "encodedId=", encodedId);
+    const graphId = GraphService.officeIdToGraphId(messageId);
+    const encodedId = encodeURIComponent(graphId);
+    console.debug(
+      "[GraphService] getMessage: officeId=",
+      messageId,
+      "convertedGraphId=",
+      graphId,
+      "encodedId=",
+      encodedId
+    );
     return this.graphRequest<GraphMessage>(`/me/messages/${encodedId}`);
   }
 
@@ -192,20 +232,25 @@ export class GraphService {
    */
   async getAttachmentContent(messageId: string, attachmentId: string): Promise<string> {
     return retryWithAdaptiveBackoff(async () => {
-      const encodedMessageId = encodeURIComponent(messageId);
-      const encodedAttachmentId = encodeURIComponent(attachmentId);
+      const graphMessageId = GraphService.officeIdToGraphId(messageId);
+      const graphAttachmentId = GraphService.officeIdToGraphId(attachmentId);
+      const encodedMessageId = encodeURIComponent(graphMessageId);
+      const encodedAttachmentId = encodeURIComponent(graphAttachmentId);
       console.debug(
-        "[GraphService] getAttachmentContent: originalMessageId=",
+        "[GraphService] getAttachmentContent: officeMessageId=",
         messageId,
+        "convertedGraphMessageId=",
+        graphMessageId,
         "encodedMessageId=",
         encodedMessageId,
-        "originalAttachmentId=",
+        "officeAttachmentId=",
         attachmentId,
+        "convertedGraphAttachmentId=",
+        graphAttachmentId,
         "encodedAttachmentId=",
         encodedAttachmentId
       );
       const token = await this.authProvider.getAccessToken();
-
       const url = `${this.baseUrl}/me/messages/${encodedMessageId}/attachments/${encodedAttachmentId}/$value`;
       console.debug("[GraphService] getAttachmentContent: url=", url);
       const response = await fetch(url, {
@@ -247,15 +292,17 @@ export class GraphService {
    */
   async getEmailAsEML(messageId: string): Promise<string> {
     return retryWithAdaptiveBackoff(async () => {
-      const encodedId = encodeURIComponent(messageId);
+      const graphId = GraphService.officeIdToGraphId(messageId);
+      const encodedId = encodeURIComponent(graphId);
       console.debug(
-        "[GraphService] getEmailAsEML: originalId=",
+        "[GraphService] getEmailAsEML: officeId=",
         messageId,
+        "convertedGraphId=",
+        graphId,
         "encodedId=",
         encodedId
       );
       const token = await this.authProvider.getAccessToken();
-
       const url = `${this.baseUrl}/me/messages/${encodedId}/$value`;
       console.debug("[GraphService] getEmailAsEML: url=", url);
       const response = await fetch(url, {
