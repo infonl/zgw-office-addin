@@ -3,20 +3,32 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-/* eslint-disable no-undef */
-
+const fs = require("fs");
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
+const path = require("path");
 
 async function getHttpsOptions() {
+  const certPath = path.resolve(__dirname, "certs/cert.pem");
+  const keyPath = path.resolve(__dirname, "certs/key.pem");
+
+  if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    console.log("[dev-server] Using mkcert certificates from", certPath);
+    return {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+  }
+
+  console.log("[dev-server] Using office-addin-dev-certs fallback certificates");
   const httpsOptions = await devCerts.getHttpsServerOptions();
   return { ca: httpsOptions.ca, key: httpsOptions.key, cert: httpsOptions.cert };
 }
 
 module.exports = async (env, options) => {
-  const dev = options.mode === "development";
+  //const dev = options.mode === "development";
   const config = {
     devtool: "source-map",
     entry: {
@@ -78,8 +90,8 @@ module.exports = async (env, options) => {
             from: "manifest*.xml",
             to: "[name]" + "[ext]",
             transform(content) {
-                return content;
-              }
+              return content;
+            },
           },
         ],
       }),
@@ -97,6 +109,13 @@ module.exports = async (env, options) => {
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
+      host: "localhost",
+      allowedHosts: "all",
+      client: {
+        overlay: true,
+      },
+      historyApiFallback: true,
+      static: false,
       server: {
         type: "https",
         options:

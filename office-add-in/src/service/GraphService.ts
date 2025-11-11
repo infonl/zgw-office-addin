@@ -5,6 +5,23 @@
 
 import { GraphApiError, retryWithAdaptiveBackoff } from "../utils/retryWithBackoff";
 
+function decodeJwtClaims(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
 export interface GraphAuthProvider {
   getAccessToken(): Promise<string>;
 }
@@ -50,6 +67,25 @@ export class GraphService {
   private async graphRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     return retryWithAdaptiveBackoff(async () => {
       const token = await this.authProvider.getAccessToken();
+      const claims = decodeJwtClaims(token);
+      try {
+        console.debug("🔐 [Graph] token claims", {
+          aud: claims && (claims as any).aud,
+          scp: claims && (claims as any).scp,
+          roles: claims && (claims as any).roles,
+          tid: claims && (claims as any).tid,
+          oid: claims && (claims as any).oid,
+          appid: claims && (claims as any).appid,
+          iat: claims && (claims as any).iat,
+          exp: claims && (claims as any).exp,
+        });
+      } catch (error) {
+        console.debug("GraphService: caught error (ignored)", error);
+      }
+      console.debug("➡️ [Graph] request", {
+        url: `${this.baseUrl}${endpoint}`,
+        method: options.method || "GET",
+      });
 
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
@@ -62,23 +98,42 @@ export class GraphService {
 
       if (!response.ok) {
         const retryAfter = response.headers.get("Retry-After");
+        let errorBody: any = null;
+        try {
+          const clone = response.clone();
+          const text = await clone.text();
+          try {
+            errorBody = JSON.parse(text);
+          } catch {
+            errorBody = text;
+          }
+        } catch (error) {
+          console.debug("GraphService: caught error (ignored)", error);
+        }
 
-        // Special handling for authentication errors
-        if (response.status === 401) {
+        console.error("⛔ [Graph] response error", {
+          status: response.status,
+          statusText: response.statusText,
+          endpoint,
+          errorBody,
+        });
+
+        if (response.status === 401 || response.status === 403) {
           throw new GraphApiError(
             response.status,
-            `Authentication failed - please check Office sign-in status: ${response.statusText}`,
+            `Authentication/Authorization failed: ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`,
             retryAfter ? parseInt(retryAfter, 10) : undefined
           );
         }
 
         throw new GraphApiError(
           response.status,
-          `Graph API error: ${response.statusText}`,
+          `Graph API error: ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`,
           retryAfter ? parseInt(retryAfter, 10) : undefined
         );
       }
 
+      console.debug("✅ [Graph] response ok", { endpoint, status: response.status });
       return response.json();
     });
   }
@@ -111,7 +166,7 @@ export class GraphService {
         const retryAfter = response.headers.get("Retry-After");
         throw new GraphApiError(
           response.status,
-          `Failed to download attachment: ${response.statusText}`,
+          `Failed to download attachment ${attachmentId} from message ${messageId}: ${response.statusText}`,
           retryAfter ? parseInt(retryAfter, 10) : undefined
         );
       }
@@ -150,13 +205,20 @@ export class GraphService {
 
       if (!response.ok) {
         const retryAfter = response.headers.get("Retry-After");
+        let details = "";
+        try {
+          const t = await response.clone().text();
+          details = t;
+        } catch (error) {
+          console.debug("GraphService: caught error (ignored)", error);
+        }
         throw new GraphApiError(
           response.status,
-          `Failed to download email: ${response.statusText}`,
+          `Failed to download email from /me/messages/${messageId}/$value: ${response.statusText} — ${details}`,
           retryAfter ? parseInt(retryAfter, 10) : undefined
         );
       }
-
+      console.debug("✅ [Graph] EML fetched", { messageId });
       return response.text(); // EML is plain text format
     });
   }

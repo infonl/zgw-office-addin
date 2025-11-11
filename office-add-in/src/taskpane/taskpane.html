@@ -1,11 +1,3 @@
-<!--
-  ~ SPDX-FileCopyrightText: 2025 INFO.nl
-  ~ SPDX-License-Identifier: EUPL-1.2+
--->
-
-<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. -->
-<!-- See LICENSE in the project root for license information -->
-
 <!doctype html>
 <html lang="en" data-framework="typescript">
   <head>
@@ -19,6 +11,12 @@
       type="text/javascript"
       src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"
     ></script>
+  <!-- ZGW auth config for MSAL fallback (local dev). Replace placeholders with your Azure App Registration. -->
+  <script id="zgw-auth-config">
+    window.ZGW_AAD_CLIENT_ID = "5bfd847-4b36-4766-9b1b-3b6f2c4c41c3";
+    window.ZGW_AUTHORITY = "https://login.microsoftonline.com/5ac40c21-50a2-414f-93d1-495d1324322b";
+    window.ZGW_REDIRECT_URI = "https://localhost:3000";
+  </script>
   </head>
 
   <body style="width: 100%; height: 100%; margin: 0; padding: 0">

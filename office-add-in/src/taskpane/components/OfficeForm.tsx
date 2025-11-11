@@ -30,6 +30,7 @@ import { useToast } from "../../provider/ToastProvider";
 import { useZaak } from "../../provider/ZaakProvider";
 import { useCommonStyles } from "./styles/shared";
 import { ZaakSearch } from "./ZaakSearch";
+import { OfficeGraphAuthProvider } from "../../provider/OfficeGraphAuthProvider";
 
 const useStyles = makeStyles({
   form: {
@@ -88,6 +89,39 @@ export function OfficeForm() {
       );
     },
   });
+
+  // Graph API test functie
+  const testGraphApi = async () => {
+    try {
+      const provider = new OfficeGraphAuthProvider();
+      const token = await provider.getAccessToken();
+      console.log("Graph access token:", token);
+      // Simpele Graph API call: user profile ophalen
+      const response = await fetch("https://graph.microsoft.com/v1.0/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const profile = await response.json();
+      console.log("Graph user profile:", profile);
+      dispatchToast(
+        <Toast>
+          <ToastTitle>Graph API Success!</ToastTitle>
+          <ToastBody>{profile.displayName || JSON.stringify(profile)}</ToastBody>
+        </Toast>,
+        { intent: "success" }
+      );
+    } catch (err) {
+      console.error("Graph API error:", err);
+      dispatchToast(
+        <Toast>
+          <ToastTitle>Graph API Error</ToastTitle>
+          <ToastBody>{String(err)}</ToastBody>
+        </Toast>,
+        { intent: "error" }
+      );
+    }
+  };
 
   const form = useForm({
     resolver: zodResolver(addDocumentSchema),
@@ -166,6 +200,9 @@ export function OfficeForm() {
               type="submit"
             >
               Document koppelen
+            </Button>
+            <Button appearance="secondary" type="button" onClick={testGraphApi}>
+              Test Graph API
             </Button>
           </form>
         )}
