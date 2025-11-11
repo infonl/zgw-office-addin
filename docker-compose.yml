@@ -44,7 +44,6 @@ services:
       - POSTGRES_DB=openzaak
     volumes:
       - ./scripts/docker-compose/open-zaak/openzaak-database:/docker-entrypoint-initdb.d
-      - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
 
 
   openzaak.local:

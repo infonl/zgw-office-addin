@@ -1,7 +1,4 @@
--- SPDX-FileCopyrightText: 2025 INFO.nl
--- SPDX-License-Identifier: EUPL-1.2+
-
--- SQL script that creates the 'Melding evenement organiseren behandelen' zaaktype in the Open Zaak database
+-- SQL script that creates the 'Test zaaktype 3' zaaktype in the Open Zaak database
 
 -- note that we currently use the public https://selectielijst.openzaak.nl/ VNG Selectielijst service here
 INSERT INTO catalogi_zaaktype
@@ -54,12 +51,12 @@ VALUES
   NULL,         -- datum_einde_geldigheid
   false,         -- concept
   '448356ff-dcfb-4504-9501-7fe929077c4f', -- uuid
-  'melding-evenement-organiseren-behandelen', -- identificatie
-  'Melding evenement organiseren behandelen', -- zaaktype_omschrijving
-  'Melding evenement organiseren', -- zaaktype_omschrijving_generiek
+  'test-zaaktype-3', -- identificatie
+  'Test zaaktype 3', -- zaaktype_omschrijving
+  'Test zaaktype 3', -- zaaktype_omschrijving_generiek
   'openbaar',   -- vertrouwelijkheidaanduiding
-  'Melding evenement organiseren behandelen', -- doel
-  'Melding evenement organiseren behandelen', -- aanleiding
+  'Test zaaktype 3', -- doel
+  'Test zaaktype 3', -- aanleiding
   '',           -- toelichting
   'extern',     -- indicatie_intern_of_extern
   'Melden',     -- handeling_initiator
@@ -77,7 +74,7 @@ VALUES
   '2023-09-21', -- versiedatum
   '{}',         -- producten_of_diensten
   'https://selectielijst.openzaak.nl/api/v1/procestypen/7ff2b005-4d84-47fe-983a-732bfa958ff5', -- selectielijst_procestype
-  'melding klein evenement', -- referentieproces_naam
+  'Test zaaktype 3', -- referentieproces_naam
   '',           -- referentieproces_link
   1,           -- catalogus_id
   2020,           -- selectielijst_procestype_jaar
@@ -249,6 +246,59 @@ VALUES
   NULL,
   NULL
 );
+
+-- For the fourth JSON object
+INSERT INTO catalogi_resultaattype
+(
+  id,
+  uuid,
+  omschrijving,
+  resultaattypeomschrijving,
+  omschrijving_generiek,
+  selectielijstklasse,
+  archiefnominatie,
+  archiefactietermijn,
+  brondatum_archiefprocedure_afleidingswijze,
+  brondatum_archiefprocedure_datumkenmerk,
+  brondatum_archiefprocedure_einddatum_bekend,
+  brondatum_archiefprocedure_objecttype,
+  brondatum_archiefprocedure_registratie,
+  brondatum_archiefprocedure_procestermijn,
+  toelichting,
+  zaaktype_id,
+  _etag,
+  indicatie_specifiek,
+  procesobjectaard,
+  procestermijn,
+  datum_begin_geldigheid,
+  datum_einde_geldigheid
+)
+VALUES
+(
+  (SELECT COALESCE(MAX(id),0) FROM catalogi_resultaattype) + 1, -- Adjust ID as needed
+  'ce19f9dc-efd7-4f6a-a95f-7b22f5ab9a09', -- UUID
+  'test-resultaat-eigenschap', -- Omschrijving
+  'https://selectielijst.openzaak.nl/api/v1/resultaattypeomschrijvingen/ce8cf476-0b59-496f-8eee-957a7c6e2506', -- Resultaattypeomschrijving
+  'Afgebroken', -- Omschrijving Generiek
+  'https://selectielijst.openzaak.nl/api/v1/resultaten/2e86a8ca-0269-446c-8da2-6f4d08be422d', -- Selectielijstklasse
+  'vernietigen', -- Archiefnominatie
+  'P1Y', -- Archiefactietermijn
+  'eigenschap', -- Brondatum Archiefprocedure Afleidingswijze
+  'test-eigenschap', -- Brondatum Archiefprocedure Datumkenmerk
+  false, -- Brondatum Archiefprocedure Einddatum Bekend
+  '', -- Brondatum Archiefprocedure Objecttype
+  '', -- Brondatum Archiefprocedure Registratie
+  NULL, -- Brondatum Archiefprocedure Procestermijn
+  'test-resultaat-eigenschap', -- Toelichting
+  (SELECT id FROM catalogi_zaaktype WHERE uuid = '448356ff-dcfb-4504-9501-7fe929077c4f'), -- Zaaktype ID
+  '_etag',
+  NULL,
+  '',
+  NULL,
+  NULL,
+  NULL
+);
+
 
 
 
@@ -424,7 +474,40 @@ VALUES
 );
 
 -- PROPERTIES (eigenschappen)
--- no properties are defined for this zaaktype
+
+-- For the first JSON object eigenschap specificatie
+INSERT INTO catalogi_eigenschapspecificatie (id, groep, formaat, lengte, kardinaliteit, waardenverzameling) VALUES (1, 'test eigenschap groep', 'datum', 8, 1, '{}');
+
+
+-- For the first JSON object eigenschap
+INSERT INTO catalogi_eigenschap
+(
+  id,
+  uuid,
+  eigenschapnaam,
+  definitie,
+  toelichting,
+  specificatie_van_eigenschap_id,
+  zaaktype_id,
+  _etag,
+  statustype_id,
+  datum_begin_geldigheid,
+  datum_einde_geldigheid
+)
+VALUES
+(
+  (SELECT COALESCE(MAX(id),0) FROM catalogi_eigenschap) + 1, -- Adjust ID as needed
+  'f0a4fed5-6aac-4cf8-b1c1-3854fc5093c8', -- UUID
+  'test-eigenschap',-- eigenschapnaam
+  'test-eigenschap',-- definitie
+  '',-- toelichting
+  1,-- specificatie_van_eigenschap_id
+  (SELECT id FROM catalogi_zaaktype WHERE uuid = '448356ff-dcfb-4504-9501-7fe929077c4f'),-- zaaktype_id
+  '_etag',-- _etag
+  NULL,-- statustype_id
+  NULL,-- datum_begin_geldigheid
+  NULL-- datum_einde_geldigheid
+);
 
 -- ROLTYPEN
 -- Note that these rol types must be known to ZAC as defined in the 'AardVanRol' Java enum in the ZAC code base.
