@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2025 INFO.nl
+-- SPDX-License-Identifier: EUPL-1.2+
+
 -- SQL script that creates the 'Test zaaktype 1' zaaktype in the Open Zaak database
 
 -- note that we currently use the public https://selectielijst.openzaak.nl/ VNG Selectielijst service here

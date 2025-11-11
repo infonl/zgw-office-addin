@@ -1,3 +1,5 @@
+-- SPDX-FileCopyrightText: 2025 INFO.nl
+-- SPDX-License-Identifier: EUPL-1.2+
 
 -- add a parent-child (hoofdzaak-deelzaaktype) relation between the two zaaktypes created previously
 -- so that we can test the functionality in ZAC to manage hoofdzaak - deelzaak relations
