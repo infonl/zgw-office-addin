@@ -53,77 +53,6 @@ export interface GraphMessage {
  * Handles authentication, rate limiting, and file operations
  */
 export class GraphService {
-  /**
-   * Converteer een Office itemId naar een Graph messageId formaat
-   * Vervangt / door _ en + door -
-   */
-  static officeIdToGraphId(officeId: string): string {
-    return officeId.replace(/\+/g, "_").replace(/\//g, "-");
-  }
-
-  /**
-   * Converteer een Graph messageId naar een Office itemId formaat
-   * Vervangt _ door / en - door +
-   */
-  static graphIdToOfficeId(graphId: string): string {
-    return graphId.replace(/_/g, "/").replace(/-/g, "+");
-  }
-  /**
-   * Simpele test: haal de huidige gebruiker op via Graph API /me
-   */
-  async getCurrentUser(): Promise<any> {
-    return this.graphRequest<any>(`/me`);
-  }
-  /**
-   * Zoekt een Graph message ID op basis van een Office itemId en optionele eigenschappen
-   * Vergelijkt Office itemId met Graph message IDs en logt matches
-   * @param officeItemId - De Office API itemId
-   * @param opts - Optioneel: subject, sender, receivedDateTime
-   */
-  async findGraphMessageIdByOfficeId(
-    officeItemId: string,
-    opts?: { subject?: string; sender?: string; receivedDateTime?: string }
-  ): Promise<string | null> {
-    // Haal de eerste 50 berichten op (pas $top aan indien nodig)
-    const messagesResp = await this.graphRequest<{ value: GraphMessage[] }>(
-      `/me/messages?$top=500`
-    );
-    const messages = messagesResp.value;
-    // Log alle Graph IDs ter vergelijking
-    console.debug("[GraphService] Vergelijk Office itemId met Graph message IDs:", {
-      officeItemId,
-      graphIds: messages.map((m) => m.id),
-    });
-    // Directe match op ID (met conversie)
-    const convertedOfficeId = GraphService.officeIdToGraphId(officeItemId);
-    console.debug("[GraphService] Geconverteerd Office itemId naar Graph ID:", {
-      officeItemId,
-      convertedOfficeId,
-    });
-    const directMatch = messages.find((m) => m.id === convertedOfficeId);
-    if (directMatch) {
-      console.debug("[GraphService] Directe match gevonden in top 500:", {
-        officeItemId,
-        convertedOfficeId,
-        graphId: directMatch.id,
-      });
-      return directMatch.id;
-    }
-    // Optionele match op eigenschappen
-    const propMatch = messages.find((m) => {
-      if (opts?.subject && m.subject !== opts.subject) return false;
-      if (opts?.sender && m.from?.emailAddress?.address !== opts.sender) return false;
-      if (opts?.receivedDateTime && (m as any).receivedDateTime !== opts.receivedDateTime)
-        return false;
-      return true;
-    });
-    if (propMatch) {
-      console.debug("[GraphService] Eigenschappen-match gevonden:", propMatch.id);
-      return propMatch.id;
-    }
-    console.warn("[GraphService] Geen match gevonden voor Office itemId:", officeItemId);
-    return null;
-  }
   private readonly baseUrl = "https://graph.microsoft.com/v1.0";
   private authProvider: GraphAuthProvider;
 
@@ -210,46 +139,26 @@ export class GraphService {
   }
 
   /**
-   * Gets the current user's email message by ID
+   * Gets the current user's email message by Graph ID
    */
-  async getMessage(messageId: string): Promise<GraphMessage> {
-    const graphId = GraphService.officeIdToGraphId(messageId);
+  async getMessage(graphId: string): Promise<GraphMessage> {
     const encodedId = encodeURIComponent(graphId);
-    console.debug(
-      "[GraphService] getMessage: officeId=",
-      messageId,
-      "convertedGraphId=",
-      graphId,
-      "encodedId=",
-      encodedId
-    );
+    console.debug("[GraphService] getMessage: graphId=", graphId, "encodedId=", encodedId);
     return this.graphRequest<GraphMessage>(`/me/messages/${encodedId}`);
   }
 
   /**
-   * Gets specific attachment content from an email message
-   * Returns base64 encoded content for files > 3MB via streaming
+   * Gets specific attachment content from an email message by Graph IDs
+   * Returns the raw binary content as an ArrayBuffer (no base64 encoding).
    */
-  async getAttachmentContent(messageId: string, attachmentId: string): Promise<string> {
+  async getAttachmentContent(
+    graphMessageId: string,
+    graphAttachmentId: string
+  ): Promise<ArrayBuffer> {
     return retryWithAdaptiveBackoff(async () => {
-      const graphMessageId = GraphService.officeIdToGraphId(messageId);
-      const graphAttachmentId = GraphService.officeIdToGraphId(attachmentId);
       const encodedMessageId = encodeURIComponent(graphMessageId);
       const encodedAttachmentId = encodeURIComponent(graphAttachmentId);
-      console.debug(
-        "[GraphService] getAttachmentContent: officeMessageId=",
-        messageId,
-        "convertedGraphMessageId=",
-        graphMessageId,
-        "encodedMessageId=",
-        encodedMessageId,
-        "officeAttachmentId=",
-        attachmentId,
-        "convertedGraphAttachmentId=",
-        graphAttachmentId,
-        "encodedAttachmentId=",
-        encodedAttachmentId
-      );
+
       const token = await this.authProvider.getAccessToken();
       const url = `${this.baseUrl}/me/messages/${encodedMessageId}/attachments/${encodedAttachmentId}/$value`;
       console.debug("[GraphService] getAttachmentContent: url=", url);
@@ -263,48 +172,26 @@ export class GraphService {
         const retryAfter = response.headers.get("Retry-After");
         throw new GraphApiError(
           response.status,
-          `Failed to download attachment ${attachmentId} from message ${messageId}: ${response.statusText}`,
+          `Failed to download attachment ${graphAttachmentId} from message ${graphMessageId}: ${response.statusText}`,
           retryAfter ? parseInt(retryAfter, 10) : undefined
         );
       }
 
-      // Convert binary response to base64 efficiently
       const arrayBuffer = await response.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-
-      // More efficient conversion for large files
-      const chunkSize = 1024 * 1024; // 1MB chunks
-      let binary = "";
-
-      for (let i = 0; i < bytes.byteLength; i += chunkSize) {
-        const chunk = bytes.subarray(i, i + chunkSize);
-        binary += String.fromCharCode.apply(null, Array.from(chunk));
-      }
-
-      return btoa(binary);
+      return arrayBuffer;
     });
   }
 
   /**
-   * Gets the raw email content as EML format
-   * Useful for archiving entire emails with attachments
-   * Throws error if EML would exceed nginx 80MB limit after base64 encoding
+   * Gets the raw email content as EML (plain text) by Graph ID
+   * Returns the EML string; backend is responsible for any base64 encoding.
    */
-  async getEmailAsEML(messageId: string): Promise<string> {
+  async getEmailAsEML(graphId: string): Promise<string> {
     return retryWithAdaptiveBackoff(async () => {
-      const graphId = GraphService.officeIdToGraphId(messageId);
       const encodedId = encodeURIComponent(graphId);
-      console.debug(
-        "[GraphService] getEmailAsEML: officeId=",
-        messageId,
-        "convertedGraphId=",
-        graphId,
-        "encodedId=",
-        encodedId
-      );
       const token = await this.authProvider.getAccessToken();
       const url = `${this.baseUrl}/me/messages/${encodedId}/$value`;
-      console.debug("[GraphService] getEmailAsEML: url=", url);
+
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -322,32 +209,45 @@ export class GraphService {
         }
         throw new GraphApiError(
           response.status,
-          `Failed to download email from /me/messages/${messageId}/$value: ${response.statusText} — ${details}`,
+          `Failed to download email from /me/messages/${graphId}/$value: ${response.statusText} — ${details}`,
           retryAfter ? parseInt(retryAfter, 10) : undefined
         );
       }
-      console.debug("✅ [Graph] EML fetched", { messageId });
-      return response.text(); // EML is plain text format
+      console.debug("✅ [Graph] EML fetched", { graphId });
+      return response.text(); // EML in plain text format as string, encoding base 64 will be handled by backend
     });
   }
 
   /**
-   * Utility: Convert EML content to base64 for API submission
-   * Validates size constraints (nginx MAX_BODY_SIZE: 80MB)
+   * Converteer een lijst van Office itemIds naar Graph messageIds via de officiële Graph API
    */
-  emlToBase64(emlContent: string): string {
-    // Check size before base64 encoding
-    // Base64 adds ~33% overhead, nginx limit is 80MB
-    const maxRawSize = 60 * 1024 * 1024; // 60MB raw = ~80MB base64
-    const emlSizeBytes = new Blob([emlContent]).size;
-
-    if (emlSizeBytes > maxRawSize) {
-      throw new Error(
-        `EML bestand te groot: ${Math.round(emlSizeBytes / 1024 / 1024)}MB. ` +
-          `Maximum: ${Math.round(maxRawSize / 1024 / 1024)}MB (nginx limiet: 80MB na base64 encoding)`
-      );
+  async officeIdsToGraphIdsViaApi(
+    officeIds: string[],
+    sourceIdType: "ewsId" | "entryId" = "ewsId"
+  ): Promise<(string | null)[]> {
+    const token = await this.authProvider.getAccessToken();
+    const url = `https://graph.microsoft.com/v1.0/me/translateExchangeIds`;
+    const body = {
+      inputIds: officeIds,
+      sourceIdType,
+      targetIdType: "restId",
+    };
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      console.error("[GraphService] translateExchangeIds batch error", await response.text());
+      return officeIds.map(() => null);
     }
-
-    return btoa(unescape(encodeURIComponent(emlContent)));
+    const result = await response.json();
+    if (result.value && Array.isArray(result.value)) {
+      return result.value.map((v: any) => v.targetId || null);
+    }
+    return officeIds.map(() => null);
   }
 }
