@@ -34,6 +34,13 @@ if (isLocal) {
 const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
 
 fastify.addHook("onRequest", (request, reply, done) => {
+  // Security headers
+  reply.header("X-Content-Type-Options", "nosniff");
+  reply.header("X-Frame-Options", "DENY");
+  reply.header("X-XSS-Protection", "1; mode=block");
+  reply.header("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // CORS headers
   const origin = request.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     reply.header("Access-Control-Allow-Origin", origin);
@@ -55,6 +62,14 @@ fastify.addHook("onRequest", onRequestLoggerHook);
 const httpService = new HttpService();
 const zaakService = new ZaakService(httpService);
 const zaakController = new ZaakController(zaakService);
+
+// Health check endpoint for Kubernetes probes
+fastify.get("/health", async (_req, res) => {
+  return res
+    .status(200)
+    .header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+    .send({ status: "ok" });
+});
 
 fastify.get<{ Params: ZaakParam }>("/zaken/:zaakIdentificatie", (req, res) =>
   zaakController.getZaak(req, res),
