@@ -47,7 +47,7 @@
     "@fluentui/react-components": "9.72.7",
     "@fluentui/react-icons": "2.0.314",
     "@hookform/resolvers": "5.2.2",
-    "@tanstack/react-query": "5.90.8",
+    "@tanstack/react-query": "5.90.9",
     "core-js": "3.46.0",
     "es6-promise": "4.2.8",
     "jwt-decode": "4.0.0",
