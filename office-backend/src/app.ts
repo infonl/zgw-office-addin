@@ -16,26 +16,28 @@ import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-let fastify: FastifyInstance
-const isLocal = process.env.APP_ENV === "local"
+let fastify: FastifyInstance;
+const isLocal = process.env.APP_ENV === "local";
 
 if (isLocal) {
-  const keyPath = process.env.TLS_KEY_PATH || path.resolve(__dirname, '../../office-add-in/certs/key.pem')
-  const certPath = process.env.TLS_CERT_PATH || path.resolve(__dirname, '../../office-add-in/certs/cert.pem')
-  const caPath = process.env.TLS_CA_PATH
+  const keyPath =
+    process.env.TLS_KEY_PATH || path.resolve(__dirname, "../../office-add-in/certs/key.pem");
+  const certPath =
+    process.env.TLS_CERT_PATH || path.resolve(__dirname, "../../office-add-in/certs/cert.pem");
+  const caPath = process.env.TLS_CA_PATH;
 
   const httpsOptions: any = {
     key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath)
-  }
+    cert: fs.readFileSync(certPath),
+  };
   if (caPath) {
-    httpsOptions.ca = fs.readFileSync(caPath)
+    httpsOptions.ca = fs.readFileSync(caPath);
   }
 
-  fastify = Fastify({ https: httpsOptions })
-  LoggerService.log(`[backend] Using TLS key at ${keyPath} and cert at ${certPath}`)
+  fastify = Fastify({ https: httpsOptions });
+  LoggerService.log(`[backend] Using TLS key at ${keyPath} and cert at ${certPath}`);
 } else {
-  fastify = Fastify()
+  fastify = Fastify();
 }
 
 const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
@@ -72,16 +74,18 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );
 
+const port = Number(process.env.PORT || 3003);
 
-const port = Number(process.env.PORT || 3003)
-
-fastify.listen({
-  port,
-  host: '0.0.0.0'
-}, (err, address) => {
-  if (err) {
-    LoggerService.error('Error starting server:', err)
-    process.exit(1)
-  }
-  LoggerService.log(`🚀 Server running at ${address}`)
-})
+fastify.listen(
+  {
+    port,
+    host: "0.0.0.0",
+  },
+  (err, address) => {
+    if (err) {
+      LoggerService.error("Error starting server:", err);
+      process.exit(1);
+    }
+    LoggerService.log(`🚀 Server running at ${address}`);
+  },
+);

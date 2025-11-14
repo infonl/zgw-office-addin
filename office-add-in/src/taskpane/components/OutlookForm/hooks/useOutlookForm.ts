@@ -10,7 +10,7 @@ import z from "zod";
 import { addDocumentSchema } from "../../../../hooks/useAddDocumentToZaak";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
-import { graphServiceManager } from "../../../../service/GraphServiceSingleton";
+import { graphServiceManager } from "../../../../service/GraphServiceManager";
 
 // Schema definitions
 const document = z.discriminatedUnion("selected", [

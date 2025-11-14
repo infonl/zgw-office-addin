@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
+const path = require("path");
+const dotenv = require("dotenv");
+const envFrontend =
+  dotenv.config({ path: path.resolve(__dirname, ".env.local.frontend") }).parsed || {};
 const fs = require("fs");
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
-const path = require("path");
 
 async function getHttpsOptions() {
   const certPath = path.resolve(__dirname, "certs/cert.pem");
@@ -75,6 +78,22 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        "process.env.APP_ENV": JSON.stringify(
+          envFrontend.APP_ENV || process.env.APP_ENV || "local"
+        ),
+        "process.env.MSAL_CLIENT_ID": JSON.stringify(
+          envFrontend.MSAL_CLIENT_ID || process.env.MSAL_CLIENT_ID || ""
+        ),
+        "process.env.MSAL_AUTHORITY": JSON.stringify(
+          envFrontend.MSAL_AUTHORITY ||
+            process.env.MSAL_AUTHORITY ||
+            "https://login.microsoftonline.com/common"
+        ),
+        "process.env.MSAL_REDIRECT_URI": JSON.stringify(
+          envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
+        ),
+      }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",

@@ -79,9 +79,8 @@ class GraphServiceManager {
    * Check if GraphService is ready without triggering initialization
    */
   isReady(): boolean {
-    return this.graphService !== null && this.authProvider !== null;
+    return !!this.graphService && !!this.authProvider;
   }
 }
 
-// Export singleton instance
 export const graphServiceManager = GraphServiceManager.getInstance();

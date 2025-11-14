@@ -60,6 +60,17 @@ export NGINX_CONFIG_FILE="$TEST_DIR/test.conf"
 export NGINX_TEMPLATES_DIR="$ROOT_DIR"
 export MAX_BODY_SIZE="555M"
 
+# environment
+export APP_ENV="local"
+
+#local  development settings
+if [ $APP_ENV="local"]; then
+  export  MSAL_CLIENT_ID: "696724da-f71f-40c4-9dce-53ab2bc8e0cb"
+  export  MSAL_AUTHORITY: "https://login.microsoftonline.com/5ac40c21-50a2-414f-93d1-495d1324322b"
+  export  MSAL_CLIENT_ID: "http://localhost:3000"
+  export  MSAL_SCOPES: "api://localhost:3000/e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3/access_as_user"  
+fi
+
 #Copy source files to test directory
 cp -r "$SRC_DIR" "$TEST_SRC"
 touch "$NGINX_CONFIG_FILE"
