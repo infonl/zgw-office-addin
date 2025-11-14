@@ -8,4 +8,4 @@ INSERT INTO catalogi_catalogus (naam, uuid, domein, rsin, contactpersoon_beheer_
 
 INSERT INTO authorizations_applicatie (uuid, client_ids, label, heeft_alle_autorisaties) VALUES (uuid_generate_v4(), '{office-add-in}', 'Office Add-in', true);
 
-INSERT INTO vng_api_common_jwtsecret (identifier, secret) VALUES ('office-add-in', 'openzaakOfficeAddInSecret');
+INSERT INTO vng_api_common_jwtsecret (identifier, secret) VALUES ('office-add-in', 'openZaakSecretKey');

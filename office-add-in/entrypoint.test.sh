@@ -59,6 +59,7 @@ export NGINX_PUBLIC_HTML="$TEST_DIR"
 export NGINX_CONFIG_FILE="$TEST_DIR/test.conf"
 export NGINX_TEMPLATES_DIR="$ROOT_DIR"
 export MAX_BODY_SIZE="555M"
+export APP_VERSION="test-version"
 
 # environment
 export APP_ENV="local"
