@@ -3,15 +3,8 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { components } from "./types";
+import { ApiType } from "./api-type";
 
-type NestedSchemaProperty<Type, Key> = Key extends `${infer P}.${infer R}`
-  ? P extends keyof Type
-    ? NestedSchemaProperty<Type[P], R>
-    : never
-  : Key extends keyof Type
-    ? Type[Key]
-    : never;
-
-export type GeneratedType<Key extends keyof components["schemas"]> =
-  NestedSchemaProperty<components["schemas"], Key>;
+export type GeneratedType<
+  Key extends keyof import("./types").components["schemas"],
+> = ApiType<Key, import("./types").components>;

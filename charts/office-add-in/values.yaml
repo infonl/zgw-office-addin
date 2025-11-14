@@ -13,6 +13,7 @@ frontend:
   enableHttps: false
   # -- Maximum content body size (e.g. for attachments)
   maxBodySize: 80M
+  appEnv: "production"
   # -- Resource limits and requests for the frontend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious
