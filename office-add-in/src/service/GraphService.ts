@@ -5,7 +5,23 @@
 
 import { GraphApiError, retryWithAdaptiveBackoff } from "../utils/retryWithBackoff";
 
-function decodeJwtClaims(token: string): Record<string, unknown> | null {
+interface JwtClaims {
+  aud?: string;
+  scp?: string;
+  roles?: string[];
+  tid?: string;
+  oid?: string;
+  appid?: string;
+  iat?: number;
+  exp?: number;
+  [key: string]: unknown;
+}
+
+interface ExchangeIdResult {
+  targetId?: string | null;
+}
+
+function decodeJwtClaims(token: string): JwtClaims | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -13,7 +29,7 @@ function decodeJwtClaims(token: string): Record<string, unknown> | null {
     const json = decodeURIComponent(
       atob(base64)
         .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
         .join("")
     );
     return JSON.parse(json);
@@ -64,20 +80,23 @@ export class GraphService {
    * Performs authenticated HTTP request to Microsoft Graph API with retry logic
    * Includes special handling for authentication failures
    */
-  private async graphRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async graphRequest<ResponseType>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ResponseType> {
     return retryWithAdaptiveBackoff(async () => {
       const token = await this.authProvider.getAccessToken();
       const claims = decodeJwtClaims(token);
       try {
         console.debug("🔐 [Graph] token claims", {
-          aud: claims && (claims as any).aud,
-          scp: claims && (claims as any).scp,
-          roles: claims && (claims as any).roles,
-          tid: claims && (claims as any).tid,
-          oid: claims && (claims as any).oid,
-          appid: claims && (claims as any).appid,
-          iat: claims && (claims as any).iat,
-          exp: claims && (claims as any).exp,
+          aud: claims && claims.aud,
+          scp: claims && claims.scp,
+          roles: claims && claims.roles,
+          tid: claims && claims.tid,
+          oid: claims && claims.oid,
+          appid: claims && claims.appid,
+          iat: claims && claims.iat,
+          exp: claims && claims.exp,
         });
       } catch (error) {
         console.debug("GraphService: caught error (ignored)", error);
@@ -98,7 +117,7 @@ export class GraphService {
 
       if (!response.ok) {
         const retryAfter = response.headers.get("Retry-After");
-        let errorBody: any = null;
+        let errorBody: string | object | null = null;
         try {
           const clone = response.clone();
           const text = await clone.text();
@@ -202,8 +221,8 @@ export class GraphService {
         const retryAfter = response.headers.get("Retry-After");
         let details = "";
         try {
-          const t = await response.clone().text();
-          details = t;
+          const responseText = await response.clone().text();
+          details = responseText;
         } catch (error) {
           console.debug("GraphService: caught error (ignored)", error);
         }
@@ -219,7 +238,7 @@ export class GraphService {
   }
 
   /**
-   * Converteer een lijst van Office itemIds naar Graph messageIds via de officiële Graph API
+   * Converts a list of Office itemIds (messages, attachments) to Graph REST IDs using the official Graph API
    */
   async officeIdsToGraphIdsViaApi(
     officeIds: string[],
@@ -246,7 +265,9 @@ export class GraphService {
     }
     const result = await response.json();
     if (result.value && Array.isArray(result.value)) {
-      return result.value.map((v: any) => v.targetId || null);
+      return result.value.map(
+        (exchangeIdResult: ExchangeIdResult) => exchangeIdResult.targetId || null
+      );
     }
     return officeIds.map(() => null);
   }

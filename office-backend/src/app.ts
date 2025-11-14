@@ -26,7 +26,11 @@ if (isLocal) {
     process.env.TLS_CERT_PATH || path.resolve(__dirname, "../../office-add-in/certs/cert.pem");
   const caPath = process.env.TLS_CA_PATH;
 
-  const httpsOptions: any = {
+  const httpsOptions: {
+    key: Buffer;
+    cert: Buffer;
+    ca?: Buffer;
+  } = {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath),
   };
