@@ -6,14 +6,9 @@
 import { GraphAuthProvider } from "../service/GraphService";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
-import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalAuthFallback } from "./MsalAuthFallback";
 
-// Defaults for non-local builds; real values are injected via webpack in local dev
-const defaultAuthority = process.env.MSAL_AUTHORITY;
-const defaultRedirectUri = process.env.MSAL_REDIRECT_URI;
-
-// Lazy init MSAL so non-local environments don't require MSAL env vars at startup
-let msalInstance: PublicClientApplication | null = null;
+let msalFallbackInstance: MsalAuthFallback | null = null;
 
 /**
  * Microsoft Graph authentication provider for Office Add-ins
@@ -23,6 +18,11 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
+
+  private isGraphAudience(payload: any): boolean {
+    const graphAppId = "00000003-0000-0000-c000-000000000000";
+    return payload?.aud === "https://graph.microsoft.com" || payload?.aud === graphAppId;
+  }
 
   private decodeJwtPayload(token: string): any | null {
     try {
@@ -44,6 +44,19 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
         .filter(Boolean)
     );
     return scopes.every((requiredScope) => grantedScopesSet.has(requiredScope));
+  }
+
+  private getMsalFallbackInstance(): MsalAuthFallback {
+    const appEnv = process.env.APP_ENV;
+    if (appEnv !== "local") throw new Error("MSAL fallback only on local development");
+    const clientId = process.env.MSAL_CLIENT_ID || "";
+    const authority = process.env.MSAL_AUTHORITY || "";
+    const redirectUri = process.env.MSAL_REDIRECT_URI || "";
+    if (!clientId || !authority || !redirectUri) throw new Error("MSAL fallback not configured");
+    if (!msalFallbackInstance) {
+      msalFallbackInstance = new MsalAuthFallback({ clientId, authority, redirectUri });
+    }
+    return msalFallbackInstance;
   }
 
   async getAccessToken(): Promise<string> {
@@ -88,9 +101,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           console.log("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
           // Ensure audience is Graph; otherwise fall back to MSAL
-          const graphAppId = "00000003-0000-0000-c000-000000000000";
-          const isGraphAudience =
-            jwtPayload?.aud === "https://graph.microsoft.com" || jwtPayload?.aud === graphAppId;
+          const isGraphAudience = this.isGraphAudience(jwtPayload);
 
           // If we have a Graph token but it's missing required scopes (e.g. Mail.Read),
           // attempt an MSAL upgrade to those scopes (silent first, then popup).
@@ -107,7 +118,9 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
               missingScopes
             );
             try {
-              const upgradedToken = await this.msalFallback(this.requiredScopes);
+              // MSAL fallback
+              const msalInstance = this.getMsalFallbackInstance();
+              const upgradedToken = await msalInstance.getAccessToken([...this.requiredScopes]);
               token = upgradedToken;
               jwtPayload = this.decodeJwtPayload(upgradedToken);
               console.log("✅ Upgraded token scopes:", jwtPayload?.scp);
@@ -139,15 +152,14 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           if (error?.code === 13006 || error?.code === 13008 || error?.code === 13009) {
             try {
               console.log("🛟 Falling back to MSAL (popup) ...");
-              const msalToken = await this.msalFallback(this.requiredScopes);
-
+              const msalInstance = this.getMsalFallbackInstance();
+              const msalToken = await msalInstance.getAccessToken([...this.requiredScopes]);
               // set cache using JWT exp if present
               let msalTokenExpiryTimestamp = Date.now() + 50 * 60 * 1000;
               const msalJwtPayload = this.decodeJwtPayload(msalToken);
               if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
                 msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
               }
-
               this.tokenCache = {
                 token: msalToken,
                 expires: msalTokenExpiryTimestamp - 5 * 60 * 1000,
@@ -210,45 +222,6 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
     });
 
     return this.tokenRequest;
-  }
-
-  /**
-   * MSAL fallback: alleen actief in development/localhost
-   */
-  private async msalFallback(scopesOverride?: readonly string[]): Promise<string> {
-    const appEnv = process.env.APP_ENV;
-    const isLocal = appEnv === "local";
-
-    console.log("🧭 [DEV] APP_ENV:", appEnv);
-
-    if (!isLocal) {
-      throw new Error("MSAL fallback is alleen beschikbaar in APP_ENV=local (development)");
-    }
-
-    const clientId = process.env.MSAL_CLIENT_ID;
-    if (!clientId) {
-      throw new Error(
-        "MSAL fallback niet geconfigureerd: MSAL_CLIENT_ID ontbreekt in .env.local.frontend"
-      );
-    }
-
-    if (!msalInstance) {
-      msalInstance = new PublicClientApplication({
-        auth: {
-          clientId,
-          authority: defaultAuthority,
-          redirectUri: defaultRedirectUri,
-        },
-      });
-
-      await msalInstance.initialize();
-    }
-
-    const scopes = { scopes: (scopesOverride ?? this.requiredScopes) as string[] };
-    console.log("🧭 [DEV] MSAL fallback scopes:", scopes.scopes.join(" "));
-
-    const response = await msalInstance.loginPopup(scopes);
-    return response.accessToken;
   }
 
   /**
