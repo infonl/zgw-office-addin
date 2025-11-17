@@ -62,6 +62,7 @@ export default [
     },
     rules: {
       "no-async-promise-executor": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
       "no-unused-vars": [
         "error",
         {

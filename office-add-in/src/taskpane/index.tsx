@@ -15,7 +15,9 @@ Office.onReady(async (info) => {
   root?.render(<App />);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if ((module as any).hot) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (module as any).hot.accept("./components/App", () => {
     const NextApp = require("./components/App").default;
     root?.render(<NextApp />);
