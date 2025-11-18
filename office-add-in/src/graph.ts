@@ -10,4 +10,3 @@ export {
   type GraphMessage,
 } from "./service/GraphService";
 export { OfficeGraphAuthProvider } from "./provider/OfficeGraphAuthProvider";
-export { GraphApiError, retryWithAdaptiveBackoff } from "./utils/retryWithBackoff";

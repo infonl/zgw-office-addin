@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { GraphApiError, retryWithAdaptiveBackoff } from "../utils/retryWithBackoff";
-
 interface JwtClaims {
   aud?: string;
   scp?: string;
@@ -84,77 +82,69 @@ export class GraphService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ResponseType> {
-    return retryWithAdaptiveBackoff(async () => {
-      const token = await this.authProvider.getAccessToken();
-      const claims = decodeJwtClaims(token);
+    const token = await this.authProvider.getAccessToken();
+    const claims = decodeJwtClaims(token);
+    try {
+      console.debug("🔐 [Graph] token claims", {
+        aud: claims && claims.aud,
+        scp: claims && claims.scp,
+        roles: claims && claims.roles,
+        tid: claims && claims.tid,
+        oid: claims && claims.oid,
+        appid: claims && claims.appid,
+        iat: claims && claims.iat,
+        exp: claims && claims.exp,
+      });
+    } catch (error) {
+      console.debug("GraphService: caught error (ignored)", error);
+    }
+    console.debug("➡️ [Graph] request", {
+      url: `${this.baseUrl}${endpoint}`,
+      method: options.method || "GET",
+    });
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      let errorBody: string | object | null = null;
       try {
-        console.debug("🔐 [Graph] token claims", {
-          aud: claims && claims.aud,
-          scp: claims && claims.scp,
-          roles: claims && claims.roles,
-          tid: claims && claims.tid,
-          oid: claims && claims.oid,
-          appid: claims && claims.appid,
-          iat: claims && claims.iat,
-          exp: claims && claims.exp,
-        });
+        const clone = response.clone();
+        const text = await clone.text();
+        try {
+          errorBody = JSON.parse(text);
+        } catch {
+          errorBody = text;
+        }
       } catch (error) {
         console.debug("GraphService: caught error (ignored)", error);
       }
-      console.debug("➡️ [Graph] request", {
-        url: `${this.baseUrl}${endpoint}`,
-        method: options.method || "GET",
+
+      console.error("⛔ [Graph] response error", {
+        status: response.status,
+        statusText: response.statusText,
+        endpoint,
+        errorBody,
       });
 
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        ...options,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const retryAfter = response.headers.get("Retry-After");
-        let errorBody: string | object | null = null;
-        try {
-          const clone = response.clone();
-          const text = await clone.text();
-          try {
-            errorBody = JSON.parse(text);
-          } catch {
-            errorBody = text;
-          }
-        } catch (error) {
-          console.debug("GraphService: caught error (ignored)", error);
-        }
-
-        console.error("⛔ [Graph] response error", {
-          status: response.status,
-          statusText: response.statusText,
-          endpoint,
-          errorBody,
-        });
-
-        if (response.status === 401 || response.status === 403) {
-          throw new GraphApiError(
-            response.status,
-            `Authentication/Authorization failed: ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`,
-            retryAfter ? parseInt(retryAfter, 10) : undefined
-          );
-        }
-
-        throw new GraphApiError(
-          response.status,
-          `Graph API error: ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`,
-          retryAfter ? parseInt(retryAfter, 10) : undefined
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(
+          `Authentication/Authorization failed (${response.status}): ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`
         );
       }
 
-      console.debug("✅ [Graph] response ok", { endpoint, status: response.status });
-      return response.json();
-    });
+      throw new Error(
+        `Graph API error (${response.status}): ${response.statusText} — details: ${typeof errorBody === "string" ? errorBody : JSON.stringify(errorBody)}`
+      );
+    }
+    console.debug("✅ [Graph] response ok", { endpoint, status: response.status });
+    return response.json();
   }
 
   /**
@@ -174,31 +164,26 @@ export class GraphService {
     graphMessageId: string,
     graphAttachmentId: string
   ): Promise<ArrayBuffer> {
-    return retryWithAdaptiveBackoff(async () => {
-      const encodedMessageId = encodeURIComponent(graphMessageId);
-      const encodedAttachmentId = encodeURIComponent(graphAttachmentId);
+    const encodedMessageId = encodeURIComponent(graphMessageId);
+    const encodedAttachmentId = encodeURIComponent(graphAttachmentId);
 
-      const token = await this.authProvider.getAccessToken();
-      const url = `${this.baseUrl}/me/messages/${encodedMessageId}/attachments/${encodedAttachmentId}/$value`;
-      console.debug("[GraphService] getAttachmentContent: url=", url);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const retryAfter = response.headers.get("Retry-After");
-        throw new GraphApiError(
-          response.status,
-          `Failed to download attachment ${graphAttachmentId} from message ${graphMessageId}: ${response.statusText}`,
-          retryAfter ? parseInt(retryAfter, 10) : undefined
-        );
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      return arrayBuffer;
+    const token = await this.authProvider.getAccessToken();
+    const url = `${this.baseUrl}/me/messages/${encodedMessageId}/attachments/${encodedAttachmentId}/$value`;
+    console.debug("[GraphService] getAttachmentContent: url=", url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to download attachment ${graphAttachmentId} from message ${graphMessageId}: ${response.statusText} (${response.status})`
+      );
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return arrayBuffer;
   }
 
   /**
@@ -206,35 +191,30 @@ export class GraphService {
    * Returns the EML string; backend is responsible for any base64 encoding.
    */
   async getEmailAsEML(graphId: string): Promise<string> {
-    return retryWithAdaptiveBackoff(async () => {
-      const encodedId = encodeURIComponent(graphId);
-      const token = await this.authProvider.getAccessToken();
-      const url = `${this.baseUrl}/me/messages/${encodedId}/$value`;
+    const encodedId = encodeURIComponent(graphId);
+    const token = await this.authProvider.getAccessToken();
+    const url = `${this.baseUrl}/me/messages/${encodedId}/$value`;
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const retryAfter = response.headers.get("Retry-After");
-        let details = "";
-        try {
-          const responseText = await response.clone().text();
-          details = responseText;
-        } catch (error) {
-          console.debug("GraphService: caught error (ignored)", error);
-        }
-        throw new GraphApiError(
-          response.status,
-          `Failed to download email from /me/messages/${graphId}/$value: ${response.statusText} — ${details}`,
-          retryAfter ? parseInt(retryAfter, 10) : undefined
-        );
-      }
-      console.debug("✅ [Graph] EML fetched", { graphId });
-      return response.text(); // EML in plain text format as string, encoding base 64 will be handled by backend
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
+    if (!response.ok) {
+      let details = "";
+      try {
+        const responseText = await response.clone().text();
+        details = responseText;
+      } catch (error) {
+        console.debug("GraphService: caught error (ignored)", error);
+      }
+      throw new Error(
+        `Failed to download email from /me/messages/${graphId}/$value: ${response.statusText} (${response.status}) — ${details}`
+      );
+    }
+    console.debug("✅ [Graph] EML fetched", { graphId });
+    return response.text(); // EML in plain text format as string, encoding base 64 will be handled by backend
   }
 
   /**
