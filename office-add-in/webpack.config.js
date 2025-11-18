@@ -31,7 +31,6 @@ async function getHttpsOptions() {
 }
 
 module.exports = async (env, options) => {
-  //const dev = options.mode === "development";
   const config = {
     devtool: "source-map",
     entry: {
@@ -92,6 +91,9 @@ module.exports = async (env, options) => {
         ),
         "process.env.MSAL_REDIRECT_URI": JSON.stringify(
           envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
+        ),
+        "process.env.MSAL_SCOPES": JSON.stringify(
+          envFrontend.MSAL_SCOPES || process.env.MSAL_SCOPES || ""
         ),
       }),
       new HtmlWebpackPlugin({

@@ -5,7 +5,6 @@
 
 import dotenv from "dotenv";
 import path from "path";
-
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
 import Fastify, { FastifyInstance } from "fastify";
@@ -14,23 +13,19 @@ import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
+import { envServerSchema } from "./envSchema";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 let fastify: FastifyInstance;
-const isLocal = process.env.APP_ENV === "local";
+const isLocal = envServerSchema.APP_ENV === "local";
 
 if (isLocal) {
-  const keyPath =
-    process.env.TLS_KEY_PATH || path.resolve(__dirname, "../../office-add-in/certs/key.pem");
-  const certPath =
-    process.env.TLS_CERT_PATH || path.resolve(__dirname, "../../office-add-in/certs/cert.pem");
-  const caPath = process.env.TLS_CA_PATH;
-
-  const httpsOptions: {
-    key: Buffer;
-    cert: Buffer;
-    ca?: Buffer;
-  } = {
+  const keyPath = path.resolve(__dirname, envServerSchema.KEY_PATH);
+  const certPath = path.resolve(__dirname, envServerSchema.CERT_PATH);
+  const caPath = envServerSchema.CA_CERT_PATH
+    ? path.resolve(__dirname, envServerSchema.CA_CERT_PATH)
+    : undefined;
+  const httpsOptions: { key: Buffer; cert: Buffer; ca?: Buffer } = {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath),
   };
@@ -44,7 +39,7 @@ if (isLocal) {
   fastify = Fastify();
 }
 
-const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
+const allowedOrigins = envServerSchema.FRONTEND_URL ? [envServerSchema.FRONTEND_URL] : [];
 
 fastify.addHook("onRequest", (request, reply, done) => {
   const origin = request.headers.origin;
@@ -78,7 +73,7 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );
 
-const port = Number(process.env.PORT || 3003);
+const port = Number(envServerSchema.PORT || 3003);
 
 fastify.listen(
   {

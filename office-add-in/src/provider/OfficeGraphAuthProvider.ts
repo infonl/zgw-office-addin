@@ -7,6 +7,7 @@ import { GraphAuthProvider } from "../service/GraphService";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
 import { MsalAuthFallback } from "./MsalAuthFallback";
+import { getValidatedFrontendEnv } from "./envFrontendSchema";
 
 let msalFallbackInstance: MsalAuthFallback | null = null;
 
@@ -18,6 +19,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
+  private readonly env = getValidatedFrontendEnv();
 
   private isGraphAudience(payload: any): boolean {
     const graphAppId = "00000003-0000-0000-c000-000000000000";
@@ -47,12 +49,10 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
   }
 
   private getMsalFallbackInstance(): MsalAuthFallback {
-    const appEnv = process.env.APP_ENV;
-    if (appEnv !== "local") throw new Error("MSAL fallback only on local development");
-    const clientId = process.env.MSAL_CLIENT_ID || "";
-    const authority = process.env.MSAL_AUTHORITY || "";
-    const redirectUri = process.env.MSAL_REDIRECT_URI || "";
-    if (!clientId || !authority || !redirectUri) throw new Error("MSAL fallback not configured");
+    if (this.env.APP_ENV !== "local") throw new Error("MSAL fallback only on local development");
+    const clientId = this.env.MSAL_CLIENT_ID;
+    const authority = this.env.MSAL_AUTHORITY;
+    const redirectUri = this.env.MSAL_REDIRECT_URI;
     if (!msalFallbackInstance) {
       msalFallbackInstance = new MsalAuthFallback({ clientId, authority, redirectUri });
     }
@@ -108,7 +108,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           if (
             isGraphAudience &&
             !this.tokenHasScopes(jwtPayload, this.requiredScopes) &&
-            process.env.MSAL_CLIENT_ID
+            this.env.MSAL_CLIENT_ID
           ) {
             const missingScopes = this.requiredScopes.filter(
               (requiredScope) => !(jwtPayload?.scp ?? "").includes(requiredScope)

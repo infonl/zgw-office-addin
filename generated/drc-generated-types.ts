@@ -4,7 +4,9 @@
  */
 
 import { ApiType } from "./api-type";
-// Gebruik type import voor components
-export type DRCType<
-  Key extends keyof import("./drc-types").components["schemas"],
-> = ApiType<Key, import("./drc-types").components>;
+import type { components } from "./drc-types";
+
+export type DRCType<Key extends keyof components["schemas"]> = ApiType<
+  Key,
+  components
+>;
