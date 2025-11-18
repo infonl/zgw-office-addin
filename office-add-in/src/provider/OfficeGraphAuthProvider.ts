@@ -182,7 +182,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           this.tokenRequest = null;
 
           // Provide more specific error messages based on error codes
-          let errorMessage = "Unknown authentication error";
+          let errorMessage;
 
           switch (error.code) {
             case 13001:

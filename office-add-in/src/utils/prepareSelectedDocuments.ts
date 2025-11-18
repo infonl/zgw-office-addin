@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 /*
-
-/*
  * Utility for building processed documents from selected documents and current email context
  */
 
