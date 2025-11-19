@@ -28,3 +28,14 @@ export interface GraphMessage {
   hasAttachments: boolean;
   attachments?: GraphAttachment[];
 }
+
+export interface JwtPayload {
+  aud?: string;
+  exp?: number;
+  iat?: number;
+  scp?: string;
+  roles?: string[];
+  appid?: string;
+  azp?: string;
+  [key: string]: unknown;
+}

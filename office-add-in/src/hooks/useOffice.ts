@@ -218,10 +218,7 @@ export function useOffice() {
           );
         } else {
           if (!graphId) throw new Error("Found no Graph ID for attachment");
-          const parentEmailDoc = processedDocuments.find((doc) =>
-            doc.attachment.id.startsWith("EmailItself-")
-          );
-          const parentGraphId = parentEmailDoc?.graphId;
+          const parentGraphId = doc.parentEmailGraphId;
           if (!parentGraphId) throw new Error("Found no Graph ID for parent email");
           const graphAttachmentId = graphId;
           console.log(

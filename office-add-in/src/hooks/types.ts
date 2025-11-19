@@ -40,7 +40,10 @@ export type DocumentSchema = z.infer<typeof document>;
 
 export type ZaakResponse = { data?: { identificatie?: string } };
 
-export type ProcessedDocument = DocumentSchema & { graphId: string | null };
+export type ProcessedDocument = DocumentSchema & {
+  graphId: string | null;
+  parentEmailGraphId: string | null;
+};
 
 export type GraphServiceType = {
   getEmailAsEML: (_graphId: string) => Promise<string>;

@@ -6,14 +6,14 @@
  * Utility for building processed documents from selected documents and current email context
  */
 
-import { DocumentSchema } from "../hooks/types";
+import { DocumentSchema, ProcessedDocument } from "../hooks/types";
 import { GraphService } from "../graph";
 
 export async function prepareSelectedDocuments(
   selectedDocuments: DocumentSchema[],
   currentEmail: Office.MessageRead | Office.MessageCompose,
   graphService: GraphService
-): Promise<Array<DocumentSchema & { graphId: string | null }>> {
+): Promise<ProcessedDocument[]> {
   // Collect all IDs to translate: email itself + attachments
   const itemsToTranslate: { type: "email" | "attachment"; id: string }[] = [];
   if (currentEmail && "itemId" in currentEmail) {
@@ -43,16 +43,19 @@ export async function prepareSelectedDocuments(
   }
 
   return selectedDocuments.map((doc) => {
+    const parentEmailGraphId = messageGraphId;
     if (doc.attachment.id.startsWith("EmailItself-")) {
       return {
         ...doc,
         graphId: messageGraphId,
+        parentEmailGraphId: null, // always null for the email itself
       };
     }
     const graphId = officeIdToGraphId.get(doc.attachment.id) ?? null;
     return {
       ...doc,
       graphId,
+      parentEmailGraphId,
     };
   });
 }
