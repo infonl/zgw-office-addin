@@ -6,10 +6,8 @@
 import { GraphAuthProvider } from "../service/GraphService";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
-import { MsalAuthFallback } from "./MsalAuthFallback";
+import { MsalAuthSingleton } from "./MsalAuthSingleton";
 import { getValidatedFrontendEnv } from "./envFrontendSchema";
-
-let msalFallbackInstance: MsalAuthFallback | null = null;
 
 /**
  * Microsoft Graph authentication provider for Office Add-ins
@@ -48,15 +46,20 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
     return scopes.every((requiredScope) => grantedScopesSet.has(requiredScope));
   }
 
-  private getMsalFallbackInstance(): MsalAuthFallback {
-    if (this.env.APP_ENV !== "local") throw new Error("MSAL fallback only on local development");
-    const clientId = this.env.MSAL_CLIENT_ID;
-    const authority = this.env.MSAL_AUTHORITY;
-    const redirectUri = this.env.MSAL_REDIRECT_URI;
-    if (!msalFallbackInstance) {
-      msalFallbackInstance = new MsalAuthFallback({ clientId, authority, redirectUri });
-    }
-    return msalFallbackInstance;
+  private getMsalSingletonInstance(): MsalAuthSingleton {
+    if (this.env.APP_ENV !== "local") throw new Error("MSAL singleton only on local development");
+    const config = {
+      auth: {
+        clientId: this.env.MSAL_CLIENT_ID,
+        authority: this.env.MSAL_AUTHORITY,
+        redirectUri: this.env.MSAL_REDIRECT_URI,
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false,
+      },
+    };
+    return MsalAuthSingleton.getInstance(config);
   }
 
   async getAccessToken(): Promise<string> {
@@ -119,8 +122,8 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
             );
             try {
               // MSAL fallback
-              const msalInstance = this.getMsalFallbackInstance();
-              const upgradedToken = await msalInstance.getAccessToken([...this.requiredScopes]);
+              const msalSingleton = this.getMsalSingletonInstance();
+              const upgradedToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
               token = upgradedToken;
               jwtPayload = this.decodeJwtPayload(upgradedToken);
               console.log("✅ Upgraded token scopes:", jwtPayload?.scp);
@@ -152,8 +155,8 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           if (error?.code === 13006 || error?.code === 13008 || error?.code === 13009) {
             try {
               console.log("🛟 Falling back to MSAL (popup) ...");
-              const msalInstance = this.getMsalFallbackInstance();
-              const msalToken = await msalInstance.getAccessToken([...this.requiredScopes]);
+              const msalSingleton = this.getMsalSingletonInstance();
+              const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
               // set cache using JWT exp if present
               let msalTokenExpiryTimestamp = Date.now() + 50 * 60 * 1000;
               const msalJwtPayload = this.decodeJwtPayload(msalToken);
