@@ -6,7 +6,7 @@
  * Utility for building processed documents from selected documents and current email context
  */
 
-import { DocumentSchema } from "../taskpane/components/OutlookForm/hooks/useOutlookForm";
+import { DocumentSchema } from "../hooks/types";
 import { GraphService } from "../service/GraphService";
 
 export async function prepareSelectedDocuments(

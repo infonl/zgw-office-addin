@@ -7,27 +7,14 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { addDocumentSchema } from "../../../../hooks/useAddDocumentToZaak";
+import { document, DocumentSchema } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
+import { useOffice } from "../../../../hooks/useOffice";
 import { graphServiceManager } from "../../../../service/GraphServiceManager";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
 
 // Schema definitions
-const document = z.discriminatedUnion("selected", [
-  addDocumentSchema.extend({
-    selected: z.literal(true),
-    attachment: z.custom<Office.AttachmentDetails>(),
-  }),
-  z
-    .object({
-      selected: z.literal(false),
-      attachment: z.custom<Office.AttachmentDetails>(),
-    })
-    .passthrough(),
-]);
-
-export type DocumentSchema = z.infer<typeof document>;
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
 const schema = z.object({
@@ -39,6 +26,7 @@ export type Schema = z.infer<typeof schema>;
 export function useOutlookForm() {
   const { zaak } = useZaak();
   const { files } = useOutlook();
+  const { processAndUploadDocuments } = useOffice();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -105,138 +93,6 @@ export function useOutlookForm() {
         graphService
       );
 
-      // Process each selected document (now with authenticated Graph service)
-      const uploadPromises = processedDocuments.map(
-        async (doc: DocumentSchema & { graphId: string | null }, index: number) => {
-          const attachment = doc.attachment;
-          console.log(
-            `[Upload to back-end] Processing: ${index + 1}/${processedDocuments.length} ${attachment.name}`
-          );
-
-          console.log("[Upload to back-end] Details:", {
-            type: attachment.attachmentType,
-            size: Math.round(attachment.size / 1024) + "KB",
-            contentType: attachment.contentType,
-            isEmail: attachment.id.startsWith("EmailItself-"),
-          });
-
-          try {
-            let fileContent: ArrayBuffer | string;
-            const startTime = Date.now();
-            let graphId: string | null = doc.graphId;
-
-            if (attachment.id.startsWith("EmailItself-")) {
-              if (!graphId) throw new Error("Geen Graph ID voor email gevonden");
-              console.log(
-                "[EmailItself] Getting email as EML via Graph API for: " + attachment.name
-              );
-              const emlContent = await graphService.getEmailAsEML(graphId); // string (RFC822)
-              fileContent = emlContent;
-              const emlBytes = new TextEncoder().encode(emlContent).length;
-              const emlSizeMB = Math.round((emlBytes / 1024 / 1024) * 100) / 100;
-              console.log(
-                "[EmailItself] EML retrieved (raw string): " +
-                  attachment.name +
-                  " ~" +
-                  emlSizeMB +
-                  "MB"
-              );
-            } else {
-              // Attachments: download direct via attachmentId (ArrayBuffer), in context van huidig bericht
-              if (!graphId) {
-                throw new Error("Geen Graph ID voor attachment gevonden");
-              }
-              // Parent email GraphId ophalen uit geselecteerde documenten
-              const parentEmailDoc = processedDocuments.find((d) =>
-                d.attachment.id.startsWith("EmailItself-")
-              );
-              const parentGraphId = parentEmailDoc?.graphId;
-              if (!parentGraphId) {
-                throw new Error("Geen Graph ID voor parent email gevonden");
-              }
-              const graphAttachmentId = graphId;
-              console.log(
-                "[Attachment] Requesting: /me/messages/" +
-                  parentGraphId +
-                  "/attachments/" +
-                  graphAttachmentId +
-                  "$/value for " +
-                  attachment.name
-              );
-              const arrayBuffer = await graphService.getAttachmentContent(
-                parentGraphId,
-                graphAttachmentId
-              ); // ArrayBuffer
-              fileContent = arrayBuffer;
-              const sizeBytes = arrayBuffer.byteLength;
-              const sizeMB = Math.round((sizeBytes / 1024 / 1024) * 100) / 100;
-              console.log(
-                "[Attachment] Attachment downloaded (raw bytes): " +
-                  attachment.name +
-                  " " +
-                  sizeMB +
-                  "MB"
-              );
-            }
-
-            const duration = Date.now() - startTime;
-            // Type guard voor metadata
-            let metadata = {};
-            if (doc.selected) {
-              metadata = {
-                vertrouwelijkheidaanduiding: doc.vertrouwelijkheidaanduiding,
-                informatieobjecttype: doc.informatieobjecttype,
-                status: doc.status,
-                creatiedatum: doc.creatiedatum,
-                auteur: doc.auteur,
-              };
-            }
-
-            // TODO PZ-8370: Upload to OpenZaak API (backend doet base64)
-            const contentSizeBytes =
-              typeof fileContent === "string"
-                ? new TextEncoder().encode(fileContent).length
-                : fileContent.byteLength;
-
-            console.log(`📤 [${attachment.name}] [TODO] Upload to OpenZaak:`, {
-              filename: attachment.name,
-              contentType:
-                attachment.contentType ||
-                (attachment.id.startsWith("EmailItself-") ? "message/rfc822" : undefined),
-              sizeBytes: contentSizeBytes,
-              sizeKB: Math.round(contentSizeBytes / 1024),
-              zaakId: zaak.data?.identificatie,
-              metadata,
-              graphApiDetails: {
-                fetchDuration: `${duration}ms`,
-                originalSizeHeaderBytes: attachment.size,
-                transportFormat: typeof fileContent === "string" ? "string" : "arraybuffer",
-              },
-            });
-
-            return {
-              success: true,
-              filename: attachment.name,
-              size: contentSizeBytes,
-              duration,
-            };
-          } catch (error) {
-            console.error(`❌ [${attachment.name}] Failed to process:`, error);
-            console.error(`💥 [${attachment.name}] Error details:`, {
-              message: error instanceof Error ? error.message : "Unknown error",
-              stack: error instanceof Error ? error.stack?.substring(0, 200) + "..." : undefined,
-            });
-            return {
-              success: false,
-              filename: attachment.name,
-              error: error instanceof Error ? error.message : "Unknown error",
-            };
-          }
-        }
-      );
-
-      // Execute uploads (parallel for efficiency)
-      console.log("🚀 Starting parallel uploads...");
       console.log("📊 Upload Summary:", {
         totalFiles: selectedDocuments.length,
         emailFiles: selectedDocuments.filter((doc) => doc.attachment.id.startsWith("EmailItself-"))
@@ -249,10 +105,10 @@ export function useOutlookForm() {
         ),
       });
 
-      const results = await Promise.all(uploadPromises);
-      const successful = results.filter((result: { success: boolean }) => result.success);
-      const failed = results.filter((result: { success: boolean }) => !result.success);
-
+      console.log("🚀 Starting parallel uploads...");
+      const results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
+      const successful = results.filter((result) => result.success);
+      const failed = results.filter((result) => !result.success);
       const totalDuration = successful.reduce(
         (sum: number, result: { duration?: number }) => sum + (result.duration || 0),
         0

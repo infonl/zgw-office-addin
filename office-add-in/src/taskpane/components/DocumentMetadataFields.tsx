@@ -7,7 +7,7 @@ import React from "react";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
-import { addDocumentSchema, documentstatus } from "../../hooks/useAddDocumentToZaak";
+import { addDocumentSchema, documentstatus } from "../../hooks/types";
 import { mq } from "./styles/layout";
 
 const useStyles = makeStyles({

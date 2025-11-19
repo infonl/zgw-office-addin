@@ -18,12 +18,8 @@ import { useEffect } from "react";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AddDocumentSchema,
-  addDocumentSchema,
-  documentstatus,
-  useAddDocumentToZaak,
-} from "../../hooks/useAddDocumentToZaak";
+import { AddDocumentSchema, addDocumentSchema, documentstatus } from "../../hooks/types";
+import { useAddDocumentToZaak } from "../../hooks/useAddDocumentToZaak";
 import { useOffice } from "../../hooks/useOffice";
 import { DocumentMetadataFields } from "./DocumentMetadataFields";
 import { useToast } from "../../provider/ToastProvider";

@@ -7,7 +7,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Checkmark16Filled } from "@fluentui/react-icons";
 import { tokens } from "@fluentui/react-components";
-import { addDocumentSchema } from "../../../../hooks/useAddDocumentToZaak";
+import { addDocumentSchema } from "../../../../hooks/types";
 import { Schema } from "../hooks/useOutlookForm";
 
 interface DocumentIndicatorProps {

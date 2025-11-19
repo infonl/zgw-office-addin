@@ -6,6 +6,7 @@
 import { useCallback } from "react";
 import { useLogger } from "./useLogger";
 import { jwtDecode } from "jwt-decode";
+import { ZaakResponse, ProcessedDocument, GraphServiceType } from "./types";
 
 type State = { file: Office.File; currentSlice: number };
 
@@ -180,6 +181,117 @@ export function useOffice() {
     });
   };
 
+  const processAndUploadDocuments = async ({
+    processedDocuments,
+    zaak,
+    graphService,
+  }: {
+    processedDocuments: ProcessedDocument[];
+    zaak: ZaakResponse;
+    graphService: GraphServiceType;
+  }) => {
+    const uploadPromises = processedDocuments.map(async (doc, index) => {
+      const attachment = doc.attachment;
+      console.log(
+        `[Upload to back-end] Processing: ${index + 1}/${processedDocuments.length} ${attachment.name}`
+      );
+
+      console.log("[Upload to back-end] Details:", {
+        type: attachment.attachmentType,
+        size: Math.round(attachment.size / 1024) + "KB",
+        contentType: attachment.contentType,
+        isEmail: attachment.id.startsWith("EmailItself-"),
+      });
+      try {
+        let fileContent: ArrayBuffer | string;
+        const startTime = Date.now();
+        let graphId = doc.graphId;
+        if (attachment.id.startsWith("EmailItself-")) {
+          if (!graphId) throw new Error("Geen Graph ID voor email gevonden");
+          console.log("[EmailItself] Getting email as EML via Graph API for: " + attachment.name);
+          const emlContent = await graphService.getEmailAsEML(graphId);
+          fileContent = emlContent;
+          const emlBytes = new TextEncoder().encode(emlContent).length;
+          const emlSizeMB = Math.round((emlBytes / 1024 / 1024) * 100) / 100;
+          console.log(
+            `[EmailItself] EML retrieved (raw string): ${attachment.name} ~${emlSizeMB}MB`
+          );
+        } else {
+          if (!graphId) throw new Error("Found no Graph ID for attachment");
+          const parentEmailDoc = processedDocuments.find((doc) =>
+            doc.attachment.id.startsWith("EmailItself-")
+          );
+          const parentGraphId = parentEmailDoc?.graphId;
+          if (!parentGraphId) throw new Error("Found no Graph ID for parent email");
+          const graphAttachmentId = graphId;
+          console.log(
+            `[Attachment] Requesting: /me/messages/${parentGraphId}/attachments/${graphAttachmentId}$/value for ${attachment.name}`
+          );
+          const arrayBuffer = await graphService.getAttachmentContent(
+            parentGraphId,
+            graphAttachmentId
+          );
+          fileContent = arrayBuffer;
+          const sizeBytes = arrayBuffer.byteLength;
+          const sizeMB = Math.round((sizeBytes / 1024 / 1024) * 100) / 100;
+          console.log(
+            `[Attachment] Attachment downloaded (raw bytes): ${attachment.name} ${sizeMB}MB`
+          );
+        }
+        const duration = Date.now() - startTime;
+        // Type guard voor metadata
+        let metadata = {};
+        if (doc.selected) {
+          metadata = {
+            vertrouwelijkheidaanduiding: doc.vertrouwelijkheidaanduiding,
+            informatieobjecttype: doc.informatieobjecttype,
+            status: doc.status,
+            creatiedatum: doc.creatiedatum,
+            auteur: doc.auteur,
+          };
+        }
+        const contentSizeBytes =
+          typeof fileContent === "string"
+            ? new TextEncoder().encode(fileContent).length
+            : fileContent.byteLength;
+        console.log(`📤 [${attachment.name}] [TODO] Upload to OpenZaak:`, {
+          filename: attachment.name,
+          contentType:
+            attachment.contentType ||
+            (attachment.id.startsWith("EmailItself-") ? "message/rfc822" : undefined),
+          sizeBytes: contentSizeBytes,
+          sizeKB: Math.round(contentSizeBytes / 1024),
+          zaakId: zaak.data?.identificatie,
+          metadata,
+          graphApiDetails: {
+            fetchDuration: `${duration}ms`,
+            originalSizeHeaderBytes: attachment.size,
+            transportFormat: typeof fileContent === "string" ? "string" : "arraybuffer",
+          },
+        });
+
+        return {
+          success: true,
+          filename: attachment.name,
+          size: contentSizeBytes,
+          duration,
+        };
+      } catch (error) {
+        console.error(`❌ [${attachment.name}] Failed to process:`, error);
+        console.error(`💥 [${attachment.name}] Error details:`, {
+          message: error instanceof Error ? error.message : "Unknown error",
+          stack: error instanceof Error ? error.stack?.substring(0, 200) + "..." : undefined,
+        });
+        return {
+          success: false,
+          filename: attachment.name,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    });
+    return Promise.all(uploadPromises);
+  };
+
   return {
     getDocumentData,
     getSignedInUser,
@@ -189,5 +301,6 @@ export function useOffice() {
     host,
     isWord,
     isOutlook,
+    processAndUploadDocuments,
   };
 }
