@@ -7,7 +7,7 @@
  */
 
 import { DocumentSchema } from "../hooks/types";
-import { GraphService } from "../service/GraphService";
+import { GraphService } from "../graph";
 
 export async function prepareSelectedDocuments(
   selectedDocuments: DocumentSchema[],

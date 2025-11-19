@@ -43,6 +43,8 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "date-fns": "4.1.0"
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "date-fns": "4.1.0",
+    "isomorphic-fetch": "^3.0.0"
   }
 }

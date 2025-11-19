@@ -11,7 +11,7 @@ import { document, DocumentSchema } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
-import { graphServiceManager } from "../../../../service/GraphServiceManager";
+import { GraphService, OfficeGraphAuthProvider } from "../../../../graph";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
 
 // Schema definitions
@@ -66,14 +66,14 @@ export function useOutlookForm() {
     }
 
     try {
-      // Use singleton GraphService to avoid concurrent authentication
-      console.log("🔧 Getting GraphService instance...");
-      let graphService;
-
+      // Create a new GraphService
+      console.log("🔧 Initializing GraphService...");
+      const authProvider = new OfficeGraphAuthProvider();
+      const graphService = new GraphService(authProvider);
       // log if GraphService retrieval fails or succeeds
       // ToDo: (remove after test on server)
       try {
-        graphService = await graphServiceManager.getGraphService();
+        await authProvider.getAccessToken();
         console.log("✅ GraphService ready for downloads");
       } catch (authError) {
         console.error("❌ Graph API authentication failed:", authError);
