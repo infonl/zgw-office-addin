@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { defineConfig, mergeConfig } from "vitest/config";
+import { defineConfig } from "vitest/config";
 import baseConfig from "../vitest.config";
 
-export default mergeConfig(
-  baseConfig,
-  defineConfig({
-    test: {
-      include: ["src/**/*.{test,spec}.{js,ts}", "service/**/*.{test,spec}.{js,ts}"],
-      setupFiles: ["./test/setup.ts"],
-    },
-  }),
-);
+export default defineConfig({
+  ...baseConfig,
+  test: {
+    ...baseConfig.test,
+    include: ["src/**/*.{test,spec}.{js,ts}", "service/**/*.{test,spec}.{js,ts}"],
+    setupFiles: ["./test/setup.ts"],
+  },
+});
