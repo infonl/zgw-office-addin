@@ -8,16 +8,10 @@ export const envFrontendSchema = z.object({
   MSAL_SCOPES: z.string().min(1),
 });
 
-export function getValidatedFrontendEnv() {
-  const result = envFrontendSchema.safeParse({
-    APP_ENV: process.env.APP_ENV,
-    MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID,
-    MSAL_AUTHORITY: process.env.MSAL_AUTHORITY,
-    MSAL_REDIRECT_URI: process.env.MSAL_REDIRECT_URI,
-    MSAL_SCOPES: process.env.MSAL_SCOPES,
-  });
-  if (!result.success) {
-    throw new Error("Invalid frontend environment configuration");
-  }
-  return result.data;
-}
+export const FRONTEND_ENV = envFrontendSchema.parse({
+  APP_ENV: process.env.APP_ENV,
+  MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID,
+  MSAL_AUTHORITY: process.env.MSAL_AUTHORITY,
+  MSAL_REDIRECT_URI: process.env.MSAL_REDIRECT_URI,
+  MSAL_SCOPES: process.env.MSAL_SCOPES,
+});

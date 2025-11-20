@@ -8,7 +8,7 @@ import { FileNotSupported } from "../exception/FileNotSupported";
 import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
 import { type GeneratedType } from "../../generated/generated-types";
-import { type DRCType } from "../../generated/drc-generated-types";
+import { type DrcType } from "../../generated/drc-generated-types";
 
 export class ZaakService {
   constructor(private readonly httpService: HttpService) {}
@@ -40,7 +40,7 @@ export class ZaakService {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
     LoggerService.debug("creating document", zaakIdentificatie);
-    const informatieobject = await this.httpService.POST<DRCType<"EnkelvoudigInformatieObject">>(
+    const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
       JSON.stringify({
         ...body,

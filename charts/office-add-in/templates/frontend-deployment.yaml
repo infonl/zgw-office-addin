@@ -42,7 +42,7 @@ spec:
             - name: MAX_BODY_SIZE
               value: {{ .Values.frontend.maxBodySize | default "80M" | quote }}
             - name: APP_ENV
-              value: {{ .Values.frontend.appEnv  }}
+              value: {{ .Values.frontend.appEnv | default "production" | quote }}
           livenessProbe:
             tcpSocket:
               port: 80

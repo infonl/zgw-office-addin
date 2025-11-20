@@ -6,7 +6,7 @@
 import { ApiType } from "./api-type";
 import type { components } from "./drc-types";
 
-export type DRCType<Key extends keyof components["schemas"]> = ApiType<
+export type DrcType<Key extends keyof components["schemas"]> = ApiType<
   Key,
   components
 >;

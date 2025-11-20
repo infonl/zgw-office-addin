@@ -7,7 +7,7 @@ import { GraphAuthProvider } from "../service/GraphService";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
 import { MsalAuthSingleton } from "./MsalAuthSingleton";
-import { getValidatedFrontendEnv } from "./envFrontendSchema";
+import { FRONTEND_ENV } from "./envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "../service/GraphTypes";
 import { jwtDecode } from "jwt-decode";
@@ -21,7 +21,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
-  private readonly env = getValidatedFrontendEnv();
+  private readonly env = FRONTEND_ENV;
 
   // Check if access token is for Microsoft Graph by validating audience.
   // For value of id: https://web.archive.org/web/20241114222012/https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications
@@ -40,10 +40,9 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
 
   private tokenHasScopes(payload: MicrosoftJwtPayload, scopes: readonly string[]): boolean {
     // "scp" is a space-delimited string of delegated scopes
-    if (!payload || typeof payload.scp !== "string") return false;
     const grantedScopesSet = new Set(
       payload.scp
-        .split(" ")
+        ?.split(" ")
         .map((scopeName: string) => scopeName.trim())
         .filter(Boolean)
     );

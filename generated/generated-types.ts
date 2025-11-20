@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { ApiType } from "./api-type";
+import type { ApiType } from "./api-type";
+import type { components } from "./types";
 
-export type GeneratedType<
-  Key extends keyof import("./types").components["schemas"],
-> = ApiType<Key, import("./types").components>;
+export type GeneratedType<Key extends keyof components["schemas"]> = ApiType<
+  Key,
+  components
+>;

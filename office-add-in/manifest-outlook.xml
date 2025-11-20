@@ -109,12 +109,12 @@
         </bt:Urls>
 
         <bt:ShortStrings>
-          <bt:String id="CommandsGroup.Label" DefaultValue="Start here" />
+          <bt:String id="CommandsGroup.Label" DefaultValue="Start hier" />
           <bt:String id="TaskpaneButton.Label" DefaultValue="ZGW" />
         </bt:ShortStrings>
 
         <bt:LongStrings>
-          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open de ZGW task pane" />
+          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open dhet ZGW taakvenster" />
         </bt:LongStrings>
       </Resources>
 
