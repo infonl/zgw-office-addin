@@ -15,7 +15,6 @@ import { GraphService, OfficeGraphAuthProvider } from "../../../../graph";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
 import { useLogger } from "../../../../hooks/useLogger";
 
-// Schema definitions
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
 const schema = z.object({
@@ -45,7 +44,6 @@ export function useOutlookForm() {
     const selectedDocuments = data.documents.filter(({ selected }) => selected);
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
-    // Log
     selectedDocuments.forEach((doc, index) => {
       DEBUG(`📋 File ${index + 1}:`, {
         name: doc.attachment.name,
@@ -53,7 +51,7 @@ export function useOutlookForm() {
         contentType: doc.attachment.contentType,
         attachmentType: doc.attachment.attachmentType,
         isInline: doc.attachment.isInline,
-        id: doc.attachment.id.substring(0, 20) + "...", // Truncate for readability
+        id: doc.attachment.id.substring(0, 20) + "...",
         metadata: {
           informatieobjecttype: doc.informatieobjecttype,
           vertrouwelijkheidaanduiding: doc.vertrouwelijkheidaanduiding,
@@ -68,11 +66,9 @@ export function useOutlookForm() {
     }
 
     try {
-      // Create a new GraphService
       DEBUG("🔧 Initializing GraphService...");
       const authProvider = new OfficeGraphAuthProvider();
       const graphService = new GraphService(authProvider);
-      // log if GraphService retrieval fails or succeeds
       // ToDo: (remove after test on server)
       try {
         await authProvider.getAccessToken();
@@ -82,13 +78,11 @@ export function useOutlookForm() {
         throw authError;
       }
 
-      // Get current email context
       const currentEmail = Office.context.mailbox?.item;
       if (!currentEmail) {
         throw new Error("No email context found");
       }
 
-      // Prepare selected documents with translated Graph IDs
       const processedDocuments = await prepareSelectedDocuments(
         selectedDocuments,
         currentEmail,
@@ -152,7 +146,6 @@ export function useOutlookForm() {
     }
   };
 
-  // Initialize form with default values when files are available
   React.useEffect(() => {
     if (!files.length) return;
 

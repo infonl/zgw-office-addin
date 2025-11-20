@@ -114,7 +114,7 @@
         </bt:ShortStrings>
 
         <bt:LongStrings>
-          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open dhet ZGW taakvenster" />
+          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open het ZGW taakvenster" />
         </bt:LongStrings>
       </Resources>
 

@@ -98,8 +98,8 @@ export function MetadataStep() {
       <Accordion collapsible defaultOpenItems={defaultOpenItems} className={styles.accordion}>
         {documents.map(
           (document, index) =>
-            // We only render the selected documents
-            // We explicitly do not filter before mapping to preserve the index for react-hook-form
+            // Only render the selected documents
+            // No filtering before mapping to preserve the index for react-hook-form
             document.selected && (
               <AccordionItem
                 value={document.attachment.id}

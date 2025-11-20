@@ -96,7 +96,6 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
       .then(async (token) => {
         let jwtPayload = this.decodeJwtPayload(token);
 
-        // Log scopes
         this.logger.DEBUG("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
         this.logger.DEBUG("🔎 TOKEN.AUD:", jwtPayload?.aud);
         this.logger.DEBUG(
@@ -169,7 +168,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           this.logger.DEBUG("🛟 Falling back to MSAL (local only)) ...");
           const msalSingleton = this.getMsalSingletonInstance();
           const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
-          // set cache using JWT exp if present
+
           let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
           const msalJwtPayload = this.decodeJwtPayload(msalToken);
           if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
@@ -187,7 +186,6 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           this.logger.WARN("⚠️ MSAL fallback failed:", msalError);
         }
 
-        // Clear any cached token and request promise on failure
         this.tokenCache = null;
 
         const errorCode = error?.code || "unknown";
