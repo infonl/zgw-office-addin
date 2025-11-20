@@ -12,11 +12,26 @@ services:
       - ENABLE_HTTPS=true
     volumes:
       - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f -k https://localhost:443/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_healthy
 
   backend:
     image: ghcr.io/infonl/zgw-office-add-in-backend:dev
     ports:
       - "3003:3003"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O- -q http://127.0.0.1:3003/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   prometheus:
     image: prom/prometheus@sha256:49214755b6153f90a597adcbff0252cc61069f8ab69ce8411285cd4a560e8038

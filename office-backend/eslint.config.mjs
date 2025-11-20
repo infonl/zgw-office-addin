@@ -14,4 +14,7 @@ export default neostandard({
 
   // Ignore build outputs and config files
   ignores: ["dist/**", "node_modules/**", "*.config.js", "*.config.mjs"],
+  rules: {
+    "@typescript-eslint/no-explicit-any": "error",
+  },
 });
