@@ -8,9 +8,9 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { AddDocumentSchema } from "./types";
 import { useOffice } from "./useOffice";
 import { useHttp } from "./useHttp";
-import { GeneratedType } from "../../../generated/generated-types";
+import { ZrcType } from "../../../generated/zrc-generated-types";
 
-type SuccessData = GeneratedType<"ZaakInformatieObject">;
+type SuccessData = ZrcType<"ZaakInformatieObject">;
 
 export function useAddDocumentToZaak(
   options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>

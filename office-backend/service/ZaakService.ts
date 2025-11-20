@@ -7,8 +7,8 @@ import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { FileNotSupported } from "../exception/FileNotSupported";
 import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
-import { type GeneratedType } from "../../generated/generated-types";
 import { type DrcType } from "../../generated/drc-generated-types";
+import { type ZrcType } from "../../generated/zrc-generated-types";
 
 export class ZaakService {
   constructor(private readonly httpService: HttpService) {}
@@ -16,11 +16,11 @@ export class ZaakService {
   public async getZaak(zaakIdentificatie: string) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
-    const zaaktype = await this.httpService.GET<GeneratedType<"ZaakType">>(zaak.zaaktype);
+    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype);
 
     const status = zaak.status
-      ? await this.httpService.GET<GeneratedType<"Status">>(zaak.status)
-      : ({ statustoelichting: "-" } satisfies Partial<GeneratedType<"Status">>);
+      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status)
+      : ({ statustoelichting: "-" } satisfies Partial<ZrcType<"Status">>);
 
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url: string) =>
@@ -82,7 +82,7 @@ export class ZaakService {
   }
 
   private async getZaakFromOpenZaak(zaakIdentificatie: string) {
-    const zaken = await this.httpService.GET<GeneratedType<"PaginatedZaakList">>(
+    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
       "/zaken/api/v1/zaken",
       { identificatie: zaakIdentificatie },
     );

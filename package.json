@@ -23,7 +23,7 @@
     "validate": "turbo validate",
     "prettier": "turbo prettier",
     "prettier:fix": "turbo prettier:fix",
-    "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/types.ts && npx openapi-typescript ./resources/api-specs/drc-openapi.yaml -o ./generated/drc-types.ts",
+    "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/zrc-types.ts && npx openapi-typescript ./resources/api-specs/drc-openapi.yaml -o ./generated/drc-types.ts",
     "test": "turbo test",
     "test:coverage": "turbo test -- --coverage",
     "test:ui": "turbo test:ui",
