@@ -3,39 +3,26 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
+import { z } from "zod";
+import type { Attachment, Message } from "@microsoft/microsoft-graph-types";
+
+export type GraphAttachment = Attachment;
+
+export type GraphMessage = Message;
+
 export interface GraphAuthProvider {
   getAccessToken(): Promise<string>;
 }
 
-export interface GraphAttachment {
-  id: string;
-  name: string;
-  contentType: string;
-  size: number;
-  isInline?: boolean;
-  contentBytes?: string; // Base64 encoded content for small attachments
-}
-
-export interface GraphMessage {
-  id: string;
-  subject: string;
-  from: {
-    emailAddress: {
-      address: string;
-      name?: string;
-    };
-  };
-  hasAttachments: boolean;
-  attachments?: GraphAttachment[];
-}
-
-export interface JwtPayload {
-  aud?: string;
-  exp?: number;
-  iat?: number;
-  scp?: string;
-  roles?: string[];
-  appid?: string;
-  azp?: string;
-  [key: string]: unknown;
-}
+export const jwtPayloadSchema = z
+  .object({
+    aud: z.string().optional(),
+    exp: z.number().optional(),
+    iat: z.number().optional(),
+    scp: z.string().optional(),
+    roles: z.array(z.string()).optional(),
+    appid: z.string().optional(),
+    azp: z.string().optional(),
+  })
+  .catchall(z.unknown());
+export type JwtPayload = z.infer<typeof jwtPayloadSchema>;
