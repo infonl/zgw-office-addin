@@ -10,6 +10,7 @@ import { MsalAuthSingleton } from "./MsalAuthSingleton";
 import { getValidatedFrontendEnv } from "./envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { JwtPayload } from "../service/GraphTypes";
+import { jwtDecode } from "jwt-decode";
 
 /**
  * Microsoft Graph authentication provider for Office Add-ins
@@ -29,14 +30,9 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
     return payload?.aud === "https://graph.microsoft.com" || payload?.aud === graphAppId;
   }
 
-  // Payload consists of claims like aud, exp, iat, scp, roles, appid, etc. (https://learn.microsoft.com/en-us/entra/identity-platform/access-token-claims-reference)
-  // Decode JWT payload with https://developer.mozilla.org/en-US/docs/Web/API/Window/atob
-  // payload is second part of JWT token (https://www.jwt.io/introduction#when-to-use-json-web-tokens)
   private decodeJwtPayload(token: string): JwtPayload | null {
     try {
-      const jwtParts = token.split(".");
-      if (jwtParts.length !== 3) return null;
-      return JSON.parse(atob(jwtParts[1]));
+      return jwtDecode<JwtPayload>(token);
     } catch {
       return null;
     }
