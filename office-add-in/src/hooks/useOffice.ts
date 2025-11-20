@@ -12,7 +12,7 @@ type State = { file: Office.File; currentSlice: number };
 
 // Based on https://learn.microsoft.com/en-us/office/dev/add-ins/develop/get-the-whole-document-from-an-add-in-for-powerpoint-or-word
 export function useOffice() {
-  const { DEBUG, WARN } = useLogger(useOffice.name);
+  const { DEBUG, WARN, ERROR } = useLogger(useOffice.name);
   const host = Office.context.host;
   const isWord = host === Office.HostType.Word;
   const isOutlook = host === Office.HostType.Outlook;
@@ -192,11 +192,11 @@ export function useOffice() {
   }) => {
     const uploadPromises = processedDocuments.map(async (doc, index) => {
       const attachment = doc.attachment;
-      console.log(
+      DEBUG(
         `[Upload to back-end] Processing: ${index + 1}/${processedDocuments.length} ${attachment.name}`
       );
 
-      console.log("[Upload to back-end] Details:", {
+      DEBUG("[Upload to back-end] Details:", {
         type: attachment.attachmentType,
         size: Math.round(attachment.size / 1024) + "KB",
         contentType: attachment.contentType,
@@ -208,20 +208,18 @@ export function useOffice() {
         let graphId = doc.graphId;
         if (attachment.id.startsWith("EmailItself-")) {
           if (!graphId) throw new Error("Geen Graph ID voor email gevonden");
-          console.log("[EmailItself] Getting email as EML via Graph API for: " + attachment.name);
+          DEBUG("[EmailItself] Getting email as EML via Graph API for: " + attachment.name);
           const emlContent = await graphService.getEmailAsEML(graphId);
           fileContent = emlContent;
           const emlBytes = new TextEncoder().encode(emlContent).length;
           const emlSizeMB = Math.round((emlBytes / 1024 / 1024) * 100) / 100;
-          console.log(
-            `[EmailItself] EML retrieved (raw string): ${attachment.name} ~${emlSizeMB}MB`
-          );
+          DEBUG(`[EmailItself] EML retrieved (raw string): ${attachment.name} ~${emlSizeMB}MB`);
         } else {
           if (!graphId) throw new Error("Found no Graph ID for attachment");
           const parentGraphId = doc.parentEmailGraphId;
           if (!parentGraphId) throw new Error("Found no Graph ID for parent email");
           const graphAttachmentId = graphId;
-          console.log(
+          DEBUG(
             `[Attachment] Requesting: /me/messages/${parentGraphId}/attachments/${graphAttachmentId}$/value for ${attachment.name}`
           );
           const arrayBuffer = await graphService.getAttachmentContent(
@@ -231,9 +229,7 @@ export function useOffice() {
           fileContent = arrayBuffer;
           const sizeBytes = arrayBuffer.byteLength;
           const sizeMB = Math.round((sizeBytes / 1024 / 1024) * 100) / 100;
-          console.log(
-            `[Attachment] Attachment downloaded (raw bytes): ${attachment.name} ${sizeMB}MB`
-          );
+          DEBUG(`[Attachment] Attachment downloaded (raw bytes): ${attachment.name} ${sizeMB}MB`);
         }
         const duration = Date.now() - startTime;
         // Type guard voor metadata
@@ -251,7 +247,7 @@ export function useOffice() {
           typeof fileContent === "string"
             ? new TextEncoder().encode(fileContent).length
             : fileContent.byteLength;
-        console.log(`📤 [${attachment.name}] [TODO] Upload to OpenZaak:`, {
+        DEBUG(`📤 [${attachment.name}] [TODO] Upload to OpenZaak:`, {
           filename: attachment.name,
           contentType:
             attachment.contentType ||
@@ -274,8 +270,8 @@ export function useOffice() {
           duration,
         };
       } catch (error) {
-        console.error(`❌ [${attachment.name}] Failed to process:`, error);
-        console.error(`💥 [${attachment.name}] Error details:`, {
+        ERROR(`❌ [${attachment.name}] Failed to process:`, error);
+        ERROR(`💥 [${attachment.name}] Error details:`, {
           message: error instanceof Error ? error.message : "Unknown error",
           stack: error instanceof Error ? error.stack?.substring(0, 200) + "..." : undefined,
         });

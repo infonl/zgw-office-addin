@@ -4,14 +4,16 @@
  */
 
 import { PublicClientApplication, Configuration } from "@azure/msal-browser";
+import { LoggerService } from "../utils/LoggerService";
 
 export class MsalAuthSingleton {
   private static msalSingletonInstance: MsalAuthSingleton | null = null;
+  private logger = LoggerService.withContext(this);
   private readonly msalInstance: PublicClientApplication;
   private readonly initialized: Promise<void>;
 
   private constructor(config: Configuration) {
-    console.log("MSAL Singleton config:", config);
+    this.logger.DEBUG("MSAL Singleton config:", config);
     this.msalInstance = new PublicClientApplication(config);
     this.initialized = this.msalInstance.initialize();
   }
@@ -29,7 +31,7 @@ export class MsalAuthSingleton {
       const response = await this.msalInstance.loginPopup({ scopes });
       return response.accessToken;
     } catch (error) {
-      console.error("MSAL Singleton error:", error);
+      this.logger.ERROR("MSAL Singleton error:", error);
       throw error;
     }
   }

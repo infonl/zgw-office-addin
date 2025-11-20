@@ -13,6 +13,7 @@ import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
 import { GraphService, OfficeGraphAuthProvider } from "../../../../graph";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
+import { useLogger } from "../../../../hooks/useLogger";
 
 // Schema definitions
 export type TranslateItem = { type: "email" | "attachment"; id: string };
@@ -27,6 +28,7 @@ export function useOutlookForm() {
   const { zaak } = useZaak();
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
+  const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -41,11 +43,11 @@ export function useOutlookForm() {
 
   const handleSubmit = async (data: Schema) => {
     const selectedDocuments = data.documents.filter(({ selected }) => selected);
-    console.log("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
+    DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
     // Log
     selectedDocuments.forEach((doc, index) => {
-      console.log(`📋 File ${index + 1}:`, {
+      DEBUG(`📋 File ${index + 1}:`, {
         name: doc.attachment.name,
         size: `${Math.round(doc.attachment.size / 1024)}KB`,
         contentType: doc.attachment.contentType,
@@ -61,22 +63,22 @@ export function useOutlookForm() {
     });
 
     if (selectedDocuments.length === 0) {
-      console.warn("⚠️ No documents selected for upload");
+      WARN("⚠️ No documents selected for upload");
       return;
     }
 
     try {
       // Create a new GraphService
-      console.log("🔧 Initializing GraphService...");
+      DEBUG("🔧 Initializing GraphService...");
       const authProvider = new OfficeGraphAuthProvider();
       const graphService = new GraphService(authProvider);
       // log if GraphService retrieval fails or succeeds
       // ToDo: (remove after test on server)
       try {
         await authProvider.getAccessToken();
-        console.log("✅ GraphService ready for downloads");
+        DEBUG("✅ GraphService ready for downloads");
       } catch (authError) {
-        console.error("❌ Graph API authentication failed:", authError);
+        ERROR("❌ Graph API authentication failed:", authError);
         throw authError;
       }
 
@@ -93,7 +95,7 @@ export function useOutlookForm() {
         graphService
       );
 
-      console.log("📊 Upload Summary:", {
+      DEBUG("📊 Upload Summary:", {
         totalFiles: selectedDocuments.length,
         emailFiles: selectedDocuments.filter((doc) => doc.attachment.id.startsWith("EmailItself-"))
           .length,
@@ -105,7 +107,7 @@ export function useOutlookForm() {
         ),
       });
 
-      console.log("🚀 Starting parallel uploads...");
+      DEBUG("🚀 Starting parallel uploads...");
       const results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
       const successful = results.filter((result) => result.success);
       const failed = results.filter((result) => !result.success);
@@ -121,7 +123,7 @@ export function useOutlookForm() {
       const throughput =
         totalDuration > 0 ? Math.round(totalDataTransferred / 1024 / (totalDuration / 1000)) : 0;
 
-      console.log("Retrieved Results:", {
+      DEBUG("Retrieved Results:", {
         total: results.length,
         successful: successful.length,
         failed: failed.length,
@@ -139,14 +141,14 @@ export function useOutlookForm() {
       });
 
       if (successful.length > 0) {
-        console.log(`🎉 Successfully processed ${successful.length} documents!`);
+        DEBUG(`🎉 Successfully processed ${successful.length} documents!`);
       }
 
       if (failed.length > 0) {
-        console.error(`💥 Failed to process ${failed.length} documents`);
+        ERROR(`💥 Failed to process ${failed.length} documents`);
       }
     } catch (error) {
-      console.error("❌ Upload process failed:", error);
+      ERROR("❌ Upload process failed:", error);
     }
   };
 

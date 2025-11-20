@@ -4,6 +4,7 @@
  */
 
 import { GraphAuthProvider } from "../service/GraphService";
+import { LoggerService } from "../utils/LoggerService";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
 import { MsalAuthSingleton } from "./MsalAuthSingleton";
@@ -17,6 +18,7 @@ import { jwtDecode } from "jwt-decode";
  * Uses Office.js authentication context to obtain Graph API tokens
  */
 export class OfficeGraphAuthProvider implements GraphAuthProvider {
+  private logger = LoggerService.withContext(this);
   private static readonly TOKEN_EXPIRY_OFFSET_MINUTES = 5;
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
@@ -73,16 +75,16 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
       this.tokenCache.expires >
         addMinutes(new Date(), OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
     ) {
-      console.log("🔄 Using cached Graph API token");
+      this.logger.DEBUG("🔄 Using cached Graph API token");
       return this.tokenCache.token;
     }
 
     if (this.tokenRequest) {
-      console.log("⏳ Waiting for existing token request to complete...");
+      this.logger.DEBUG("⏳ Waiting for existing token request to complete...");
       return this.tokenRequest;
     }
 
-    console.log("🔑 Requesting new Graph API access token...");
+    this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
     // Use Office SSO (Single Sign-On) to get Graph API access token
     this.tokenRequest = Office.auth
@@ -95,14 +97,14 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
         let jwtPayload = this.decodeJwtPayload(token);
 
         // Log scopes
-        console.log("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
-        console.log("🔎 TOKEN.AUD:", jwtPayload?.aud);
-        console.log(
+        this.logger.DEBUG("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
+        this.logger.DEBUG("🔎 TOKEN.AUD:", jwtPayload?.aud);
+        this.logger.DEBUG(
           "🔎 TOKEN.APPID / ROLES:",
           jwtPayload?.appid ?? jwtPayload?.azp,
           jwtPayload?.roles
         );
-        console.log("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
+        this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
         // Ensure audience is Graph; otherwise fall back to MSAL
         const isGraphAudience = jwtPayload ? this.isGraphAudience(jwtPayload) : false;
@@ -117,7 +119,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           const missingScopes = this.requiredScopes.filter(
             (requiredScope) => !(jwtPayload?.scp ?? "").includes(requiredScope)
           );
-          console.warn(
+          this.logger.WARN(
             "⚠️ Graph token missing scopes %o — attempting MSAL scope upgrade...",
             missingScopes
           );
@@ -127,9 +129,9 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
             const upgradedToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
             token = upgradedToken;
             jwtPayload = this.decodeJwtPayload(upgradedToken);
-            console.log("✅ Upgraded token scopes:", jwtPayload?.scp);
+            this.logger.DEBUG("✅ Upgraded token scopes:", jwtPayload?.scp);
           } catch (msalUpgradeError) {
-            console.warn(
+            this.logger.WARN(
               "⚠️ MSAL scope upgrade failed; continuing with existing token. Error:",
               msalUpgradeError
             );
@@ -144,7 +146,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
             tokenExpiryTimestamp = jwtPayload.exp * 1000;
           }
         } catch {
-          console.log("Could not decode token exp, using default lifetime");
+          this.logger.DEBUG("Could not decode token exp, using default lifetime");
         }
 
         this.tokenCache = {
@@ -157,14 +159,14 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
         return token;
       })
       .catch(async (error) => {
-        console.error("Graph API authentication failed (Office SSO):", {
+        this.logger.ERROR("Graph API authentication failed (Office SSO):", {
           code: error?.code,
           name: error?.name,
           message: error?.message,
         });
 
         try {
-          console.log("🛟 Falling back to MSAL (local only)) ...");
+          this.logger.DEBUG("🛟 Falling back to MSAL (local only)) ...");
           const msalSingleton = this.getMsalSingletonInstance();
           const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
           // set cache using JWT exp if present
@@ -182,7 +184,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           };
           return msalToken;
         } catch (msalError) {
-          console.warn("⚠️ MSAL fallback failed:", msalError);
+          this.logger.WARN("⚠️ MSAL fallback failed:", msalError);
         }
 
         // Clear any cached token and request promise on failure

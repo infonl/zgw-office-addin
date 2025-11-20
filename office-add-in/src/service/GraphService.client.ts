@@ -5,11 +5,13 @@
 
 import { Client } from "@microsoft/microsoft-graph-client";
 import "isomorphic-fetch";
+import { LoggerService } from "../utils/LoggerService";
 
 import type { GraphAuthProvider, GraphMessage } from "./GraphTypes";
 import { ResponseType } from "@microsoft/microsoft-graph-client";
 
 export class GraphServiceClient {
+  private logger = LoggerService.withContext(this);
   private client: Client;
 
   constructor(authProvider: GraphAuthProvider) {
@@ -17,29 +19,26 @@ export class GraphServiceClient {
       authProvider: async (done) => {
         try {
           const token = await authProvider.getAccessToken();
-          console.debug(
-            "[GraphServiceClient] Token retrieved:",
-            token ? token.substring(0, 20) + "..." : null
-          );
+          this.logger.DEBUG("Token retrieved:", token ? token.substring(0, 20) + "..." : null);
           done(null, token);
         } catch (err) {
-          console.error("[GraphServiceClient] Token retrieval failed:", err);
+          this.logger.ERROR("Token retrieval failed:", err);
           done(err, null);
         }
       },
     });
-    console.debug("[GraphServiceClient] Initialized");
+    this.logger.DEBUG("Initialized");
   }
 
   async getMessage(graphId: string): Promise<GraphMessage> {
     const endpoint = `/me/messages/${encodeURIComponent(graphId)}`;
-    console.debug("[GraphServiceClient] getMessage:", { graphId, endpoint });
+    this.logger.DEBUG("getMessage:", { graphId, endpoint });
     try {
       const result = await this.client.api(endpoint).get();
-      console.debug("[GraphServiceClient] getMessage result:", result);
+      this.logger.DEBUG("getMessage result:", result);
       return result;
     } catch (error) {
-      console.error("[GraphServiceClient] getMessage error:", error);
+      this.logger.ERROR("getMessage error:", error);
       throw error;
     }
   }
@@ -49,32 +48,34 @@ export class GraphServiceClient {
     graphAttachmentId: string
   ): Promise<ArrayBuffer> {
     const endpoint = `/me/messages/${encodeURIComponent(graphMessageId)}/attachments/${encodeURIComponent(graphAttachmentId)}/$value`;
-    console.debug("[GraphServiceClient] getAttachmentContent:", {
+    this.logger.DEBUG("getAttachmentContent:", {
       graphMessageId,
       graphAttachmentId,
       endpoint,
     });
     try {
       const response = await this.client.api(endpoint).responseType(ResponseType.ARRAYBUFFER).get();
-      console.debug("[GraphServiceClient] getAttachmentContent result:", {
+      this.logger.DEBUG("getAttachmentContent result:", {
         size: response?.byteLength,
       });
       return response;
     } catch (error) {
-      console.error("[GraphServiceClient] getAttachmentContent error:", error);
+      this.logger.ERROR("getAttachmentContent error:", error);
       throw error;
     }
   }
 
   async getEmailAsEML(graphId: string): Promise<string> {
     const endpoint = `/me/messages/${encodeURIComponent(graphId)}/$value`;
-    console.debug("[GraphServiceClient] getEmailAsEML:", { graphId, endpoint });
+    this.logger.DEBUG("getEmailAsEML:", { graphId, endpoint });
     try {
       const response = await this.client.api(endpoint).responseType(ResponseType.TEXT).get();
-      console.debug("[GraphServiceClient] getEmailAsEML result:", { length: response?.length });
+      this.logger.DEBUG("getEmailAsEML result:", {
+        length: response?.length,
+      });
       return response;
     } catch (error) {
-      console.error("[GraphServiceClient] getEmailAsEML error:", error);
+      this.logger.ERROR("getEmailAsEML error:", error);
       throw error;
     }
   }
@@ -84,7 +85,7 @@ export class GraphServiceClient {
     sourceIdType: "ewsId" | "entryId" = "ewsId"
   ): Promise<(string | null)[]> {
     const endpoint = "/me/translateExchangeIds";
-    console.debug("[GraphServiceClient] officeIdsToGraphIdsViaApi:", {
+    this.logger.DEBUG("officeIdsToGraphIdsViaApi:", {
       officeIds,
       sourceIdType,
       endpoint,
@@ -96,15 +97,15 @@ export class GraphServiceClient {
         targetIdType: "restId",
       });
       if (result.value && Array.isArray(result.value)) {
-        console.debug("[GraphServiceClient] officeIdsToGraphIdsViaApi result:", result.value);
+        this.logger.DEBUG("officeIdsToGraphIdsViaApi result:", result.value);
         return result.value.map(
           (exchangeIdResult: { targetId?: string | null }) => exchangeIdResult.targetId || null
         );
       }
-      console.warn("[GraphServiceClient] officeIdsToGraphIdsViaApi: no value in result");
+      this.logger.WARN("officeIdsToGraphIdsViaApi: no value in result");
       return officeIds.map(() => null);
     } catch (error) {
-      console.error("[GraphServiceClient] officeIdsToGraphIdsViaApi error:", error);
+      this.logger.ERROR("officeIdsToGraphIdsViaApi error:", error);
       return officeIds.map(() => null);
     }
   }
