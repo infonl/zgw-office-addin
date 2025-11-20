@@ -9,7 +9,7 @@ import { GraphAuthProvider } from "../service/GraphService";
 import { MsalAuthSingleton } from "./MsalAuthSingleton";
 import { getValidatedFrontendEnv } from "./envFrontendSchema";
 import { addMinutes } from "date-fns";
-import { JwtPayload } from "../service/GraphTypes";
+import { MicrosoftJwtPayload } from "../service/GraphTypes";
 import { jwtDecode } from "jwt-decode";
 
 /**
@@ -25,20 +25,20 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
 
   // Check if access token is for Microsoft Graph by validating audience.
   // For value of id: https://web.archive.org/web/20241114222012/https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications
-  private isGraphAudience(payload: JwtPayload): boolean {
+  private isGraphAudience(payload: MicrosoftJwtPayload): boolean {
     const graphAppId = "00000003-0000-0000-c000-000000000000";
     return payload?.aud === "https://graph.microsoft.com" || payload?.aud === graphAppId;
   }
 
-  private decodeJwtPayload(token: string): JwtPayload | null {
+  private decodeJwtPayload(token: string): MicrosoftJwtPayload | null {
     try {
-      return jwtDecode<JwtPayload>(token);
+      return jwtDecode<MicrosoftJwtPayload>(token);
     } catch {
       return null;
     }
   }
 
-  private tokenHasScopes(payload: JwtPayload, scopes: readonly string[]): boolean {
+  private tokenHasScopes(payload: MicrosoftJwtPayload, scopes: readonly string[]): boolean {
     // "scp" is a space-delimited string of delegated scopes
     if (!payload || typeof payload.scp !== "string") return false;
     const grantedScopesSet = new Set(
