@@ -82,10 +82,9 @@ export class ZaakService {
   }
 
   private async getZaakFromOpenZaak(zaakIdentificatie: string) {
-    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
-      "/zaken/api/v1/zaken",
-      { identificatie: zaakIdentificatie },
-    );
+    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>("/zaken/api/v1/zaken", {
+      identificatie: zaakIdentificatie,
+    });
 
     const zaak = zaken.results.at(0);
 
