@@ -73,7 +73,6 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
   async getAccessToken(): Promise<string> {
     await Office.onReady();
 
-    // Return cached token if still valid (with buffer)
     if (
       this.tokenCache &&
       this.tokenCache.expires >
@@ -83,13 +82,11 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
       return this.tokenCache.token;
     }
 
-    // If there's already a token request in progress, wait for it
     if (this.tokenRequest) {
       console.log("⏳ Waiting for existing token request to complete...");
       return this.tokenRequest;
     }
 
-    // Start new token request
     console.log("🔑 Requesting new Graph API access token...");
 
     // Use Office SSO (Single Sign-On) to get Graph API access token
@@ -115,8 +112,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
         // Ensure audience is Graph; otherwise fall back to MSAL
         const isGraphAudience = jwtPayload ? this.isGraphAudience(jwtPayload) : false;
 
-        // If we have a Graph token but it's missing required scopes (e.g. Mail.Read),
-        // attempt an MSAL upgrade to those scopes (silent first, then popup).
+        // If Graph token is missing the required scopes attempt an MSAL upgrade to those scopes.
         if (
           isGraphAudience &&
           jwtPayload &&
@@ -166,77 +162,41 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
         return token;
       })
       .catch(async (error) => {
-        // Try MSAL fallback for client/UI errors if configured
-        if (error?.code === 13006 || error?.code === 13008 || error?.code === 13009) {
-          try {
-            console.log("🛟 Falling back to MSAL (popup) ...");
-            const msalSingleton = this.getMsalSingletonInstance();
-            const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
-            // set cache using JWT exp if present
-            let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-            const msalJwtPayload = this.decodeJwtPayload(msalToken);
-            if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
-              msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
-            }
-            this.tokenCache = {
-              token: msalToken,
-              expires: addMinutes(
-                new Date(msalTokenExpiryTimestamp),
-                -OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES
-              ).getTime(),
-            };
-            return msalToken;
-          } catch (msalErr) {
-            console.warn("MSAL fallback failed:", msalErr);
-          }
-        }
-
-        console.error("❌ Graph API authentication failed:", {
-          code: error.code,
-          name: error.name,
-          message: error.message,
+        console.error("Graph API authentication failed (Office SSO):", {
+          code: error?.code,
+          name: error?.name,
+          message: error?.message,
         });
+
+        try {
+          console.log("🛟 Falling back to MSAL (local only)) ...");
+          const msalSingleton = this.getMsalSingletonInstance();
+          const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
+          // set cache using JWT exp if present
+          let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
+          const msalJwtPayload = this.decodeJwtPayload(msalToken);
+          if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
+            msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+          }
+          this.tokenCache = {
+            token: msalToken,
+            expires: addMinutes(
+              new Date(msalTokenExpiryTimestamp),
+              -OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES
+            ).getTime(),
+          };
+          return msalToken;
+        } catch (msalError) {
+          console.warn("⚠️ MSAL fallback failed:", msalError);
+        }
 
         // Clear any cached token and request promise on failure
         this.tokenCache = null;
 
-        // Provide more specific error messages based on error codes
-        let errorMessage;
+        const errorCode = error?.code || "unknown";
+        const errorMessage = error?.message || "Authentication error from Office SSO.";
 
-        switch (error.code) {
-          case 13001:
-            errorMessage = "User is not signed in to Office. Please sign in first.";
-            break;
-          case 13002:
-            errorMessage = "User consent required. Please allow Graph API access.";
-            break;
-          case 13003:
-            errorMessage = "Add-in domain not trusted. Check manifest configuration.";
-            break;
-          case 13004:
-            errorMessage = "Invalid resource specified for authentication.";
-            break;
-          case 13005:
-            errorMessage = "Platform doesn't support this authentication method.";
-            break;
-          case 13006:
-            errorMessage =
-              "Authentication client error. This may be a temporary issue - please try again.";
-            break;
-          case 13007:
-            errorMessage = "Authentication request was cancelled by user.";
-            break;
-          case 13008:
-            errorMessage = "Authentication dialog cannot be displayed.";
-            break;
-          case 13009:
-            errorMessage = "Authentication dialog was closed unexpectedly.";
-            break;
-          default:
-            errorMessage = error.message || "Unexpected authentication error";
-        }
-
-        throw new Error(`Graph authentication failed: ${errorMessage} (Code: ${error.code})`);
+        throw new Error(`Graph authentication failed: ${errorMessage} (Code: ${errorCode})`);
       })
       .finally(() => {
         this.tokenRequest = null;
