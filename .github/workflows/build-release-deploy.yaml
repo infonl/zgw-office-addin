@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file from secrets
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
       - name: Run code validation
         id: validation
         run: |
