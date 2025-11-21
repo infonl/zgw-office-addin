@@ -4,5 +4,5 @@
  */
 
 export { GraphServiceClient as GraphService } from "./service/GraphService.client";
-export type { GraphAuthProvider, GraphAttachment, GraphMessage } from "./service/GraphTypes";
-export { OfficeGraphAuthProvider } from "./provider/OfficeGraphAuthProvider";
+export type { GraphAuthService, GraphAttachment, GraphMessage } from "./service/GraphTypes";
+export { OfficeGraphAuthService } from "./service/OfficeGraphAuthService";

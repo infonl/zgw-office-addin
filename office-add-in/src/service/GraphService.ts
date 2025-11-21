@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
-export interface GraphAuthProvider {
+export interface GraphAuthService {
   getAccessToken(): Promise<string>;
 }
 

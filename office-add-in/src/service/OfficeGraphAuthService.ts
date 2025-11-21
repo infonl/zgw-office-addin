@@ -3,27 +3,36 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { GraphAuthProvider } from "../service/GraphService";
-import { LoggerService } from "../utils/LoggerService";
+import { GraphAuthService } from "./GraphService";
+import { useLogger } from "../hooks/useLogger";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
-import { MsalAuthSingleton } from "./MsalAuthSingleton";
-import { FRONTEND_ENV } from "./envFrontendSchema";
+import { MsalAuthContextType } from "../provider/MsalAuthProvider";
+import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
-import { MicrosoftJwtPayload } from "../service/GraphTypes";
+import { MicrosoftJwtPayload } from "./GraphTypes";
 import { jwtDecode } from "jwt-decode";
 
 /**
- * Microsoft Graph authentication provider for Office Add-ins
+ * Microsoft Graph authentication service for Office Add-ins
  * Uses Office.js authentication context to obtain Graph API tokens
  */
-export class OfficeGraphAuthProvider implements GraphAuthProvider {
-  private logger = LoggerService.withContext(this);
+export class OfficeGraphAuthService implements GraphAuthService {
+  private logger;
   private static readonly TOKEN_EXPIRY_OFFSET_MINUTES = 5;
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
   private readonly env = FRONTEND_ENV;
+  private msalAuth: MsalAuthContextType | null = null;
+
+  constructor(logger: ReturnType<typeof useLogger>) {
+    this.logger = logger;
+  }
+
+  setMsalAuth(msalAuth: MsalAuthContextType) {
+    this.msalAuth = msalAuth;
+  }
 
   // Check if access token is for Microsoft Graph by validating audience.
   // For value of id: https://web.archive.org/web/20241114222012/https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications
@@ -51,29 +60,13 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
     return scopes.every((requiredScope) => grantedScopesSet.has(requiredScope));
   }
 
-  private getMsalSingletonInstance(): MsalAuthSingleton {
-    if (this.env.APP_ENV !== "local") throw new Error("MSAL singleton only on local development");
-    const config = {
-      auth: {
-        clientId: this.env.MSAL_CLIENT_ID,
-        authority: this.env.MSAL_AUTHORITY,
-        redirectUri: this.env.MSAL_REDIRECT_URI,
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: false,
-      },
-    };
-    return MsalAuthSingleton.getInstance(config);
-  }
-
   async getAccessToken(): Promise<string> {
     await Office.onReady();
 
     if (
       this.tokenCache &&
       this.tokenCache.expires >
-        addMinutes(new Date(), OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
+        addMinutes(new Date(), OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
     ) {
       this.logger.DEBUG("🔄 Using cached Graph API token");
       return this.tokenCache.token;
@@ -124,11 +117,12 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           );
           try {
             // MSAL fallback
-            const msalSingleton = this.getMsalSingletonInstance();
-            const upgradedToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
-            token = upgradedToken;
-            jwtPayload = this.decodeJwtPayload(upgradedToken);
-            this.logger.DEBUG("✅ Upgraded token scopes:", jwtPayload?.scp);
+            if (this.msalAuth) {
+              const upgradedToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
+              token = upgradedToken;
+              jwtPayload = this.decodeJwtPayload(upgradedToken);
+              this.logger.DEBUG("✅ Upgraded token scopes:", jwtPayload?.scp);
+            }
           } catch (msalUpgradeError) {
             this.logger.WARN(
               "⚠️ MSAL scope upgrade failed; continuing with existing token. Error:",
@@ -152,7 +146,7 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
           token,
           expires: addMinutes(
             new Date(tokenExpiryTimestamp),
-            -OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES
+            -OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES
           ).getTime(),
         };
         return token;
@@ -166,22 +160,22 @@ export class OfficeGraphAuthProvider implements GraphAuthProvider {
 
         try {
           this.logger.DEBUG("🛟 Falling back to MSAL (local only)) ...");
-          const msalSingleton = this.getMsalSingletonInstance();
-          const msalToken = await msalSingleton.getAccessToken([...this.requiredScopes]);
-
-          let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-          const msalJwtPayload = this.decodeJwtPayload(msalToken);
-          if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
-            msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+          if (this.msalAuth) {
+            const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
+            let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
+            const msalJwtPayload = this.decodeJwtPayload(msalToken);
+            if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
+              msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+            }
+            this.tokenCache = {
+              token: msalToken,
+              expires: addMinutes(
+                new Date(msalTokenExpiryTimestamp),
+                -OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES
+              ).getTime(),
+            };
+            return msalToken;
           }
-          this.tokenCache = {
-            token: msalToken,
-            expires: addMinutes(
-              new Date(msalTokenExpiryTimestamp),
-              -OfficeGraphAuthProvider.TOKEN_EXPIRY_OFFSET_MINUTES
-            ).getTime(),
-          };
-          return msalToken;
         } catch (msalError) {
           this.logger.WARN("⚠️ MSAL fallback failed:", msalError);
         }

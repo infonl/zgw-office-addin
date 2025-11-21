@@ -11,7 +11,8 @@ import { document, DocumentSchema } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
-import { GraphService, OfficeGraphAuthProvider } from "../../../../graph";
+import { GraphService } from "../../../../graph";
+import { useAuth } from "../../../../provider/AuthProvider";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
 import { useLogger } from "../../../../hooks/useLogger";
 
@@ -24,6 +25,7 @@ const schema = z.object({
 export type Schema = z.infer<typeof schema>;
 
 export function useOutlookForm() {
+  const { authService } = useAuth();
   const { zaak } = useZaak();
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
@@ -67,11 +69,10 @@ export function useOutlookForm() {
 
     try {
       DEBUG("🔧 Initializing GraphService...");
-      const authProvider = new OfficeGraphAuthProvider();
-      const graphService = new GraphService(authProvider);
+      const graphService = new GraphService(authService, { DEBUG, WARN, ERROR });
       // ToDo: (remove after test on server)
       try {
-        await authProvider.getAccessToken();
+        await authService.getAccessToken();
         DEBUG("✅ GraphService ready for downloads");
       } catch (authError) {
         ERROR("❌ Graph API authentication failed:", authError);

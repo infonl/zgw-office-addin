@@ -5,20 +5,27 @@
 
 import { Client } from "@microsoft/microsoft-graph-client";
 import "isomorphic-fetch";
-import { LoggerService } from "../utils/LoggerService";
 
-import type { GraphAuthProvider, GraphMessage } from "./GraphTypes";
+import type { GraphAuthService, GraphMessage } from "./GraphTypes";
 import { ResponseType } from "@microsoft/microsoft-graph-client";
 
+type LoggerMethods = {
+  DEBUG: (_message: string, ..._optionalParams: unknown[]) => void;
+  INFO?: (_message: string, ..._optionalParams: unknown[]) => void;
+  WARN: (_message: string, ..._optionalParams: unknown[]) => void;
+  ERROR: (_message: string, ..._optionalParams: unknown[]) => void;
+};
+
 export class GraphServiceClient {
-  private logger = LoggerService.withContext(this);
+  private logger: LoggerMethods;
   private client: Client;
 
-  constructor(authProvider: GraphAuthProvider) {
+  constructor(authService: GraphAuthService, logger: LoggerMethods) {
+    this.logger = logger;
     this.client = Client.init({
       authProvider: async (done) => {
         try {
-          const token = await authProvider.getAccessToken();
+          const token = await authService.getAccessToken();
           this.logger.DEBUG("Token retrieved:", token ? token.substring(0, 20) + "..." : null);
           done(null, token);
         } catch (err) {

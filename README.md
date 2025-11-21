@@ -101,6 +101,6 @@ Set these variables in your `.env.local.frontend` file :
 ### Notes
 
 - These variables are required for all local development environments (Docker, Webpack, etc).
-- The fallback logic is implemented in `OfficeGraphAuthProvider.ts`.
+- The fallback logic is implemented in `OfficeGraphAuthService.ts`.
 - For production, authentication uses Office SSO and does not require these MSAL variables.
 

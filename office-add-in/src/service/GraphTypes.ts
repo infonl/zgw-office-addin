@@ -10,7 +10,7 @@ export type GraphAttachment = Attachment;
 
 export type GraphMessage = Message;
 
-export interface GraphAuthProvider {
+export interface GraphAuthService {
   getAccessToken(): Promise<string>;
 }
 
