@@ -28,6 +28,10 @@ jobs:
       - name: Generate types
         run: npm run types
 
+      - name: Create .env file from secrets
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
       - name: Run linting
         run: npm run lint
 
