@@ -11,8 +11,8 @@ export class HttpService {
   private readonly baseUrl = envServerSchema.API_BASE_URL;
 
   constructor() {
-    console.log('[HttpService] API_BASE_URL:', envServerSchema.API_BASE_URL);
-    console.log('[HttpService] JWT_SECRET:', envServerSchema.JWT_SECRET);
+    console.log("[HttpService] API_BASE_URL:", envServerSchema.API_BASE_URL);
+    console.log("[HttpService] JWT_SECRET:", envServerSchema.JWT_SECRET);
   }
 
   public async POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
