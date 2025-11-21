@@ -9,6 +9,10 @@ import { HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
 import { mockFetch } from "../test/setup";
 
+console.log("API_BASE_URL:", process.env.API_BASE_URL);
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+console.log("ENV:", process.env);
+
 // Mock dependencies
 vi.mock("jsonwebtoken", () => ({
   default: {
