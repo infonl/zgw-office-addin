@@ -8,6 +8,16 @@ import path from "path";
 import { z } from "zod";
 import { LoggerService } from "../service/LoggerService";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+LoggerService.debug("Loaded environment variables:", {
+  APP_ENV: process.env.APP_ENV,
+  JWT_SECRET: process.env.JWT_SECRET,
+  API_BASE_URL: process.env.API_BASE_URL,
+  FRONTEND_URL: process.env.FRONTEND_URL,
+  KEY_PATH: process.env.KEY_PATH,
+  CERT_PATH: process.env.CERT_PATH,
+  CA_CERT_PATH: process.env.CA_CERT_PATH,
+  PORT: process.env.PORT,
+});
 
 export const envSchema = z.object({
   APP_ENV: z.enum(["local", "production", "test"]),
