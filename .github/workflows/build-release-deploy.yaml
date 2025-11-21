@@ -21,91 +21,94 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - name: Create .env file from secrets
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
-    - name: Set up Node.js
-      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
-      with:
-        node-version-file: '.nvmrc'
+      - name: Set up Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version-file: ".nvmrc"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run code validation
-      id: validation
-      run: |
-        set +e  # Don't fail immediately on error
-        npm run check > validation_output.txt 2>&1
-        validation_exit_code=$?
-        echo "exit_code=$validation_exit_code" >> $GITHUB_OUTPUT
-        
-        # Always show the output
-        cat validation_output.txt
-        
-        # Exit with the original exit code
-        exit $validation_exit_code
+      - name: Run code validation
+        id: validation
+        run: |
+          set +e  # Don't fail immediately on error
+          npm run check > validation_output.txt 2>&1
+          validation_exit_code=$?
+          echo "exit_code=$validation_exit_code" >> $GITHUB_OUTPUT
 
-    - name: Output validation results
-      if: failure() && github.event_name == 'pull_request'
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-      with:
-        script: |
-          const fs = require('fs');
-          const path = require('path');
-          
-          let validationOutput = '';
-          try {
-            validationOutput = fs.readFileSync('validation_output.txt', 'utf8');
-          } catch (error) {
-            validationOutput = 'Could not read validation output';
-          }
-          
-          const exitCode = '${{ steps.validation.outputs.exit_code }}';
-          const status = exitCode === '0' ? 'Passed ✅' : 'Failed ❌';
-          const emoji = exitCode === '0' ? '🎉' : '⚠️';
-          
-          const comment = `${emoji} **Build Validation ${status}**
-          
-          <details>
-          <summary>📋 Validation Output</summary>
-          
-          \`\`\`
-          ${validationOutput.slice(0, 4000)}${validationOutput.length > 4000 ? '\n... (output truncated)' : ''}
-          \`\`\`
-          
-          </details>
-          `;
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+          # Always show the output
+          cat validation_output.txt
 
-    - name: Build project
-      run: npm run build
+          # Exit with the original exit code
+          exit $validation_exit_code
 
-    - name: Package Artifacts
-      run: |
-        mkdir -p release
-        cp -r office-add-in/dist release/
+      - name: Output validation results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
 
-    - name: Archive Artifacts for release zip
-      if: github.ref == 'refs/heads/main'
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-      with:
-        name: office-addin-artifacts
-        path: release/
+            let validationOutput = '';
+            try {
+              validationOutput = fs.readFileSync('validation_output.txt', 'utf8');
+            } catch (error) {
+              validationOutput = 'Could not read validation output';
+            }
 
-    - name: Archive Artifacts for docker image
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-      with:
-        name: office-addin-build-artifacts-docker
-        path: |
-          office-add-in/dist/
-          office-backend/dist/
+            const exitCode = '${{ steps.validation.outputs.exit_code }}';
+            const status = exitCode === '0' ? 'Passed ✅' : 'Failed ❌';
+            const emoji = exitCode === '0' ? '🎉' : '⚠️';
+
+            const comment = `${emoji} **Build Validation ${status}**
+
+            <details>
+            <summary>📋 Validation Output</summary>
+
+            \`\`\`
+            ${validationOutput.slice(0, 4000)}${validationOutput.length > 4000 ? '\n... (output truncated)' : ''}
+            \`\`\`
+
+            </details>
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Build project
+        run: npm run build
+
+      - name: Package Artifacts
+        run: |
+          mkdir -p release
+          cp -r office-add-in/dist release/
+
+      - name: Archive Artifacts for release zip
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: office-addin-artifacts
+          path: release/
+
+      - name: Archive Artifacts for docker image
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: office-addin-build-artifacts-docker
+          path: |
+            office-add-in/dist/
+            office-backend/dist/
 
   next-version:
     runs-on: ubuntu-24.04
@@ -113,116 +116,115 @@ jobs:
       old-version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.old_tag || steps.get-tag-non-main.outputs.old_tag }}
       version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}
     steps:
-    # Checkout the repository including tags
-    - name: Checkout
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      with:
-        fetch-depth: 0
-    # Determine the next semantic version based on the commit message tags
-    - name: Get next tag on main
-      id: get-tag-main
-      if: ${{ github.ref == 'refs/heads/main'}}
-      uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PRERELEASE: false
-        DEFAULT_BUMP: patch
-        WITH_V: true
-        RELEASE_BRANCHES: main
-    # If not on main, Determine the next semantic version based on the commit message tags without pushing tags`
-    - name: Get next tag on non-main
-      id: get-tag-non-main
-      if: ${{ github.ref != 'refs/heads/main'}}
-      uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PRERELEASE: false
-        DEFAULT_BUMP: patch
-        WITH_V: true
-        RELEASE_BRANCHES: main
-        DRY_RUN: true
-    - name: Print new version
-      run: |
-        echo "Next version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}"
+      # Checkout the repository including tags
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          fetch-depth: 0
+      # Determine the next semantic version based on the commit message tags
+      - name: Get next tag on main
+        id: get-tag-main
+        if: ${{ github.ref == 'refs/heads/main'}}
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: false
+          DEFAULT_BUMP: patch
+          WITH_V: true
+          RELEASE_BRANCHES: main
+      # If not on main, Determine the next semantic version based on the commit message tags without pushing tags`
+      - name: Get next tag on non-main
+        id: get-tag-non-main
+        if: ${{ github.ref != 'refs/heads/main'}}
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: false
+          DEFAULT_BUMP: patch
+          WITH_V: true
+          RELEASE_BRANCHES: main
+          DRY_RUN: true
+      - name: Print new version
+        run: |
+          echo "Next version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}"
 
   create-release:
-    needs: [build,next-version]
+    needs: [build, next-version]
     runs-on: ubuntu-24.04
     if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
-    - name: Checkout
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - name: Download office-addin-artifacts
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: office-addin-artifacts
+          path: release-${{ needs.next-version.outputs.version }}/
 
-    - name: Download office-addin-artifacts
-      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
-      with:
-        name: office-addin-artifacts
-        path: release-${{ needs.next-version.outputs.version }}/
+      - name: Create zip
+        run: |
+          zip -r zgw-office-addin-${{ needs.next-version.outputs.version }}.zip release-${{ needs.next-version.outputs.version }}
 
-    - name: Create zip
-      run: |
-        zip -r zgw-office-addin-${{ needs.next-version.outputs.version }}.zip release-${{ needs.next-version.outputs.version }}
-
-    - name: Create Github release
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        gh release create ${{ needs.next-version.outputs.version }} zgw-office-addin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }} --generate-notes
+      - name: Create Github release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ needs.next-version.outputs.version }} zgw-office-addin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }} --generate-notes
 
   create-docker-image:
-    needs: [build,next-version]
+    needs: [build, next-version]
     runs-on: ubuntu-24.04
     if: ${{ !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
     permissions:
       contents: read
       packages: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
-    - name: Download office-addin-artifacts for docker build
-      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
-      with:
-        name: office-addin-build-artifacts-docker
+      - name: Download office-addin-artifacts for docker build
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: office-addin-build-artifacts-docker
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build (and Push) Frontend Docker image
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-      with:
-        file: ./office-add-in/Dockerfile
-        build-args: |
-          APP_VERSION="${{ needs.next-version.outputs.version }}"
-        context: .
-        push: ${{ github.ref == 'refs/heads/main' }}
-        tags: |
-          ghcr.io/infonl/zgw-office-add-in-frontend:latest
-          ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
-        attests: |
-          type=provenance,mode=max
-          type=sbom
+      - name: Build (and Push) Frontend Docker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          file: ./office-add-in/Dockerfile
+          build-args: |
+            APP_VERSION="${{ needs.next-version.outputs.version }}"
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/infonl/zgw-office-add-in-frontend:latest
+            ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+          attests: |
+            type=provenance,mode=max
+            type=sbom
 
-    - name: Build (and Push) Backend Docker image
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-      with:
-        file: ./office-backend/Dockerfile
-        context: .
-        push: ${{ github.ref == 'refs/heads/main' }}
-        tags: |
-          ghcr.io/infonl/zgw-office-add-in-backend:latest
-          ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
-        attests: |
-          type=provenance,mode=max
-          type=sbom
+      - name: Build (and Push) Backend Docker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          file: ./office-backend/Dockerfile
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/infonl/zgw-office-add-in-backend:latest
+            ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
+          attests: |
+            type=provenance,mode=max
+            type=sbom
 
   trigger-provision:
     needs: [next-version, create-docker-image]
