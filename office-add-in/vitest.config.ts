@@ -11,7 +11,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: "happy-dom",
-      setupFiles: ["./src/test/setup.ts"],
+      setupFiles: ["./src/test/env.setup.ts", "./src/test/setup.ts"],
       include: ["src/**/*.{test,spec}.{js,ts,tsx}"],
     },
   })

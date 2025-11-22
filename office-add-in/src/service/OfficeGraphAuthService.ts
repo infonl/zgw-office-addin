@@ -11,6 +11,7 @@ import { MsalAuthContextType } from "../provider/MsalAuthProvider";
 import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "./GraphTypes";
+import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
 
 /**
@@ -19,7 +20,6 @@ import { jwtDecode } from "jwt-decode";
  */
 export class OfficeGraphAuthService implements GraphAuthService {
   private logger;
-  private static readonly TOKEN_EXPIRY_OFFSET_MINUTES = 5;
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
@@ -65,11 +65,10 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     if (
       this.tokenCache &&
-      this.tokenCache.expires >
-        addMinutes(new Date(), OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
+      this.tokenCache.expires > addMinutes(new Date(), TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
     ) {
       this.logger.DEBUG("🔄 Using cached Graph API token");
-      return this.tokenCache.token;
+      return Promise.resolve(this.tokenCache.token);
     }
 
     if (this.tokenRequest) {
@@ -146,7 +145,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
           token,
           expires: addMinutes(
             new Date(tokenExpiryTimestamp),
-            -OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES
+            -TOKEN_EXPIRY_OFFSET_MINUTES
           ).getTime(),
         };
         return token;
@@ -159,22 +158,26 @@ export class OfficeGraphAuthService implements GraphAuthService {
         });
 
         try {
-          this.logger.DEBUG("🛟 Falling back to MSAL (local only)) ...");
-          if (this.msalAuth) {
-            const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
-            let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-            const msalJwtPayload = this.decodeJwtPayload(msalToken);
-            if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
-              msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+          if (this.env.APP_ENV === "local") {
+            this.logger.DEBUG("🛟 Falling back to MSAL (local only)) ...");
+            if (this.msalAuth) {
+              const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
+              let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
+              const msalJwtPayload = this.decodeJwtPayload(msalToken);
+              if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
+                msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+              }
+              this.tokenCache = {
+                token: msalToken,
+                expires: addMinutes(
+                  new Date(msalTokenExpiryTimestamp),
+                  -TOKEN_EXPIRY_OFFSET_MINUTES
+                ).getTime(),
+              };
+              return msalToken;
             }
-            this.tokenCache = {
-              token: msalToken,
-              expires: addMinutes(
-                new Date(msalTokenExpiryTimestamp),
-                -OfficeGraphAuthService.TOKEN_EXPIRY_OFFSET_MINUTES
-              ).getTime(),
-            };
-            return msalToken;
+          } else {
+            this.logger.DEBUG("MSAL fallback not even tried, not the local environment");
           }
         } catch (msalError) {
           this.logger.WARN("⚠️ MSAL fallback failed:", msalError);

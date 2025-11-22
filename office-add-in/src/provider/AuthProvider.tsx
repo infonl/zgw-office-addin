@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const msalAuth = useMsalAuth();
-  const logger = useLogger("OfficeGraphAuthService");
+  const logger = useLogger(OfficeGraphAuthService.name);
 
   const authService = useMemo(() => {
     const service = new OfficeGraphAuthService(logger);

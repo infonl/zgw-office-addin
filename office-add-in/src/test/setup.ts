@@ -46,4 +46,7 @@ global.Office = fromPartial({
         "progressIndicator" as Office.MailboxEnums.ItemNotificationMessageType.ProgressIndicator,
     },
   },
+  auth: {
+    getAccessToken: vi.fn(),
+  },
 });
