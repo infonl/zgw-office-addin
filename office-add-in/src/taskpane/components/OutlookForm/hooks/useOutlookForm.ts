@@ -24,6 +24,10 @@ const schema = z.object({
 
 export type Schema = z.infer<typeof schema>;
 
+export type SubmitResult = {
+  error: Error | null;
+};
+
 export function useOutlookForm() {
   const { authService } = useAuth();
   const { zaak } = useZaak();
@@ -42,7 +46,7 @@ export function useOutlookForm() {
 
   const documents = form.watch("documents");
 
-  const handleSubmit = async (data: Schema) => {
+  const handleSubmit = async (data: Schema): Promise<SubmitResult> => {
     const selectedDocuments = data.documents.filter(({ selected }) => selected);
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
@@ -64,7 +68,7 @@ export function useOutlookForm() {
 
     if (selectedDocuments.length === 0) {
       WARN("⚠️ No documents selected for upload");
-      return;
+      return { error: null };
     }
 
     try {
@@ -81,7 +85,8 @@ export function useOutlookForm() {
 
       const currentEmail = Office.context.mailbox?.item;
       if (!currentEmail) {
-        throw new Error("No email context found");
+        WARN("⚠️ No email context found");
+        return { error: new Error("No email context found") };
       }
 
       const processedDocuments = await prepareSelectedDocuments(
@@ -89,6 +94,11 @@ export function useOutlookForm() {
         currentEmail,
         graphService
       );
+
+      if (!processedDocuments.length) {
+        DEBUG("ℹ️ No documents to upload after processing");
+        return { error: null };
+      }
 
       DEBUG("📊 Upload Summary:", {
         totalFiles: selectedDocuments.length,
@@ -140,10 +150,15 @@ export function useOutlookForm() {
       }
 
       if (failed.length > 0) {
-        ERROR(`💥 Failed to process ${failed.length} documents`);
+        const error = new Error(`Failed to process ${failed.length} documents`);
+        ERROR("❌ Upload process completed with failed documents");
+        return { error };
       }
+
+      return { error: null }; // all successfull
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
+      return { error: error instanceof Error ? error : new Error(String(error)) };
     }
   };
 
