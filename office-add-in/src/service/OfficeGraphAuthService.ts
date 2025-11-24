@@ -133,7 +133,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
         // Cache token using JWT exp if present; fallback to 50 minutes
         let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
         try {
-          const jwtPayload = this.decodeJwtPayload(token);
           if (jwtPayload && typeof jwtPayload.exp === "number") {
             tokenExpiryTimestamp = jwtPayload.exp * 1000;
           }
@@ -175,6 +174,8 @@ export class OfficeGraphAuthService implements GraphAuthService {
                 ).getTime(),
               };
               return msalToken;
+            } else {
+              this.logger.ERROR("MSAL fallback requested but msalAuth is not available. Cannot acquire token in local environment.");
             }
           } else {
             this.logger.DEBUG("MSAL fallback not even tried, not the local environment");
