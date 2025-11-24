@@ -11,13 +11,13 @@ import { GraphService } from "../graph";
 
 export async function prepareSelectedDocuments(
   selectedDocuments: DocumentSchema[],
-  currentEmail: Office.MessageRead | Office.MessageCompose,
+  currentEmail: Office.MessageRead,
   graphService: GraphService
 ): Promise<ProcessedDocument[]> {
   // Collect all IDs to translate: email itself + attachments
   const itemsToTranslate: { type: "email" | "attachment"; id: string }[] = [];
-  if (currentEmail && "itemId" in currentEmail) {
-    itemsToTranslate.push({ type: "email", id: (currentEmail as Office.MessageRead).itemId });
+  if (currentEmail && currentEmail.itemId) {
+    itemsToTranslate.push({ type: "email", id: currentEmail.itemId });
   }
   selectedDocuments.forEach((doc) => {
     if (!doc.attachment.id.startsWith("EmailItself-")) {
@@ -37,8 +37,8 @@ export async function prepareSelectedDocuments(
   });
 
   let messageGraphId: string | null = null;
-  if (currentEmail && "itemId" in currentEmail) {
-    const emailOfficeId = (currentEmail as Office.MessageRead).itemId;
+  if (currentEmail && currentEmail.itemId) {
+    const emailOfficeId = currentEmail.itemId;
     messageGraphId = officeIdToGraphId.get(emailOfficeId) ?? null;
   }
 
