@@ -6,8 +6,12 @@
 import dotenv from "dotenv";
 import path from "path";
 import { z } from "zod";
-import { LoggerService } from "../service/LoggerService";
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+const dotenvResult = dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+if (dotenvResult.error) {
+  console.error("Failed to load .env file:", dotenvResult.error);
+  throw dotenvResult.error;
+}
 
 export const envSchema = z.object({
   APP_ENV: z.enum(["local", "production", "test"]),
@@ -32,7 +36,7 @@ export const envServer = envSchema.safeParse({
 });
 
 if (!envServer.success) {
-  LoggerService.error("Environment variable validation failed:", envServer.error.issues);
+  console.error("Environment variable validation failed:", envServer.error.issues);
   throw new Error("There is an error with the server environment variables");
 }
 

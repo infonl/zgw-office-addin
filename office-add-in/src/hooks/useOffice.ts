@@ -207,7 +207,7 @@ export function useOffice() {
         const startTime = Date.now();
         let graphId = doc.graphId;
         if (attachment.id.startsWith("EmailItself-")) {
-          if (!graphId) throw new Error("Geen Graph ID voor email gevonden");
+          if (!graphId) throw new Error("No Graph ID found for email");
           DEBUG("[EmailItself] Getting email as EML via Graph API for: " + attachment.name);
           const emlContent = await graphService.getEmailAsEML(graphId);
           fileContent = emlContent;
@@ -232,7 +232,7 @@ export function useOffice() {
           DEBUG(`[Attachment] Attachment downloaded (raw bytes): ${attachment.name} ${sizeMB}MB`);
         }
         const duration = Date.now() - startTime;
-        // Type guard voor metadata
+
         let metadata = {};
         if (doc.selected) {
           metadata = {

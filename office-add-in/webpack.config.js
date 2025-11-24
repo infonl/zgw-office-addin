@@ -31,6 +31,24 @@ async function getHttpsOptions() {
 }
 
 module.exports = async (env, options) => {
+  function getEnvVar(key, fallback) {
+    return envFrontend[key] || process.env[key] || fallback;
+  }
+
+  const requiredVars = [
+    { key: "MSAL_CLIENT_ID", fallback: null },
+    { key: "MSAL_AUTHORITY", fallback: null },
+    { key: "MSAL_REDIRECT_URI", fallback: null },
+  ];
+  const missingVars = requiredVars.filter(({ key, fallback }) => !getEnvVar(key, fallback));
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars
+        .map((v) => v.key)
+        .join(", ")}.\nSet them in .env.local.frontend.`
+    );
+  }
+
   const config = {
     devtool: "source-map",
     entry: {
@@ -78,23 +96,11 @@ module.exports = async (env, options) => {
     },
     plugins: [
       new webpack.DefinePlugin({
-        "process.env.APP_ENV": JSON.stringify(
-          envFrontend.APP_ENV || process.env.APP_ENV || "local"
-        ),
-        "process.env.MSAL_CLIENT_ID": JSON.stringify(
-          envFrontend.MSAL_CLIENT_ID || process.env.MSAL_CLIENT_ID || ""
-        ),
-        "process.env.MSAL_AUTHORITY": JSON.stringify(
-          envFrontend.MSAL_AUTHORITY ||
-            process.env.MSAL_AUTHORITY ||
-            "https://login.microsoftonline.com/common"
-        ),
-        "process.env.MSAL_REDIRECT_URI": JSON.stringify(
-          envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
-        ),
-        "process.env.MSAL_SCOPES": JSON.stringify(
-          envFrontend.MSAL_SCOPES || process.env.MSAL_SCOPES || ""
-        ),
+        "process.env.APP_ENV": JSON.stringify(getEnvVar("APP_ENV", "local")),
+        "process.env.MSAL_CLIENT_ID": JSON.stringify(getEnvVar("MSAL_CLIENT_ID", "")),
+        "process.env.MSAL_AUTHORITY": JSON.stringify(getEnvVar("MSAL_AUTHORITY", "")),
+        "process.env.MSAL_REDIRECT_URI": JSON.stringify(getEnvVar("MSAL_REDIRECT_URI", "")),
+        "process.env.MSAL_SCOPES": JSON.stringify(getEnvVar("MSAL_SCOPES", "")),
       }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",

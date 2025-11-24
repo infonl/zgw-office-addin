@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { GraphAuthService } from "./GraphService";
+import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
 
 // Fallback: if SSO token audience is not Graph, use MSAL
@@ -175,7 +175,9 @@ export class OfficeGraphAuthService implements GraphAuthService {
               };
               return msalToken;
             } else {
-              this.logger.ERROR("MSAL fallback requested but msalAuth is not available. Cannot acquire token in local environment.");
+              this.logger.ERROR(
+                "MSAL fallback requested but msalAuth is not available. Cannot acquire token in local environment."
+              );
             }
           } else {
             this.logger.DEBUG("MSAL fallback not even tried, not the local environment");

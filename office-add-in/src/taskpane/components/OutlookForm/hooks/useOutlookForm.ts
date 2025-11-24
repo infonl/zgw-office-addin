@@ -155,7 +155,7 @@ export function useOutlookForm() {
         return { error };
       }
 
-      return { error: null }; // all successfull
+      return { error: null }; // all successful
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
       return { error: error instanceof Error ? error : new Error(String(error)) };
