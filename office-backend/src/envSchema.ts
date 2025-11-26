@@ -4,14 +4,9 @@
  */
 
 import dotenv from "dotenv";
-import path from "path";
 import { z } from "zod";
 
-const dotenvResult = dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-if (dotenvResult.error) {
-  console.error("Failed to load .env file:", dotenvResult.error);
-  throw dotenvResult.error;
-}
+dotenv.config();
 
 export const envSchema = z.object({
   APP_ENV: z.enum(["local", "production", "test"]),
