@@ -81,22 +81,23 @@
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html" />
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Get started with the ZGW Office Add-in!" />
-        <bt:String id="CommandsGroup.Label" DefaultValue="Start here" />
-        <bt:String id="TaskpaneButton.Label" DefaultValue="ZGW Office" />
+        <bt:String id="GetStarted.Title" DefaultValue="Aan de slag met de ZGW-add-in!" />
+        <bt:String id="CommandsGroup.Label" DefaultValue="Start hier" />
+        <bt:String id="TaskpaneButton.Label" DefaultValue="ZGW" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String
           id="GetStarted.Description"
-          DefaultValue="ZGW Office add-in loaded successfully. Go to the HOME tab and click the 'Show Task Pane' button to get started."
+          DefaultValue="ZGW-add-in is met succes geladen. Ga naar het tabblad HOME en klik op 'Toon taakvenster' om te beginnen."
         />
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Task Pane" />
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open het ZGW-taakvenster" />
       </bt:LongStrings>
     </Resources>
     <WebApplicationInfo>
       <Id>e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Id>
       <Resource>api://localhost:3000/e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Resource>
       <Scopes>
+        <Scope>access_as_user</Scope>
         <Scope>openid</Scope>
         <Scope>user.read</Scope>
         <Scope>profile</Scope>

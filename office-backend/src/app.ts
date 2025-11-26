@@ -5,7 +5,6 @@
 
 import dotenv from "dotenv";
 import path from "path";
-
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
 import Fastify, { FastifyInstance } from "fastify";
@@ -14,24 +13,33 @@ import { HttpService } from "../service/HttpService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
+import { envServerSchema } from "./envSchema";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 let fastify: FastifyInstance;
-const isLocal = process.env.APP_ENV === "local";
+const isLocal = envServerSchema.APP_ENV === "local";
 
 if (isLocal) {
-  fastify = Fastify({
-    https: {
-      key: fs.readFileSync(path.join(__dirname, process.env.KEY_PATH!)),
-      cert: fs.readFileSync(path.join(__dirname, process.env.CERT_PATH!)),
-      ca: fs.readFileSync(path.join(__dirname, process.env.CA_CERT_PATH!)),
-    },
-  });
+  const keyPath = path.resolve(__dirname, envServerSchema.KEY_PATH);
+  const certPath = path.resolve(__dirname, envServerSchema.CERT_PATH);
+  const caPath = envServerSchema.CA_CERT_PATH
+    ? path.resolve(__dirname, envServerSchema.CA_CERT_PATH)
+    : undefined;
+  const httpsOptions: { key: Buffer; cert: Buffer; ca?: Buffer } = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+  if (caPath) {
+    httpsOptions.ca = fs.readFileSync(caPath);
+  }
+
+  fastify = Fastify({ https: httpsOptions });
+  LoggerService.log(`[backend] Using TLS key at ${keyPath} and cert at ${certPath}`);
 } else {
   fastify = Fastify();
 }
 
-const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
+const allowedOrigins = envServerSchema.FRONTEND_URL ? [envServerSchema.FRONTEND_URL] : [];
 
 fastify.addHook("onRequest", (request, reply, done) => {
   // Security headers
@@ -79,10 +87,18 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );
 
-fastify.listen({ port: 3003, host: "0.0.0.0" }, (err, address) => {
-  if (err) {
-    LoggerService.error("Error starting server:", err);
-    process.exit(1);
-  }
-  LoggerService.log(`🚀 Server running at ${address}`);
-});
+const port = Number(envServerSchema.PORT || 3003);
+
+fastify.listen(
+  {
+    port,
+    host: "0.0.0.0",
+  },
+  (err, address) => {
+    if (err) {
+      LoggerService.error("Error starting server:", err);
+      process.exit(1);
+    }
+    LoggerService.log(`🚀 Server running at ${address}`);
+  },
+);

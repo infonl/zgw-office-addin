@@ -38,8 +38,8 @@ More details on the development setup can be found in the [development setup doc
 - **Node.js**: Use the version specified in `.nvmrc`
   ```bash
   # Install and use the correct Node.js version with nvm
-  nvm install  
-  nvm use       
+  nvm install
+  nvm use
   ```
 - **npm**: Comes bundled with Node.js, (version is specified in `packageManager` field)
 
@@ -56,3 +56,51 @@ More details on the development setup can be found in the [development setup doc
 ## License
 
 This project is licensed under the EUPL-1.2-or-later - see the [LICENSE](LICENSE.md) file for details.
+
+## OpenAPI Types & TypeScript
+
+This repository uses automatically generated TypeScript types from the backend OpenAPI specifications.
+
+### Using ApiType
+
+The generic `ApiType` type from `generated/api-type.ts` allows to directly retrieve a schema type from any OpenAPI spec:
+
+```typescript
+import { ApiType } from "./generated/api-type";
+
+// For the DRC API:
+type MyDRCSchema = ApiType<
+  "SchemaName",
+  import("./generated/drc-types").components
+>;
+```
+
+### More information
+
+- See the files in `generated/` for all available types.
+- Types are automatically regenerated when the OpenAPI specs are updated.
+
+## MSAL Environment Variables for local Graph authentication
+
+Microsoft Office API cannot generate a valid authentication token for `localhost` due to Microsoft security restrictions. As a result, local development requires a fallback to MSAL (Microsoft Authentication Library) for Graph authentication.
+
+- The authentication provider automatically falls back to MSAL when running locally (`APP_ENV=local`).
+- MSAL requires explicit environment variables to be set for authentication to work in local development.
+
+### Required MSAL Environment Variables
+
+Set these variables in your `.env.local.frontend` file :
+
+- `APP_ENV=local`
+- `MSAL_CLIENT_ID`: Azure AD Application (client) ID
+- `MSAL_AUTHORITY`: Authority URL (e.g. `https://login.microsoftonline.com/<tenant-id>`)
+- `MSAL_REDIRECT_URI`: Redirect URI for your app (e.g. `https://localhost:3000/auth-callback`)
+- `MSAL_SCOPES`: api://localhost:3000/<client-id>/access_as_user
+
+
+### Notes
+
+- These variables are required for all local development environments (Docker, Webpack, etc).
+- The fallback logic is implemented in `OfficeGraphAuthService.ts`.
+- For production, authentication uses Office SSO and does not require these MSAL variables.
+

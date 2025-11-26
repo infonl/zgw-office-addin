@@ -5,9 +5,15 @@
 
 import jwt from "jsonwebtoken";
 import { LoggerService } from "./LoggerService";
+import { envServerSchema } from "../src/envSchema";
 
 export class HttpService {
-  private readonly baseUrl = process.env.API_BASE_URL!;
+  private readonly baseUrl = envServerSchema.API_BASE_URL;
+
+  constructor() {
+    console.log("[HttpService] API_BASE_URL:", envServerSchema.API_BASE_URL);
+    console.log("[HttpService] JWT_SECRET:", envServerSchema.JWT_SECRET);
+  }
 
   public async POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
     return this.request<T>("POST", url, { body, headers });
@@ -79,7 +85,7 @@ export class HttpService {
         user_id: "office-add-in",
         user_representation: "office-add-in",
       },
-      process.env.JWT_SECRET!,
+      envServerSchema.JWT_SECRET,
       {
         algorithm: "HS256",
       },

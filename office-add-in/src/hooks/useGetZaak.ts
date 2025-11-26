@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { GeneratedType } from "../../../generated/generated-types";
+import { ZrcType } from "../../../generated/zrc-generated-types";
 import { useQuery } from "@tanstack/react-query";
 import { useHttp } from "./useHttp";
 
-export type Zaak = Omit<GeneratedType<"Zaak">, "zaakinformatieobjecten"> & {
-  zaaktype: GeneratedType<"ZaakType">;
-  status: GeneratedType<"Status">;
+export type Zaak = Omit<ZrcType<"Zaak">, "zaakinformatieobjecten"> & {
+  zaaktype: ZrcType<"ZaakType">;
+  status: ZrcType<"Status">;
   zaakinformatieobjecten: Array<
-    GeneratedType<"ZaakInformatieObject"> & {
+    ZrcType<"ZaakInformatieObject"> & {
       vertrouwelijkheidaanduiding: string;
       omschrijving: string;
     }

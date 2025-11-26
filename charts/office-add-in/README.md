@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.53](https://img.shields.io/badge/Version-0.0.53-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.54](https://img.shields.io/badge/Version-0.0.54-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -45,6 +45,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.service.type | string | `"ClusterIP"` |  |
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
+| frontend.appEnv | string | `"production"` |  |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |

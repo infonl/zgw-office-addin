@@ -32,38 +32,40 @@ export function OutlookForm() {
   if (!zaak.data) return <ZaakSearch />;
 
   return (
-    <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        {step === "selectItems" && (
-          <>
-            <ZaakSearch />
-            <SelectItems />
-            <section className={styles.actions}>
-              <Button
-                appearance="primary"
-                disabled={!hasSelectedDocuments}
-                onClick={() => setStep("metaData")}
-              >
-                Volgende stap: bestandsgegevens
-              </Button>
-            </section>
-          </>
-        )}
-        {step === "metaData" && (
-          <>
-            <MetadataStep />
-            <section className={styles.actions}>
-              <Button appearance="secondary" type="button" onClick={() => setStep("selectItems")}>
-                Vorige stap
-              </Button>
-              <Button appearance="primary" type="submit" disabled={!form.formState.isValid}>
-                Bestanden koppelen
-              </Button>
-            </section>
-          </>
-        )}
-      </form>
-    </FormProvider>
+    <>
+      {step === "selectItems" && <ZaakSearch />}
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          {step === "selectItems" && (
+            <>
+              <SelectItems />
+              <section className={styles.actions}>
+                <Button
+                  appearance="primary"
+                  disabled={!hasSelectedDocuments}
+                  onClick={() => setStep("metaData")}
+                >
+                  Volgende stap: bestandsgegevens
+                </Button>
+              </section>
+            </>
+          )}
+          {step === "metaData" && (
+            <>
+              <MetadataStep />
+              <section className={styles.actions}>
+                <Button appearance="secondary" type="button" onClick={() => setStep("selectItems")}>
+                  Vorige stap
+                </Button>
+                <Button appearance="primary" type="submit" disabled={!form.formState.isValid}>
+                  Bestanden koppelen
+                </Button>
+              </section>
+            </>
+          )}
+        </form>
+      </FormProvider>
+    </>
   );
 }
 

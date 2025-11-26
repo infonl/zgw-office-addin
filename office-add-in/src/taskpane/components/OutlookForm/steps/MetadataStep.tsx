@@ -16,7 +16,7 @@ import {
   Body1Strong,
 } from "@fluentui/react-components";
 import { useFormContext } from "react-hook-form";
-import { addDocumentSchema, documentstatus } from "../../../../hooks/useAddDocumentToZaak";
+import { addDocumentSchema, documentstatus } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { DocumentIndicator } from "./DocumentIndicator";
@@ -98,8 +98,8 @@ export function MetadataStep() {
       <Accordion collapsible defaultOpenItems={defaultOpenItems} className={styles.accordion}>
         {documents.map(
           (document, index) =>
-            // We only render the selected documents
-            // We explicitly do not filter before mapping to preserve the index for react-hook-form
+            // Only render the selected documents
+            // No filtering before mapping to preserve the index for react-hook-form
             document.selected && (
               <AccordionItem
                 value={document.attachment.id}

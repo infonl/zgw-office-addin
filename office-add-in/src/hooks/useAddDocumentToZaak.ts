@@ -4,30 +4,14 @@
  */
 
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import * as zod from "zod";
+
+import { AddDocumentSchema } from "./types";
 import { useOffice } from "./useOffice";
 import { useHttp } from "./useHttp";
-import { GeneratedType } from "../../../generated/generated-types";
+import { ZrcType } from "../../../generated/zrc-generated-types";
 
-export const documentstatus = [
-  "in_bewerking",
-  "ter_vaststelling",
-  "definitief",
-  "gearchiveerd",
-] as const;
+type SuccessData = ZrcType<"ZaakInformatieObject">;
 
-export const addDocumentSchema = zod.object({
-  vertrouwelijkheidaanduiding: zod.string(),
-  informatieobjecttype: zod.string().url(),
-  status: zod.enum(documentstatus),
-  creatiedatum: zod.date(),
-  zaakidentificatie: zod.string(),
-  auteur: zod.string().min(1),
-});
-
-export type AddDocumentSchema = zod.infer<typeof addDocumentSchema>;
-
-type SuccessData = GeneratedType<"ZaakInformatieObject">;
 export function useAddDocumentToZaak(
   options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>
 ) {

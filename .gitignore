@@ -16,6 +16,7 @@ dist/
 
 ### ENVIRONMENT ###
 .env
+.env.local.frontend
 
 ### OS specific ###
 *.swp
@@ -36,6 +37,8 @@ node_modules/
 openzaak-database-data
 generated-client
 generated/types.ts
+generated/zrc-types.ts
+generated/drc-types.ts
 /office-add-in/docker-metadata.json
 /office-backend/docker-metadata.json
 WARP.md
