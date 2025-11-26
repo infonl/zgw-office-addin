@@ -14,7 +14,7 @@ import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config();
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
