@@ -10,9 +10,13 @@ import path from "path";
 // Only load .env file when running locally (not in production/Kubernetes)
 if (!process.env.APP_ENV || process.env.APP_ENV === "local") {
   try {
-    dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-  } catch (error) {
-    console.warn("Could not load .env file, using environment variables directly");
+    const envPath = path.resolve(__dirname, "../../.env");
+    const result = dotenv.config({ path: envPath });
+    if (result.error) {
+      console.warn("Could not load .env file, using environment variables directly");
+    }
+  } catch (pathError) {
+    console.warn("Could not resolve .env path, using environment variables directly");
   }
 }
 
