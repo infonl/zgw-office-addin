@@ -5,13 +5,27 @@
 
 import { z } from "zod";
 
-export const envFrontendSchema = z.object({
-  APP_ENV: z.enum(["local", "production", "test"]),
-  MSAL_CLIENT_ID: z.string().min(1),
-  MSAL_AUTHORITY: z.string().url(),
-  MSAL_REDIRECT_URI: z.string().url(),
-  MSAL_SCOPES: z.string().min(1),
-});
+export const envFrontendSchema = z
+  .object({
+    APP_ENV: z.enum(["local", "production", "test"]).default("production"),
+    MSAL_CLIENT_ID: z.string().optional(),
+    MSAL_AUTHORITY: z.string().url().or(z.literal("")).optional(),
+    MSAL_REDIRECT_URI: z.string().url().or(z.literal("")).optional(),
+    MSAL_SCOPES: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.APP_ENV === "local") {
+        return (
+          data.MSAL_CLIENT_ID && data.MSAL_AUTHORITY && data.MSAL_REDIRECT_URI && data.MSAL_SCOPES
+        );
+      }
+      return true;
+    },
+    {
+      message: "MSAL configuration is required for local environment",
+    }
+  );
 
 export const FRONTEND_ENV = envFrontendSchema.parse({
   APP_ENV: process.env.APP_ENV,
