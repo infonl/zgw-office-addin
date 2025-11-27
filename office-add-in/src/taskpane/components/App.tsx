@@ -45,7 +45,7 @@ const queryClient = new QueryClient();
 export function App() {
   const { isDarkMode } = useDarkMode();
 
-  // Only create MSAL config  on localhost
+  // Only create MSAL config on localhost
   let msalConfig: Configuration | undefined;
 
   if (
