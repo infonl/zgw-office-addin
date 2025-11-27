@@ -30,7 +30,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
     this.logger = logger;
   }
 
-  setMsalAuth(msalAuth: MsalAuthContextType) {
+  setMsalAuth(msalAuth: MsalAuthContextType | null) {
     this.msalAuth = msalAuth;
   }
 
