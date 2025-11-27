@@ -121,8 +121,8 @@ jobs:
 
       - name: Load Docker images into KIND
         run: |
-          kind load docker-image ghcr.io/infonl/zgw-office-add-in-frontend:test
-          kind load docker-image ghcr.io/infonl/zgw-office-add-in-backend:test
+          kind load docker-image ghcr.io/infonl/zgw-office-add-in-frontend:test --name chart-testing
+          kind load docker-image ghcr.io/infonl/zgw-office-add-in-backend:test --name chart-testing
 
       - name: Run chart-testing (install)
         run: |
