@@ -16,7 +16,7 @@ if (!process.env.APP_ENV || process.env.APP_ENV === "local") {
       console.warn("Could not load .env file, using environment variables directly");
     }
   } catch (pathError) {
-    console.warn("Could not resolve .env path, using environment variables directly");
+    console.warn("Could not resolve .env path, using environment variables directly", pathError);
   }
 }
 
