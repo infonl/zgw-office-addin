@@ -7,13 +7,14 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema } from "../../../../hooks/types";
+import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
 import { GraphService } from "../../../../graph";
 import { useAuth } from "../../../../provider/AuthProvider";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
+import { useUploadDocumentsToZaak } from "../../../../hooks/useUploadDocumentsToZaak";
 import { useLogger } from "../../../../hooks/useLogger";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
@@ -33,6 +34,7 @@ export function useOutlookForm() {
   const { zaak } = useZaak();
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
+  const { uploadDocumentsToZaak } = useUploadDocumentsToZaak();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
 
   const form = useForm({
@@ -47,7 +49,9 @@ export function useOutlookForm() {
   const documents = form.watch("documents");
 
   const handleSubmit = async (data: Schema): Promise<SubmitResult> => {
-    const selectedDocuments = data.documents.filter(({ selected }) => selected);
+    const selectedDocuments = data.documents.filter(
+      ({ selected }) => selected
+    ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
     selectedDocuments.forEach((doc, index) => {
@@ -112,31 +116,43 @@ export function useOutlookForm() {
         ),
       });
 
-      DEBUG("🚀 Starting parallel uploads...");
-      const results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
-      const successful = results.filter((result) => result.success);
-      const failed = results.filter((result) => !result.success);
-      const totalDuration = successful.reduce(
-        (sum: number, result: { duration?: number }) => sum + (result.duration || 0),
-        0
-      );
-      const avgDuration = successful.length > 0 ? Math.round(totalDuration / successful.length) : 0;
-      const totalDataTransferred = successful.reduce(
-        (sum: number, result: { size?: number }) => sum + (result.size || 0),
-        0
-      );
+      let results;
+
+      try {
+        DEBUG("🚀 Starting parallel uploads...", {
+          processedCount: processedDocuments.length,
+        });
+
+        results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
+
+        DEBUG("✅ processAndUploadDocuments completed", {
+          total: results.length,
+        });
+      } catch (error) {
+        ERROR("❌ processAndUploadDocuments threw an error:", error);
+        return { error: error instanceof Error ? error : new Error(String(error)) };
+      }
+
+      const successfulFiles = results
+        .map((result, index) => (result.success ? processedDocuments[index].attachment.name : null))
+        .filter((name) => !!name);
+      const failedFiles = results
+        .map((result, index) =>
+          !result.success
+            ? { filename: processedDocuments[index].attachment.name, error: result.error }
+            : null
+        )
+        .filter((item) => !!item);
+      const totalDuration = results.reduce((sum, result) => sum + (result.duration || 0), 0);
+      const avgDuration = results.length > 0 ? Math.round(totalDuration / results.length) : 0;
+      const totalDataTransferred = results.reduce((sum, result) => sum + (result.size || 0), 0);
       const throughput =
         totalDuration > 0 ? Math.round(totalDataTransferred / 1024 / (totalDuration / 1000)) : 0;
 
-      DEBUG("Retrieved Results:", {
+      DEBUG("Client download results:", {
         total: results.length,
-        successful: successful.length,
-        failed: failed.length,
-        successfulFiles: successful.map((result: { filename: string }) => result.filename),
-        failedFiles: failed.map((result: { filename: string; error?: string }) => ({
-          filename: result.filename,
-          error: result.error,
-        })),
+        successfulFiles,
+        failedFiles,
         performance: {
           totalDuration: `${totalDuration}ms`,
           averageDuration: `${avgDuration}ms`,
@@ -145,12 +161,54 @@ export function useOutlookForm() {
         },
       });
 
-      if (successful.length > 0) {
-        DEBUG(`🎉 Successfully processed ${successful.length} documents!`);
+      const uploadPayload = processedDocuments.map((doc, index) => {
+        const result = results[index];
+        const fileContent = result?.fileContent ?? "";
+        let inhoud = "";
+        if (fileContent instanceof ArrayBuffer) {
+          const uint8Array = new Uint8Array(fileContent);
+          const binary = String.fromCharCode.apply(null, Array.from(uint8Array));
+          inhoud = btoa(binary);
+        } else if (typeof fileContent === "string") {
+          inhoud = btoa(unescape(encodeURIComponent(fileContent)));
+        } else {
+          inhoud = "";
+        }
+
+        return {
+          ...doc,
+          inhoud,
+          titel: String(doc.attachment.name),
+        };
+      });
+      DEBUG("[TRACE] uploadPayload:", uploadPayload);
+
+      const uploadResults = await uploadDocumentsToZaak({ zaak, documents: uploadPayload });
+      DEBUG("[TRACE] uploadDocumentsToZaak results:", uploadResults);
+
+      // Genereer uploadFailedFiles direct na uploadResults
+      const uploadSuccessfulFiles: string[] = [];
+      const uploadFailedFiles: { document: (typeof uploadPayload)[0]; error: unknown }[] = [];
+      uploadPayload.forEach((doc, index) => {
+        if (uploadResults[index]) {
+          uploadSuccessfulFiles.push(doc.titel);
+        } else {
+          uploadFailedFiles.push({ document: doc, error: uploadResults[index] });
+        }
+      });
+
+      DEBUG("Backend upload results:", {
+        total: uploadResults.length,
+        successfulFiles: uploadSuccessfulFiles,
+        failedFiles: uploadFailedFiles,
+      });
+
+      if (uploadSuccessfulFiles.length > 0) {
+        DEBUG(`🎉 Successfully uploaded ${uploadSuccessfulFiles.length} documents!`);
       }
 
-      if (failed.length > 0) {
-        const error = new Error(`Failed to process ${failed.length} documents`);
+      if (uploadFailedFiles.length > 0) {
+        const error = new Error(`Failed to upload ${uploadFailedFiles.length} documents`);
         ERROR("❌ Upload process completed with failed documents");
         return { error };
       }

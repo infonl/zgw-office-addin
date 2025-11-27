@@ -268,6 +268,7 @@ export function useOffice() {
           filename: attachment.name,
           size: contentSizeBytes,
           duration,
+          fileContent,
         };
       } catch (error) {
         ERROR(`❌ [${attachment.name}] Failed to process:`, error);
@@ -279,6 +280,7 @@ export function useOffice() {
           success: false,
           filename: attachment.name,
           error: error instanceof Error ? error.message : "Unknown error",
+          fileContent: undefined,
         };
       }
     });

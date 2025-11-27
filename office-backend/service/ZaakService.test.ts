@@ -204,8 +204,60 @@ describe("ZaakService", () => {
       );
     });
 
+    it("should handle .pdf files", async () => {
+      const pdfBody = { ...documentBody, titel: "test-document.pdf" };
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", pdfBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.stringContaining('"formaat":"application/pdf"'),
+      );
+    });
+
+    it("should handle .txt files", async () => {
+      const txtBody = { ...documentBody, titel: "test-document.txt" };
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", txtBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.stringContaining('"formaat":"text/plain"'),
+      );
+    });
+
+    it("should handle .png files", async () => {
+      const pngBody = { ...documentBody, titel: "test-document.png" };
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", pngBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.stringContaining('"formaat":"image/png"'),
+      );
+    });
+
+    it("should handle .jpg files", async () => {
+      const jpgBody = { ...documentBody, titel: "test-document.jpg" };
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", jpgBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.stringContaining('"formaat":"image/jpeg"'),
+      );
+    });
+
     it("should throw FileNotSupported for unsupported file types", async () => {
-      const unsupportedBody = { ...documentBody, titel: "test-document.pdf" };
+      const unsupportedBody = { ...documentBody, titel: "test-document.xyz" };
 
       await expect(zaakService.addDocumentToZaak("ZAAK-001", unsupportedBody)).rejects.toThrow(
         FileNotSupported,
@@ -214,7 +266,7 @@ describe("ZaakService", () => {
       // Reset mock for second call
       mockHttpService.GET.mockResolvedValueOnce({ results: [mockZaak] });
       await expect(zaakService.addDocumentToZaak("ZAAK-001", unsupportedBody)).rejects.toThrow(
-        "Bestand wordt niet ondersteund: test-document.pdf",
+        "Bestand wordt niet ondersteund: test-document.xyz",
       );
     });
 
@@ -285,7 +337,7 @@ describe("ZaakService", () => {
 
       await expect(
         zaakService.addDocumentToZaak("ZAAK-001", {
-          titel: "test.txt",
+          titel: "test.xyz",
           creatiedatum: "2025-01-15",
         }),
       ).rejects.toThrow(FileNotSupported);

@@ -15,6 +15,7 @@ import {
 const mockGetAccessToken = vi.fn();
 const mockProcessAndUploadDocuments = vi.fn();
 const mockPrepareSelectedDocuments = vi.fn().mockResolvedValue([]);
+const mockUploadDocumentsToZaak = vi.fn();
 
 vi.mock("../../../../provider/AuthProvider", () => ({
   useAuth: () => ({ authService: { getAccessToken: mockGetAccessToken } }),
@@ -32,15 +33,20 @@ vi.mock("../../../../utils/prepareSelectedDocuments", () => ({
 vi.mock("../../../../hooks/useOffice", () => ({
   useOffice: () => ({ processAndUploadDocuments: mockProcessAndUploadDocuments }),
 }));
+vi.mock("../../../../hooks/useUploadDocumentsToZaak", () => ({
+  useUploadDocumentsToZaak: () => ({ uploadDocumentsToZaak: mockUploadDocumentsToZaak }),
+}));
 
 describe("useOutlookForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockProcessAndUploadDocuments.mockReset();
     mockPrepareSelectedDocuments.mockReset();
+    mockUploadDocumentsToZaak.mockReset();
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
+    mockUploadDocumentsToZaak.mockResolvedValue([true]);
     // Office object has many props, not needed for mock
     (global as unknown as { Office: unknown }).Office = {
       context: {
@@ -83,6 +89,7 @@ describe("useOutlookForm", () => {
         id: mockAttachment1.id,
         name: mockAttachment1.name,
         size: mockAttachment1.size,
+        fileContent: new Uint8Array(),
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
@@ -104,9 +111,9 @@ describe("useOutlookForm", () => {
     ]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
-        id: mockEmailDocument.attachment.id,
-        name: mockEmailDocument.attachment.name,
-        size: mockEmailDocument.attachment.size,
+        ...mockEmailDocument,
+        graphId: "graph-email-id",
+        parentEmailGraphId: null,
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
@@ -114,13 +121,23 @@ describe("useOutlookForm", () => {
     const submitResult = await result.current.handleSubmit({ documents: [mockEmailDocument] });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
-        processedDocuments: [
-          {
-            id: mockEmailDocument.attachment.id,
-            name: mockEmailDocument.attachment.name,
-            size: mockEmailDocument.attachment.size,
-          },
-        ],
+        processedDocuments: expect.arrayContaining([
+          expect.objectContaining({
+            attachment: expect.objectContaining({
+              id: mockEmailDocument.attachment.id,
+              name: mockEmailDocument.attachment.name,
+              size: mockEmailDocument.attachment.size,
+            }),
+            graphId: "graph-email-id",
+            parentEmailGraphId: null,
+          }),
+        ]),
+        zaak: expect.objectContaining({
+          data: expect.objectContaining({
+            identificatie: "ZAAK-001",
+          }),
+        }),
+        graphService: expect.any(Object),
       })
     );
     expect(submitResult).toEqual({ error: null });
@@ -137,9 +154,9 @@ describe("useOutlookForm", () => {
     ]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
-        id: mockAttachmentDocument1.attachment.id,
-        name: mockAttachmentDocument1.attachment.name,
-        size: mockAttachmentDocument1.attachment.size,
+        ...mockAttachmentDocument1,
+        graphId: "graph-attachment-id",
+        parentEmailGraphId: "graph-email-id",
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
@@ -149,13 +166,23 @@ describe("useOutlookForm", () => {
     });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
-        processedDocuments: [
-          {
-            id: mockAttachmentDocument1.attachment.id,
-            name: mockAttachmentDocument1.attachment.name,
-            size: mockAttachmentDocument1.attachment.size,
-          },
-        ],
+        processedDocuments: expect.arrayContaining([
+          expect.objectContaining({
+            attachment: expect.objectContaining({
+              id: mockAttachmentDocument1.attachment.id,
+              name: mockAttachmentDocument1.attachment.name,
+              size: mockAttachmentDocument1.attachment.size,
+            }),
+            graphId: "graph-attachment-id",
+            parentEmailGraphId: "graph-email-id",
+          }),
+        ]),
+        zaak: expect.objectContaining({
+          data: expect.objectContaining({
+            identificatie: "ZAAK-001",
+          }),
+        }),
+        graphService: expect.any(Object),
       })
     );
     expect(submitResult).toEqual({ error: null });
@@ -165,27 +192,42 @@ describe("useOutlookForm", () => {
     mockProcessAndUploadDocuments.mockResolvedValueOnce([
       {
         success: true,
+        filename: mockEmailDocument.attachment.name,
+        size: mockEmailDocument.attachment.size,
+        duration: 100,
+        fileContent: new Uint8Array([1, 2, 3]),
+      },
+      {
+        success: true,
         filename: mockAttachmentDocument1.attachment.name,
         size: mockAttachmentDocument1.attachment.size,
         duration: 100,
+        fileContent: new Uint8Array([4, 5, 6]),
       },
       {
         success: true,
         filename: mockAttachmentDocument2.attachment.name,
         size: mockAttachmentDocument2.attachment.size,
         duration: 120,
+        fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
+    mockUploadDocumentsToZaak.mockResolvedValueOnce([true, true, true]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
-        id: mockAttachmentDocument1.attachment.id,
-        name: mockAttachmentDocument1.attachment.name,
-        size: mockAttachmentDocument1.attachment.size,
+        ...mockEmailDocument,
+        graphId: "graph-email-id",
+        parentEmailGraphId: null,
       },
       {
-        id: mockAttachmentDocument2.attachment.id,
-        name: mockAttachmentDocument2.attachment.name,
-        size: mockAttachmentDocument2.attachment.size,
+        ...mockAttachmentDocument1,
+        graphId: "graph-attachment-1-id",
+        parentEmailGraphId: "graph-email-id",
+      },
+      {
+        ...mockAttachmentDocument2,
+        graphId: "graph-attachment-2-id",
+        parentEmailGraphId: "graph-email-id",
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
@@ -195,18 +237,41 @@ describe("useOutlookForm", () => {
     });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
-        processedDocuments: [
-          {
-            id: mockAttachmentDocument1.attachment.id,
-            name: mockAttachmentDocument1.attachment.name,
-            size: mockAttachmentDocument1.attachment.size,
-          },
-          {
-            id: mockAttachmentDocument2.attachment.id,
-            name: mockAttachmentDocument2.attachment.name,
-            size: mockAttachmentDocument2.attachment.size,
-          },
-        ],
+        processedDocuments: expect.arrayContaining([
+          expect.objectContaining({
+            attachment: expect.objectContaining({
+              id: mockEmailDocument.attachment.id,
+              name: mockEmailDocument.attachment.name,
+              size: mockEmailDocument.attachment.size,
+            }),
+            graphId: "graph-email-id",
+            parentEmailGraphId: null,
+          }),
+          expect.objectContaining({
+            attachment: expect.objectContaining({
+              id: mockAttachmentDocument1.attachment.id,
+              name: mockAttachmentDocument1.attachment.name,
+              size: mockAttachmentDocument1.attachment.size,
+            }),
+            graphId: "graph-attachment-1-id",
+            parentEmailGraphId: "graph-email-id",
+          }),
+          expect.objectContaining({
+            attachment: expect.objectContaining({
+              id: mockAttachmentDocument2.attachment.id,
+              name: mockAttachmentDocument2.attachment.name,
+              size: mockAttachmentDocument2.attachment.size,
+            }),
+            graphId: "graph-attachment-2-id",
+            parentEmailGraphId: "graph-email-id",
+          }),
+        ]),
+        zaak: expect.objectContaining({
+          data: expect.objectContaining({
+            identificatie: "ZAAK-001",
+          }),
+        }),
+        graphService: expect.any(Object),
       })
     );
     expect(submitResult).toEqual({ error: null });
@@ -216,28 +281,48 @@ describe("useOutlookForm", () => {
     mockProcessAndUploadDocuments.mockResolvedValueOnce([
       {
         success: true,
+        filename: mockEmailDocument.attachment.name,
+        size: mockEmailDocument.attachment.size,
+        duration: 100,
+        fileContent: new Uint8Array([1, 2, 3]),
+      },
+      {
+        success: true,
         filename: mockAttachmentDocument1.attachment.name,
         size: mockAttachmentDocument1.attachment.size,
         duration: 100,
+        fileContent: new Uint8Array([4, 5, 6]),
       },
       {
-        success: false,
+        success: true,
         filename: mockAttachmentDocument2.attachment.name,
         size: mockAttachmentDocument2.attachment.size,
         duration: 200,
-        error: "Upload error",
+        fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
+    mockUploadDocumentsToZaak.mockResolvedValueOnce([true, false, false]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
+      {
+        id: mockEmailDocument.attachment.id,
+        name: mockEmailDocument.attachment.name,
+        size: mockEmailDocument.attachment.size,
+        fileContent: new Uint8Array(),
+        attachment: mockEmailDocument.attachment,
+      },
       {
         id: mockAttachmentDocument1.attachment.id,
         name: mockAttachmentDocument1.attachment.name,
         size: mockAttachmentDocument1.attachment.size,
+        fileContent: new Uint8Array(),
+        attachment: mockAttachmentDocument1.attachment,
       },
       {
         id: mockAttachmentDocument2.attachment.id,
         name: mockAttachmentDocument2.attachment.name,
         size: mockAttachmentDocument2.attachment.size,
+        fileContent: new Uint8Array(),
+        attachment: mockAttachmentDocument2.attachment,
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
@@ -247,20 +332,26 @@ describe("useOutlookForm", () => {
     });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
-        processedDocuments: [
-          {
+        processedDocuments: expect.arrayContaining([
+          expect.objectContaining({
             id: mockAttachmentDocument1.attachment.id,
             name: mockAttachmentDocument1.attachment.name,
             size: mockAttachmentDocument1.attachment.size,
-          },
-          {
+            fileContent: expect.any(Uint8Array),
+            attachment: expect.any(Object),
+          }),
+          expect.objectContaining({
             id: mockAttachmentDocument2.attachment.id,
             name: mockAttachmentDocument2.attachment.name,
             size: mockAttachmentDocument2.attachment.size,
-          },
-        ],
+            fileContent: expect.any(Uint8Array),
+            attachment: expect.any(Object),
+          }),
+        ]),
+        zaak: expect.any(Object),
+        graphService: expect.any(Object),
       })
     );
-    expect(submitResult).toEqual({ error: new Error("Failed to process 1 documents") });
+    expect(submitResult).toEqual({ error: new Error("Failed to upload 2 documents") });
   });
 });
