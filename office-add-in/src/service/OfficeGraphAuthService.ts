@@ -97,39 +97,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
-        // Ensure audience is Graph; otherwise fall back to MSAL
-        const isGraphAudience = jwtPayload ? this.isGraphAudience(jwtPayload) : false;
-
-        // If Graph token is missing the required scopes attempt an MSAL upgrade to those scopes.
-        if (
-          isGraphAudience &&
-          jwtPayload &&
-          !this.tokenHasScopes(jwtPayload, this.requiredScopes) &&
-          this.env.MSAL_CLIENT_ID
-        ) {
-          const missingScopes = this.requiredScopes.filter(
-            (requiredScope) => !(jwtPayload?.scp ?? "").includes(requiredScope)
-          );
-          this.logger.WARN(
-            "⚠️ Graph token missing scopes %o — attempting MSAL scope upgrade...",
-            missingScopes
-          );
-          try {
-            // MSAL fallback
-            if (this.msalAuth) {
-              const upgradedToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
-              token = upgradedToken;
-              jwtPayload = this.decodeJwtPayload(upgradedToken);
-              this.logger.DEBUG("✅ Upgraded token scopes:", jwtPayload?.scp);
-            }
-          } catch (msalUpgradeError) {
-            this.logger.WARN(
-              "⚠️ MSAL scope upgrade failed; continuing with existing token. Error:",
-              msalUpgradeError
-            );
-          }
-        }
-
         // Cache token using JWT exp if present; fallback to 50 minutes
         let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
         try {

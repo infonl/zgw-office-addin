@@ -125,6 +125,7 @@
           <Scope>access_as_user</Scope>
           <Scope>openid</Scope>
           <Scope>user.read</Scope>
+          <Scope>mail.read</Scope>
           <Scope>profile</Scope>
         </Scopes>
       </WebApplicationInfo>
