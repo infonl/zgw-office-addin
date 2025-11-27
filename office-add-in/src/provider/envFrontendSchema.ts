@@ -14,14 +14,13 @@ const baseSchema = z.object({
 });
 
 // localhost: strict validation
-const localhostSchema = baseSchema.refine(
-  (data) => {
-    return data.MSAL_CLIENT_ID && data.MSAL_AUTHORITY && data.MSAL_REDIRECT_URI && data.MSAL_SCOPES;
-  },
-  {
-    message: "MSAL configuration is required for local environment",
-  }
-);
+const localhostSchema = z.object({
+  APP_ENV: z.enum(["local", "production", "test"]).default("production"),
+  MSAL_CLIENT_ID: z.string().min(1),
+  MSAL_AUTHORITY: z.string().url(),
+  MSAL_REDIRECT_URI: z.string().url(),
+  MSAL_SCOPES: z.string().min(1),
+});
 
 const rawEnv = {
   APP_ENV: process.env.APP_ENV,
