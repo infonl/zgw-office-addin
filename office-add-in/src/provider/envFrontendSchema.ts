@@ -9,8 +9,8 @@ export const envFrontendSchema = z
   .object({
     APP_ENV: z.enum(["local", "production", "test"]).default("production"),
     MSAL_CLIENT_ID: z.string().optional(),
-    MSAL_AUTHORITY: z.string().url().optional(),
-    MSAL_REDIRECT_URI: z.string().url().optional(),
+    MSAL_AUTHORITY: z.string().url().or(z.literal("")).optional(),
+    MSAL_REDIRECT_URI: z.string().url().or(z.literal("")).optional(),
     MSAL_SCOPES: z.string().optional(),
   })
   .refine(
