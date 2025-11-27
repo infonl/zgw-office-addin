@@ -80,7 +80,7 @@ export function App() {
     };
   }
 
-  // Wrap with MsalAuthProvider only if MSAL config is available (localhost development)
+  // Wrap with MsalAuthProvider only if MSAL config is available
   if (msalConfig) {
     return (
       <MsalAuthProvider config={msalConfig}>
