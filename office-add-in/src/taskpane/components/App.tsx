@@ -42,6 +42,20 @@ const useStyles = makeStyles({
 
 const queryClient = new QueryClient();
 
+const AppContent = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <AuthProvider>
+    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
+      <QueryClientProvider client={queryClient}>
+        <ZaakProvider>
+          <ToastProvider>
+            <Main />
+          </ToastProvider>
+        </ZaakProvider>
+      </QueryClientProvider>
+    </FluentProvider>
+  </AuthProvider>
+);
+
 export function App() {
   const { isDarkMode } = useDarkMode();
 
@@ -66,30 +80,16 @@ export function App() {
     };
   }
 
-  const AppContent = () => (
-    <AuthProvider>
-      <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
-        <QueryClientProvider client={queryClient}>
-          <ZaakProvider>
-            <ToastProvider>
-              <Main />
-            </ToastProvider>
-          </ZaakProvider>
-        </QueryClientProvider>
-      </FluentProvider>
-    </AuthProvider>
-  );
-
-  // MsalAuthProvider only on localhost development
+  // Wrap with MsalAuthProvider only if MSAL config is available (localhost development)
   if (msalConfig) {
     return (
       <MsalAuthProvider config={msalConfig}>
-        <AppContent />
+        <AppContent isDarkMode={isDarkMode} />
       </MsalAuthProvider>
     );
   }
 
-  return <AppContent />;
+  return <AppContent isDarkMode={isDarkMode} />;
 }
 
 export default App;
