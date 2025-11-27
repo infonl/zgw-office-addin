@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import dotenv from "dotenv";
 import path from "path";
 import { ZaakController } from "../controller/ZaakController";
 import { ZaakParam } from "../dto/ZaakParam";
@@ -14,12 +13,11 @@ import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
-dotenv.config();
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
 
-if (isLocal) {
+if (isLocal && envServerSchema.KEY_PATH && envServerSchema.CERT_PATH) {
   const keyPath = path.resolve(__dirname, envServerSchema.KEY_PATH);
   const certPath = path.resolve(__dirname, envServerSchema.CERT_PATH);
   const caPath = envServerSchema.CA_CERT_PATH
@@ -37,6 +35,7 @@ if (isLocal) {
   LoggerService.log(`[backend] Using TLS key at ${keyPath} and cert at ${certPath}`);
 } else {
   fastify = Fastify();
+  LoggerService.log(`[backend] Running without TLS (env: ${envServerSchema.APP_ENV})`);
 }
 
 const allowedOrigins = envServerSchema.FRONTEND_URL ? [envServerSchema.FRONTEND_URL] : [];
