@@ -5,16 +5,28 @@
 
 import dotenv from "dotenv";
 import { z } from "zod";
+import path from "path";
 
-dotenv.config();
+// Only load .env file when running locally (not in production/Kubernetes)
+if (!process.env.APP_ENV || process.env.APP_ENV === "local") {
+  try {
+    const envPath = path.resolve(__dirname, "../../.env");
+    const result = dotenv.config({ path: envPath });
+    if (result.error) {
+      console.warn("Could not load .env file, using environment variables directly");
+    }
+  } catch (pathError) {
+    console.warn("Could not resolve .env path, using environment variables directly", pathError);
+  }
+}
 
 export const envSchema = z.object({
-  APP_ENV: z.enum(["local", "production", "test"]),
+  APP_ENV: z.enum(["local", "production", "test"]).default("production"),
   JWT_SECRET: z.string().min(1),
   API_BASE_URL: z.string().url(),
-  FRONTEND_URL: z.string().url(),
-  KEY_PATH: z.string().min(1),
-  CERT_PATH: z.string().min(1),
+  FRONTEND_URL: z.string().url().optional(),
+  KEY_PATH: z.string().min(1).optional(),
+  CERT_PATH: z.string().min(1).optional(),
   CA_CERT_PATH: z.string().min(1).optional(),
   PORT: z.string().min(1).optional(),
 });
