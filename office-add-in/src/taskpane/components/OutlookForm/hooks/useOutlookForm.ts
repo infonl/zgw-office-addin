@@ -29,6 +29,17 @@ export type SubmitResult = {
   error: Error | null;
 };
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return btoa(binary);
+}
+
 export function useOutlookForm() {
   const { authService } = useAuth();
   const { zaak } = useZaak();
@@ -166,11 +177,12 @@ export function useOutlookForm() {
         const fileContent = result?.fileContent ?? "";
         let inhoud = "";
         if (fileContent instanceof ArrayBuffer) {
-          const uint8Array = new Uint8Array(fileContent);
-          const binary = String.fromCharCode.apply(null, Array.from(uint8Array));
-          inhoud = btoa(binary);
+          inhoud = arrayBufferToBase64(fileContent);
         } else if (typeof fileContent === "string") {
-          inhoud = btoa(unescape(encodeURIComponent(fileContent)));
+          const encoder = new TextEncoder();
+          const uint8Array = encoder.encode(fileContent);
+          const binary = String.fromCharCode(...Array.from(uint8Array));
+          inhoud = btoa(binary);
         } else {
           inhoud = "";
         }
@@ -178,13 +190,19 @@ export function useOutlookForm() {
         return {
           ...doc,
           inhoud,
-          titel: String(doc.attachment.name),
+          titel: doc.attachment.name,
         };
       });
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
-      const uploadResults = await uploadDocumentsToZaak({ zaak, documents: uploadPayload });
-      DEBUG("[TRACE] uploadDocumentsToZaak results:", uploadResults);
+      let uploadResults = [];
+      try {
+        uploadResults = await uploadDocumentsToZaak({ zaak, documents: uploadPayload });
+        DEBUG("[TRACE] uploadDocumentsToZaak results:", uploadResults);
+      } catch (error) {
+        DEBUG("[ERROR] uploadDocumentsToZaak failed:", error);
+        uploadResults = uploadPayload.map(() => null);
+      }
 
       // Genereer uploadFailedFiles direct na uploadResults
       const uploadSuccessfulFiles: string[] = [];

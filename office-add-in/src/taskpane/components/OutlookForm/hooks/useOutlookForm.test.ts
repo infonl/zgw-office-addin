@@ -46,7 +46,7 @@ describe("useOutlookForm", () => {
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
-    mockUploadDocumentsToZaak.mockResolvedValue([true]);
+    mockUploadDocumentsToZaak.mockResolvedValue([mockAttachmentDocument1]);
     // Office object has many props, not needed for mock
     (global as unknown as { Office: unknown }).Office = {
       context: {
@@ -301,7 +301,16 @@ describe("useOutlookForm", () => {
         fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
-    mockUploadDocumentsToZaak.mockResolvedValueOnce([true, false, false]);
+    mockUploadDocumentsToZaak.mockResolvedValueOnce([
+      {
+        id: "info-object-1",
+        title: mockEmailDocument.attachment.name,
+        size: mockEmailDocument.attachment.size,
+        // add other required fields for DrcType<"EnkelvoudigInformatieObject">
+      },
+      null,
+      null,
+    ]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
         id: mockEmailDocument.attachment.id,

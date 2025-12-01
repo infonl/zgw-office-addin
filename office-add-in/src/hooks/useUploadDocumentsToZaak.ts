@@ -8,7 +8,7 @@ import { useCallback } from "react";
 import { ZaakResponse } from "./types";
 
 export type UploadDocument = {
-  inhoud: string | ArrayBuffer;
+  inhoud: string;
   titel: string;
   vertrouwelijkheidaanduiding: string;
   informatieobjecttype: string;
