@@ -14,8 +14,9 @@ import { useOffice } from "../../../../hooks/useOffice";
 import { GraphService } from "../../../../graph";
 import { useAuth } from "../../../../provider/AuthProvider";
 import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocuments";
-import { useUploadDocumentsToZaak } from "../../../../hooks/useUploadDocumentsToZaak";
 import { useLogger } from "../../../../hooks/useLogger";
+import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
+import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
@@ -33,9 +34,9 @@ export function useOutlookForm() {
   const { authService } = useAuth();
   const { zaak } = useZaak();
   const { files } = useOutlook();
-  const { processAndUploadDocuments, arrayBufferToBase64 } = useOffice();
-  const { uploadDocumentsToZaak } = useUploadDocumentsToZaak();
+  const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
+  const { mutateAsync } = useAddDocumentToZaak();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -104,18 +105,6 @@ export function useOutlookForm() {
         return { error: null };
       }
 
-      DEBUG("📊 Upload Summary:", {
-        totalFiles: selectedDocuments.length,
-        emailFiles: selectedDocuments.filter((doc) => doc.attachment.id.startsWith("EmailItself-"))
-          .length,
-        attachmentFiles: selectedDocuments.filter(
-          (doc) => !doc.attachment.id.startsWith("EmailItself-")
-        ).length,
-        totalSizeKB: Math.round(
-          selectedDocuments.reduce((sum, doc) => sum + doc.attachment.size, 0) / 1024
-        ),
-      });
-
       let results;
 
       try {
@@ -132,34 +121,6 @@ export function useOutlookForm() {
         ERROR("❌ processAndUploadDocuments threw an error:", error);
         return { error: error instanceof Error ? error : new Error(String(error)) };
       }
-
-      const successfulFiles = results
-        .map((result, index) => (result.success ? processedDocuments[index].attachment.name : null))
-        .filter((name) => !!name);
-      const failedFiles = results
-        .map((result, index) =>
-          !result.success
-            ? { filename: processedDocuments[index].attachment.name, error: result.error }
-            : null
-        )
-        .filter((item) => !!item);
-      const totalDuration = results.reduce((sum, result) => sum + (result.duration || 0), 0);
-      const avgDuration = results.length > 0 ? Math.round(totalDuration / results.length) : 0;
-      const totalDataTransferred = results.reduce((sum, result) => sum + (result.size || 0), 0);
-      const throughput =
-        totalDuration > 0 ? Math.round(totalDataTransferred / 1024 / (totalDuration / 1000)) : 0;
-
-      DEBUG("Client download results:", {
-        total: results.length,
-        successfulFiles,
-        failedFiles,
-        performance: {
-          totalDuration: `${totalDuration}ms`,
-          averageDuration: `${avgDuration}ms`,
-          totalDataTransferred: `${Math.round(totalDataTransferred / 1024)}KB`,
-          throughput: `${throughput}KB/s`,
-        },
-      });
 
       const uploadPayload = processedDocuments.map((doc, index) => {
         const result = results[index];
@@ -184,41 +145,15 @@ export function useOutlookForm() {
       });
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
-      let uploadResults = [];
-      try {
-        uploadResults = await uploadDocumentsToZaak({ zaak, documents: uploadPayload });
-        DEBUG("[TRACE] uploadDocumentsToZaak results:", uploadResults);
-      } catch (error) {
-        DEBUG("[ERROR] uploadDocumentsToZaak failed:", error);
-        uploadResults = uploadPayload.map(() => null);
-      }
-
-      // Genereer uploadFailedFiles direct na uploadResults
-      const uploadSuccessfulFiles: string[] = [];
-      const uploadFailedFiles: { document: (typeof uploadPayload)[0]; error: unknown }[] = [];
-      uploadPayload.forEach((doc, index) => {
-        if (uploadResults[index]) {
-          uploadSuccessfulFiles.push(doc.titel);
-        } else {
-          uploadFailedFiles.push({ document: doc, error: uploadResults[index] });
-        }
+      uploadPayload.forEach((document) => {
+        mutateAsync(document)
+          .then((response) => {
+            DEBUG("Document upload response:", response);
+          })
+          .catch((error) => {
+            ERROR("Document upload failed:", error);
+          });
       });
-
-      DEBUG("Backend upload results:", {
-        total: uploadResults.length,
-        successfulFiles: uploadSuccessfulFiles,
-        failedFiles: uploadFailedFiles,
-      });
-
-      if (uploadSuccessfulFiles.length > 0) {
-        DEBUG(`🎉 Successfully uploaded ${uploadSuccessfulFiles.length} documents!`);
-      }
-
-      if (uploadFailedFiles.length > 0) {
-        const error = new Error(`Failed to upload ${uploadFailedFiles.length} documents`);
-        ERROR("❌ Upload process completed with failed documents");
-        return { error };
-      }
 
       return { error: null }; // all successful
     } catch (error) {
