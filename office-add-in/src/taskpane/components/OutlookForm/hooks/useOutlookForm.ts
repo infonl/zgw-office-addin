@@ -29,22 +29,11 @@ export type SubmitResult = {
   error: Error | null;
 };
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-
-  return btoa(binary);
-}
-
 export function useOutlookForm() {
   const { authService } = useAuth();
   const { zaak } = useZaak();
   const { files } = useOutlook();
-  const { processAndUploadDocuments } = useOffice();
+  const { processAndUploadDocuments, arrayBufferToBase64 } = useOffice();
   const { uploadDocumentsToZaak } = useUploadDocumentsToZaak();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
 
