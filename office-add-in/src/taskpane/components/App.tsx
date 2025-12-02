@@ -42,35 +42,54 @@ const useStyles = makeStyles({
 
 const queryClient = new QueryClient();
 
+const AppContent = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <AuthProvider>
+    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
+      <QueryClientProvider client={queryClient}>
+        <ZaakProvider>
+          <ToastProvider>
+            <Main />
+          </ToastProvider>
+        </ZaakProvider>
+      </QueryClientProvider>
+    </FluentProvider>
+  </AuthProvider>
+);
+
 export function App() {
   const { isDarkMode } = useDarkMode();
-  const msalConfig: Configuration = {
-    auth: {
-      clientId: FRONTEND_ENV.MSAL_CLIENT_ID,
-      authority: FRONTEND_ENV.MSAL_AUTHORITY,
-      redirectUri: FRONTEND_ENV.MSAL_REDIRECT_URI,
-    },
-    cache: {
-      cacheLocation: "localStorage",
-      storeAuthStateInCookie: false,
-    },
-  };
 
-  return (
-    <MsalAuthProvider config={msalConfig}>
-      <AuthProvider>
-        <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
-          <QueryClientProvider client={queryClient}>
-            <ZaakProvider>
-              <ToastProvider>
-                <Main />
-              </ToastProvider>
-            </ZaakProvider>
-          </QueryClientProvider>
-        </FluentProvider>
-      </AuthProvider>
-    </MsalAuthProvider>
-  );
+  // Only create MSAL config on localhost
+  let msalConfig: Configuration | undefined;
+
+  if (
+    FRONTEND_ENV.MSAL_CLIENT_ID &&
+    FRONTEND_ENV.MSAL_AUTHORITY &&
+    FRONTEND_ENV.MSAL_REDIRECT_URI
+  ) {
+    msalConfig = {
+      auth: {
+        clientId: FRONTEND_ENV.MSAL_CLIENT_ID,
+        authority: FRONTEND_ENV.MSAL_AUTHORITY,
+        redirectUri: FRONTEND_ENV.MSAL_REDIRECT_URI,
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false,
+      },
+    };
+  }
+
+  // Wrap with MsalAuthProvider only if MSAL config is available
+  if (msalConfig) {
+    return (
+      <MsalAuthProvider config={msalConfig}>
+        <AppContent isDarkMode={isDarkMode} />
+      </MsalAuthProvider>
+    );
+  }
+
+  return <AppContent isDarkMode={isDarkMode} />;
 }
 
 export default App;

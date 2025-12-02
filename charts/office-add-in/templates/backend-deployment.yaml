@@ -33,10 +33,16 @@ spec:
           ports:
             - containerPort: 3003
           env:
+            - name: APP_ENV
+              value: "production"
             - name: JWT_SECRET
               value: {{ .Values.backend.jwtSecret | quote }}
             - name: API_BASE_URL
               value: {{ .Values.backend.apiBaseUrl | quote }}
+            {{- if .Values.frontend.frontendUrl }}
+            - name: FRONTEND_URL
+              value: {{ .Values.frontend.frontendUrl | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health

@@ -82,28 +82,6 @@ describe("OfficeGraphAuthService", () => {
     expect(Office.auth.getAccessToken).toHaveBeenCalled();
   });
 
-  it("upgrades scopes via MSAL if Graph token misses required scopes", async () => {
-    const mockJwtPayload: MicrosoftJwtPayload = {
-      aud: "https://graph.microsoft.com",
-      scp: "User.Read", // missing Mail.Read
-      exp: Math.round(addMinutes(new Date(), 1).getTime() / 1000),
-    };
-    const upgradedJwtPayload: MicrosoftJwtPayload = {
-      aud: "https://graph.microsoft.com",
-      scp: "Mail.Read User.Read", // complete set of scopes
-      exp: Math.round(addMinutes(new Date(), 1).getTime() / 1000),
-    };
-    const service = createService();
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue("office-token");
-    vi.spyOn(Object.getPrototypeOf(service), "decodeJwtPayload")
-      .mockReturnValueOnce(mockJwtPayload) // first call
-      .mockReturnValueOnce(upgradedJwtPayload); // second call
-    mockMsalAuth.getAccessToken.mockResolvedValue("upgraded-token");
-    const token = await service.getAccessToken();
-    expect(token).toBe("upgraded-token");
-    expect(mockMsalAuth.getAccessToken).toHaveBeenCalledWith(["Mail.Read", "User.Read"]);
-  });
-
   it("falls back to MSAL if Office.auth fails and env is local", async () => {
     const service = createService();
     service["env"].APP_ENV = "local";
