@@ -13,7 +13,6 @@ const root = rootElement ? createRoot(rootElement) : undefined;
 Office.onReady(async (info) => {
   console.log(info);
   root?.render(<App />);
-  console.log("nevvers loaded");
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
