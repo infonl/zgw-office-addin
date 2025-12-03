@@ -76,6 +76,15 @@ export class ZaakService {
         return "application/msword";
       case "eml":
         return "message/rfc822";
+      case "pdf":
+        return "application/pdf";
+      case "txt":
+        return "text/plain";
+      case "png":
+        return "image/png";
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
       default:
         throw new FileNotSupported(file);
     }
