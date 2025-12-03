@@ -15,7 +15,7 @@ import {
 const mockGetAccessToken = vi.fn();
 const mockProcessAndUploadDocuments = vi.fn();
 const mockPrepareSelectedDocuments = vi.fn().mockResolvedValue([]);
-const mockUploadDocumentsToZaak = vi.fn();
+const mockAddDocumentToZaak = vi.fn();
 
 vi.mock("../../../../provider/AuthProvider", () => ({
   useAuth: () => ({ authService: { getAccessToken: mockGetAccessToken } }),
@@ -33,8 +33,10 @@ vi.mock("../../../../utils/prepareSelectedDocuments", () => ({
 vi.mock("../../../../hooks/useOffice", () => ({
   useOffice: () => ({ processAndUploadDocuments: mockProcessAndUploadDocuments }),
 }));
-vi.mock("../../../../hooks/useUploadDocumentsToZaak", () => ({
-  useUploadDocumentsToZaak: () => ({ uploadDocumentsToZaak: mockUploadDocumentsToZaak }),
+vi.mock("../../../../hooks/useAddDocumentToZaak", () => ({
+  useAddDocumentToZaak: () => ({
+    mutateAsync: mockAddDocumentToZaak,
+  }),
 }));
 
 describe("useOutlookForm", () => {
@@ -42,11 +44,11 @@ describe("useOutlookForm", () => {
     vi.clearAllMocks();
     mockProcessAndUploadDocuments.mockReset();
     mockPrepareSelectedDocuments.mockReset();
-    mockUploadDocumentsToZaak.mockReset();
+    mockAddDocumentToZaak.mockReset();
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
-    mockUploadDocumentsToZaak.mockResolvedValue([mockAttachmentDocument1]);
+    mockAddDocumentToZaak.mockResolvedValue([mockAttachmentDocument1]);
     // Office object has many props, not needed for mock
     (global as unknown as { Office: unknown }).Office = {
       context: {
@@ -212,7 +214,7 @@ describe("useOutlookForm", () => {
         fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
-    mockUploadDocumentsToZaak.mockResolvedValueOnce([true, true, true]);
+    mockAddDocumentToZaak.mockResolvedValueOnce([true, true, true]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
         ...mockEmailDocument,
@@ -301,16 +303,15 @@ describe("useOutlookForm", () => {
         fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
-    mockUploadDocumentsToZaak.mockResolvedValueOnce([
-      {
+    mockAddDocumentToZaak
+      .mockResolvedValueOnce({
         id: "info-object-1",
-        title: mockEmailDocument.attachment.name,
-        size: mockEmailDocument.attachment.size,
-        // add other required fields for DrcType<"EnkelvoudigInformatieObject">
-      },
-      null,
-      null,
-    ]);
+        titel: mockEmailDocument.attachment.name,
+        // add other required ZaakInformatieObject fields
+      })
+      .mockRejectedValueOnce(new Error("Upload failed"))
+      .mockRejectedValueOnce(new Error("Upload failed"));
+
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
         id: mockEmailDocument.attachment.id,
