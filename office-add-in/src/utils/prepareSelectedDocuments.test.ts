@@ -6,11 +6,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { prepareSelectedDocuments } from "./prepareSelectedDocuments";
 import { GraphService } from "../graph";
-import type { DocumentSchema } from "../hooks/types";
+import type { SelectedDocument } from "../hooks/types";
 
 const mockGraphService = { officeIdsToGraphIdsViaApi: vi.fn() };
 
-const mockDocument = (id: string): DocumentSchema => ({ attachment: { id } }) as DocumentSchema;
+const mockDocument = (id: string): SelectedDocument =>
+  ({
+    selected: true,
+    attachment: { id },
+    vertrouwelijkheidaanduiding: "openbaar",
+    informatieobjecttype: "http://example.com/type",
+    status: "in_bewerking",
+    creatiedatum: new Date(),
+    zaakidentificatie: "ZAAK-001",
+    auteur: "Test User",
+  }) as SelectedDocument;
 
 const mockEmailObject = (itemId: string): Office.MessageRead => ({ itemId }) as Office.MessageRead;
 

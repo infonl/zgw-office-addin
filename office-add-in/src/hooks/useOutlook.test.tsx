@@ -35,7 +35,7 @@ describe("useOutlook", () => {
     expect(result.current.files).toHaveLength(1);
     expect(result.current.files[0]).toMatchObject({
       id: "EmailItself-ABC123",
-      name: "E-mail: Test mail",
+      name: "E-mail: Test mail.eml",
       contentType: "message/rfc822",
       isInline: false,
       size: 0,
@@ -56,7 +56,7 @@ describe("useOutlook", () => {
     expect(result.current.files).toHaveLength(1);
     expect(result.current.files[0]).toMatchObject({
       id: "EmailItself-ABC123",
-      name: "E-mail: (geen onderwerp)",
+      name: "E-mail: (geen onderwerp).eml",
       contentType: "message/rfc822",
       isInline: false,
       size: 0,
