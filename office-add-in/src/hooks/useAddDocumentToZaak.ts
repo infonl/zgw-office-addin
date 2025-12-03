@@ -24,7 +24,7 @@ export function useAddDocumentToZaak(
         `/zaken/${data.zaakidentificatie}/documenten`,
         JSON.stringify(
           host === Office.HostType.Outlook
-            ? { ...data, titel: await getFileName() }
+            ? { ...data }
             : {
                 ...data,
                 inhoud: await getDocumentData(),

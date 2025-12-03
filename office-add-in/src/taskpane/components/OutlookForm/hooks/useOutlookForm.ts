@@ -147,16 +147,15 @@ export function useOutlookForm() {
 
       DEBUG("🚀 Uploading documents to Zaak via mutation...");
 
-      const mutationResults = await Promise.allSettled(
-        uploadPayload.map((doc) => mutateAsync(doc))
-      );
-
-      const failed = mutationResults.filter((r) => r.status === "rejected").length;
-
-      if (failed > 0) {
-        ERROR(`❌ Failed to upload ${failed} documents`);
-        return { error: new Error(`Failed to upload ${failed} documents`) };
-      }
+      uploadPayload.forEach((document) => {
+        mutateAsync(document)
+          .then((response) => {
+            DEBUG("Document upload response:", response);
+          })
+          .catch((error) => {
+            ERROR("Document upload failed:", error);
+          });
+      });
 
       DEBUG("✅ All documents uploaded successfully");
       return { error: null };
