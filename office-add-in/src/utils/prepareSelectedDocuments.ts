@@ -6,11 +6,11 @@
  * Utility for building processed documents from selected documents and current email context
  */
 
-import { DocumentSchema, ProcessedDocument } from "../hooks/types";
+import { ProcessedDocument, SelectedDocument } from "../hooks/types";
 import { GraphService } from "../graph";
 
 export async function prepareSelectedDocuments(
-  selectedDocuments: DocumentSchema[],
+  selectedDocuments: SelectedDocument[],
   currentEmail: Office.MessageRead,
   graphService: GraphService
 ): Promise<ProcessedDocument[]> {
