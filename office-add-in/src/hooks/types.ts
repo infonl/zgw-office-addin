@@ -38,12 +38,14 @@ export const document = z.discriminatedUnion("selected", [
 
 export type DocumentSchema = z.infer<typeof document>;
 
-export type ZaakResponse = { data?: { identificatie?: string } };
+export type SelectedDocument = Extract<DocumentSchema, { selected: true }>;
 
-export type ProcessedDocument = DocumentSchema & {
+export type ProcessedDocument = SelectedDocument & {
   graphId: string | null;
   parentEmailGraphId: string | null;
 };
+
+export type ZaakResponse = { data?: { identificatie?: string } };
 
 export type GraphServiceType = {
   getEmailAsEML: (_graphId: string) => Promise<string>;

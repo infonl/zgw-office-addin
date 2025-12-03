@@ -97,6 +97,17 @@ export class OfficeGraphAuthService implements GraphAuthService {
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
+        const isValidGraphToken =
+          jwtPayload &&
+          this.isGraphAudience(jwtPayload) &&
+          this.tokenHasScopes(jwtPayload, this.requiredScopes);
+
+        // This check can fail when the user has not opened or blocked the required pop-up that asks for consent
+        // for Graph API access. In that case, we fall back to MSAL (only in local env).
+        if (!isValidGraphToken) {
+          this.logger.WARN("SSO token invalid for Graph, falling back to MSAL...");
+          throw new Error("SSO token invalid for Graph API");
+        }
         // Cache token using JWT exp if present; fallback to 50 minutes
         let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
         try {
