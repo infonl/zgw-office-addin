@@ -151,8 +151,6 @@ export function useOutlookForm() {
         uploadPayload.map((doc) => mutateAsync(doc))
       );
 
-      console.debug("✅ Mutation results:", mutationResults);
-
       const failed = mutationResults.filter((r) => r.status === "rejected").length;
 
       if (failed > 0) {
