@@ -43,9 +43,9 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@microsoft/microsoft-graph-types": "^2.43.1",
+    "@microsoft/microsoft-graph-client": "3.0.7",
+    "@microsoft/microsoft-graph-types": "2.43.1",
     "date-fns": "4.1.0",
-    "isomorphic-fetch": "^3.0.0"
+    "isomorphic-fetch": "3.0.0"
   }
 }
