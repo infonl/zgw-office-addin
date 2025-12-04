@@ -7,10 +7,10 @@ import { z } from "zod";
 
 const schema = z.object({
   APP_ENV: z.enum(["local", "production", "test"]).default("production"),
-  MSAL_CLIENT_ID: z.string().optional(),
-  MSAL_AUTHORITY: z.string().url().or(z.literal("")).optional(),
-  MSAL_REDIRECT_URI: z.string().url().or(z.literal("")).optional(),
-  MSAL_SCOPES: z.string().optional(),
+  MSAL_CLIENT_ID: z.string(),
+  MSAL_AUTHORITY: z.string().url().or(z.literal("")),
+  MSAL_REDIRECT_URI: z.string().url().or(z.literal("")),
+  MSAL_SCOPES: z.string(),
 });
 
 const rawEnv = {
