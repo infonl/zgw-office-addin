@@ -6,7 +6,6 @@
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
 
-// Use MSAL for authentication
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
 import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
@@ -78,7 +77,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
-    // Use MSAL to get Graph API access token
     this.tokenRequest = (async () => {
       try {
         this.logger.DEBUG("🛟 Using MSAL authentication...");
