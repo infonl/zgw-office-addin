@@ -124,7 +124,9 @@ describe("OfficeGraphAuthService", () => {
       const invalidToken = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
       mockMsalAuth.getAccessToken.mockResolvedValue(invalidToken);
 
-      await expect(service.getAccessToken()).rejects.toThrow("MSAL token invalid for Graph API");
+      await expect(service.getAccessToken()).rejects.toThrow(
+        "Graph authentication failed: MSAL token audience 'https://wrong-audience.com' is not valid for Graph API"
+      );
     });
 
     it("rejects token with missing scopes", async () => {
@@ -137,7 +139,9 @@ describe("OfficeGraphAuthService", () => {
       const invalidToken = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
       mockMsalAuth.getAccessToken.mockResolvedValue(invalidToken);
 
-      await expect(service.getAccessToken()).rejects.toThrow("MSAL token invalid for Graph API");
+      await expect(service.getAccessToken()).rejects.toThrow(
+        "Graph authentication failed: MSAL token missing required scopes. Required: Mail.Read, User.Read. Granted: User.Read"
+      );
     });
 
     it("accepts token with Graph app ID as audience", async () => {
