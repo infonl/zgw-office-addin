@@ -21,4 +21,6 @@ const rawEnv = {
   MSAL_SCOPES: process.env.MSAL_SCOPES,
 };
 
+console.debug("Frontend env schema:", rawEnv);
+
 export const FRONTEND_ENV = schema.parse(rawEnv);

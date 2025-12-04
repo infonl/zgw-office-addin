@@ -16,7 +16,7 @@ dist/
 
 ### ENVIRONMENT ###
 .env
-.env.frontend
+.env.local.frontend
 
 ### OS specific ###
 *.swp
