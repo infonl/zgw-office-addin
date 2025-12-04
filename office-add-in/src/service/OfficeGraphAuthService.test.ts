@@ -14,11 +14,11 @@ const mockMsalAuth = {
 };
 
 const vitestDummyLogger = {
-  DEBUG: () => {},
-  LOG: () => {},
-  INFO: () => {},
-  WARN: () => {},
-  ERROR: () => {},
+  DEBUG: vi.fn(),
+  LOG: vi.fn(),
+  INFO: vi.fn(),
+  WARN: vi.fn(),
+  ERROR: vi.fn(),
 };
 
 const createService = () => {
@@ -27,112 +27,196 @@ const createService = () => {
   return service;
 };
 
+// Valid Graph token payload
+const createValidGraphToken = (expiresInMinutes = 60): string => {
+  const payload: MicrosoftJwtPayload = {
+    aud: "https://graph.microsoft.com",
+    scp: "Mail.Read User.Read",
+    exp: Math.round(addMinutes(new Date(), expiresInMinutes).getTime() / 1000),
+    iat: Math.round(Date.now() / 1000),
+  };
+  // Create a fake JWT (header.payload.signature)
+  const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+  return `fake.${base64Payload}.signature`;
+};
+
 describe("OfficeGraphAuthService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("returns cached token if valid", async () => {
-    const service = createService();
-    service["tokenCache"] = {
-      token: "cached-token",
-      expires: addMinutes(new Date(), TOKEN_EXPIRY_OFFSET_MINUTES + 10).getTime(),
-    };
-    const token = await service.getAccessToken();
-    expect(token).toBe("cached-token");
-  });
-
-  it("waits for already running token request", async () => {
-    const service = createService();
-    const promise = Promise.resolve("pending-token");
-    service["tokenRequest"] = promise;
-    const token = await service.getAccessToken();
-    expect(token).toBe("pending-token");
-  });
-
-  it("fetches new token if cached token is expired", async () => {
-    const service = createService();
-    service["tokenCache"] = {
-      token: "expired-token",
-      expires: Date.now() - 10000,
-    };
-    const mockJwtPayload: MicrosoftJwtPayload = {
-      aud: "https://graph.microsoft.com",
-      scp: "Mail.Read User.Read",
-      exp: Math.round(addMinutes(new Date(), 1).getTime() / 1000),
-    };
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue("new-token");
-    vi.spyOn(Object.getPrototypeOf(service), "decodeJwtPayload").mockReturnValue(mockJwtPayload);
-    const token = await service.getAccessToken();
-    expect(token).toBe("new-token");
-    expect(Office.auth.getAccessToken).toHaveBeenCalled();
-  });
-
-  it("requests a new token via Office.auth", async () => {
-    const mockJwtPayload: MicrosoftJwtPayload = {
-      aud: "https://graph.microsoft.com",
-      scp: "Mail.Read User.Read",
-      exp: Math.round(addMinutes(new Date(), 1).getTime() / 1000),
-    };
-    const service = createService();
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockResolvedValue("office-token");
-    vi.spyOn(Object.getPrototypeOf(service), "decodeJwtPayload").mockReturnValue(mockJwtPayload);
-    const token = await service.getAccessToken();
-    expect(token).toBe("office-token");
-    expect(Office.auth.getAccessToken).toHaveBeenCalled();
-  });
-
-  it("falls back to MSAL if Office.auth fails and env is local", async () => {
-    const service = createService();
-    service["env"].APP_ENV = "local";
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockRejectedValue({
-      code: "401",
-      message: "fail",
+  describe("Token caching", () => {
+    it("returns cached token if still valid", async () => {
+      const service = createService();
+      service["tokenCache"] = {
+        token: "cached-token",
+        expires: addMinutes(new Date(), TOKEN_EXPIRY_OFFSET_MINUTES + 10).getTime(),
+      };
+      const token = await service.getAccessToken();
+      expect(token).toBe("cached-token");
+      expect(mockMsalAuth.getAccessToken).not.toHaveBeenCalled();
     });
-    mockMsalAuth.getAccessToken.mockResolvedValue("msal-token");
-    const token = await service.getAccessToken();
-    expect(token).toBe("msal-token");
-    expect(mockMsalAuth.getAccessToken).toHaveBeenCalled();
-  });
 
-  it("throws error if both Office.auth and MSAL fail", async () => {
-    const mockJwtPayload: MicrosoftJwtPayload = {
-      aud: "https://graph.microsoft.com",
-      scp: "Mail.Read User.Read",
-      exp: Math.round(addMinutes(new Date(), 1).getTime() / 1000),
-    };
-    const service = createService();
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockRejectedValue({
-      code: "401",
-      message: "fail",
+    it("fetches new token if cached token is expired", async () => {
+      const service = createService();
+      service["tokenCache"] = {
+        token: "expired-token",
+        expires: Date.now() - 10000,
+      };
+      const validToken = createValidGraphToken();
+      mockMsalAuth.getAccessToken.mockResolvedValue(validToken);
+
+      const token = await service.getAccessToken();
+
+      expect(mockMsalAuth.getAccessToken).toHaveBeenCalledWith(["Mail.Read", "User.Read"]);
+      expect(token).toBe(validToken);
     });
-    mockMsalAuth.getAccessToken.mockRejectedValue(new Error("msal fail"));
-    vi.spyOn(Object.getPrototypeOf(service), "decodeJwtPayload").mockReturnValue(mockJwtPayload);
-    await expect(service.getAccessToken()).rejects.toThrow("Graph authentication failed");
-  });
 
-  it("throws error if Office.auth fails and env is prod", async () => {
-    const service = createService();
-    service["env"].APP_ENV = "production";
-    (Office.auth.getAccessToken as ReturnType<typeof vi.fn>).mockRejectedValue({
-      code: "401",
-      message: "fail",
+    it("waits for already running token request", async () => {
+      const service = createService();
+      const promise = Promise.resolve("pending-token");
+      service["tokenRequest"] = promise;
+
+      const token = await service.getAccessToken();
+
+      expect(token).toBe("pending-token");
+      expect(mockMsalAuth.getAccessToken).not.toHaveBeenCalled();
     });
-    await expect(service.getAccessToken()).rejects.toThrow("Graph authentication failed");
-    expect(mockMsalAuth.getAccessToken).not.toHaveBeenCalled(); // only for local
   });
 
-  it("validateGraphAccess returns true if token is retrieved", async () => {
-    const service = createService();
-    service.getAccessToken = vi.fn().mockResolvedValue("token");
-    const result = await service.validateGraphAccess();
-    expect(result).toBe(true);
+  describe("MSAL authentication", () => {
+    it("successfully gets token from MSAL", async () => {
+      const service = createService();
+      const validToken = createValidGraphToken();
+      mockMsalAuth.getAccessToken.mockResolvedValue(validToken);
+
+      const token = await service.getAccessToken();
+
+      expect(token).toBe(validToken);
+      expect(mockMsalAuth.getAccessToken).toHaveBeenCalledWith(["Mail.Read", "User.Read"]);
+    });
+
+    it("throws error if MSAL auth is not available", async () => {
+      const service = createService();
+      service.setMsalAuth(null);
+
+      await expect(service.getAccessToken()).rejects.toThrow("MSAL auth is not available");
+    });
+
+    it("throws error if MSAL fails", async () => {
+      const service = createService();
+      mockMsalAuth.getAccessToken.mockRejectedValue(new Error("MSAL login failed"));
+
+      await expect(service.getAccessToken()).rejects.toThrow(
+        "Graph authentication failed: MSAL login failed"
+      );
+    });
   });
 
-  it("validateGraphAccess returns false if token fails", async () => {
-    const service = createService();
-    service.getAccessToken = vi.fn().mockRejectedValue(new Error("fail"));
-    const result = await service.validateGraphAccess();
-    expect(result).toBe(false);
+  describe("Token validation", () => {
+    it("rejects token with invalid audience", async () => {
+      const service = createService();
+      const payload: MicrosoftJwtPayload = {
+        aud: "https://wrong-audience.com", // Wrong audience
+        scp: "Mail.Read User.Read",
+        exp: Math.round(addMinutes(new Date(), 60).getTime() / 1000),
+      };
+      const invalidToken = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
+      mockMsalAuth.getAccessToken.mockResolvedValue(invalidToken);
+
+      await expect(service.getAccessToken()).rejects.toThrow("MSAL token invalid for Graph API");
+    });
+
+    it("rejects token with missing scopes", async () => {
+      const service = createService();
+      const payload: MicrosoftJwtPayload = {
+        aud: "https://graph.microsoft.com",
+        scp: "User.Read", // Missing Mail.Read
+        exp: Math.round(addMinutes(new Date(), 60).getTime() / 1000),
+      };
+      const invalidToken = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
+      mockMsalAuth.getAccessToken.mockResolvedValue(invalidToken);
+
+      await expect(service.getAccessToken()).rejects.toThrow("MSAL token invalid for Graph API");
+    });
+
+    it("accepts token with Graph app ID as audience", async () => {
+      const service = createService();
+      const payload: MicrosoftJwtPayload = {
+        aud: "00000003-0000-0000-c000-000000000000", // Graph app ID
+        scp: "Mail.Read User.Read",
+        exp: Math.round(addMinutes(new Date(), 60).getTime() / 1000),
+      };
+      const validToken = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
+      mockMsalAuth.getAccessToken.mockResolvedValue(validToken);
+
+      const token = await service.getAccessToken();
+
+      expect(token).toBe(validToken);
+    });
+  });
+
+  describe("Token expiry handling", () => {
+    it("uses JWT exp claim for cache expiry", async () => {
+      const service = createService();
+      const expiresInMinutes = 30;
+      const validToken = createValidGraphToken(expiresInMinutes);
+      mockMsalAuth.getAccessToken.mockResolvedValue(validToken);
+
+      await service.getAccessToken();
+
+      const cached = service["tokenCache"];
+      expect(cached).not.toBeNull();
+
+      // Should expire around 30 minutes minus offset
+      const expectedExpiry = addMinutes(new Date(), expiresInMinutes - TOKEN_EXPIRY_OFFSET_MINUTES);
+      const actualExpiry = new Date(cached!.expires);
+
+      // Allow 1 second tolerance for test timing
+      expect(Math.abs(actualExpiry.getTime() - expectedExpiry.getTime())).toBeLessThan(1000);
+    });
+
+    it("uses default 50 minutes if JWT exp is missing", async () => {
+      const service = createService();
+      const payload = {
+        aud: "https://graph.microsoft.com",
+        scp: "Mail.Read User.Read",
+        // No exp claim
+      };
+      const tokenWithoutExp = `fake.${Buffer.from(JSON.stringify(payload)).toString("base64")}.sig`;
+      mockMsalAuth.getAccessToken.mockResolvedValue(tokenWithoutExp);
+
+      await service.getAccessToken();
+
+      const cached = service["tokenCache"];
+      expect(cached).not.toBeNull();
+
+      // Should use default 50 minutes minus offset
+      const expectedExpiry = addMinutes(new Date(), 50 - TOKEN_EXPIRY_OFFSET_MINUTES);
+      const actualExpiry = new Date(cached!.expires);
+
+      expect(Math.abs(actualExpiry.getTime() - expectedExpiry.getTime())).toBeLessThan(1000);
+    });
+  });
+
+  describe("validateGraphAccess", () => {
+    it("returns true if token is retrieved successfully", async () => {
+      const service = createService();
+      const validToken = createValidGraphToken();
+      mockMsalAuth.getAccessToken.mockResolvedValue(validToken);
+
+      const result = await service.validateGraphAccess();
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false if token retrieval fails", async () => {
+      const service = createService();
+      mockMsalAuth.getAccessToken.mockRejectedValue(new Error("Auth failed"));
+
+      const result = await service.validateGraphAccess();
+
+      expect(result).toBe(false);
+    });
   });
 });
