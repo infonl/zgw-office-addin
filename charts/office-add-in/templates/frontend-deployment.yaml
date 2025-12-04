@@ -43,6 +43,14 @@ spec:
               value: {{ .Values.frontend.maxBodySize | default "80M" | quote }}
             - name: APP_ENV
               value: {{ .Values.frontend.appEnv | default "production" | quote }}
+            - name: MSAL_CLIENT_ID
+              value: {{ .Values.frontend.msalClientId | quote }}
+            - name: MSAL_AUTHORITY
+              value: {{ .Values.frontend.msalAuthority | quote }}
+            - name: MSAL_REDIRECT_URI
+              value: {{ .Values.frontend.msalRedirectUri | quote }}
+            - name: MSAL_SCOPES
+              value: {{ .Values.frontend.msalScopes | quote }}
           livenessProbe:
             httpGet:
               path: /health

@@ -60,6 +60,14 @@ backend:
   jwtSecret: "SECRET_KEY_PLACEHOLDER"
   # -- Base URL to the openzaak API
   apiBaseUrl: "http://localhost:8020"
+  # -- Client ID for MSAL authentication towards Azure AD
+  msalClientId: "MSAL_CLIENT_ID_PLACEHOLDER"
+  # -- Authority URL for MSAL authentication towards Azure AD
+  msalAuthorityUrl: "https://login.microsoftonline.com/"
+  # -- Scope for MSAL authentication towards Azure AD
+  msalScope: "https://graph.microsoft.com/.default"
+  # -- Redirect URI for MSAL authentication towards Azure AD
+  msalRedirectUri: "http://localhost:3003/auth/callback"
   # -- Resource limits and requests for the backend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious

@@ -13,6 +13,8 @@ export type MsalAuthContextType = {
 
 const MsalAuthContext = createContext<MsalAuthContextType | null>(null);
 
+export { MsalAuthContext };
+
 export function MsalAuthProvider({
   config,
   children,

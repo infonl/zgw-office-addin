@@ -36,6 +36,10 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.image.tag | string | `"v0.2.143@sha256:b16543fb4d1ad61b9a8a9bd6ff87c19f3ea94c900a67bf998627c4bda78837af"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
+| backend.msalAuthorityUrl | string | `"https://login.microsoftonline.com/"` | Authority URL for MSAL authentication towards Azure AD |
+| backend.msalClientId | string | `"MSAL_CLIENT_ID_PLACEHOLDER"` | Client ID for MSAL authentication towards Azure AD |
+| backend.msalRedirectUri | string | `"http://localhost:3003/auth/callback"` | Redirect URI for MSAL authentication towards Azure AD |
+| backend.msalScope | string | `"https://graph.microsoft.com/.default"` | Scope for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |

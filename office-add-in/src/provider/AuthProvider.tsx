@@ -5,7 +5,7 @@
 
 import React, { createContext, PropsWithChildren, useContext, useMemo } from "react";
 import { OfficeGraphAuthService } from "../service/OfficeGraphAuthService";
-import { useMsalAuth } from "./MsalAuthProvider";
+import { MsalAuthContext } from "./MsalAuthProvider";
 import { useLogger } from "../hooks/useLogger";
 
 export type AuthContextType = {
@@ -14,7 +14,7 @@ export type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const msalAuth = useMsalAuth();
+  const msalAuth = useContext(MsalAuthContext);
   const logger = useLogger(OfficeGraphAuthService.name);
 
   const authService = useMemo(() => {
