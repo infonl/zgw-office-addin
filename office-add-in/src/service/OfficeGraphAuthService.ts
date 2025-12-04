@@ -5,9 +5,8 @@
 
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
-
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
-import { FRONTEND_ENV } from "../provider/envFrontendSchema";
+import { getFrontendEnv } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
@@ -22,7 +21,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
-  private readonly env = FRONTEND_ENV;
+  private env: Awaited<ReturnType<typeof getFrontendEnv>> | null = null;
   private msalAuth: MsalAuthContextType | null = null;
 
   constructor(logger: ReturnType<typeof useLogger>) {
@@ -33,8 +32,11 @@ export class OfficeGraphAuthService implements GraphAuthService {
     this.msalAuth = msalAuth;
   }
 
-  // Check if access token is for Microsoft Graph by validating audience.
-  // For value of id: https://web.archive.org/web/20241114222012/https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications
+  async initEnv() {
+    this.env = await getFrontendEnv();
+    this.logger.DEBUG("Frontend environment loaded:", this.env);
+  }
+
   private isGraphAudience(payload: MicrosoftJwtPayload): boolean {
     const graphAppId = "00000003-0000-0000-c000-000000000000";
     return payload?.aud === "https://graph.microsoft.com" || payload?.aud === graphAppId;
@@ -49,11 +51,10 @@ export class OfficeGraphAuthService implements GraphAuthService {
   }
 
   private tokenHasScopes(payload: MicrosoftJwtPayload, scopes: readonly string[]): boolean {
-    // "scp" is a space-delimited string of delegated scopes
     const grantedScopesSet = new Set(
       payload.scp
         ?.split(" ")
-        .map((scopeName: string) => scopeName.trim())
+        .map((scopeName) => scopeName.trim())
         .filter(Boolean)
     );
     return scopes.every((requiredScope) => grantedScopesSet.has(requiredScope));
@@ -62,12 +63,18 @@ export class OfficeGraphAuthService implements GraphAuthService {
   async getAccessToken(): Promise<string> {
     await Office.onReady();
 
+    await this.initEnv();
+
+    if (!this.env) {
+      throw new Error("Frontend environment not initialized");
+    }
+
     if (
       this.tokenCache &&
       this.tokenCache.expires > addMinutes(new Date(), TOKEN_EXPIRY_OFFSET_MINUTES).getTime()
     ) {
       this.logger.DEBUG("🔄 Using cached Graph API token");
-      return Promise.resolve(this.tokenCache.token);
+      return this.tokenCache.token;
     }
 
     if (this.tokenRequest) {
@@ -79,45 +86,24 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     this.tokenRequest = (async () => {
       try {
-        this.logger.DEBUG("🛟 Using MSAL authentication...");
-        if (!this.msalAuth) {
-          throw new Error("MSAL auth is not available. Cannot acquire token.");
-        }
+        if (!this.msalAuth) throw new Error("MSAL auth is not available.");
 
         const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
-        let jwtPayload = this.decodeJwtPayload(msalToken);
+        const jwtPayload = this.decodeJwtPayload(msalToken);
 
-        this.logger.DEBUG("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
-        this.logger.DEBUG("🔎 TOKEN.AUD:", jwtPayload?.aud);
-        this.logger.DEBUG(
-          "🔎 TOKEN.APPID / ROLES:",
-          jwtPayload?.appid ?? jwtPayload?.azp,
-          jwtPayload?.roles
-        );
-        this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
-
-        if (!jwtPayload) {
-          throw new Error("Failed to decode MSAL token");
-        }
-        if (!this.isGraphAudience(jwtPayload)) {
-          throw new Error(`MSAL token audience '${jwtPayload.aud}' is not valid for Graph API`);
-        }
+        if (!jwtPayload) throw new Error("Failed to decode MSAL token");
+        if (!this.isGraphAudience(jwtPayload)) throw new Error("MSAL token audience is invalid");
         if (!this.tokenHasScopes(jwtPayload, this.requiredScopes)) {
           const grantedScopes = jwtPayload.scp?.split(" ") || [];
           throw new Error(
-            `MSAL token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+            `MSAL token missing required scopes. Required: ${this.requiredScopes.join(
+              ", "
+            )}. Granted: ${grantedScopes.join(", ")}`
           );
         }
 
-        // Cache token using JWT exp if present; fallback to 50 minutes
         let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-        try {
-          if (jwtPayload && typeof jwtPayload.exp === "number") {
-            tokenExpiryTimestamp = jwtPayload.exp * 1000;
-          }
-        } catch {
-          this.logger.DEBUG("Could not decode token exp, using default lifetime");
-        }
+        if (jwtPayload.exp) tokenExpiryTimestamp = jwtPayload.exp * 1000;
 
         this.tokenCache = {
           token: msalToken,
@@ -131,7 +117,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
       } catch (msalError) {
         this.logger.ERROR("⚠️ MSAL authentication failed:", msalError);
         this.tokenCache = null;
-
         const errorMessage =
           msalError instanceof Error ? msalError.message : "MSAL authentication error";
         throw new Error(`Graph authentication failed: ${errorMessage}`);
@@ -143,9 +128,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
     return this.tokenRequest;
   }
 
-  /**
-   * Check if the user is authenticated and has proper Graph permissions
-   */
   async validateGraphAccess(): Promise<boolean> {
     try {
       await this.getAccessToken();

@@ -23,7 +23,7 @@ const vitestDummyLogger = {
 
 const createService = () => {
   const service = new OfficeGraphAuthService(vitestDummyLogger);
-  service.setMsalAuth(mockMsalAuth);
+  // service.setMsalAuth(mockMsalAuth);
   return service;
 };
 

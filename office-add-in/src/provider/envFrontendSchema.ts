@@ -1,26 +1,17 @@
-/*
- * SPDX-FileCopyrightText: 2025 INFO.nl
- * SPDX-License-Identifier: EUPL-1.2+
- */
-
+// src/config/index.ts
 import { z } from "zod";
+import { loadEnv } from "../config/loadEnv";
 
 const schema = z.object({
-  APP_ENV: z.enum(["local", "production", "test"]).default("production"),
+  APP_ENV: z.enum(["local", "test", "production"]),
   MSAL_CLIENT_ID: z.string(),
   MSAL_AUTHORITY: z.string().url().or(z.literal("")),
   MSAL_REDIRECT_URI: z.string().url().or(z.literal("")),
   MSAL_SCOPES: z.string(),
 });
 
-const rawEnv = {
-  APP_ENV: process.env.APP_ENV,
-  MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID,
-  MSAL_AUTHORITY: process.env.MSAL_AUTHORITY,
-  MSAL_REDIRECT_URI: process.env.MSAL_REDIRECT_URI,
-  MSAL_SCOPES: process.env.MSAL_SCOPES,
+export const getFrontendEnv = async () => {
+  const rawEnv = await loadEnv();
+  console.debug("Loaded frontend env:", rawEnv);
+  return schema.parse(rawEnv);
 };
-
-console.debug("Frontend env schema:", rawEnv);
-
-export const FRONTEND_ENV = schema.parse(rawEnv);

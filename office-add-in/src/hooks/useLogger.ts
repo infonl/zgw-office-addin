@@ -4,10 +4,9 @@
  */
 
 import { useCallback } from "react";
-import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 
 // Enable debug logging for local (and test environment for now)
-const isDev = FRONTEND_ENV.APP_ENV === "local" || FRONTEND_ENV.APP_ENV === "test";
+const isDev = process.env.APP_ENV === "local" || process.env.APP_ENV === "test";
 
 export function useLogger(context = "UNKNOWN") {
   const DEBUG = useCallback(

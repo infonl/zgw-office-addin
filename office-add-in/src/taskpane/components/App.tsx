@@ -12,7 +12,6 @@ import {
   MessageBarTitle,
   tokens,
 } from "@fluentui/react-components";
-import { Configuration } from "@azure/msal-browser";
 import { useOffice } from "../../hooks/useOffice";
 import { FluentProvider, webLightTheme, webDarkTheme } from "@fluentui/react-components";
 import { useDarkMode } from "usehooks-ts";
@@ -21,7 +20,6 @@ import { ToastProvider } from "../../provider/ToastProvider";
 import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
 import { AuthProvider } from "../../provider/AuthProvider";
 import { MsalAuthProvider } from "../../provider/MsalAuthProvider";
-import { FRONTEND_ENV } from "../../provider/envFrontendSchema";
 import { OfficeForm } from "./OfficeForm";
 import { OutlookForm } from "./OutlookForm/OutlookForm";
 import { useCommonStyles } from "./styles/shared";
@@ -32,7 +30,6 @@ const useStyles = makeStyles({
     paddingLeft: tokens.spacingHorizontalXL,
     paddingRight: tokens.spacingHorizontalXL,
   },
-
   actions: {
     marginTop: tokens.spacingVerticalXL,
     display: "flex",
@@ -42,54 +39,24 @@ const useStyles = makeStyles({
 
 const queryClient = new QueryClient();
 
-const AppContent = ({ isDarkMode }: { isDarkMode: boolean }) => (
-  <AuthProvider>
-    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
-      <QueryClientProvider client={queryClient}>
-        <ZaakProvider>
-          <ToastProvider>
-            <Main />
-          </ToastProvider>
-        </ZaakProvider>
-      </QueryClientProvider>
-    </FluentProvider>
-  </AuthProvider>
-);
-
 export function App() {
   const { isDarkMode } = useDarkMode();
 
-  // Only create MSAL config on localhost
-  let msalConfig: Configuration | undefined;
-
-  if (
-    FRONTEND_ENV.MSAL_CLIENT_ID &&
-    FRONTEND_ENV.MSAL_AUTHORITY &&
-    FRONTEND_ENV.MSAL_REDIRECT_URI
-  ) {
-    msalConfig = {
-      auth: {
-        clientId: FRONTEND_ENV.MSAL_CLIENT_ID,
-        authority: FRONTEND_ENV.MSAL_AUTHORITY,
-        redirectUri: FRONTEND_ENV.MSAL_REDIRECT_URI,
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: false,
-      },
-    };
-  }
-
-  // Wrap with MsalAuthProvider only if MSAL config is available
-  if (msalConfig) {
-    return (
-      <MsalAuthProvider config={msalConfig}>
-        <AppContent isDarkMode={isDarkMode} />
-      </MsalAuthProvider>
-    );
-  }
-
-  return <AppContent isDarkMode={isDarkMode} />;
+  return (
+    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <MsalAuthProvider>
+            <AuthProvider>
+              <ZaakProvider>
+                <Main />
+              </ZaakProvider>
+            </AuthProvider>
+          </MsalAuthProvider>
+        </ToastProvider>
+      </QueryClientProvider>
+    </FluentProvider>
+  );
 }
 
 export default App;
@@ -97,9 +64,7 @@ export default App;
 function Main() {
   const styles = useStyles();
   const common = useCommonStyles();
-
   const { isOutlook, isWord } = useOffice();
-
   const { documentAddedToZaak, reset } = useZaak();
 
   if (documentAddedToZaak) {

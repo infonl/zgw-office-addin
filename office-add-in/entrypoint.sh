@@ -78,3 +78,26 @@ cat <<EOF > "$NGINX_PUBLIC_HTML/metrics.txt"
 # TYPE app_version gauge
 app_version{version="$APP_VERSION"} 1
 EOF
+
+###
+# Generate runtime environment configuration for frontend
+# This allows the React app to read Kubernetes environment variables at runtime
+FRONTEND_CONFIG_JSON="$NGINX_PUBLIC_HTML/config/env.json"
+echo "Generating runtime environment configuration at '$FRONTEND_CONFIG_JSON'"
+mkdir -p "$(dirname "$FRONTEND_CONFIG_JSON")"
+
+cat <<EOF > "$FRONTEND_CONFIG_JSON"
+{
+  "MAX_BODY_SIZE": "${MAX_BODY_SIZE:-80M}",
+  "MSAL_CLIENT_ID": "${MSAL_CLIENT_ID:-}",
+  "MSAL_AUTHORITY": "${MSAL_AUTHORITY:-}",
+  "MSAL_REDIRECT_URI": "${MSAL_REDIRECT_URI:-}",
+  "MSAL_SCOPES": "${MSAL_SCOPES:-}"
+}
+EOF
+
+echo "Runtime environment configuration generated successfully"
+cat "$FRONTEND_CONFIG_JSON"
+
+# Start nginx
+exec nginx -g 'daemon off;'
