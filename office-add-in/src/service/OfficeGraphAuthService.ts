@@ -98,14 +98,17 @@ export class OfficeGraphAuthService implements GraphAuthService {
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
-        const isValidGraphToken =
-          jwtPayload &&
-          this.isGraphAudience(jwtPayload) &&
-          this.tokenHasScopes(jwtPayload, this.requiredScopes);
-
-        if (!isValidGraphToken) {
-          this.logger.WARN("MSAL token invalid for Graph API");
-          throw new Error("MSAL token invalid for Graph API");
+        if (!jwtPayload) {
+          throw new Error("Failed to decode MSAL token");
+        }
+        if (!this.isGraphAudience(jwtPayload)) {
+          throw new Error(`MSAL token audience '${jwtPayload.aud}' is not valid for Graph API`);
+        }
+        if (!this.tokenHasScopes(jwtPayload, this.requiredScopes)) {
+          const grantedScopes = jwtPayload.scp?.split(" ") || [];
+          throw new Error(
+            `MSAL token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+          );
         }
 
         // Cache token using JWT exp if present; fallback to 50 minutes
