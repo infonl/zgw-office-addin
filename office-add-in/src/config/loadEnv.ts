@@ -27,7 +27,7 @@ export async function loadEnv(): Promise<RuntimeEnv> {
     return cachedEnv;
   }
 
-  if (process.env.APP_ENV && process.env.APP_ENV === "local") {
+  if (process.env.APP_ENV === "local") {
     cachedEnv = runtimeEnvSchema.parse({
       APP_ENV: "local",
       MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID || "",
