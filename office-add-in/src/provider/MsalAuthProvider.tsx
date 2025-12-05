@@ -29,6 +29,8 @@ export function MsalAuthProvider({ children }: { children: React.ReactNode }) {
           redirectUri: env.MSAL_REDIRECT_URI,
         });
 
+        logger.DEBUG("ENV: " + JSON.stringify(env));
+
         const config: Configuration = {
           auth: {
             clientId: env.MSAL_CLIENT_ID,

@@ -88,6 +88,7 @@ mkdir -p "$(dirname "$FRONTEND_CONFIG_JSON")"
 
 cat <<EOF > "$FRONTEND_CONFIG_JSON"
 {
+  "APP_ENV": "${APP_ENV:-}",
   "MAX_BODY_SIZE": "${MAX_BODY_SIZE:-80M}",
   "MSAL_CLIENT_ID": "${MSAL_CLIENT_ID:-}",
   "MSAL_AUTHORITY": "${MSAL_AUTHORITY:-}",

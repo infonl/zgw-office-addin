@@ -4,14 +4,25 @@
  */
 
 import { useCallback } from "react";
+import { getEnv } from "../config/loadEnv";
 
-// Enable debug logging for local (and test environment for now)
-const isDev = process.env.APP_ENV === "local" || process.env.APP_ENV === "test";
+/**
+ * Check if we're in development mode (local or test)
+ */
+function isDev(): boolean {
+  try {
+    const env = getEnv();
+    return env.APP_ENV === "local" || env.APP_ENV === "test";
+  } catch {
+    // Fallback voor early initialization
+    return process.env.APP_ENV === "local" || process.env.APP_ENV === "test";
+  }
+}
 
 export function useLogger(context = "UNKNOWN") {
   const DEBUG = useCallback(
     (message: string, ...optionalParams: unknown[]) => {
-      if (!isDev) return;
+      if (!isDev()) return;
       console.debug(`[DEBUG] [${context}] ${message}`, ...optionalParams);
     },
     [context]

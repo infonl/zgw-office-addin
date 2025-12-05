@@ -6,23 +6,18 @@
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
-import { getFrontendEnv } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
 
-/**
- * Microsoft Graph authentication service for Office Add-ins
- * Uses MSAL to obtain Graph API tokens
- */
 export class OfficeGraphAuthService implements GraphAuthService {
   private logger;
   private tokenCache: { token: string; expires: number } | null = null;
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
-  private env: Awaited<ReturnType<typeof getFrontendEnv>> | null = null;
   private msalAuth: MsalAuthContextType | null = null;
+  // ✅ Geen private env property meer!
 
   constructor(logger: ReturnType<typeof useLogger>) {
     this.logger = logger;
@@ -30,11 +25,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
   setMsalAuth(msalAuth: MsalAuthContextType | null) {
     this.msalAuth = msalAuth;
-  }
-
-  async initEnv() {
-    this.env = await getFrontendEnv();
-    this.logger.DEBUG("Frontend environment loaded:", this.env);
   }
 
   private isGraphAudience(payload: MicrosoftJwtPayload): boolean {
@@ -62,12 +52,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
   async getAccessToken(): Promise<string> {
     await Office.onReady();
-
-    await this.initEnv();
-
-    if (!this.env) {
-      throw new Error("Frontend environment not initialized");
-    }
 
     if (
       this.tokenCache &&

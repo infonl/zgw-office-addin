@@ -7,10 +7,10 @@ import { z } from "zod";
 
 const runtimeEnvSchema = z.object({
   APP_ENV: z.enum(["local", "production", "test"]).default("production"),
-  MSAL_CLIENT_ID: z.string(),
-  MSAL_AUTHORITY: z.string().url(),
-  MSAL_REDIRECT_URI: z.string().url(),
-  MSAL_SCOPES: z.string(),
+  MSAL_CLIENT_ID: z.string().default(""),
+  MSAL_AUTHORITY: z.string().url().or(z.literal("")).default(""),
+  MSAL_REDIRECT_URI: z.string().url().or(z.literal("")).default(""),
+  MSAL_SCOPES: z.string().default(""),
 });
 
 export type RuntimeEnv = z.infer<typeof runtimeEnvSchema>;
@@ -27,10 +27,7 @@ export async function loadEnv(): Promise<RuntimeEnv> {
     return cachedEnv;
   }
 
-  // LOCAL: Gebruik build-time process.env (sync, geen fetch nodig)
-  if (process.env.APP_ENV === "local") {
-    console.log(process.env.APP_ENV);
-
+  if (process.env.APP_ENV && process.env.APP_ENV === "local") {
     cachedEnv = runtimeEnvSchema.parse({
       APP_ENV: "local",
       MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID || "",
@@ -42,7 +39,6 @@ export async function loadEnv(): Promise<RuntimeEnv> {
     return cachedEnv;
   }
 
-  // TEST/PROD: Fetch runtime config
   try {
     const response = await fetch("/config/env.json");
     if (!response.ok) {
@@ -57,4 +53,27 @@ export async function loadEnv(): Promise<RuntimeEnv> {
     console.error("[loadEnv] ❌ Failed to load runtime config:", error);
     throw error;
   }
+}
+
+/**
+ * Get cached environment (synchronous)
+ * Safe to use AFTER loadEnv() has been called
+ */
+export function getEnv(): RuntimeEnv {
+  // Voor lokaal: maak meteen een cached versie aan als die er niet is
+  if (!cachedEnv && process.env.APP_ENV && process.env.APP_ENV === "local") {
+    cachedEnv = runtimeEnvSchema.parse({
+      APP_ENV: "local",
+      MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID || "",
+      MSAL_AUTHORITY: process.env.MSAL_AUTHORITY || "",
+      MSAL_REDIRECT_URI: process.env.MSAL_REDIRECT_URI || "",
+      MSAL_SCOPES: process.env.MSAL_SCOPES || "",
+    });
+  }
+
+  if (!cachedEnv) {
+    throw new Error("Environment not loaded yet. Call loadEnv() first.");
+  }
+
+  return cachedEnv;
 }
