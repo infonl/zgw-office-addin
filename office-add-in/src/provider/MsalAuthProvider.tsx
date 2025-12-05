@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { PublicClientApplication, Configuration } from "@azure/msal-browser";
 import { useLogger } from "../hooks/useLogger";
