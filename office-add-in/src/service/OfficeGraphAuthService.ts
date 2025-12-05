@@ -17,7 +17,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
   private tokenRequest: Promise<string> | null = null;
   private readonly requiredScopes = ["Mail.Read", "User.Read"] as const;
   private msalAuth: MsalAuthContextType | null = null;
-  // ✅ Geen private env property meer!
 
   constructor(logger: ReturnType<typeof useLogger>) {
     this.logger = logger;
