@@ -84,10 +84,6 @@ export function MsalAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (!isInitialized) {
-    return <div style={{ padding: "20px" }}>Loading authentication...</div>;
-  }
-
   return (
     <MsalAuthContext.Provider value={{ getAccessToken, isInitialized }}>
       {children}
