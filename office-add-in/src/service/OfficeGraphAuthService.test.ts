@@ -10,6 +10,7 @@ import { MicrosoftJwtPayload } from "./GraphTypes";
 import { addMinutes } from "date-fns";
 
 const mockMsalAuth = {
+  isInitialized: true,
   getAccessToken: vi.fn(),
 };
 
@@ -23,7 +24,7 @@ const vitestDummyLogger = {
 
 const createService = () => {
   const service = new OfficeGraphAuthService(vitestDummyLogger);
-  // service.setMsalAuth(mockMsalAuth);
+  service.setMsalAuth(mockMsalAuth);
   return service;
 };
 
@@ -125,7 +126,7 @@ describe("OfficeGraphAuthService", () => {
       mockMsalAuth.getAccessToken.mockResolvedValue(invalidToken);
 
       await expect(service.getAccessToken()).rejects.toThrow(
-        "Graph authentication failed: MSAL token audience 'https://wrong-audience.com' is not valid for Graph API"
+        "Graph authentication failed: MSAL token audience https://wrong-audience.com is not valid for Graph API"
       );
     });
 

@@ -76,7 +76,8 @@ export class OfficeGraphAuthService implements GraphAuthService {
         const jwtPayload = this.decodeJwtPayload(msalToken);
 
         if (!jwtPayload) throw new Error("Failed to decode MSAL token");
-        if (!this.isGraphAudience(jwtPayload)) throw new Error("MSAL token audience is invalid");
+        if (!this.isGraphAudience(jwtPayload))
+          throw new Error("MSAL token audience " + jwtPayload.aud + " is not valid for Graph API");
         if (!this.tokenHasScopes(jwtPayload, this.requiredScopes)) {
           const grantedScopes = jwtPayload.scp?.split(" ") || [];
           throw new Error(
