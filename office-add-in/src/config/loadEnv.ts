@@ -54,26 +54,3 @@ export async function loadEnv(): Promise<RuntimeEnv> {
     throw error;
   }
 }
-
-/**
- * Get cached environment (synchronous)
- * Safe to use AFTER loadEnv() has been called
- */
-export function getEnv(): RuntimeEnv {
-  // Voor lokaal: maak meteen een cached versie aan als die er niet is
-  if (!cachedEnv && process.env.APP_ENV && process.env.APP_ENV === "local") {
-    cachedEnv = runtimeEnvSchema.parse({
-      APP_ENV: "local",
-      MSAL_CLIENT_ID: process.env.MSAL_CLIENT_ID || "",
-      MSAL_AUTHORITY: process.env.MSAL_AUTHORITY || "",
-      MSAL_REDIRECT_URI: process.env.MSAL_REDIRECT_URI || "",
-      MSAL_SCOPES: process.env.MSAL_SCOPES || "",
-    });
-  }
-
-  if (!cachedEnv) {
-    throw new Error("Environment not loaded yet. Call loadEnv() first.");
-  }
-
-  return cachedEnv;
-}

@@ -4,14 +4,14 @@
  */
 
 import { useCallback } from "react";
-import { getEnv } from "../config/loadEnv";
+import { loadEnv } from "../config/loadEnv";
 
 /**
  * Check if we're in development mode (local or test)
  */
-function isDev(): boolean {
+async function isDev(): Promise<boolean> {
   try {
-    const env = getEnv();
+    const env = await loadEnv();
     return env.APP_ENV === "local" || env.APP_ENV === "test";
   } catch {
     // Fallback voor early initialization
