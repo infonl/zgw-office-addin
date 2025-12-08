@@ -81,7 +81,7 @@ EOF
 
 ###
 # Generate runtime environment configuration for frontend
-# This allows the React app to read Kubernetes environment variables at runtime
+# This allows the React app to read environment variables at runtime
 FRONTEND_CONFIG_JSON="$NGINX_PUBLIC_HTML/config/env.json"
 echo "Generating runtime environment configuration at '$FRONTEND_CONFIG_JSON'"
 mkdir -p "$(dirname "$FRONTEND_CONFIG_JSON")"
