@@ -34,7 +34,7 @@ export function MsalAuthProvider({ children }: { children: React.ReactNode }) {
           redirectUri: env.MSAL_REDIRECT_URI,
         });
 
-        if (env.MSAL_CLIENT_ID == "" && env.MSAL_AUTHORITY == "" || env.MSAL_REDIRECT_URI == "") {
+        if (env.MSAL_CLIENT_ID == "" || env.MSAL_AUTHORITY == "" || env.MSAL_REDIRECT_URI == "") {
           throw new Error(
             "MSAL_CLIENT_ID, MSAL_AUTHORITY, or MSAL_REDIRECT_URI is not set in the environment configuration"
           );
