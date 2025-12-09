@@ -96,6 +96,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
           jwtPayload?.roles
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
+        this.logger.DEBUG("🔎 scopes:", this.requiredScopes);
 
         const isValidGraphToken =
           jwtPayload &&
