@@ -120,7 +120,7 @@
 
       <WebApplicationInfo>
         <Id>696724da-f71f-40c4-9dce-53ab2bc8e0cb</Id>
-        <Resource>api://localhost:3000/96724da-f71f-40c4-9dce-53ab2bc8e0cb</Resource>
+        <Resource>api://localhost:3000/696724da-f71f-40c4-9dce-53ab2bc8e0cb</Resource>
         <Scopes>
           <Scope>access_as_user</Scope>
           <Scope>openid</Scope>
