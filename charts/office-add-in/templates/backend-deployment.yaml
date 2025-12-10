@@ -43,6 +43,16 @@ spec:
             - name: FRONTEND_URL
               value: {{ .Values.frontend.frontendUrl | quote }}
             {{- end }}
+            - name: MSAL_CLIENT_ID
+              value: {{ .Values.backend.msalClientId | quote }}
+            - name: MSAL_AUTHORITY
+              value: {{ .Values.backend.msalAuthority | quote }}
+            - name: MSAL_REDIRECT_URI
+              value: {{ .Values.backend.msalRedirectUri | quote }}
+            - name: MSAL_SCOPES
+              value: {{ .Values.backend.msalScopes | quote }}
+            - name: MSAL_SECRET
+              value: {{ .Values.backend.msalSecret | quote }}
           livenessProbe:
             httpGet:
               path: /health
