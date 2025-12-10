@@ -6,6 +6,7 @@
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
 
+
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
 import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
@@ -13,9 +14,26 @@ import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
 
+interface ExtendedOfficeContext extends Office.Context {
+  auth?: {
+    getAccessTokenAsync: (
+      _options: {
+        forMSGraphAccess?: boolean;
+        allowSignInPrompt?: boolean;
+        allowConsentPrompt?: boolean;
+      },
+      _callback: (_result: {
+        status: Office.AsyncResultStatus;
+        value?: string;
+        error?: Office.Error;
+      }) => void
+    ) => void;
+  };
+}
+
 /**
  * Microsoft Graph authentication service for Office Add-ins
- * Uses MSAL to obtain Graph API tokens
+ * Uses Office.js authentication context to obtain Graph API tokens
  */
 export class OfficeGraphAuthService implements GraphAuthService {
   private logger;
@@ -77,15 +95,40 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
-    this.tokenRequest = (async () => {
-      try {
-        this.logger.DEBUG("🛟 Using MSAL authentication...");
-        if (!this.msalAuth) {
-          throw new Error("MSAL auth is not available. Cannot acquire token.");
-        }
-
-        const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
-        let jwtPayload = this.decodeJwtPayload(msalToken);
+    // Use Office SSO (Single Sign-On) to get Graph API access token
+    this.tokenRequest = new Promise<string>((resolve, reject) => {
+      const officeContext = Office.context as ExtendedOfficeContext;
+      if (officeContext.auth?.getAccessTokenAsync) {
+        this.logger.DEBUG("office context");
+        officeContext.auth.getAccessTokenAsync(
+          {
+            forMSGraphAccess: true,
+            allowSignInPrompt: true,
+            allowConsentPrompt: true,
+          },
+          (result) => {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              resolve(result.value!);
+            } else {
+              reject(result.error);
+            }
+          }
+        );
+      } else {
+        // Fallback to Office.auth.getAccessToken if context.auth is not available
+        this.logger.DEBUG("office without context");
+        Office.auth
+          .getAccessToken({
+            forMSGraphAccess: true,
+            allowSignInPrompt: true,
+            allowConsentPrompt: true,
+          })
+          .then(resolve)
+          .catch(reject);
+      }
+    })
+      .then(async (token) => {
+        let jwtPayload = this.decodeJwtPayload(token);
 
         this.logger.DEBUG("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
         this.logger.DEBUG("🔎 TOKEN.AUD:", jwtPayload?.aud);
@@ -96,18 +139,52 @@ export class OfficeGraphAuthService implements GraphAuthService {
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
+        // Validate that Office SSO actually returned a Graph API token
         if (!jwtPayload) {
-          throw new Error("Failed to decode MSAL token");
+          this.logger.ERROR("❌ Failed to decode Office SSO token");
+          throw new Error("Failed to decode Office SSO token");
         }
-        if (!this.isGraphAudience(jwtPayload)) {
-          throw new Error(`MSAL token audience '${jwtPayload.aud}' is not valid for Graph API`);
-        }
-        if (!this.tokenHasScopes(jwtPayload, this.requiredScopes)) {
-          const grantedScopes = jwtPayload.scp?.split(" ") || [];
+
+        const isGraphToken = this.isGraphAudience(jwtPayload);
+        this.logger.DEBUG("🔍 Token validation:", {
+          audience: jwtPayload.aud,
+          isGraphAudience: isGraphToken,
+          expectedGraphAudiences: [
+            "https://graph.microsoft.com",
+            "00000003-0000-0000-c000-000000000000",
+          ],
+        });
+
+        if (!isGraphToken) {
+          this.logger.ERROR("❌ Office SSO returned app token instead of Graph token", {
+            received: jwtPayload.aud,
+            expected: "https://graph.microsoft.com or 00000003-0000-0000-c000-000000000000",
+            forMSGraphAccess: true,
+          });
           throw new Error(
-            `MSAL token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+            `Office SSO failed to return Graph token. Got audience: ${jwtPayload.aud}`
           );
         }
+
+        const hasRequiredScopes = this.tokenHasScopes(jwtPayload, this.requiredScopes);
+        const grantedScopes = jwtPayload.scp?.split(" ") || [];
+        this.logger.DEBUG("🔒 Scope validation:", {
+          required: this.requiredScopes,
+          granted: grantedScopes,
+          hasAllRequired: hasRequiredScopes,
+        });
+
+        if (!hasRequiredScopes) {
+          this.logger.ERROR("❌ Graph token missing required scopes", {
+            required: this.requiredScopes,
+            granted: grantedScopes,
+          });
+          throw new Error(
+            `Graph token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+          );
+        }
+
+        this.logger.DEBUG("✅ Valid Graph API token received from Office SSO");
 
         // Cache token using JWT exp if present; fallback to 50 minutes
         let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
@@ -120,25 +197,64 @@ export class OfficeGraphAuthService implements GraphAuthService {
         }
 
         this.tokenCache = {
-          token: msalToken,
+          token,
           expires: addMinutes(
             new Date(tokenExpiryTimestamp),
             -TOKEN_EXPIRY_OFFSET_MINUTES
           ).getTime(),
         };
+        return token;
+      })
+      .catch(async (error) => {
+        this.logger.ERROR("❌ Office SSO Graph authentication failed:", {
+          code: error?.code,
+          name: error?.name,
+          message: error?.message,
+          environment: this.env.APP_ENV,
+        });
 
-        return msalToken;
-      } catch (msalError) {
-        this.logger.ERROR("⚠️ MSAL authentication failed:", msalError);
+        if (this.env.APP_ENV === "local") {
+          this.logger.DEBUG("🛟 Falling back to MSAL (local only)...");
+          try {
+            if (this.msalAuth) {
+              const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
+              let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
+              const msalJwtPayload = this.decodeJwtPayload(msalToken);
+              if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
+                msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+              }
+              this.tokenCache = {
+                token: msalToken,
+                expires: addMinutes(
+                  new Date(msalTokenExpiryTimestamp),
+                  -TOKEN_EXPIRY_OFFSET_MINUTES
+                ).getTime(),
+              };
+              return msalToken;
+            } else {
+              this.logger.ERROR(
+                "MSAL fallback requested but msalAuth is not available. Cannot acquire token in local environment."
+              );
+            }
+          } catch (msalError) {
+            this.logger.ERROR("⚠️ MSAL fallback also failed:", msalError);
+          }
+        } else {
+          this.logger.ERROR("❌ Office SSO must work on test/prod. MSAL fallback not available.", {
+            suggestion: "Check Azure AD app registration and Graph API permissions",
+          });
+        }
+
         this.tokenCache = null;
 
-        const errorMessage =
-          msalError instanceof Error ? msalError.message : "MSAL authentication error";
-        throw new Error(`Graph authentication failed: ${errorMessage}`);
-      } finally {
+        const errorCode = error?.code || "unknown";
+        const errorMessage = error?.message || "Authentication error from Office SSO.";
+
+        throw new Error(`Graph authentication failed: ${errorMessage} (Code: ${errorCode})`);
+      })
+      .finally(() => {
         this.tokenRequest = null;
-      }
-    })();
+      });
 
     return this.tokenRequest;
   }
