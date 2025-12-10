@@ -17,7 +17,7 @@ const cca = new ConfidentialClientApplication(msalConfig);
 
 export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {
   try {
-    LoggerService.debug('config', msalConfig);
+    LoggerService.debug("config: ", msalConfig);
     const result = await cca.acquireTokenOnBehalfOf({
       oboAssertion: bootstrapToken,
       scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
