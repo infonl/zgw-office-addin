@@ -1,10 +1,9 @@
 /*
- * Microsoft Graph On-Behalf-Of service
+ * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
  */
-
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { LoggerService } from "./LoggerService";
-// import { envServerSchema } from "../config/envSchema";
 
 const msalConfig = {
   auth: {
@@ -18,6 +17,7 @@ const cca = new ConfidentialClientApplication(msalConfig);
 
 export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {
   try {
+    LoggerService.debug('config', msalConfig);
     const result = await cca.acquireTokenOnBehalfOf({
       oboAssertion: bootstrapToken,
       scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
