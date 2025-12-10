@@ -6,7 +6,6 @@
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
 
-
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
 import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
