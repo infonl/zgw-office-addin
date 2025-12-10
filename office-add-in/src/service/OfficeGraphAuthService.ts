@@ -13,9 +13,26 @@ import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
 
+interface ExtendedOfficeContext extends Office.Context {
+  auth?: {
+    getAccessTokenAsync: (
+      _options: {
+        forMSGraphAccess?: boolean;
+        allowSignInPrompt?: boolean;
+        allowConsentPrompt?: boolean;
+      },
+      _callback: (_result: {
+        status: Office.AsyncResultStatus;
+        value?: string;
+        error?: Office.Error;
+      }) => void
+    ) => void;
+  };
+}
+
 /**
  * Microsoft Graph authentication service for Office Add-ins
- * Uses MSAL to obtain Graph API tokens
+ * Uses Office.js authentication context to obtain Graph API tokens
  */
 export class OfficeGraphAuthService implements GraphAuthService {
   private logger;
@@ -31,6 +48,27 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
   setMsalAuth(msalAuth: MsalAuthContextType | null) {
     this.msalAuth = msalAuth;
+  }
+
+  private async exchangeTokenWithBackend(bootstrapToken: string): Promise<string> {
+    const baseUrl = "https://localhost:3003";
+
+    const response = await fetch(baseUrl + "/auth/obo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: bootstrapToken }),
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      this.logger.ERROR("❌ OBO backend error:", message);
+      throw new Error("Backend OBO failed: " + message);
+    }
+
+    const { access_token } = await response.json();
+    return access_token;
   }
 
   // Check if access token is for Microsoft Graph by validating audience.
@@ -77,15 +115,40 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
-    this.tokenRequest = (async () => {
-      try {
-        this.logger.DEBUG("🛟 Using MSAL authentication...");
-        if (!this.msalAuth) {
-          throw new Error("MSAL auth is not available. Cannot acquire token.");
-        }
-
-        const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
-        let jwtPayload = this.decodeJwtPayload(msalToken);
+    // Use Office SSO (Single Sign-On) to get Graph API access token
+    this.tokenRequest = new Promise<string>((resolve, reject) => {
+      const officeContext = Office.context as ExtendedOfficeContext;
+      if (officeContext.auth?.getAccessTokenAsync) {
+        this.logger.DEBUG("office context");
+        officeContext.auth.getAccessTokenAsync(
+          {
+            forMSGraphAccess: true,
+            allowSignInPrompt: true,
+            allowConsentPrompt: true,
+          },
+          (result) => {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              resolve(result.value!);
+            } else {
+              reject(result.error);
+            }
+          }
+        );
+      } else {
+        // Fallback to Office.auth.getAccessToken if context.auth is not available
+        this.logger.DEBUG("office without context");
+        Office.auth
+          .getAccessToken({
+            forMSGraphAccess: true,
+            allowSignInPrompt: true,
+            allowConsentPrompt: true,
+          })
+          .then(resolve)
+          .catch(reject);
+      }
+    })
+      .then(async (token) => {
+        let jwtPayload = this.decodeJwtPayload(token);
 
         this.logger.DEBUG("🔎 TOKEN.SCP (scopes):", jwtPayload?.scp);
         this.logger.DEBUG("🔎 TOKEN.AUD:", jwtPayload?.aud);
@@ -96,49 +159,106 @@ export class OfficeGraphAuthService implements GraphAuthService {
         );
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
-        if (!jwtPayload) {
-          throw new Error("Failed to decode MSAL token");
+        // Validate that Office SSO actually returned a Graph API token
+        // We hebben *geen* Graph token, maar een Office bootstrap token.
+        // Stuur naar backend OBO flow.
+        this.logger.DEBUG("🔁 Performing OBO exchange on backend...");
+
+        const graphToken = await this.exchangeTokenWithBackend(token);
+        this.logger.DEBUG("✅ OBO exchange completed, received Graph token.", graphToken);
+
+        // decode payload to determine caching
+        const graphPayload = this.decodeJwtPayload(graphToken);
+        let expiryTimestamp = addMinutes(new Date(), 50).getTime();
+        this.logger.DEBUG("🔎 GRAPH PAYLOAD", graphPayload);
+        if (!graphPayload) {
+          this.logger.ERROR("❌ Unable to decode Graph token payload");
+          throw new Error("Unable to decode Graph token payload");
         }
-        if (!this.isGraphAudience(jwtPayload)) {
-          throw new Error(`MSAL token audience '${jwtPayload.aud}' is not valid for Graph API`);
+
+        // 1️⃣ Controleer audience
+        if (!this.isGraphAudience(graphPayload)) {
+          this.logger.ERROR("❌ Graph token audience invalid", { aud: graphPayload.aud });
+          throw new Error(`Graph token has invalid audience: ${graphPayload.aud}`);
         }
-        if (!this.tokenHasScopes(jwtPayload, this.requiredScopes)) {
-          const grantedScopes = jwtPayload.scp?.split(" ") || [];
+
+        // 2️⃣ Controleer scopes
+        const hasRequiredScopes = this.tokenHasScopes(graphPayload, this.requiredScopes);
+        if (!hasRequiredScopes) {
+          const grantedScopes = graphPayload.scp?.split(" ") || [];
+          this.logger.ERROR("❌ Graph token missing required scopes", {
+            required: this.requiredScopes,
+            granted: grantedScopes,
+          });
           throw new Error(
-            `MSAL token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+            `Graph token missing required scopes. Required: ${this.requiredScopes.join(
+              ", "
+            )}. Granted: ${grantedScopes.join(", ")}`
           );
         }
 
-        // Cache token using JWT exp if present; fallback to 50 minutes
-        let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-        try {
-          if (jwtPayload && typeof jwtPayload.exp === "number") {
-            tokenExpiryTimestamp = jwtPayload.exp * 1000;
-          }
-        } catch {
-          this.logger.DEBUG("Could not decode token exp, using default lifetime");
+        if (graphPayload?.exp) {
+          expiryTimestamp = graphPayload.exp * 1000;
         }
 
         this.tokenCache = {
-          token: msalToken,
-          expires: addMinutes(
-            new Date(tokenExpiryTimestamp),
-            -TOKEN_EXPIRY_OFFSET_MINUTES
-          ).getTime(),
+          token: graphToken,
+          expires: addMinutes(new Date(expiryTimestamp), -TOKEN_EXPIRY_OFFSET_MINUTES).getTime(),
         };
 
-        return msalToken;
-      } catch (msalError) {
-        this.logger.ERROR("⚠️ MSAL authentication failed:", msalError);
+        this.logger.DEBUG("✅ Graph token acquired via OBO backend flow");
+        return graphToken;
+      })
+      .catch(async (error) => {
+        this.logger.ERROR("❌ Office SSO Graph authentication failed:", {
+          code: error?.code,
+          name: error?.name,
+          message: error?.message,
+          environment: this.env.APP_ENV,
+        });
+
+        if (this.env.APP_ENV === "local") {
+          this.logger.DEBUG("🛟 Falling back to MSAL (local only)...");
+          try {
+            if (this.msalAuth) {
+              const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
+              let msalTokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
+              const msalJwtPayload = this.decodeJwtPayload(msalToken);
+              if (msalJwtPayload && typeof msalJwtPayload.exp === "number") {
+                msalTokenExpiryTimestamp = msalJwtPayload.exp * 1000;
+              }
+              this.tokenCache = {
+                token: msalToken,
+                expires: addMinutes(
+                  new Date(msalTokenExpiryTimestamp),
+                  -TOKEN_EXPIRY_OFFSET_MINUTES
+                ).getTime(),
+              };
+              return msalToken;
+            } else {
+              this.logger.ERROR(
+                "MSAL fallback requested but msalAuth is not available. Cannot acquire token in local environment."
+              );
+            }
+          } catch (msalError) {
+            this.logger.ERROR("⚠️ MSAL fallback also failed:", msalError);
+          }
+        } else {
+          this.logger.ERROR("❌ Office SSO must work on test/prod. MSAL fallback not available.", {
+            suggestion: "Check Azure AD app registration and Graph API permissions",
+          });
+        }
+
         this.tokenCache = null;
 
-        const errorMessage =
-          msalError instanceof Error ? msalError.message : "MSAL authentication error";
-        throw new Error(`Graph authentication failed: ${errorMessage}`);
-      } finally {
+        const errorCode = error?.code || "unknown";
+        const errorMessage = error?.message || "Authentication error from Office SSO.";
+
+        throw new Error(`Graph authentication failed: ${errorMessage} (Code: ${errorCode})`);
+      })
+      .finally(() => {
         this.tokenRequest = null;
-      }
-    })();
+      });
 
     return this.tokenRequest;
   }

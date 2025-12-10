@@ -5,7 +5,8 @@
 
 const path = require("path");
 const dotenv = require("dotenv");
-const envFrontend = dotenv.config({ path: path.resolve(__dirname, "../.env") }).parsed || {};
+const envFrontend =
+  dotenv.config({ path: path.resolve(__dirname, ".env.local.frontend") }).parsed || {};
 const fs = require("fs");
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
