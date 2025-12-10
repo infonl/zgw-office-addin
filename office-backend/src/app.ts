@@ -13,6 +13,7 @@ import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
+import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
@@ -85,6 +86,24 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
   "/zaken/:zaakIdentificatie/documenten",
   (req, res) => zaakController.addDocumentToZaak(req, res),
 );
+
+// === OBO AUTH ENDPOINT ===
+fastify.post("/auth/obo", async (req, res) => {
+  try {
+    const body = req.body as any;
+
+    if (!body?.token) {
+      return res.status(400).send("Missing bootstrap token");
+    }
+
+    const graphToken = await exchangeBootstrapTokenForGraphToken(body.token);
+
+    return res.status(200).send({ access_token: graphToken });
+  } catch (err: any) {
+    LoggerService.error("❌ /auth/obo error:", err);
+    return res.status(500).send(err.message);
+  }
+});
 
 const port = Number(envServerSchema.PORT || 3003);
 

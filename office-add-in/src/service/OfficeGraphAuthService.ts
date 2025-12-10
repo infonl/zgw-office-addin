@@ -50,6 +50,27 @@ export class OfficeGraphAuthService implements GraphAuthService {
     this.msalAuth = msalAuth;
   }
 
+  private async exchangeTokenWithBackend(bootstrapToken: string): Promise<string> {
+    const baseUrl = "https://localhost:3003";
+
+    const response = await fetch(baseUrl + "/auth/obo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: bootstrapToken }),
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      this.logger.ERROR("❌ OBO backend error:", message);
+      throw new Error("Backend OBO failed: " + message);
+    }
+
+    const { access_token } = await response.json();
+    return access_token;
+  }
+
   // Check if access token is for Microsoft Graph by validating audience.
   // For value of id: https://web.archive.org/web/20241114222012/https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/governance/verify-first-party-apps-sign-in#application-ids-of-commonly-used-microsoft-applications
   private isGraphAudience(payload: MicrosoftJwtPayload): boolean {
@@ -139,70 +160,54 @@ export class OfficeGraphAuthService implements GraphAuthService {
         this.logger.DEBUG("🔎 TOKEN.EXP:", jwtPayload?.exp, "iat:", jwtPayload?.iat);
 
         // Validate that Office SSO actually returned a Graph API token
-        if (!jwtPayload) {
-          this.logger.ERROR("❌ Failed to decode Office SSO token");
-          throw new Error("Failed to decode Office SSO token");
+        // We hebben *geen* Graph token, maar een Office bootstrap token.
+        // Stuur naar backend OBO flow.
+        this.logger.DEBUG("🔁 Performing OBO exchange on backend...");
+
+        const graphToken = await this.exchangeTokenWithBackend(token);
+        this.logger.DEBUG("✅ OBO exchange completed, received Graph token.", graphToken);
+
+        // decode payload to determine caching
+        const graphPayload = this.decodeJwtPayload(graphToken);
+        let expiryTimestamp = addMinutes(new Date(), 50).getTime();
+        this.logger.DEBUG("🔎 GRAPH PAYLOAD", graphPayload);
+        if (!graphPayload) {
+          this.logger.ERROR("❌ Unable to decode Graph token payload");
+          throw new Error("Unable to decode Graph token payload");
         }
 
-        const isGraphToken = this.isGraphAudience(jwtPayload);
-        this.logger.DEBUG("🔍 Token validation:", {
-          audience: jwtPayload.aud,
-          isGraphAudience: isGraphToken,
-          expectedGraphAudiences: [
-            "https://graph.microsoft.com",
-            "00000003-0000-0000-c000-000000000000",
-          ],
-        });
-
-        if (!isGraphToken) {
-          this.logger.ERROR("❌ Office SSO returned app token instead of Graph token", {
-            received: jwtPayload.aud,
-            expected: "https://graph.microsoft.com or 00000003-0000-0000-c000-000000000000",
-            forMSGraphAccess: true,
-          });
-          throw new Error(
-            `Office SSO failed to return Graph token. Got audience: ${jwtPayload.aud}`
-          );
+        // 1️⃣ Controleer audience
+        if (!this.isGraphAudience(graphPayload)) {
+          this.logger.ERROR("❌ Graph token audience invalid", { aud: graphPayload.aud });
+          throw new Error(`Graph token has invalid audience: ${graphPayload.aud}`);
         }
 
-        const hasRequiredScopes = this.tokenHasScopes(jwtPayload, this.requiredScopes);
-        const grantedScopes = jwtPayload.scp?.split(" ") || [];
-        this.logger.DEBUG("🔒 Scope validation:", {
-          required: this.requiredScopes,
-          granted: grantedScopes,
-          hasAllRequired: hasRequiredScopes,
-        });
-
+        // 2️⃣ Controleer scopes
+        const hasRequiredScopes = this.tokenHasScopes(graphPayload, this.requiredScopes);
         if (!hasRequiredScopes) {
+          const grantedScopes = graphPayload.scp?.split(" ") || [];
           this.logger.ERROR("❌ Graph token missing required scopes", {
             required: this.requiredScopes,
             granted: grantedScopes,
           });
           throw new Error(
-            `Graph token missing required scopes. Required: ${this.requiredScopes.join(", ")}. Granted: ${grantedScopes.join(", ")}`
+            `Graph token missing required scopes. Required: ${this.requiredScopes.join(
+              ", "
+            )}. Granted: ${grantedScopes.join(", ")}`
           );
         }
 
-        this.logger.DEBUG("✅ Valid Graph API token received from Office SSO");
-
-        // Cache token using JWT exp if present; fallback to 50 minutes
-        let tokenExpiryTimestamp = addMinutes(new Date(), 50).getTime();
-        try {
-          if (jwtPayload && typeof jwtPayload.exp === "number") {
-            tokenExpiryTimestamp = jwtPayload.exp * 1000;
-          }
-        } catch {
-          this.logger.DEBUG("Could not decode token exp, using default lifetime");
+        if (graphPayload?.exp) {
+          expiryTimestamp = graphPayload.exp * 1000;
         }
 
         this.tokenCache = {
-          token,
-          expires: addMinutes(
-            new Date(tokenExpiryTimestamp),
-            -TOKEN_EXPIRY_OFFSET_MINUTES
-          ).getTime(),
+          token: graphToken,
+          expires: addMinutes(new Date(expiryTimestamp), -TOKEN_EXPIRY_OFFSET_MINUTES).getTime(),
         };
-        return token;
+
+        this.logger.DEBUG("✅ Graph token acquired via OBO backend flow");
+        return graphToken;
       })
       .catch(async (error) => {
         this.logger.ERROR("❌ Office SSO Graph authentication failed:", {
