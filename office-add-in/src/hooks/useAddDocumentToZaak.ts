@@ -9,6 +9,7 @@ import { AddDocumentSchema } from "./types";
 import { useOffice } from "./useOffice";
 import { useHttp } from "./useHttp";
 import { ZrcType } from "../../../generated/zrc-generated-types";
+import { useLogger } from "./useLogger";
 
 type SuccessData = ZrcType<"ZaakInformatieObject">;
 
@@ -17,9 +18,27 @@ export function useAddDocumentToZaak(
 ) {
   const { getDocumentData, getFileName, host } = useOffice();
   const { POST } = useHttp();
+  const { DEBUG } = useLogger(useAddDocumentToZaak.name);
 
   return useMutation({
     mutationFn: async (data: AddDocumentSchema) => {
+      // If zaakidentificatie is empty, log a warning with a sanitized snapshot
+      if (!data.zaakidentificatie || data.zaakidentificatie.trim() === "") {
+        try {
+          const sanitized = { ...data } as Record<string, unknown>;
+          if (typeof sanitized.inhoud === "string") {
+            sanitized.inhoud = (sanitized.inhoud as string).substring(0, 200) + "...";
+          }
+          DEBUG("[useAddDocumentToZaak] empty zaakidentificatie detected");
+          DEBUG(
+            "[useAddDocumentToZaak] empty zaakidentificatie - request snapshot:",
+            JSON.stringify(sanitized)
+          );
+        } catch {
+          DEBUG("[useAddDocumentToZaak] empty zaakidentificatie - failed to snapshot request");
+        }
+      }
+
       return POST<SuccessData>(
         `/zaken/${data.zaakidentificatie}/documenten`,
         JSON.stringify(

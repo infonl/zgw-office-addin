@@ -99,7 +99,7 @@ module.exports = async (env, options) => {
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
-        chunks: ["polyfill", "taskpane", "react"],
+        chunks: ["polyfill", "react", "taskpane"],
       }),
       new CopyWebpackPlugin({
         patterns: [
