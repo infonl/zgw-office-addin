@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.58](https://img.shields.io/badge/Version-0.0.58-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.59](https://img.shields.io/badge/Version-0.0.59-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -33,7 +33,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.2.143@sha256:b16543fb4d1ad61b9a8a9bd6ff87c19f3ea94c900a67bf998627c4bda78837af"` |  |
+| backend.image.tag | string | `"v0.2.171@sha256:82b4ee7be41f7fbd2fd036f8f4067c59217fe73ca5413a2dba69ee40ca5eb1a0"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.msalAuthorityUrl | string | `"https://login.microsoftonline.com/"` | Authority URL for MSAL authentication towards Azure AD |
@@ -54,7 +54,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.2.143@sha256:2ef9fe57e9174e430823599be0e3fabc3034c3a27ae225c93e2107f6d564bf8c"` |  |
+| frontend.image.tag | string | `"v0.2.171@sha256:c1b30b1ab680e67641bf8cd8b5e9ef770a55e1564ec645a8a14a46bdf106d774"` |  |
 | frontend.imagePullSecrets | list | `[]` | Image pull secrets for the frontend deployment |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |
