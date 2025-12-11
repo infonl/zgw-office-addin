@@ -112,6 +112,7 @@ export function useOutlookForm() {
           processedCount: processedDocuments.length,
         });
 
+        DEBUG("processedDocuments for results", processedDocuments);
         results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
 
         DEBUG("✅ processAndUploadDocuments completed", {
@@ -124,6 +125,8 @@ export function useOutlookForm() {
 
       const uploadPayload = processedDocuments.map((doc, index) => {
         const result = results[index];
+        DEBUG("result for document uploadPayload", result);
+        DEBUG("doc for document uploadPayload", doc);
         const fileContent = result?.fileContent ?? "";
         let inhoud = "";
         if (fileContent instanceof ArrayBuffer) {
