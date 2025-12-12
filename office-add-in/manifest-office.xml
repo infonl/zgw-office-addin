@@ -6,7 +6,7 @@
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
   xsi:type="TaskPaneApp"
 >
-  <Id>e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Id>
+  <Id>696724da-f71f-40c4-9dce-53ab2bc8e0cb</Id>
   <Version>1.0.0</Version>
   <ProviderName>INFO.nl</ProviderName>
   <DefaultLocale>nl-NL</DefaultLocale>
@@ -19,6 +19,7 @@
     <AppDomain>https://www.info.nl/zaak-gericht-werken/office-integratie</AppDomain>
   </AppDomains>
   <Hosts>
+    <Host Name="Workbook" />
     <Host Name="Document" />
   </Hosts>
   <DefaultSettings>
@@ -30,6 +31,44 @@
     xsi:type="VersionOverridesV1_0"
   >
     <Hosts>
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl" />
+          </GetStarted>
+          <FunctionFile resid="Commands.Url" />
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="CommandsGroup">
+                <Label resid="CommandsGroup.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16" />
+                  <bt:Image size="32" resid="Icon.32x32" />
+                  <bt:Image size="80" resid="Icon.80x80" />
+                </Icon>
+                <Control xsi:type="Button" id="TaskpaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Supertip>
+                    <Title resid="TaskpaneButton.Label" />
+                    <Description resid="TaskpaneButton.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16" />
+                    <bt:Image size="32" resid="Icon.32x32" />
+                    <bt:Image size="80" resid="Icon.80x80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
       <Host xsi:type="Document">
         <DesktopFormFactor>
           <GetStarted>
@@ -94,12 +133,12 @@
       </bt:LongStrings>
     </Resources>
     <WebApplicationInfo>
-      <Id>e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Id>
-      <Resource>api://localhost:3000/e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3</Resource>
+      <Id>696724da-f71f-40c4-9dce-53ab2bc8e0cb</Id>
+      <Resource>api://localhost:3000/696724da-f71f-40c4-9dce-53ab2bc8e0cb</Resource>
       <Scopes>
         <Scope>access_as_user</Scope>
         <Scope>openid</Scope>
-        <Scope>user.read</Scope>
+        <Scope>User.Read</Scope>
         <Scope>profile</Scope>
       </Scopes>
     </WebApplicationInfo>

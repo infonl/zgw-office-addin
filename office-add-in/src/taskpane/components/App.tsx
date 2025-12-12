@@ -25,6 +25,7 @@ import { FRONTEND_ENV } from "../../provider/envFrontendSchema";
 import { OfficeForm } from "./OfficeForm";
 import { OutlookForm } from "./OutlookForm/OutlookForm";
 import { useCommonStyles } from "./styles/shared";
+import { useLogger } from "../../hooks/useLogger";
 
 const useStyles = makeStyles({
   root: {
@@ -97,10 +98,19 @@ export default App;
 function Main() {
   const styles = useStyles();
   const common = useCommonStyles();
+  const { WARN } = useLogger(useOffice.name);
 
-  const { isOutlook, isWord } = useOffice();
+  const { isOutlook, isWord, isExcel } = useOffice();
 
   const { documentAddedToZaak, reset } = useZaak();
+
+  const handleClose = () => {
+    if (isWord) {
+      Office.addin.hide();
+    } else if (isExcel) {
+      WARN("Button werkt hier niet zonder Shared Runtime.");
+    }
+  };
 
   if (documentAddedToZaak) {
     return (
@@ -119,7 +129,7 @@ function Main() {
           <Button appearance="primary" onClick={reset}>
             Volgend document
           </Button>
-          <Button appearance="secondary" onClick={() => Office.addin.hide()}>
+          <Button appearance="secondary" onClick={handleClose}>
             Sluiten
           </Button>
         </section>
@@ -130,6 +140,7 @@ function Main() {
   return (
     <div className={styles.root}>
       {isWord && <OfficeForm />}
+      {isExcel && <OfficeForm />}
       {isOutlook && <OutlookForm />}
     </div>
   );

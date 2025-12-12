@@ -16,6 +16,7 @@ export function useOffice() {
   const host = Office.context.host;
   const isWord = host === Office.HostType.Word;
   const isOutlook = host === Office.HostType.Outlook;
+  const isExcel = host === Office.HostType.Excel;
 
   const getWordFileName = useCallback(() => {
     return new Promise<string>((resolve, reject) => {
@@ -51,6 +52,10 @@ export function useOffice() {
       if (isWord) {
         const n = await getWordFileName();
         return sanitizeFileName(n || "document.docx");
+      }
+      if (isExcel) {
+        const n = await getWordFileName();
+        return sanitizeFileName(n || "workbook.xlsx");
       }
       if (isOutlook) {
         const subj = getOutlookSubject();
@@ -296,6 +301,7 @@ export function useOffice() {
     host,
     isWord,
     isOutlook,
+    isExcel,
     processAndUploadDocuments,
   };
 }

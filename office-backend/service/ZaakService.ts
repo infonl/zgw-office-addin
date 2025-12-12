@@ -74,6 +74,10 @@ export class ZaakService {
       case "doc":
       case "docx":
         return "application/msword";
+      case "xls":
+        return "application/vnd.ms-excel";
+      case "xlsx":
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
       case "eml":
         return "message/rfc822";
       case "pdf":
