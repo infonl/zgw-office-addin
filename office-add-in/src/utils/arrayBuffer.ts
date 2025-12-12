@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-// Chuncked conversion of ArrayBuffer to Base64 to handle large files without stack overflow
+// Chunked conversion of ArrayBuffer to Base64 to handle large files without stack overflow
 export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   const bytes = new Uint8Array(buffer);
   let binary = "";

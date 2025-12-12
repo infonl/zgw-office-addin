@@ -204,26 +204,6 @@ export function useOutlookForm() {
     }
   }, [files, form, zaak.data?.identificatie]);
 
-  // Update zaakidentificatie in all documents when zaak changes
-  // React.useEffect(() => {
-  //   const currentDocuments = form.getValues("documents");
-  //   if (!currentDocuments.length) return;
-
-  //   const zaakId = zaak.data?.identificatie || "";
-
-  //   // Only update if zaakidentificatie has changed
-  //   const needsUpdate = currentDocuments.some((doc) => doc.zaakidentificatie !== zaakId);
-
-  //   if (needsUpdate) {
-  //     DEBUG("📝 Updating zaakidentificatie in all documents:", zaakId);
-  //     const updatedDocuments = currentDocuments.map((doc) => ({
-  //       ...doc,
-  //       zaakidentificatie: zaakId,
-  //     }));
-  //     form.setValue("documents", updatedDocuments);
-  //   }
-  // }, [zaak.data?.identificatie, form, DEBUG]);
-
   return {
     form,
     documents,
