@@ -7,7 +7,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
+import { document, DocumentSchema, SelectedDocument, UploadStatus } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
@@ -17,6 +17,9 @@ import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocum
 import { useLogger } from "../../../../hooks/useLogger";
 import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
 import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
+import { useToast } from "../../../../provider/ToastProvider";
+import { Toast, ToastTitle, ToastBody, Spinner } from "@fluentui/react-components";
+import { pluralize, conjugate } from "../../../../utils/language";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
@@ -37,6 +40,14 @@ export function useOutlookForm() {
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
   const { mutateAsync } = useAddDocumentToZaak();
+  const { dispatchToast, dismissToast } = useToast();
+  const [uploadStatus, setUploadStatus] = React.useState<Record<string, UploadStatus>>({});
+  const [uploadedEmail, setUploadedEmail] = React.useState<boolean | undefined>(undefined);
+  const [uploadedAttachments, setUploadedAttachments] = React.useState<number | undefined>(
+    undefined
+  );
+
+  const isUploading = Object.values(uploadStatus).some((status) => status === "loading");
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -54,6 +65,27 @@ export function useOutlookForm() {
       ({ selected }) => selected
     ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
+
+    const loadingStatus: Record<string, "idle" | "loading" | "success" | "error"> = {};
+    selectedDocuments.forEach((doc) => {
+      loadingStatus[doc.attachment.id] = "loading";
+    });
+    setUploadStatus(loadingStatus);
+    dispatchToast(
+      React.createElement(Toast, null, [
+        React.createElement(
+          ToastTitle,
+          { media: React.createElement(Spinner, { size: "tiny" }) },
+          "Bestanden koppelen"
+        ),
+        React.createElement(
+          ToastBody,
+          null,
+          `${selectedDocuments.length} bestand(en) worden gekoppeld aan ${zaak.data?.identificatie}.`
+        ),
+      ]),
+      { intent: "info", toastId: "uploading-documents" }
+    );
 
     selectedDocuments.forEach((doc, index) => {
       DEBUG(`📋 File ${index + 1}:`, {
@@ -161,17 +193,91 @@ export function useOutlookForm() {
         })
       );
 
+      // Update status per document based on results
+      const newUploadStatus = { ...loadingStatus };
+      mutationResults.forEach((result, index) => {
+        const attachmentId = selectedDocuments[index]?.attachment.id;
+        if (attachmentId) {
+          newUploadStatus[attachmentId] = result.status === "fulfilled" ? "success" : "error";
+        }
+      });
+      setUploadStatus(newUploadStatus);
+
       const failed = mutationResults.filter((r) => r.status === "rejected").length;
 
       if (failed > 0) {
         ERROR(`❌ Failed to upload ${failed} documents`);
+        dismissToast("uploading-documents");
+        dispatchToast(
+          React.createElement(Toast, null, [
+            React.createElement(ToastTitle, null, "Koppeling mislukt"),
+            React.createElement(
+              ToastBody,
+              null,
+              selectedDocuments.length === 1
+                ? "Het bestand kon niet worden gekoppeld."
+                : `${failed} van ${selectedDocuments.length} bestanden ${conjugate(failed, "kon", "konden")} niet worden gekoppeld.`
+            ),
+          ]),
+          { intent: "error" }
+        );
         return { error: new Error(`Failed to upload ${failed} documents`) };
       }
 
       DEBUG("✅ All documents uploaded successfully");
+      // In deze app is de e-mail zelf attachmentType === 'item', bijlagen zijn de rest
+      const emailSelected = selectedDocuments.some(
+        (doc) => doc.attachment.attachmentType === "item" && doc.selected
+      );
+      const attachmentsSelected = selectedDocuments.filter(
+        (doc) => doc.attachment.attachmentType !== "item" && doc.selected
+      ).length;
+      // Bouw dezelfde tekst als in de messagebar
+      let successMsg = "";
+      if (emailSelected && attachmentsSelected > 0) {
+        successMsg = `De e-mail en ${attachmentsSelected} ${pluralize(attachmentsSelected, "bijlage", "bijlagen")} ${conjugate(attachmentsSelected + 1, "is", "zijn")} succesvol gekoppeld`;
+      } else if (emailSelected) {
+        successMsg = `De e-mail is succesvol gekoppeld.`;
+      } else if (attachmentsSelected > 0) {
+        successMsg = `${attachmentsSelected} ${pluralize(attachmentsSelected, "bijlage", "bijlagen")} ${conjugate(attachmentsSelected, "is", "zijn")} succesvol gekoppeld.`;
+      } else {
+        successMsg = `Er zijn geen bestanden gekoppeld.`;
+      }
+      dismissToast("uploading-documents");
+      dispatchToast(
+        React.createElement(Toast, null, [
+          React.createElement(ToastTitle, null, "Bestanden gekoppeld"),
+          React.createElement(ToastBody, null, successMsg),
+        ]),
+        { intent: "success" }
+      );
+      // Store upload results locally instead of calling documentAdded (which triggers redirect)
+      setUploadedEmail(emailSelected);
+      setUploadedAttachments(attachmentsSelected);
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
+      // Set all selected documents to error status
+      const errorStatus: Record<string, "idle" | "loading" | "success" | "error"> = {};
+      const currentDocuments = form.getValues("documents");
+      currentDocuments?.forEach((doc) => {
+        if (doc.selected) {
+          errorStatus[doc.attachment.id] = "error";
+        }
+      });
+      setUploadStatus(errorStatus);
+      dismissToast("uploading-documents");
+      dispatchToast(
+        React.createElement(Toast, null, [
+          React.createElement(ToastTitle, null, "koppeling mislukt"),
+          React.createElement(
+            ToastBody,
+            null,
+            `Er is een onverwachte fout opgetreden: ${error instanceof Error ? error.message : String(error)}`
+          ),
+        ]),
+        { intent: "error" }
+      );
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }
   };
@@ -201,8 +307,15 @@ export function useOutlookForm() {
         documents: defaultDocuments,
       });
       form.trigger();
+      setUploadStatus({});
     }
   }, [files, form, zaak.data?.identificatie]);
+
+  const resetUploadState = React.useCallback(() => {
+    setUploadStatus({});
+    setUploadedEmail(undefined);
+    setUploadedAttachments(undefined);
+  }, []);
 
   return {
     form,
@@ -210,5 +323,10 @@ export function useOutlookForm() {
     handleSubmit,
     zaak,
     hasSelectedDocuments: documents?.some(({ selected }) => selected),
+    isUploading,
+    uploadStatus,
+    uploadedEmail,
+    uploadedAttachments,
+    resetUploadState,
   };
 }

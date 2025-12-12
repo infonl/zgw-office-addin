@@ -16,10 +16,11 @@ import {
   Body1Strong,
 } from "@fluentui/react-components";
 import { useFormContext } from "react-hook-form";
-import { addDocumentSchema, documentstatus } from "../../../../hooks/types";
+import { addDocumentSchema, documentstatus, UploadStatus } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { DocumentIndicator } from "./DocumentIndicator";
+import { UploadStatusIcon } from "./UploadStatusIcon";
 import { Schema } from "../hooks/useOutlookForm";
 import { useCommonStyles } from "../../styles/shared";
 
@@ -62,13 +63,22 @@ const useStyles = makeStyles({
   },
 });
 
-export function MetadataStep() {
+interface MetadataStepProps {
+  uploadStatus?: Record<string, UploadStatus>;
+}
+
+export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
   const form = useFormContext<Schema>();
   const styles = useStyles();
   const common = useCommonStyles();
   const { zaak } = useZaak();
 
   const documents = form.watch("documents");
+
+  const hasUploadActivity = Object.values(uploadStatus).some(
+    (status) => status === "loading" || status === "success" || status === "error"
+  );
+
   const defaultOpenItems = React.useMemo(() => {
     return documents
       .filter((document) => document.selected && !addDocumentSchema.safeParse(document).success)
@@ -92,9 +102,11 @@ export function MetadataStep() {
           </tbody>
         </table>
       </section>
-      <section className={common.title}>
-        <Body1>Vul bij elk bestand de bijbehorende metadata in.</Body1>
-      </section>
+      {!hasUploadActivity && (
+        <section className={common.title}>
+          <Body1>Vul bij elk bestand de bijbehorende metadata in.</Body1>
+        </section>
+      )}
       <Accordion collapsible defaultOpenItems={defaultOpenItems} className={styles.accordion}>
         {documents.map(
           (document, index) =>
@@ -108,8 +120,20 @@ export function MetadataStep() {
               >
                 <AccordionHeader className={styles.header} expandIconPosition="end">
                   <section className={styles.accordionHeader}>
-                    {document.attachment.name}
-                    <DocumentIndicator index={index} />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: tokens.spacingHorizontalXS,
+                      }}
+                    >
+                      <UploadStatusIcon status={uploadStatus[document.attachment.id]} />
+                      {document.attachment.name}
+                    </div>
+                    {(!uploadStatus[document.attachment.id] ||
+                      uploadStatus[document.attachment.id] === "idle") && (
+                      <DocumentIndicator index={index} />
+                    )}
                   </section>
                 </AccordionHeader>
                 <AccordionPanel className={styles.panel}>
@@ -117,6 +141,7 @@ export function MetadataStep() {
                     namePrefix={`documents.${index}.`}
                     zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
                     statuses={documentstatus}
+                    disabled={hasUploadActivity}
                   />
                 </AccordionPanel>
               </AccordionItem>

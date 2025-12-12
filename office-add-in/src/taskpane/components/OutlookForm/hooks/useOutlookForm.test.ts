@@ -16,6 +16,8 @@ const mockGetAccessToken = vi.fn();
 const mockProcessAndUploadDocuments = vi.fn();
 const mockPrepareSelectedDocuments = vi.fn().mockResolvedValue([]);
 const mockAddDocumentToZaak = vi.fn();
+const mockDispatchToast = vi.fn();
+const mockDismissToast = vi.fn();
 
 vi.mock("../../../../provider/AuthProvider", () => ({
   useAuth: () => ({ authService: { getAccessToken: mockGetAccessToken } }),
@@ -38,6 +40,12 @@ vi.mock("../../../../hooks/useAddDocumentToZaak", () => ({
     mutateAsync: mockAddDocumentToZaak,
   }),
 }));
+vi.mock("../../../../provider/ToastProvider", () => ({
+  useToast: () => ({
+    dispatchToast: mockDispatchToast,
+    dismissToast: mockDismissToast,
+  }),
+}));
 
 describe("useOutlookForm", () => {
   beforeEach(() => {
@@ -45,6 +53,8 @@ describe("useOutlookForm", () => {
     mockProcessAndUploadDocuments.mockReset();
     mockPrepareSelectedDocuments.mockReset();
     mockAddDocumentToZaak.mockReset();
+    mockDispatchToast.mockReset();
+    mockDismissToast.mockReset();
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");

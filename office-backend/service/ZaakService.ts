@@ -39,6 +39,13 @@ export class ZaakService {
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
+    // TEST:ToRemove!! Simulate upload failure
+    // const title = String(body.titel || "");
+    // if (title.toUpperCase().includes("TRAIN")) {
+    //   LoggerService.debug(`TEST: Simulating upload failure for file: ${title}`);
+    //   throw new Error(`Upload failed for testing purposes: ${title}`);
+    // }
+
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
