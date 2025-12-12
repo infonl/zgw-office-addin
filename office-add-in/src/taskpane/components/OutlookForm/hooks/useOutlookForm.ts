@@ -134,14 +134,14 @@ export function useOutlookForm() {
         } else if (typeof fileContent === "string") {
           const encoder = new TextEncoder();
           const uint8Array = encoder.encode(fileContent);
-          const binary = String.fromCharCode(...Array.from(uint8Array));
-          inhoud = btoa(binary);
+          inhoud = arrayBufferToBase64(uint8Array.buffer);
         } else {
           inhoud = "";
         }
 
         return {
           ...doc,
+          zaakidentificatie: zaak.data?.identificatie || "",
           inhoud,
           titel: doc.attachment.name,
         };
@@ -203,6 +203,26 @@ export function useOutlookForm() {
       form.trigger();
     }
   }, [files, form, zaak.data?.identificatie]);
+
+  // Update zaakidentificatie in all documents when zaak changes
+  // React.useEffect(() => {
+  //   const currentDocuments = form.getValues("documents");
+  //   if (!currentDocuments.length) return;
+
+  //   const zaakId = zaak.data?.identificatie || "";
+
+  //   // Only update if zaakidentificatie has changed
+  //   const needsUpdate = currentDocuments.some((doc) => doc.zaakidentificatie !== zaakId);
+
+  //   if (needsUpdate) {
+  //     DEBUG("📝 Updating zaakidentificatie in all documents:", zaakId);
+  //     const updatedDocuments = currentDocuments.map((doc) => ({
+  //       ...doc,
+  //       zaakidentificatie: zaakId,
+  //     }));
+  //     form.setValue("documents", updatedDocuments);
+  //   }
+  // }, [zaak.data?.identificatie, form, DEBUG]);
 
   return {
     form,
