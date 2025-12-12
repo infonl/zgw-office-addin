@@ -134,14 +134,14 @@ export function useOutlookForm() {
         } else if (typeof fileContent === "string") {
           const encoder = new TextEncoder();
           const uint8Array = encoder.encode(fileContent);
-          const binary = String.fromCharCode(...Array.from(uint8Array));
-          inhoud = btoa(binary);
+          inhoud = arrayBufferToBase64(uint8Array.buffer);
         } else {
           inhoud = "";
         }
 
         return {
           ...doc,
+          zaakidentificatie: zaak.data?.identificatie || "",
           inhoud,
           titel: doc.attachment.name,
         };
