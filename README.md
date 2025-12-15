@@ -96,6 +96,7 @@ Set these variables in your `.env.local.frontend` file :
 - `MSAL_AUTHORITY`: Authority URL (e.g. `https://login.microsoftonline.com/<tenant-id>`)
 - `MSAL_REDIRECT_URI`: Redirect URI for your app (e.g. `https://localhost:3000/auth-callback`)
 - `MSAL_SCOPES`: api://localhost:3000/<client-id>/access_as_user
+- `MSAL_SECRET`: Azure AD Secret value
 
 
 ### Notes
