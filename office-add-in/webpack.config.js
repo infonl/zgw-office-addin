@@ -36,11 +36,16 @@ module.exports = async (env, options) => {
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
       react: ["react", "react-dom"],
+      // ✅ Shared runtime entry: taskpane + commands
       taskpane: {
-        import: ["./src/taskpane/index.tsx", "./src/taskpane/taskpane.html"],
+        import: [
+          "./src/taskpane/index.tsx",
+          "./src/taskpane/taskpane.html",
+          // ✅ Ensure commands run in the same runtime
+          "./src/commands/commands.ts",
+        ],
         dependOn: "react",
       },
-      commands: "./src/commands/commands.ts",
     },
     output: {
       clean: true,
@@ -96,6 +101,7 @@ module.exports = async (env, options) => {
           envFrontend.MSAL_SCOPES || process.env.MSAL_SCOPES || ""
         ),
       }),
+      // ✅ Only one HTML page: taskpane.html
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
@@ -115,11 +121,6 @@ module.exports = async (env, options) => {
             },
           },
         ],
-      }),
-      new HtmlWebpackPlugin({
-        filename: "commands.html",
-        template: "./src/commands/commands.html",
-        chunks: ["polyfill", "commands"],
       }),
       new webpack.ProvidePlugin({
         Promise: ["es6-promise", "Promise"],
