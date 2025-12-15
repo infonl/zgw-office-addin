@@ -98,7 +98,7 @@ function Main() {
   const styles = useStyles();
   const common = useCommonStyles();
 
-  const { isOutlook, isWord } = useOffice();
+  const { isOutlook } = useOffice();
 
   const { documentAddedToZaak, reset } = useZaak();
 
@@ -129,8 +129,8 @@ function Main() {
 
   return (
     <div className={styles.root}>
-      {isWord && <OfficeForm />}
       {isOutlook && <OutlookForm />}
+      {!isOutlook && <OfficeForm />}
     </div>
   );
 }

@@ -37,10 +37,13 @@ module.exports = async (env, options) => {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
       react: ["react", "react-dom"],
       taskpane: {
-        import: ["./src/taskpane/index.tsx", "./src/taskpane/taskpane.html"],
+        import: [
+          "./src/taskpane/index.tsx",
+          "./src/taskpane/taskpane.html",
+          "./src/commands/commands.ts",
+        ],
         dependOn: "react",
       },
-      commands: "./src/commands/commands.ts",
     },
     output: {
       clean: true,
@@ -115,11 +118,6 @@ module.exports = async (env, options) => {
             },
           },
         ],
-      }),
-      new HtmlWebpackPlugin({
-        filename: "commands.html",
-        template: "./src/commands/commands.html",
-        chunks: ["polyfill", "commands"],
       }),
       new webpack.ProvidePlugin({
         Promise: ["es6-promise", "Promise"],
