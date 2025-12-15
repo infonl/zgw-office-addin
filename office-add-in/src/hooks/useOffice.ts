@@ -109,7 +109,7 @@ export function useOffice() {
 
   const getDocumentData = useCallback(async () => {
     try {
-      if (isWord) return await getWordDocumentData();
+      if (isWord || isExcel) return await getWordDocumentData();
       if (isOutlook) return await getOutlookDocumentData();
       return "";
     } catch (error) {
