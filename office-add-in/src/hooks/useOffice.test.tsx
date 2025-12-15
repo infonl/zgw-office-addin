@@ -462,7 +462,7 @@ describe("useOffice", () => {
       const mockData = new Uint8Array([80, 75, 3, 4]); // ZIP signature for .docx
 
       const mockFile: MockFile = {
-        getSliceAsync: vi.fn((index, callback) => {
+        getSliceAsync: vi.fn((_index, callback) => {
           callback({
             status: Office.AsyncResultStatus.Succeeded,
             value: { data: mockData, index: 0 },
@@ -472,7 +472,7 @@ describe("useOffice", () => {
         sliceCount: 1,
       };
 
-      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((fileType, callback) => {
+      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((_fileType, callback) => {
         callback({
           status: Office.AsyncResultStatus.Succeeded,
           value: mockFile,
@@ -492,7 +492,7 @@ describe("useOffice", () => {
       const mockData = new Uint8Array([80, 75, 3, 4]); // ZIP signature for .xlsx
 
       const mockFile: MockFile = {
-        getSliceAsync: vi.fn((index, callback) => {
+        getSliceAsync: vi.fn((_index, callback) => {
           callback({
             status: Office.AsyncResultStatus.Succeeded,
             value: { data: mockData, index: 0 },
@@ -502,7 +502,7 @@ describe("useOffice", () => {
         sliceCount: 1,
       };
 
-      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((fileType, callback) => {
+      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((_fileType, callback) => {
         callback({
           status: Office.AsyncResultStatus.Succeeded,
           value: mockFile,
@@ -529,7 +529,7 @@ describe("useOffice", () => {
     it("should return empty string when getFileAsync fails for Word", async () => {
       mockOfficeContext.host = Office.HostType.Word;
 
-      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((fileType, callback) => {
+      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((_fileType, callback) => {
         callback({
           status: Office.AsyncResultStatus.Failed,
           error: { message: "File access denied" },
@@ -545,7 +545,7 @@ describe("useOffice", () => {
     it("should return empty string when getFileAsync fails for Excel", async () => {
       mockOfficeContext.host = Office.HostType.Excel;
 
-      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((fileType, callback) => {
+      (mockOfficeContext.document.getFileAsync as Mock).mockImplementation((_fileType, callback) => {
         callback({
           status: Office.AsyncResultStatus.Failed,
           error: { message: "File access denied" },
