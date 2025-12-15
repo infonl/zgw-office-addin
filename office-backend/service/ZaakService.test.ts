@@ -191,68 +191,30 @@ describe("ZaakService", () => {
       expect(LoggerService.debug).toHaveBeenCalledWith("creating document", "ZAAK-001");
     });
 
-    it("should handle .doc files", async () => {
-      const docBody = { ...documentBody, titel: "test-document.doc" };
+    it.each([
+      { extension: "doc", expectedFormat: "application/msword" },
+      { extension: "docx", expectedFormat: "application/msword" },
+      { extension: "xls", expectedFormat: "application/vnd.ms-excel" },
+      {
+        extension: "xlsx",
+        expectedFormat: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+      { extension: "eml", expectedFormat: "message/rfc822" },
+      { extension: "pdf", expectedFormat: "application/pdf" },
+      { extension: "txt", expectedFormat: "text/plain" },
+      { extension: "png", expectedFormat: "image/png" },
+      { extension: "jpg", expectedFormat: "image/jpeg" },
+      { extension: "jpeg", expectedFormat: "image/jpeg" },
+    ])("should handle .$extension files", async ({ extension, expectedFormat }) => {
+      const body = { ...documentBody, titel: `test-document.${extension}` };
       mockHttpService.POST.mockResolvedValue(mockInformatieobject);
 
-      await zaakService.addDocumentToZaak("ZAAK-001", docBody);
+      await zaakService.addDocumentToZaak("ZAAK-001", body);
 
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
-        expect.stringContaining('"formaat":"application/msword"'),
-      );
-    });
-
-    it("should handle .pdf files", async () => {
-      const pdfBody = { ...documentBody, titel: "test-document.pdf" };
-      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
-
-      await zaakService.addDocumentToZaak("ZAAK-001", pdfBody);
-
-      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
-        1,
-        "/documenten/api/v1/enkelvoudiginformatieobjecten",
-        expect.stringContaining('"formaat":"application/pdf"'),
-      );
-    });
-
-    it("should handle .txt files", async () => {
-      const txtBody = { ...documentBody, titel: "test-document.txt" };
-      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
-
-      await zaakService.addDocumentToZaak("ZAAK-001", txtBody);
-
-      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
-        1,
-        "/documenten/api/v1/enkelvoudiginformatieobjecten",
-        expect.stringContaining('"formaat":"text/plain"'),
-      );
-    });
-
-    it("should handle .png files", async () => {
-      const pngBody = { ...documentBody, titel: "test-document.png" };
-      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
-
-      await zaakService.addDocumentToZaak("ZAAK-001", pngBody);
-
-      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
-        1,
-        "/documenten/api/v1/enkelvoudiginformatieobjecten",
-        expect.stringContaining('"formaat":"image/png"'),
-      );
-    });
-
-    it("should handle .jpg files", async () => {
-      const jpgBody = { ...documentBody, titel: "test-document.jpg" };
-      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
-
-      await zaakService.addDocumentToZaak("ZAAK-001", jpgBody);
-
-      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
-        1,
-        "/documenten/api/v1/enkelvoudiginformatieobjecten",
-        expect.stringContaining('"formaat":"image/jpeg"'),
+        expect.stringContaining(`"formaat":"${expectedFormat}"`),
       );
     });
 

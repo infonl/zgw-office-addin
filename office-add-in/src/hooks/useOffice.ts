@@ -65,9 +65,13 @@ export function useOffice() {
       return "";
     } catch (error) {
       WARN("Unable to get file/mail title", error);
+      // ✅ Return appropriate fallback based on host
+      if (isWord) return "document.docx";
+      if (isExcel) return "workbook.xlsx";
+      if (isOutlook) return "Outlook-bericht.eml";
       return "";
     }
-  }, [isWord, isOutlook]);
+  }, [isWord, isExcel, isOutlook, getDocumentFileName, getOutlookSubject]);
 
   const getSignedInUser = useCallback(async () => {
     try {
@@ -80,7 +84,7 @@ export function useOffice() {
     }
   }, []);
 
-  const getWordDocumentData = useCallback(async () => {
+  const getOfficeDocumentData = useCallback(async () => {
     DEBUG("Getting Word document data");
     let file: Office.File | undefined;
     return new Promise<string>((resolve, reject) => {
@@ -109,14 +113,13 @@ export function useOffice() {
 
   const getDocumentData = useCallback(async () => {
     try {
-      if (isWord || isExcel) return await getWordDocumentData();
       if (isOutlook) return await getOutlookDocumentData();
-      return "";
+      return await getOfficeDocumentData();
     } catch (error) {
       WARN("Unable to get document data", error);
       return "";
     }
-  }, [isWord, isExcel, isOutlook, getWordDocumentData, getOutlookDocumentData]);
+  }, [isWord, isExcel, isOutlook, getOfficeDocumentData, getOutlookDocumentData]);
 
   const getSlice = async (state: State) => {
     DEBUG("Getting slice", state);
