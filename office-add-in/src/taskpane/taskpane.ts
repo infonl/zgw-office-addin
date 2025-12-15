@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-const host = Office.context.host;
-
 export async function insertText(text: string) {
+  const host = Office.context.host;
   try {
     if (host === Office.HostType.Word) {
       await Word.run(async (context) => {
@@ -15,8 +14,7 @@ export async function insertText(text: string) {
       });
     } else if (host === Office.HostType.Excel) {
       await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getActiveWorksheet();
-        const range = sheet.getRange("A1");
+        const range = context.workbook.getSelectedRange();
         range.values = [[text]];
         await context.sync();
       });
@@ -24,5 +22,4 @@ export async function insertText(text: string) {
   } catch (error) {
     console.error("Error: " + error);
   }
-  console.log(text);
 }

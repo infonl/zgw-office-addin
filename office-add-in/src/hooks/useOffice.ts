@@ -18,7 +18,7 @@ export function useOffice() {
   const isOutlook = host === Office.HostType.Outlook;
   const isExcel = host === Office.HostType.Excel;
 
-  const getWordFileName = useCallback(() => {
+  const getDocumentFileName = useCallback(() => {
     return new Promise<string>((resolve, reject) => {
       Office.context.document.getFilePropertiesAsync((result) => {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
@@ -50,11 +50,11 @@ export function useOffice() {
   const getFileName = useCallback(async () => {
     try {
       if (isWord) {
-        const n = await getWordFileName();
+        const n = await getDocumentFileName();
         return sanitizeFileName(n || "document.docx");
       }
       if (isExcel) {
-        const n = await getWordFileName();
+        const n = await getDocumentFileName();
         return sanitizeFileName(n || "workbook.xlsx");
       }
       if (isOutlook) {
@@ -116,7 +116,7 @@ export function useOffice() {
       WARN("Unable to get document data", error);
       return "";
     }
-  }, [isWord, isOutlook, getWordDocumentData, getOutlookDocumentData]);
+  }, [isWord, isExcel, isOutlook, getWordDocumentData, getOutlookDocumentData]);
 
   const getSlice = async (state: State) => {
     DEBUG("Getting slice", state);
@@ -296,7 +296,7 @@ export function useOffice() {
     getDocumentData,
     getSignedInUser,
     getFileName,
-    getWordFileName,
+    getDocumentFileName,
     getOutlookSubject,
     host,
     isWord,
