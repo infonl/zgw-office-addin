@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.61](https://img.shields.io/badge/Version-0.0.61-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.62](https://img.shields.io/badge/Version-0.0.62-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -40,6 +40,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.msalClientId | string | `"MSAL_CLIENT_ID_PLACEHOLDER"` | Client ID for MSAL authentication towards Azure AD |
 | backend.msalRedirectUri | string | `"http://localhost:3003/auth/callback"` | Redirect URI for MSAL authentication towards Azure AD |
 | backend.msalScope | string | `"https://graph.microsoft.com/.default"` | Scope for MSAL authentication towards Azure AD |
+| backend.msalSecret | string | `"MSAL_CLIENT_SECRET_PLACEHOLDER"` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
