@@ -68,6 +68,8 @@ backend:
   msalScope: "https://graph.microsoft.com/.default"
   # -- Redirect URI for MSAL authentication towards Azure AD
   msalRedirectUri: "http://localhost:3003/auth/callback"
+  # -- Client secret for MSAL authentication towards Azure AD
+  msalSecret: "MSAL_CLIENT_SECRET_PLACEHOLDER"
   # -- Resource limits and requests for the backend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious
