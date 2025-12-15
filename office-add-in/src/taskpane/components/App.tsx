@@ -102,7 +102,6 @@ function Main() {
 
   const { documentAddedToZaak, reset } = useZaak();
 
-
   if (documentAddedToZaak) {
     return (
       <div className={styles.root}>
