@@ -40,9 +40,8 @@ export function ShowTokenError() {
         <ErrorCircleRegular className={styles.icon} />
         <Text className={styles.text}>
           <strong>Login vereist</strong>
-          <br />
-          U moet zich uit- en inloggen bij Microsoft Office om deze add-in te kunnen gebruiken.
-          Log uit bij Office, sluit alle Office-toepassingen en log opnieuw in.
+          <br />U moet zich uit- en inloggen bij Microsoft Office om deze add-in te kunnen
+          gebruiken. Log uit bij Office, sluit alle Office-toepassingen en log opnieuw in.
         </Text>
       </div>
     </div>
