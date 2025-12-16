@@ -99,9 +99,6 @@ export class OfficeGraphAuthService implements GraphAuthService {
     this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
     this.tokenRequest = new Promise<string>((resolve, reject) => {
-      this.logger.DEBUG(
-        "THE TOKEN THAT HAS BEEN REQUESTED HAS BEEN WITHOUT OFFICE EXTRA SETTING STUF without context"
-      );
       getToken().then(resolve).catch(reject);
     })
       .then(async (token) => {
