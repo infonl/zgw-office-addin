@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { useLogger } from "./useLogger";
 import { jwtDecode } from "jwt-decode";
 import { ZaakResponse, ProcessedDocument, GraphServiceType } from "./types";
+import { getToken } from "../utils/getAccesToken";
 
 type State = { file: Office.File; currentSlice: number };
 
@@ -75,7 +76,7 @@ export function useOffice() {
 
   const getSignedInUser = useCallback(async () => {
     try {
-      const userTokenEncoded = await Office.auth.getAccessToken();
+      const userTokenEncoded = await getToken();
       const userToken = jwtDecode<{ preferred_username?: string; name?: string }>(userTokenEncoded);
       return userToken.preferred_username ?? userToken.name ?? null;
     } catch (error) {

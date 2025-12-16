@@ -6,6 +6,7 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
+import { getToken } from "../utils/getAccesToken";
 import { jwtDecode } from "jwt-decode";
 
 const rootElement: HTMLElement | null = document.getElementById("container");
@@ -15,10 +16,10 @@ Office.onReady(async (info) => {
   console.log(info);
   root?.render(<App />);
   try {
-    const userTokenEncoded = await Office.auth.getAccessToken();
-    const userToken = jwtDecode<{ preferred_username?: string; name?: string }>(userTokenEncoded);
-    console.log("User token decoded:", userToken);
-    return userToken;
+    const token = await getToken();
+    const decodedToken = jwtDecode(token);
+    console.log("Decoded token:", decodedToken);
+    return decodedToken;
   } catch (error) {
     console.warn("Unable to get user access token", error);
     return null;

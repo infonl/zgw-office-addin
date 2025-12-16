@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -17,6 +17,7 @@ import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocum
 import { useLogger } from "../../../../hooks/useLogger";
 import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
 import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
+import { getToken } from "../../../../utils/getAccesToken";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
@@ -37,6 +38,13 @@ export function useOutlookForm() {
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
   const { mutateAsync } = useAddDocumentToZaak();
+  const [tokenError, setTokenError] = useState(false);
+
+  useEffect(() => {
+    getToken()
+      .then(() => setTokenError(false))
+      .catch(() => setTokenError(true));
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -210,5 +218,6 @@ export function useOutlookForm() {
     handleSubmit,
     zaak,
     hasSelectedDocuments: documents?.some(({ selected }) => selected),
+    tokenError,
   };
 }

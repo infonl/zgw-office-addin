@@ -10,6 +10,7 @@ import { ZaakSearch } from "../ZaakSearch";
 import { SelectItems } from "./steps/SelectItems";
 import { MetadataStep } from "./steps/MetadataStep";
 import { useOutlookForm } from "./hooks/useOutlookForm";
+import { ShowTokenError } from "../TokenError";
 
 /**
  * - Step 1: Search Zaak and select email and/or attachments to attach
@@ -27,7 +28,8 @@ const useStyles = makeStyles({
 export function OutlookForm() {
   const styles = useStyles();
   const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
-  const { form, zaak, hasSelectedDocuments, handleSubmit } = useOutlookForm();
+  const { form, zaak, hasSelectedDocuments, handleSubmit, tokenError } = useOutlookForm();
+  console.log("Token error:", tokenError);
 
   if (!zaak.data) return <ZaakSearch />;
 
@@ -38,6 +40,7 @@ export function OutlookForm() {
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           {step === "selectItems" && (
             <>
+              {tokenError == true && <ShowTokenError />}
               <SelectItems />
               <section className={styles.actions}>
                 <Button
