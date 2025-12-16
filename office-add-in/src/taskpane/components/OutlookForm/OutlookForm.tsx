@@ -22,6 +22,7 @@ const useStyles = makeStyles({
     display: "flex",
     gap: tokens.spacingHorizontalM,
     marginTop: tokens.spacingHorizontalL,
+    paddingBottom: tokens.spacingVerticalM,
   },
 });
 
