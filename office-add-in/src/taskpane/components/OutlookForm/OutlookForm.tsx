@@ -25,6 +25,11 @@ const useStyles = makeStyles({
     gap: tokens.spacingHorizontalM,
     marginTop: tokens.spacingHorizontalL,
   },
+  resultSection: {
+    marginTop: tokens.spacingHorizontalL,
+    maxWidth: "100%",
+    overflow: "hidden",
+  },
 });
 
 export function OutlookForm() {
@@ -67,7 +72,7 @@ export function OutlookForm() {
     statusValues.length > 0 &&
     !statusValues.some((status) => status === "loading" || status === "idle");
   const uploadError = statusValues.some((status) => status === "error");
-  const uploadSuccess = uploadComplete && !uploadError;
+  const uploadSuccess = statusValues.some((status) => status === "success");
   const errorCount = statusValues.filter((status) => status === "error").length;
 
   if (!zaak.data) return <ZaakSearch />;
@@ -94,14 +99,8 @@ export function OutlookForm() {
           {step === "metaData" && (
             <>
               <MetadataStep uploadStatus={uploadStatus} />
-              {uploadComplete ? (
-                <section
-                  style={{
-                    marginTop: tokens.spacingHorizontalL,
-                    maxWidth: "100%",
-                    overflow: "hidden",
-                  }}
-                >
+              {uploadComplete && (
+                <section className={styles.resultSection}>
                   <UploadResultMessageBar
                     uploadSuccess={uploadSuccess}
                     uploadError={uploadError}
@@ -121,7 +120,9 @@ export function OutlookForm() {
                     )}
                   </div>
                 </section>
-              ) : (
+              )}
+
+              {!uploadComplete && (
                 <section className={styles.actions}>
                   <Button
                     appearance="secondary"

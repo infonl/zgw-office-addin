@@ -7,6 +7,6 @@ export const pluralize = (count: number, singular: string, plural: string): stri
   return count === 1 ? singular : plural;
 };
 
-export const conjugate = (count: number, singularVerb: string, pluralVerb: string): string => {
+export const getVerbForm = (count: number, singularVerb: string, pluralVerb: string): string => {
   return count === 1 ? singularVerb : pluralVerb;
 };

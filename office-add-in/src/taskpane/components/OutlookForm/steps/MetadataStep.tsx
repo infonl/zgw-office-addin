@@ -61,11 +61,19 @@ const useStyles = makeStyles({
     background: tokens.colorNeutralForegroundInverted,
     borderBottom: `1px solid ${tokens.colorBrandForegroundLink}`,
   },
+  statusIconContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: tokens.spacingHorizontalXS,
+  },
+  metadataSection: {
+    marginTop: tokens.spacingVerticalM,
+  },
 });
 
-interface MetadataStepProps {
+type MetadataStepProps = {
   uploadStatus?: Record<string, UploadStatus>;
-}
+};
 
 export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
   const form = useFormContext<Schema>();
@@ -90,7 +98,7 @@ export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
       <section className={common.title}>
         <Subtitle1>Bestandsgegevens</Subtitle1>
       </section>
-      <section style={{ marginTop: tokens.spacingVerticalM }}>
+      <section className={styles.metadataSection}>
         <table className={styles.table}>
           <tbody>
             <tr>
@@ -120,13 +128,7 @@ export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
               >
                 <AccordionHeader className={styles.header} expandIconPosition="end">
                   <section className={styles.accordionHeader}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: tokens.spacingHorizontalXS,
-                      }}
-                    >
+                    <div className={styles.statusIconContainer}>
                       <UploadStatusIcon status={uploadStatus[document.attachment.id]} />
                       {document.attachment.name}
                     </div>

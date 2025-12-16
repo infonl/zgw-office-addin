@@ -8,9 +8,11 @@ import { Spinner, tokens, makeStyles } from "@fluentui/react-components";
 import { Warning16Filled, CheckmarkCircle16Filled } from "@fluentui/react-icons";
 import { UploadStatus } from "../../../../hooks/types";
 
-interface UploadStatusIconProps {
+type UploadStatusIconProps = {
   status?: UploadStatus;
-}
+};
+
+const ICON_SIZE = "20px";
 
 const useStyles = makeStyles({
   container: {
@@ -21,6 +23,14 @@ const useStyles = makeStyles({
   },
   withMargin: {
     marginRight: tokens.spacingHorizontalXS,
+  },
+  errorIcon: {
+    color: tokens.colorPaletteRedForeground1,
+    fontSize: ICON_SIZE,
+  },
+  successIcon: {
+    color: tokens.colorPaletteGreenForeground1,
+    fontSize: ICON_SIZE,
   },
 });
 
@@ -38,12 +48,7 @@ export function UploadStatusIcon({ status }: UploadStatusIconProps) {
   if (status === "error") {
     return (
       <div className={`${styles.container} ${styles.withMargin}`} title="Upload mislukt">
-        <Warning16Filled
-          style={{
-            color: tokens.colorPaletteRedForeground1,
-            fontSize: 20,
-          }}
-        />
+        <Warning16Filled className={styles.errorIcon} />
       </div>
     );
   }
@@ -51,12 +56,7 @@ export function UploadStatusIcon({ status }: UploadStatusIconProps) {
   if (status === "success") {
     return (
       <div className={`${styles.container} ${styles.withMargin}`} title="Upload geslaagd">
-        <CheckmarkCircle16Filled
-          style={{
-            color: tokens.colorPaletteGreenForeground1,
-            fontSize: 20,
-          }}
-        />
+        <CheckmarkCircle16Filled className={styles.successIcon} />
       </div>
     );
   }
