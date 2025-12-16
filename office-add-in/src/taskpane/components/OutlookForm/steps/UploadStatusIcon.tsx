@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Spinner, tokens } from "@fluentui/react-components";
+import { Spinner, tokens, makeStyles } from "@fluentui/react-components";
 import { Warning16Filled, CheckmarkCircle16Filled } from "@fluentui/react-icons";
 import { UploadStatus } from "../../../../hooks/types";
 
@@ -12,46 +12,52 @@ interface UploadStatusIconProps {
   status?: UploadStatus;
 }
 
+const useStyles = makeStyles({
+  container: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  withMargin: {
+    marginRight: tokens.spacingHorizontalXS,
+  },
+});
+
 export function UploadStatusIcon({ status }: UploadStatusIconProps) {
+  const styles = useStyles();
+
   if (status === "loading") {
     return (
-      <div
-        style={{
-          width: 20,
-          height: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner size="extra-small" />
+      <div className={styles.container}>
+        <Spinner size="tiny" />
       </div>
     );
   }
 
   if (status === "error") {
     return (
-      <span title="Upload mislukt">
+      <div className={`${styles.container} ${styles.withMargin}`} title="Upload mislukt">
         <Warning16Filled
           style={{
-            color: tokens.colorPaletteYellowForeground1,
+            color: tokens.colorPaletteRedForeground1,
             fontSize: 20,
           }}
         />
-      </span>
+      </div>
     );
   }
 
   if (status === "success") {
     return (
-      <span title="Upload geslaagd">
+      <div className={`${styles.container} ${styles.withMargin}`} title="Upload geslaagd">
         <CheckmarkCircle16Filled
           style={{
             color: tokens.colorPaletteGreenForeground1,
             fontSize: 20,
           }}
         />
-      </span>
+      </div>
     );
   }
 

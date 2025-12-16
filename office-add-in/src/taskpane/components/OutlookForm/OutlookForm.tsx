@@ -62,13 +62,13 @@ export function OutlookForm() {
     window.Office.context.ui.closeContainer();
   }, []);
 
-  // Check if upload is complete (success or error)
-  const uploadComplete = Object.values(uploadStatus).some(
-    (status) => status === "success" || status === "error"
-  );
-  const uploadSuccess = Object.values(uploadStatus).some((status) => status === "success");
-  const uploadError = Object.values(uploadStatus).some((status) => status === "error");
-  const errorCount = Object.values(uploadStatus).filter((status) => status === "error").length;
+  const statusValues = Object.values(uploadStatus);
+  const uploadComplete =
+    statusValues.length > 0 &&
+    !statusValues.some((status) => status === "loading" || status === "idle");
+  const uploadError = statusValues.some((status) => status === "error");
+  const uploadSuccess = uploadComplete && !uploadError;
+  const errorCount = statusValues.filter((status) => status === "error").length;
 
   if (!zaak.data) return <ZaakSearch />;
 

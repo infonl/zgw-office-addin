@@ -32,12 +32,12 @@ const useStyles = makeStyles({
   item: {
     marginBlockEnd: 0,
     borderRadius: tokens.borderRadiusNone,
-  },
-  header: {
-    backgroundColor: tokens.colorNeutralBackground2,
     borderBottomWidth: tokens.strokeWidthThin,
     borderBottomStyle: "solid",
     borderBottomColor: tokens.colorNeutralStroke1,
+  },
+  header: {
+    backgroundColor: tokens.colorNeutralBackground2,
     minHeight: tokens.spacingVerticalXXL,
     paddingBlock: tokens.spacingVerticalXS,
     borderRadius: tokens.borderRadiusNone,

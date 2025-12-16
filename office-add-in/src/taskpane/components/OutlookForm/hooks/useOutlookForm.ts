@@ -66,7 +66,7 @@ export function useOutlookForm() {
     ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
-    const loadingStatus: Record<string, "idle" | "loading" | "success" | "error"> = {};
+    const loadingStatus: Record<string, UploadStatus> = {};
     selectedDocuments.forEach((doc) => {
       loadingStatus[doc.attachment.id] = "loading";
     });
@@ -182,26 +182,24 @@ export function useOutlookForm() {
 
       DEBUG("🚀 Uploading documents to Zaak via mutation...");
 
+      // Upload each document in parallel, update status as soon as each finishes
       const mutationResults = await Promise.all(
-        uploadPayload.map(async (doc) => {
+        uploadPayload.map(async (doc, idx) => {
+          // ToDo: Remove Test with delay
+          // if (doc.titel && doc.titel.endsWith(".eml")) {
+          //   await new Promise((res) => setTimeout(res, 2000))
+          // }
+          const attachmentId = selectedDocuments[idx]?.attachment.id;
           try {
             const result = await mutateAsync(doc);
+            setUploadStatus((prev) => ({ ...prev, [attachmentId]: "success" }));
             return { status: "fulfilled", value: result };
-          } catch (error) {
-            return { status: "rejected", reason: error };
+          } catch {
+            setUploadStatus((prev) => ({ ...prev, [attachmentId]: "error" }));
+            return { status: "rejected" };
           }
         })
       );
-
-      // Update status per document based on results
-      const newUploadStatus = { ...loadingStatus };
-      mutationResults.forEach((result, index) => {
-        const attachmentId = selectedDocuments[index]?.attachment.id;
-        if (attachmentId) {
-          newUploadStatus[attachmentId] = result.status === "fulfilled" ? "success" : "error";
-        }
-      });
-      setUploadStatus(newUploadStatus);
 
       const failed = mutationResults.filter((r) => r.status === "rejected").length;
 
