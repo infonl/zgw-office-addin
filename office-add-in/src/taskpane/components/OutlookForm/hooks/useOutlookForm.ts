@@ -170,10 +170,6 @@ export function useOutlookForm() {
       // Upload each document in parallel, update status as soon as each finishes
       const mutationResults = await Promise.all(
         uploadPayload.map(async (doc, idx) => {
-          // ToDo: Remove Test with delay
-          // if (doc.titel && doc.titel.endsWith(".eml")) {
-          //   await new Promise((res) => setTimeout(res, 2000))
-          // }
           const attachmentId = selectedDocuments[idx]?.attachment.id;
           try {
             const result = await mutateAsync(doc);

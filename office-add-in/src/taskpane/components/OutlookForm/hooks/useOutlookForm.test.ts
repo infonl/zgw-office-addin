@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import {
   mockAttachment1,
   mockEmailDocument,
@@ -18,6 +18,10 @@ const mockPrepareSelectedDocuments = vi.fn().mockResolvedValue([]);
 const mockAddDocumentToZaak = vi.fn();
 const mockDispatchToast = vi.fn();
 const mockDismissToast = vi.fn();
+const mockShowUploadingToast = vi.fn();
+const mockShowErrorToast = vi.fn();
+const mockShowSuccessToast = vi.fn();
+const mockShowGeneralErrorToast = vi.fn();
 
 vi.mock("../../../../provider/AuthProvider", () => ({
   useAuth: () => ({ authService: { getAccessToken: mockGetAccessToken } }),
@@ -46,6 +50,14 @@ vi.mock("../../../../provider/ToastProvider", () => ({
     dismissToast: mockDismissToast,
   }),
 }));
+vi.mock("./useUploadToasts", () => ({
+  useUploadToasts: () => ({
+    showUploadingToast: mockShowUploadingToast,
+    showErrorToast: mockShowErrorToast,
+    showSuccessToast: mockShowSuccessToast,
+    showGeneralErrorToast: mockShowGeneralErrorToast,
+  }),
+}));
 
 describe("useOutlookForm", () => {
   beforeEach(() => {
@@ -55,6 +67,10 @@ describe("useOutlookForm", () => {
     mockAddDocumentToZaak.mockReset();
     mockDispatchToast.mockReset();
     mockDismissToast.mockReset();
+    mockShowUploadingToast.mockReset();
+    mockShowErrorToast.mockReset();
+    mockShowSuccessToast.mockReset();
+    mockShowGeneralErrorToast.mockReset();
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
@@ -72,7 +88,9 @@ describe("useOutlookForm", () => {
   it("returns early if no documents are selected", async () => {
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
-    await result.current.handleSubmit({ documents: [] });
+    await waitFor(async () => {
+      await result.current.handleSubmit({ documents: [] });
+    });
     expect(mockProcessAndUploadDocuments).not.toHaveBeenCalled();
   });
 
@@ -80,7 +98,9 @@ describe("useOutlookForm", () => {
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
     mockGetAccessToken.mockRejectedValueOnce(new Error("Auth error"));
-    const submitResult = await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    const submitResult = await waitFor(async () => {
+      return await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    });
     expect(submitResult.error).toBeInstanceOf(Error);
     expect(submitResult.error?.message).toBe("Auth error");
   });
@@ -89,7 +109,9 @@ describe("useOutlookForm", () => {
     mockPrepareSelectedDocuments.mockRejectedValueOnce(new Error("Prepare error"));
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
-    const submitResult = await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    const submitResult = await waitFor(async () => {
+      return await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    });
     expect(submitResult.error).toBeInstanceOf(Error);
     expect(submitResult.error?.message).toBe("Prepare error");
   });
@@ -106,7 +128,9 @@ describe("useOutlookForm", () => {
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
-    const submitResult = await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    const submitResult = await waitFor(async () => {
+      return await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    });
     expect(submitResult.error).toBeInstanceOf(Error);
     expect(submitResult.error?.message).toBe("Upload error");
     expect(mockProcessAndUploadDocuments).toHaveBeenCalled();
@@ -130,7 +154,9 @@ describe("useOutlookForm", () => {
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
-    const submitResult = await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    const submitResult = await waitFor(async () => {
+      return await result.current.handleSubmit({ documents: [mockEmailDocument] });
+    });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
         processedDocuments: expect.arrayContaining([
@@ -347,8 +373,10 @@ describe("useOutlookForm", () => {
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
     const { result } = renderHook(() => useOutlookForm());
-    const submitResult = await result.current.handleSubmit({
-      documents: [mockEmailDocument, mockAttachmentDocument1, mockAttachmentDocument2],
+    const submitResult = await waitFor(async () => {
+      return await result.current.handleSubmit({
+        documents: [mockEmailDocument, mockAttachmentDocument1, mockAttachmentDocument2],
+      });
     });
     expect(mockProcessAndUploadDocuments).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -373,5 +401,439 @@ describe("useOutlookForm", () => {
       })
     );
     expect(submitResult).toEqual({ error: new Error("Failed to upload 2 documents") });
+  });
+
+  describe("uploadStatus tracking", () => {
+    it("sets uploadStatus to loading during upload", async () => {
+      mockProcessAndUploadDocuments.mockImplementationOnce(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      );
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      const submitPromise = result.current.handleSubmit({ documents: [mockEmailDocument] });
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("loading");
+        expect(result.current.isUploading).toBe(true);
+      });
+
+      await submitPromise;
+    });
+
+    it("sets uploadStatus to success after successful upload", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
+        expect(result.current.isUploading).toBe(false);
+      });
+    });
+
+    it("sets uploadStatus to error after failed upload", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockAddDocumentToZaak.mockRejectedValueOnce(new Error("Upload failed"));
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("error");
+        expect(result.current.isUploading).toBe(false);
+      });
+    });
+
+    it("tracks multiple file statuses independently", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+        {
+          success: true,
+          filename: mockAttachmentDocument1.attachment.name,
+          size: mockAttachmentDocument1.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([4, 5, 6]),
+        },
+      ]);
+      mockAddDocumentToZaak
+        .mockResolvedValueOnce({ id: "info-object-1" })
+        .mockRejectedValueOnce(new Error("Upload failed"));
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+        {
+          ...mockAttachmentDocument1,
+          graphId: "graph-attachment-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({
+          documents: [mockEmailDocument, mockAttachmentDocument1],
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
+        expect(result.current.uploadStatus[mockAttachmentDocument1.attachment.id]).toBe("error");
+      });
+    });
+  });
+
+  describe("uploaded email and attachments tracking", () => {
+    it("sets uploadedEmail to true when email is uploaded", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadedEmail).toBe(true);
+        expect(result.current.uploadedAttachments).toBe(0);
+      });
+    });
+
+    it("sets uploadedAttachments count when attachments are uploaded", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockAttachmentDocument1.attachment.name,
+          size: mockAttachmentDocument1.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+        {
+          success: true,
+          filename: mockAttachmentDocument2.attachment.name,
+          size: mockAttachmentDocument2.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([4, 5, 6]),
+        },
+      ]);
+      mockAddDocumentToZaak
+        .mockResolvedValueOnce({ id: "info-object-1" })
+        .mockResolvedValueOnce({ id: "info-object-2" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockAttachmentDocument1,
+          graphId: "graph-attachment-1-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+        {
+          ...mockAttachmentDocument2,
+          graphId: "graph-attachment-2-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({
+          documents: [mockAttachmentDocument1, mockAttachmentDocument2],
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadedEmail).toBe(false);
+        expect(result.current.uploadedAttachments).toBe(2);
+      });
+    });
+
+    it("tracks both email and attachments correctly", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+        {
+          success: true,
+          filename: mockAttachmentDocument1.attachment.name,
+          size: mockAttachmentDocument1.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([4, 5, 6]),
+        },
+      ]);
+      mockAddDocumentToZaak
+        .mockResolvedValueOnce({ id: "info-object-1" })
+        .mockResolvedValueOnce({ id: "info-object-2" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+        {
+          ...mockAttachmentDocument1,
+          graphId: "graph-attachment-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({
+          documents: [mockEmailDocument, mockAttachmentDocument1],
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadedEmail).toBe(true);
+        expect(result.current.uploadedAttachments).toBe(1);
+      });
+    });
+  });
+
+  describe("resetUploadState", () => {
+    it("clears uploadStatus, uploadedEmail, and uploadedAttachments", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
+        expect(result.current.uploadedEmail).toBe(true);
+      });
+
+      result.current.resetUploadState();
+
+      await waitFor(() => {
+        expect(result.current.uploadStatus).toEqual({});
+        expect(result.current.uploadedEmail).toBeUndefined();
+        expect(result.current.uploadedAttachments).toBeUndefined();
+      });
+    });
+  });
+
+  describe("toast integration", () => {
+    it("calls showUploadingToast when upload starts", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      expect(mockShowUploadingToast).toHaveBeenCalledWith(1, "ZAAK-001");
+    });
+
+    it("calls showSuccessToast after successful upload", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+        {
+          success: true,
+          filename: mockAttachmentDocument1.attachment.name,
+          size: mockAttachmentDocument1.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([4, 5, 6]),
+        },
+      ]);
+      mockAddDocumentToZaak
+        .mockResolvedValueOnce({ id: "info-object-1" })
+        .mockResolvedValueOnce({ id: "info-object-2" });
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+        {
+          ...mockAttachmentDocument1,
+          graphId: "graph-attachment-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({
+          documents: [mockEmailDocument, mockAttachmentDocument1],
+        });
+      });
+
+      expect(mockShowSuccessToast).toHaveBeenCalledWith(true, 1);
+    });
+
+    it("calls showErrorToast when some uploads fail", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+        {
+          success: true,
+          filename: mockAttachmentDocument1.attachment.name,
+          size: mockAttachmentDocument1.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([4, 5, 6]),
+        },
+      ]);
+      mockAddDocumentToZaak
+        .mockResolvedValueOnce({ id: "info-object-1" })
+        .mockRejectedValueOnce(new Error("Upload failed"));
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+        {
+          ...mockAttachmentDocument1,
+          graphId: "graph-attachment-id",
+          parentEmailGraphId: "graph-email-id",
+        },
+      ]);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({
+          documents: [mockEmailDocument, mockAttachmentDocument1],
+        });
+      });
+
+      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2);
+    });
+
+    it("calls showGeneralErrorToast when upload process fails", async () => {
+      const authError = new Error("Auth error");
+      mockGetAccessToken.mockRejectedValueOnce(authError);
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderHook(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      expect(mockShowGeneralErrorToast).toHaveBeenCalledWith(authError);
+    });
   });
 });

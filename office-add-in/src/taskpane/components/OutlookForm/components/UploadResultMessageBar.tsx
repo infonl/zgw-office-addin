@@ -34,7 +34,7 @@ const useStyles = makeStyles({
   },
 });
 
-const getIntentAndTitle = (uploadError: boolean, uploadSuccess: boolean) => {
+export const getIntentAndTitle = (uploadError: boolean, uploadSuccess: boolean) => {
   if (uploadError && !uploadSuccess) {
     return { intent: "error" as const, title: "Koppeling mislukt" };
   }
@@ -44,7 +44,7 @@ const getIntentAndTitle = (uploadError: boolean, uploadSuccess: boolean) => {
   return { intent: "success" as const, title: "Gekoppeld" };
 };
 
-const getSuccessMessage = (
+export const getSuccessMessage = (
   uploadedEmail: boolean | undefined,
   uploadedAttachments: number | undefined
 ): string | null => {
@@ -60,7 +60,7 @@ const getSuccessMessage = (
   return null;
 };
 
-const getErrorMessage = (errorCount: number, uploadSuccess: boolean): string => {
+export const getErrorMessage = (errorCount: number, uploadSuccess: boolean): string => {
   if (uploadSuccess) {
     return `Er ${getVerbForm(errorCount, "is", "zijn")} echter ${errorCount === 1 ? "een fout opgetreden bij een bestand" : `fouten opgetreden bij ${errorCount} bestanden`}.`;
   }

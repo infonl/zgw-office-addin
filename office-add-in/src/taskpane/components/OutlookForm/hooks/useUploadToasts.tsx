@@ -15,7 +15,9 @@ export function useUploadToasts() {
     dispatchToast(
       <Toast>
         <ToastTitle media={<Spinner size="tiny" />}>Bestanden koppelen</ToastTitle>
-        <ToastBody>{count} bestand(en) worden gekoppeld aan {zaakId}.</ToastBody>
+        <ToastBody>
+          {count} bestand(en) worden gekoppeld aan {zaakId}.
+        </ToastBody>
       </Toast>,
       { intent: "info", toastId: "uploading-documents" }
     );
