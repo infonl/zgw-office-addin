@@ -105,7 +105,7 @@ function Main() {
   const canCloseTaskpane = isWord && isInBrowser && !!window.Office?.addin?.hide;
 
   const handleClose = () => {
-    window.Office.addin.hide();
+    window.Office?.addin?.hide?.();
   };
 
   if (documentAddedToZaak) {

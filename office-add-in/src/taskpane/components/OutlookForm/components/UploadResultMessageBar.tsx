@@ -19,7 +19,6 @@ export type UploadResultMessageBarProps = {
   errorCount: number;
   uploadedEmail?: boolean;
   uploadedAttachments?: number;
-  zaakIdentificatie?: string;
 };
 
 const useStyles = makeStyles({

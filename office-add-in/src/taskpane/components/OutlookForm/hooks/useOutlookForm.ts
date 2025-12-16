@@ -65,6 +65,11 @@ export function useOutlookForm() {
     ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
+    if (selectedDocuments.length === 0) {
+      WARN("⚠️ No documents selected for upload");
+      return { error: null };
+    }
+
     const loadingStatus: Record<string, UploadStatus> = {};
     selectedDocuments.forEach((doc) => {
       loadingStatus[doc.attachment.id] = "loading";
@@ -87,11 +92,6 @@ export function useOutlookForm() {
         },
       });
     });
-
-    if (selectedDocuments.length === 0) {
-      WARN("⚠️ No documents selected for upload");
-      return { error: null };
-    }
 
     try {
       DEBUG("🔧 Initializing GraphService...");
@@ -169,8 +169,8 @@ export function useOutlookForm() {
 
       // Upload each document in parallel, update status as soon as each finishes
       const mutationResults = await Promise.all(
-        uploadPayload.map(async (doc, idx) => {
-          const attachmentId = selectedDocuments[idx]?.attachment.id;
+        uploadPayload.map(async (doc) => {
+          const attachmentId = doc.attachment?.id;
           try {
             const result = await mutateAsync(doc);
             setUploadStatus((prev) => ({ ...prev, [attachmentId]: "success" }));
@@ -191,12 +191,11 @@ export function useOutlookForm() {
       }
 
       DEBUG("✅ All documents uploaded successfully");
-      // In deze app is de e-mail zelf attachmentType === 'item', bijlagen zijn de rest
       const emailSelected = selectedDocuments.some(
-        (doc) => doc.attachment.attachmentType === "item" && doc.selected
+        (doc) => doc.attachment.attachmentType === "item"
       );
       const attachmentsSelected = selectedDocuments.filter(
-        (doc) => doc.attachment.attachmentType !== "item" && doc.selected
+        (doc) => doc.attachment.attachmentType !== "item"
       ).length;
 
       showSuccessToast(emailSelected, attachmentsSelected);
@@ -206,8 +205,7 @@ export function useOutlookForm() {
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
-      // Set all selected documents to error status
-      const errorStatus: Record<string, "idle" | "loading" | "success" | "error"> = {};
+      const errorStatus: Record<string, UploadStatus> = {};
       const currentDocuments = form.getValues("documents");
       currentDocuments?.forEach((doc) => {
         if (doc.selected) {

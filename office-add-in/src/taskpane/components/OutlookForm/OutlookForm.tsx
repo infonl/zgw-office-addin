@@ -64,7 +64,7 @@ export function OutlookForm() {
   );
 
   const handleClose = React.useCallback(() => {
-    window.Office.context.ui.closeContainer();
+    window.Office?.context?.ui?.closeContainer?.();
   }, []);
 
   const statusValues = Object.values(uploadStatus);
@@ -107,7 +107,6 @@ export function OutlookForm() {
                     errorCount={errorCount}
                     uploadedEmail={uploadedEmail}
                     uploadedAttachments={uploadedAttachments}
-                    zaakIdentificatie={zaak.data?.identificatie}
                   />
                   <div className={styles.actions}>
                     <Button appearance="primary" onClick={handleReset}>
