@@ -15,6 +15,7 @@ export function useOffice() {
   const { DEBUG, WARN, ERROR } = useLogger(useOffice.name);
   const host = Office.context.host;
   const isWord = host === Office.HostType.Word;
+  const isExcel = host === Office.HostType.Excel;
   const isOutlook = host === Office.HostType.Outlook;
   const isInBrowser = Office?.context?.platform === window.Office?.PlatformType?.OfficeOnline;
 
