@@ -1,7 +1,7 @@
 frontend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-frontend
-    tag: v0.2.185@sha256:9453742027328f9f55f13ac2b9313823abe3fe8cbd1be6560537280b39109f47
+    tag: v0.2.198@sha256:fcac444b8436348187526c8ae0c332c3d4baef1ffd61930c25543872ba765529
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -51,7 +51,7 @@ frontend:
 backend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-backend
-    tag: v0.2.185@sha256:ee802d022cc94c8c8242f5860b05525cf21cd10b5071ca9044921af8ca922e1c
+    tag: v0.2.198@sha256:fac48db1f43ad9f4f88ade4f56b4f28c16a2618b0f98cc4a1b29d9050c42d0f4
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -68,6 +68,8 @@ backend:
   msalScope: "https://graph.microsoft.com/.default"
   # -- Redirect URI for MSAL authentication towards Azure AD
   msalRedirectUri: "http://localhost:3003/auth/callback"
+  # -- Client secret for MSAL authentication towards Azure AD
+  msalSecret: "MSAL_CLIENT_SECRET_PLACEHOLDER"
   # -- Resource limits and requests for the backend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious

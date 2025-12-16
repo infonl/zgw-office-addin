@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.60](https://img.shields.io/badge/Version-0.0.60-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.63](https://img.shields.io/badge/Version-0.0.63-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -33,13 +33,14 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.2.185@sha256:ee802d022cc94c8c8242f5860b05525cf21cd10b5071ca9044921af8ca922e1c"` |  |
+| backend.image.tag | string | `"v0.2.198@sha256:fac48db1f43ad9f4f88ade4f56b4f28c16a2618b0f98cc4a1b29d9050c42d0f4"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
 | backend.msalAuthorityUrl | string | `"https://login.microsoftonline.com/"` | Authority URL for MSAL authentication towards Azure AD |
 | backend.msalClientId | string | `"MSAL_CLIENT_ID_PLACEHOLDER"` | Client ID for MSAL authentication towards Azure AD |
 | backend.msalRedirectUri | string | `"http://localhost:3003/auth/callback"` | Redirect URI for MSAL authentication towards Azure AD |
 | backend.msalScope | string | `"https://graph.microsoft.com/.default"` | Scope for MSAL authentication towards Azure AD |
+| backend.msalSecret | string | `"MSAL_CLIENT_SECRET_PLACEHOLDER"` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
@@ -54,7 +55,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.2.185@sha256:9453742027328f9f55f13ac2b9313823abe3fe8cbd1be6560537280b39109f47"` |  |
+| frontend.image.tag | string | `"v0.2.198@sha256:fcac444b8436348187526c8ae0c332c3d4baef1ffd61930c25543872ba765529"` |  |
 | frontend.imagePullSecrets | list | `[]` | Image pull secrets for the frontend deployment |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |

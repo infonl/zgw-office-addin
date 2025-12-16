@@ -18,7 +18,7 @@ export function useOffice() {
   const isOutlook = host === Office.HostType.Outlook;
   const isInBrowser = Office?.context?.platform === window.Office?.PlatformType?.OfficeOnline;
 
-  const getWordFileName = useCallback(() => {
+  const getDocumentFileName = useCallback(() => {
     return new Promise<string>((resolve, reject) => {
       Office.context.document.getFilePropertiesAsync((result) => {
         if (result.status !== Office.AsyncResultStatus.Succeeded) {
@@ -50,8 +50,12 @@ export function useOffice() {
   const getFileName = useCallback(async () => {
     try {
       if (isWord) {
-        const n = await getWordFileName();
+        const n = await getDocumentFileName();
         return sanitizeFileName(n || "document.docx");
+      }
+      if (isExcel) {
+        const n = await getDocumentFileName();
+        return sanitizeFileName(n || "workbook.xlsx");
       }
       if (isOutlook) {
         const subj = getOutlookSubject();
@@ -61,9 +65,13 @@ export function useOffice() {
       return "";
     } catch (error) {
       WARN("Unable to get file/mail title", error);
+      // ✅ Return appropriate fallback based on host
+      if (isWord) return "document.docx";
+      if (isExcel) return "workbook.xlsx";
+      if (isOutlook) return "Outlook-bericht.eml";
       return "";
     }
-  }, [isWord, isOutlook]);
+  }, [isWord, isExcel, isOutlook, getDocumentFileName, getOutlookSubject]);
 
   const getSignedInUser = useCallback(async () => {
     try {
@@ -76,7 +84,7 @@ export function useOffice() {
     }
   }, []);
 
-  const getWordDocumentData = useCallback(async () => {
+  const getOfficeDocumentData = useCallback(async () => {
     DEBUG("Getting Word document data");
     let file: Office.File | undefined;
     return new Promise<string>((resolve, reject) => {
@@ -105,14 +113,13 @@ export function useOffice() {
 
   const getDocumentData = useCallback(async () => {
     try {
-      if (isWord) return await getWordDocumentData();
       if (isOutlook) return await getOutlookDocumentData();
-      return "";
+      return await getOfficeDocumentData();
     } catch (error) {
       WARN("Unable to get document data", error);
       return "";
     }
-  }, [isWord, isOutlook, getWordDocumentData, getOutlookDocumentData]);
+  }, [isWord, isExcel, isOutlook, getOfficeDocumentData, getOutlookDocumentData]);
 
   const getSlice = async (state: State) => {
     DEBUG("Getting slice", state);
@@ -292,12 +299,13 @@ export function useOffice() {
     getDocumentData,
     getSignedInUser,
     getFileName,
-    getWordFileName,
+    getDocumentFileName,
     getOutlookSubject,
     host,
     isWord,
     isOutlook,
     isInBrowser,
+    isExcel,
     processAndUploadDocuments,
   };
 }

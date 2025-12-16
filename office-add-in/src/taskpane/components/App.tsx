@@ -137,8 +137,8 @@ function Main() {
 
   return (
     <div className={styles.root}>
-      {isWord && <OfficeForm />}
       {isOutlook && <OutlookForm />}
+      {!isOutlook && <OfficeForm />}
     </div>
   );
 }
