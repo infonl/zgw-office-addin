@@ -29,7 +29,6 @@ export function OutlookForm() {
   const styles = useStyles();
   const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
   const { form, zaak, hasSelectedDocuments, handleSubmit, tokenError } = useOutlookForm();
-  console.log("Token error:", tokenError);
 
   if (!zaak.data) return <ZaakSearch />;
 
