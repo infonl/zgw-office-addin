@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getToken, clearToken } from "./getAccesToken";
+import { getToken, clearToken } from "./getAccessToken";
 
 global.Office = {
   auth: {
@@ -34,7 +34,11 @@ describe("getAccesToken", () => {
     });
 
     it("should cache the token and not request again", async () => {
-      const mockToken = "mock-cached-token";
+      // Create a valid JWT with expiry far in the future
+      const futureExp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+      const payload = { exp: futureExp };
+      const mockToken = `header.${btoa(JSON.stringify(payload))}.signature`;
+
       vi.mocked(Office.auth.getAccessToken).mockResolvedValue(mockToken);
 
       // First call

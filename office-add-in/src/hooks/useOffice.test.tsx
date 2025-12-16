@@ -6,7 +6,7 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { useOffice } from "./useOffice";
-import { clearToken } from "../utils/getAccesToken";
+import { clearToken } from "../utils/getAccessToken";
 
 // Mock Office.js types
 interface MockAsyncResult<T> {

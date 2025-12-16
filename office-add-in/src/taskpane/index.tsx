@@ -6,7 +6,7 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
-import { getToken } from "../utils/getAccesToken";
+import { getToken } from "../utils/getAccessToken";
 import { jwtDecode } from "jwt-decode";
 
 const rootElement: HTMLElement | null = document.getElementById("container");

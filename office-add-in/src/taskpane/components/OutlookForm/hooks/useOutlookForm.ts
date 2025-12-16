@@ -17,7 +17,7 @@ import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocum
 import { useLogger } from "../../../../hooks/useLogger";
 import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
 import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
-import { getToken } from "../../../../utils/getAccesToken";
+import { getToken } from "../../../../utils/getAccessToken";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 

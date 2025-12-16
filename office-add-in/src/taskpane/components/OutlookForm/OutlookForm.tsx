@@ -40,7 +40,7 @@ export function OutlookForm() {
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           {step === "selectItems" && (
             <>
-              {tokenError == true && <ShowTokenError />}
+              {tokenError === true && <ShowTokenError />}
               <SelectItems />
               <section className={styles.actions}>
                 <Button

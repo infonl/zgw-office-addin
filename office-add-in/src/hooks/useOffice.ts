@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useLogger } from "./useLogger";
 import { jwtDecode } from "jwt-decode";
 import { ZaakResponse, ProcessedDocument, GraphServiceType } from "./types";
-import { getToken } from "../utils/getAccesToken";
+import { getToken } from "../utils/getAccessToken";
 
 type State = { file: Office.File; currentSlice: number };
 

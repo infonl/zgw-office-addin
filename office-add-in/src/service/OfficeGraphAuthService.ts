@@ -11,7 +11,7 @@ import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
-import { getToken } from "../utils/getAccesToken";
+import { getToken } from "../utils/getAccessToken";
 
 /**
  * Microsoft Graph authentication service for Office Add-ins
