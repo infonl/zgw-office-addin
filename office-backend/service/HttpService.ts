@@ -10,7 +10,6 @@ import { envServerSchema } from "../src/envSchema";
 export class HttpService {
   private readonly baseUrl = envServerSchema.API_BASE_URL;
 
-
   public async POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
     return this.request<T>("POST", url, { body, headers });
   }
