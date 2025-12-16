@@ -18,8 +18,6 @@ export async function getToken(): Promise<string> {
     return tokenPromise;
   }
 
-  // throw Error("No token available");
-
   // Start a new token request
   tokenPromise = Office.auth
     .getAccessToken()
