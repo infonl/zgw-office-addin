@@ -28,8 +28,8 @@ export async function getToken(): Promise<string> {
     })
     .catch(async (error) => {
       if (error && typeof error === "object" && "code" in error) {
-        const errorWithCode = error as { code: string };
-        if (errorWithCode.code === "13006") {
+        const errorWithCode = error as { code: number };
+        if (errorWithCode.code === 13006) {
           await new Promise((r) => setTimeout(r, 500));
           return Office.auth.getAccessToken();
         }

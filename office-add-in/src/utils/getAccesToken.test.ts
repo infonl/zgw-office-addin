@@ -49,7 +49,7 @@ describe("getAccesToken", () => {
 
     it("should handle error code 13006 with retry", async () => {
       const mockToken = "mock-token-after-retry";
-      const error13006 = { code: "13006", message: "User not signed in" };
+      const error13006 = { code: 13006, message: "User not signed in" };
 
       vi.mocked(Office.auth.getAccessToken)
         .mockRejectedValueOnce(error13006)
@@ -62,7 +62,7 @@ describe("getAccesToken", () => {
     });
 
     it("should throw error for non-13006 errors", async () => {
-      const mockError = { code: "13005", message: "Other error" };
+      const mockError = { code: 13005, message: "Other error" };
       vi.mocked(Office.auth.getAccessToken).mockRejectedValue(mockError);
 
       await expect(getToken()).rejects.toEqual(mockError);
@@ -93,7 +93,7 @@ describe("getAccesToken", () => {
     });
 
     it("should clear cached token on error", async () => {
-      const mockError = { code: "13005", message: "Auth failed" };
+      const mockError = { code: 13005, message: "Auth failed" };
       vi.mocked(Office.auth.getAccessToken).mockRejectedValue(mockError);
 
       await expect(getToken()).rejects.toEqual(mockError);
