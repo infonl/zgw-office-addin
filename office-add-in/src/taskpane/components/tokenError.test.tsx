@@ -9,7 +9,6 @@ import { errorMessages, defaultError } from "../../tokenErrors";
 import { describe, expect, it } from "vitest";
 import { ShowTokenError } from "./tokenError";
 
-
 type OfficeErrorCase = {
   code: number;
   title: string;
@@ -36,31 +35,39 @@ describe("ShowTokenError", () => {
         message,
         name,
       };
-
       render(<ShowTokenError error={error} />);
-      expect(screen.getByText(title)).not.toBeNull();
-      expect(screen.getByText(message)).not.toBeNull();
-      expect(screen.getByText(`Foutcode: ${code}`)).not.toBeNull();
+
+      const shownTitle = screen.getByTestId("token-error-title");
+      expect(shownTitle.textContent).toBe(title);
+
+      const shownMessage = screen.getByTestId("token-error-message");
+      expect(shownMessage.textContent).toBe(message);
+
+      const shownCode = screen.getByTestId("token-error-code");
+      expect(shownCode.textContent).toContain(code);
     }
   );
 
   it("falls back to default error for unknown error code", () => {
     render(<ShowTokenError error={{ code: 99999 }} />);
 
-    expect(screen.getByText(defaultError.title)).not.toBeNull();
+    const shownTitle = screen.getByTestId("token-error-title");
+    expect(shownTitle.textContent).toBe(defaultError.title);
 
-    expect(screen.getByText(defaultError.message)).not.toBeNull();
+    const shownMessage = screen.getByTestId("token-error-message");
+    expect(shownMessage.textContent).toBe(defaultError.message);
 
-    expect(screen.getByText("Foutcode: 99999")).not.toBeNull();
+    const shownCode = screen.getByTestId("token-error-code");
+    expect(shownCode.textContent).toContain(String(99999));
   });
 
   it("falls back to default error when error has no code", () => {
     render(<ShowTokenError error={{ message: "Something failed" }} />);
 
-    console.debug("DEFAULTERROR: ", screen.getByText(defaultError.title).textContent)
+    const title = screen.getByTestId("token-error-title");
+    expect(title.textContent).toBe(defaultError.title);
 
-    expect(screen.getByText(defaultError.title)).not.toBeNull();
-
-    expect(screen.getByText(defaultError.message)).not.toBeNull();
+    const message = screen.getByTestId("token-error-message");
+    expect(message.textContent).toBe(defaultError.message);
   });
 });

@@ -34,7 +34,7 @@ const useStyles = makeStyles({
   },
 });
 
-export function ShowTokenError({ error } : TokenErrorProps) {
+export function ShowTokenError({ error }: TokenErrorProps) {
   const styles = useStyles();
 
   if (!error) return null;
@@ -43,17 +43,17 @@ export function ShowTokenError({ error } : TokenErrorProps) {
   const errorInfo = errorCode ? errorMessages[errorCode] || defaultError : defaultError;
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid="token-error">
       <div className={styles.content}>
-        <ErrorCircleRegular className={styles.icon} />
+        <ErrorCircleRegular className={styles.icon} data-testid="token-error-icon" />
         <Text className={styles.text}>
-          <strong>{errorInfo.title}</strong>
+          <strong data-testid="token-error-title">{errorInfo.title}</strong>
           <br />
-          {errorInfo.message}
+          <span data-testid="token-error-message">{errorInfo.message}</span>
           {errorCode && (
             <>
               <br />
-              <small>Foutcode: {errorCode}</small>
+              <small data-testid="token-error-code">Foutcode: {errorCode}</small>
             </>
           )}
         </Text>
@@ -61,3 +61,4 @@ export function ShowTokenError({ error } : TokenErrorProps) {
     </div>
   );
 }
+
