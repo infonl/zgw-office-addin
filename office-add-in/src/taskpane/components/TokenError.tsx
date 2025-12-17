@@ -9,7 +9,6 @@ import { ErrorCircleRegular } from "@fluentui/react-icons";
 import { TokenErrorProps } from "../../hooks/types";
 import { errorMessages, defaultError } from "../../tokenErrors";
 
-
 const useStyles = makeStyles({
   container: {
     marginTop: tokens.spacingVerticalM,
@@ -61,4 +60,3 @@ export function ShowTokenError({ error }: TokenErrorProps) {
     </div>
   );
 }
-
