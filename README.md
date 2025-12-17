@@ -1,6 +1,6 @@
 # ZGW Office Addin
 
-[![GitHub CI](https://github.com/infonl/zgw-office-addin/actions/workflows/build-release-deploy.yml/badge.svg?branch=main)](https://github.com/infonl/zgw-office-addin/actions/workflows/build-release-deploy.yml)
+[![GitHub CI](https://github.com/infonl/zgw-office-addin/actions/workflows/build-release-deploy.yaml/badge.svg?branch=main)](https://github.com/infonl/zgw-office-addin/actions/workflows/build-release-deploy.yaml)
 [![Codecov](https://codecov.io/gh/infonl/zgw-office-addin/branch/main/graph/badge.svg)](https://app.codecov.io/gh/infonl/zgw-office-addin/)
 [![License](https://img.shields.io/badge/License-EUPL_1.2-blue.svg)](https://opensource.org/license/eupl-1-2/)
 
