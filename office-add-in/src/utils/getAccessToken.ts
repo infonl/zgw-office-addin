@@ -43,13 +43,12 @@ export async function getToken(): Promise<string> {
     })
     .catch(async (error) => {
       if (error && typeof error === "object" && "code" in error) {
-        const errorWithCode = error as { code: number };
+        const errorWithCode = error as { code: number; message?: string };
         console.log("Error obtaining access token:", errorWithCode);
         if (errorWithCode.code === 13006) {
           cachedToken = null;
           tokenPromise = null;
           await new Promise((r) => setTimeout(r, 500));
-          // Retry and cache the new token
           try {
             const token = await Office.auth.getAccessToken();
             cachedToken = token;
@@ -62,6 +61,9 @@ export async function getToken(): Promise<string> {
         }
       }
       tokenPromise = null;
+      if (error && typeof error === "object" && !("code" in error)) {
+        (error as { code?: number }).code = undefined;
+      }
       throw error;
     });
 

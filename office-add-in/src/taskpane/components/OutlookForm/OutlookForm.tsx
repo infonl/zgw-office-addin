@@ -10,12 +10,7 @@ import { ZaakSearch } from "../ZaakSearch";
 import { SelectItems } from "./steps/SelectItems";
 import { MetadataStep } from "./steps/MetadataStep";
 import { useOutlookForm } from "./hooks/useOutlookForm";
-import { ShowTokenError } from "../TokenError";
-
-/**
- * - Step 1: Search Zaak and select email and/or attachments to attach
- * - Step 2: Metadata per selected file
- */
+import { ShowTokenError } from "../tokenError";
 
 const useStyles = makeStyles({
   actions: {
@@ -40,17 +35,17 @@ export function OutlookForm() {
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           {step === "selectItems" && (
             <>
-              {tokenError === true && <ShowTokenError />}
               <SelectItems />
               <section className={styles.actions}>
                 <Button
                   appearance="primary"
-                  disabled={!hasSelectedDocuments}
+                  disabled={!hasSelectedDocuments || !!tokenError}
                   onClick={() => setStep("metaData")}
                 >
                   Volgende stap: bestandsgegevens
                 </Button>
               </section>
+              {tokenError && <ShowTokenError error={tokenError} />}
             </>
           )}
           {step === "metaData" && (

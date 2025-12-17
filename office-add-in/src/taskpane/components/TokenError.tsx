@@ -6,6 +6,9 @@
 import React from "react";
 import { makeStyles, tokens, Text } from "@fluentui/react-components";
 import { ErrorCircleRegular } from "@fluentui/react-icons";
+import { TokenErrorProps } from "../../hooks/types";
+import { errorMessages, defaultError } from "../../tokenErrors";
+
 
 const useStyles = makeStyles({
   container: {
@@ -31,17 +34,28 @@ const useStyles = makeStyles({
   },
 });
 
-export function ShowTokenError() {
+export function ShowTokenError({ error } : TokenErrorProps) {
   const styles = useStyles();
+
+  if (!error) return null;
+
+  const errorCode = typeof error === "object" ? error.code : undefined;
+  const errorInfo = errorCode ? errorMessages[errorCode] || defaultError : defaultError;
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <ErrorCircleRegular className={styles.icon} />
         <Text className={styles.text}>
-          <strong>Login vereist</strong>
-          <br />U moet zich uit- en inloggen bij Microsoft Office om deze add-in te kunnen
-          gebruiken. Log uit bij Office, sluit alle Office-toepassingen en log opnieuw in.
+          <strong>{errorInfo.title}</strong>
+          <br />
+          {errorInfo.message}
+          {errorCode && (
+            <>
+              <br />
+              <small>Foutcode: {errorCode}</small>
+            </>
+          )}
         </Text>
       </div>
     </div>

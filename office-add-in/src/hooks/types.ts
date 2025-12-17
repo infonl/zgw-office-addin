@@ -40,6 +40,9 @@ export type DocumentSchema = z.infer<typeof document>;
 
 export type SelectedDocument = Extract<DocumentSchema, { selected: true }>;
 
+export type TokenErrorProps = {
+  error: { code?: number; message?: string } | boolean;
+};
 export type ProcessedDocument = SelectedDocument & {
   graphId: string | null;
   parentEmailGraphId: string | null;

@@ -43,7 +43,11 @@ export function useOutlookForm() {
   useEffect(() => {
     getToken()
       .then(() => setTokenError(false))
-      .catch(() => setTokenError(true));
+      .catch((error) => {
+        const errorCode = error?.code;
+        setTokenError(error);
+        console.log("Token error code:", errorCode);
+      });
   }, []);
 
   const form = useForm({
