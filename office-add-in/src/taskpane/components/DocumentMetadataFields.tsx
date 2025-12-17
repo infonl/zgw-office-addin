@@ -35,7 +35,6 @@ export type DocumentMetadataFieldsProps = {
   zaakinformatieobjecten: { omschrijving: string; url?: string }[];
   statuses: typeof documentstatus;
   namePrefix?: string;
-  disabled?: boolean;
 };
 
 // To be used within a react-hook-form FormProvider
@@ -43,7 +42,6 @@ export function DocumentMetadataFields({
   zaakinformatieobjecten,
   statuses,
   namePrefix = "",
-  disabled = false,
 }: DocumentMetadataFieldsProps) {
   const styles = useStyles();
 
@@ -54,7 +52,6 @@ export function DocumentMetadataFields({
         name={`${namePrefix}auteur`}
         label="Auteur"
         required={!addDocumentSchema.shape.auteur.isOptional()}
-        disabled={disabled}
       />
       <Select
         className={styles.gridColumnSpan1}
@@ -65,7 +62,6 @@ export function DocumentMetadataFields({
           value: zio.url || "",
         }))}
         required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
-        disabled={disabled}
       />
       <Input
         className={styles.gridColumnSpan1}
@@ -73,7 +69,6 @@ export function DocumentMetadataFields({
         name={`${namePrefix}vertrouwelijkheidaanduiding`}
         label="Vertrouwelijkheid"
         required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
-        disabled={disabled}
       />
       <Select
         className={styles.gridColumnSpan1}
@@ -84,7 +79,6 @@ export function DocumentMetadataFields({
           value: status,
         }))}
         required={!addDocumentSchema.shape.status.isOptional()}
-        disabled={disabled}
       />
       <Input
         className={styles.gridColumnSpan1}
@@ -92,7 +86,6 @@ export function DocumentMetadataFields({
         name={`${namePrefix}creatiedatum`}
         label="Creatiedatum"
         required={!addDocumentSchema.shape.creatiedatum.isOptional()}
-        disabled={disabled}
       />
     </section>
   );

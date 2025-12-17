@@ -69,6 +69,14 @@ const useStyles = makeStyles({
   metadataSection: {
     marginTop: tokens.spacingVerticalM,
   },
+  fieldsetReset: {
+    border: 0,
+    margin: 0,
+    padding: 0,
+    "&[disabled] *": {
+      color: tokens.colorNeutralForegroundDisabled,
+    },
+  },
 });
 
 type MetadataStepProps = {
@@ -139,12 +147,13 @@ export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
                   </section>
                 </AccordionHeader>
                 <AccordionPanel className={styles.panel}>
-                  <DocumentMetadataFields
-                    namePrefix={`documents.${index}.`}
-                    zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
-                    statuses={documentstatus}
-                    disabled={hasUploadActivity}
-                  />
+                  <fieldset disabled={hasUploadActivity} className={styles.fieldsetReset}>
+                    <DocumentMetadataFields
+                      namePrefix={`documents.${index}.`}
+                      zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
+                      statuses={documentstatus}
+                    />
+                  </fieldset>
                 </AccordionPanel>
               </AccordionItem>
             )

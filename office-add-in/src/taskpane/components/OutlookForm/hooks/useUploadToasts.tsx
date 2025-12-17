@@ -16,7 +16,8 @@ export function useUploadToasts() {
       <Toast>
         <ToastTitle media={<Spinner size="tiny" />}>Bestanden koppelen</ToastTitle>
         <ToastBody>
-          {count} bestand(en) worden gekoppeld aan {zaakId}.
+          {count} {pluralize(count, "bestand", "bestanden")} {getVerbForm(count, "wordt", "worden")}{" "}
+          gekoppeld aan {zaakId}.
         </ToastBody>
       </Toast>,
       { intent: "info", toastId: "uploading-documents" }

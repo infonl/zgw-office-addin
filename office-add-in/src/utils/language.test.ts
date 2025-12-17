@@ -8,33 +8,25 @@ import { pluralize, getVerbForm } from "./language";
 
 describe("language utilities", () => {
   describe("pluralize", () => {
-    it("returns singular when count is 1", () => {
-      expect(pluralize(1, "bestand", "bestanden")).toBe("bestand");
-    });
-
-    it("returns plural when count is 0", () => {
-      expect(pluralize(0, "bestand", "bestanden")).toBe("bestanden");
-    });
-
-    it("returns plural when count is greater than 1", () => {
-      expect(pluralize(2, "bestand", "bestanden")).toBe("bestanden");
-      expect(pluralize(5, "bijlage", "bijlagen")).toBe("bijlagen");
+    it.each([
+      [1, "bestand", "bestanden", "bestand"],
+      [0, "bestand", "bestanden", "bestanden"],
+      [2, "bestand", "bestanden", "bestanden"],
+      [5, "bijlage", "bijlagen", "bijlagen"],
+    ])("returns correct form for count %s", (count, singular, plural, expected) => {
+      expect(pluralize(count, singular, plural)).toBe(expected);
     });
   });
 
   describe("getVerbForm", () => {
-    it("returns singular verb when count is 1", () => {
-      expect(getVerbForm(1, "is", "zijn")).toBe("is");
-      expect(getVerbForm(1, "kon", "konden")).toBe("kon");
-    });
-
-    it("returns plural verb when count is 0", () => {
-      expect(getVerbForm(0, "is", "zijn")).toBe("zijn");
-    });
-
-    it("returns plural verb when count is greater than 1", () => {
-      expect(getVerbForm(2, "is", "zijn")).toBe("zijn");
-      expect(getVerbForm(3, "kon", "konden")).toBe("konden");
+    it.each([
+      [1, "is", "zijn", "is"],
+      [1, "kon", "konden", "kon"],
+      [0, "is", "zijn", "zijn"],
+      [2, "is", "zijn", "zijn"],
+      [3, "kon", "konden", "konden"],
+    ])("returns correct verb form for count %s", (count, singular, plural, expected) => {
+      expect(getVerbForm(count, singular, plural)).toBe(expected);
     });
   });
 });
