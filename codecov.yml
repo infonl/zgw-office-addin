@@ -1,0 +1,29 @@
+#
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+#
+
+# When modifying this file, please check if it is valid using the following command:
+# `curl --data-binary @codecov.yml https://codecov.io/validate`
+# See: https://docs.codecov.com/docs/codecov-yaml
+codecov:
+  notify:
+    # only notify Codecov after two builds because we want to make sure
+    # that the reported coverage from our GitHub workflow includes both
+    # our frontend and backend test coverage
+    after_n_builds: 2
+  max_report_age: off
+coverage:
+  status:
+    project:
+      default:
+        # Allow the coverage to drop a little bit before failing the Codecov check.
+        # This to avoid failing Codecov checks when the coverage drops with e.g. 0.01%
+        # even when there are no changes made to the code.
+        threshold: "1"
+flag_management:
+  individual_flags:
+    - name: backendunittests
+      after_n_builds: 1
+    - name: frontendunittests
+      after_n_builds: 1
