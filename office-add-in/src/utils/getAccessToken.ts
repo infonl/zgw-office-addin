@@ -3,27 +3,33 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { jwtDecode } from "jwt-decode";
-
-// Token cache
-let tokenPromise: Promise<string> | null = null;
 let cachedToken: string | null = null;
+let tokenPromise: Promise<string> | null = null;
+
+interface ExtendedOfficeContext extends Office.Context {
+  auth?: {
+    getAccessTokenAsync: (
+      _options: Office.AuthOptions,
+      _callback: (_result: Office.AsyncResult<string>) => void
+    ) => void;
+  };
+}
 
 export async function getToken(): Promise<string> {
   // If we already have a cached token, return it
   if (cachedToken) {
     try {
-      const decoded: { exp?: number } = jwtDecode(cachedToken);
-      // exp is in seconds since epoch
-      const now = Math.floor(Date.now() / 1000);
-      const offset = 60; // seconds before expiry to consider token invalid
-      if (decoded.exp && decoded.exp > now + offset) {
+      const payload = JSON.parse(atob(cachedToken.split(".")[1]));
+      const expiry = payload.exp * 1000;
+      if (Date.now() < expiry - 60000) {
+        console.debug("Using cached token");
         return cachedToken;
+      } else {
+        console.debug("Cached token expired, fetching new one");
+        cachedToken = null;
       }
-      // Token expired or about to expire, clear it
-      cachedToken = null;
     } catch {
-      // If decoding fails, clear the cached token
+      console.debug("Error parsing cached token, fetching new one");
       cachedToken = null;
     }
   }
@@ -34,40 +40,21 @@ export async function getToken(): Promise<string> {
   }
 
   // Start a new token request
-  tokenPromise = Office.auth
-    .getAccessToken({
-      allowSignInPrompt: true,
-      allowConsentPrompt: true,
-      forceAddAccount: false,
+  tokenPromise = getTokenThroughAuthModule()
+    .catch(async (error) => {
+      const officeContext = Office.context as ExtendedOfficeContext;
+      if (officeContext?.auth?.getAccessTokenAsync) {
+        console.debug("Auth module failed, trying context-based auth");
+        return getTokenThroughContext();
+      }
+      throw error;
     })
     .then((token) => {
       cachedToken = token;
       tokenPromise = null;
       return token;
     })
-    .catch(async (error) => {
-      if (error && typeof error === "object" && "code" in error) {
-        const errorWithCode = error as { code: number; message?: string };
-        console.log("Error obtaining access token:", errorWithCode);
-        if (errorWithCode.code === 13006) {
-          cachedToken = null;
-          tokenPromise = null;
-          await new Promise((r) => setTimeout(r, 500));
-          try {
-            const token = await Office.auth.getAccessToken({
-              allowSignInPrompt: true,
-              allowConsentPrompt: true,
-              forceAddAccount: false,
-            });
-            cachedToken = token;
-            tokenPromise = null;
-            return token;
-          } catch (retryError) {
-            tokenPromise = null;
-            throw retryError;
-          }
-        }
-      }
+    .catch((error) => {
       tokenPromise = null;
       if (error && typeof error === "object" && !("code" in error)) {
         (error as { code?: number }).code = undefined;
@@ -76,6 +63,64 @@ export async function getToken(): Promise<string> {
     });
 
   return tokenPromise;
+}
+
+function getTokenThroughAuthModule(): Promise<string> {
+  return Office.auth
+    .getAccessToken({
+      allowSignInPrompt: true,
+      allowConsentPrompt: true,
+      forceAddAccount: false,
+    })
+    .catch(async (error) => {
+      if (error && typeof error === "object" && "code" in error) {
+        const errorWithCode = error as { code: number; message?: string };
+        console.debug("Error obtaining access token:", errorWithCode);
+        if (errorWithCode.code === 13006) {
+          console.debug("Error code 13006, retrying after 500ms");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          return Office.auth.getAccessToken({
+            allowSignInPrompt: true,
+            allowConsentPrompt: true,
+            forceAddAccount: false,
+          });
+        }
+      }
+      throw error;
+    });
+}
+
+function getTokenThroughContext(): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const officeContext = Office.context as ExtendedOfficeContext;
+    if (officeContext.auth?.getAccessTokenAsync) {
+      console.debug("Using office context auth");
+      officeContext.auth.getAccessTokenAsync(
+        {
+          forMSGraphAccess: true,
+          allowSignInPrompt: true,
+          allowConsentPrompt: true,
+        },
+        (result) => {
+          if (result.status === Office.AsyncResultStatus.Succeeded) {
+            resolve(result.value!);
+          } else {
+            reject(result.error);
+          }
+        }
+      );
+    } else {
+      console.debug("Using Office.auth.getAccessToken fallback");
+      Office.auth
+        .getAccessToken({
+          allowSignInPrompt: true,
+          allowConsentPrompt: true,
+          forceAddAccount: false,
+        })
+        .then(resolve)
+        .catch(reject);
+    }
+  });
 }
 
 export function clearToken() {
