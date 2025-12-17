@@ -7,7 +7,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { errorMessages, defaultError } from "../../tokenErrors";
 import { describe, expect, it } from "vitest";
-import { ShowTokenError } from "./tokenError";
+import { ShowTokenError } from "./TokenError";
+
 
 type OfficeErrorCase = {
   code: number;

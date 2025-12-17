@@ -10,7 +10,7 @@ import { ZaakSearch } from "../ZaakSearch";
 import { SelectItems } from "./steps/SelectItems";
 import { MetadataStep } from "./steps/MetadataStep";
 import { useOutlookForm } from "./hooks/useOutlookForm";
-import { ShowTokenError } from "../tokenError";
+import { ShowTokenError } from "../TokenError";
 
 const useStyles = makeStyles({
   actions: {
