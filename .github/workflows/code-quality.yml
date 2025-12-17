@@ -44,13 +44,6 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
-      - name: Upload test results to CodeCov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
-        if: ${{ github.event_name != 'merge_group' && !cancelled() }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          report_type: "test_results"
-
       - name: Upload backend test coverage report to Codecov
         if: ${{ github.event_name != 'merge_group' }}
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
@@ -65,7 +58,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: frontendunittests
-          directory: ./office-add-incoverage
+          directory: ./office-add-in/coverage
 
       - name: Comment PR with test results
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
