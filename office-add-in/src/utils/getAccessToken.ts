@@ -35,7 +35,11 @@ export async function getToken(): Promise<string> {
 
   // Start a new token request
   tokenPromise = Office.auth
-    .getAccessToken()
+    .getAccessToken({
+      allowSignInPrompt: true,
+      allowConsentPrompt: true,
+      forceAddAccount: false,
+    })
     .then((token) => {
       cachedToken = token;
       tokenPromise = null;
@@ -50,7 +54,11 @@ export async function getToken(): Promise<string> {
           tokenPromise = null;
           await new Promise((r) => setTimeout(r, 500));
           try {
-            const token = await Office.auth.getAccessToken();
+            const token = await Office.auth.getAccessToken({
+              allowSignInPrompt: true,
+              allowConsentPrompt: true,
+              forceAddAccount: false,
+            });
             cachedToken = token;
             tokenPromise = null;
             return token;
