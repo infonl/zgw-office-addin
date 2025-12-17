@@ -16,7 +16,7 @@ import {
   Body1Strong,
 } from "@fluentui/react-components";
 import { useFormContext } from "react-hook-form";
-import { addDocumentSchema, documentstatus, UploadStatus } from "../../../../hooks/types";
+import { addDocumentSchema, documentstatus } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { DocumentIndicator } from "./DocumentIndicator";
@@ -80,10 +80,10 @@ const useStyles = makeStyles({
 });
 
 type MetadataStepProps = {
-  uploadStatus?: Record<string, UploadStatus>;
+  isUploading?: boolean;
 };
 
-export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
+export function MetadataStep({ isUploading = false }: MetadataStepProps) {
   const form = useFormContext<Schema>();
   const styles = useStyles();
   const common = useCommonStyles();
@@ -91,9 +91,8 @@ export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
 
   const documents = form.watch("documents");
 
-  const hasUploadActivity = Object.values(uploadStatus).some(
-    (status) => status === "loading" || status === "success" || status === "error"
-  );
+  // Check if any document is currently being uploaded (has pending mutations)
+  const hasUploadActivity = isUploading;
 
   const defaultOpenItems = React.useMemo(() => {
     return documents
@@ -137,13 +136,11 @@ export function MetadataStep({ uploadStatus = {} }: MetadataStepProps) {
                 <AccordionHeader className={styles.header} expandIconPosition="end">
                   <section className={styles.accordionHeader}>
                     <div className={styles.statusIconContainer}>
-                      <UploadStatusIcon status={uploadStatus[document.attachment.id]} />
+                      <UploadStatusIcon attachmentId={document.attachment.id} />
                       {document.attachment.name}
                     </div>
-                    {(!uploadStatus[document.attachment.id] ||
-                      uploadStatus[document.attachment.id] === "idle") && (
-                      <DocumentIndicator index={index} />
-                    )}
+
+                    {!hasUploadActivity && <DocumentIndicator index={index} />}
                   </section>
                 </AccordionHeader>
                 <AccordionPanel className={styles.panel}>

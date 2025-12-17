@@ -6,10 +6,10 @@
 import React from "react";
 import { Spinner, tokens, makeStyles } from "@fluentui/react-components";
 import { Warning16Filled, CheckmarkCircle16Filled } from "@fluentui/react-icons";
-import { UploadStatus } from "../../../../hooks/types";
+import { useMutationState } from "@tanstack/react-query";
 
 type UploadStatusIconProps = {
-  status?: UploadStatus;
+  attachmentId: string;
 };
 
 const ICON_SIZE = "20px";
@@ -34,10 +34,22 @@ const useStyles = makeStyles({
   },
 });
 
-export function UploadStatusIcon({ status }: UploadStatusIconProps) {
+export function UploadStatusIcon({ attachmentId }: UploadStatusIconProps) {
   const styles = useStyles();
 
-  if (status === "loading") {
+  const allMutationStates = useMutationState({
+    filters: { mutationKey: ["upload_document"] },
+  });
+
+  const mutationState = allMutationStates.find(
+    (state) =>
+      (state.variables as unknown as { attachment?: { id?: string } })?.attachment?.id ===
+      attachmentId
+  );
+
+  const status = mutationState?.status;
+
+  if (status === "pending") {
     return (
       <div className={styles.container}>
         <Spinner size="tiny" />

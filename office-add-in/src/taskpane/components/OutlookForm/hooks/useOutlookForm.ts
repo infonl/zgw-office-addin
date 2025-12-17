@@ -7,7 +7,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema, SelectedDocument, UploadStatus } from "../../../../hooks/types";
+import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
@@ -37,16 +37,14 @@ export function useOutlookForm() {
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
-  const { mutateAsync } = useAddDocumentToZaak();
+  const { mutateAsync } = useAddDocumentToZaak(); // Initialize one mutation without fileId - track per-file via useMutationState
   const { showUploadingToast, showErrorToast, showSuccessToast, showGeneralErrorToast } =
     useUploadToasts();
-  const [uploadStatus, setUploadStatus] = React.useState<Record<string, UploadStatus>>({});
+
   const [uploadedEmail, setUploadedEmail] = React.useState<boolean | undefined>(undefined);
   const [uploadedAttachments, setUploadedAttachments] = React.useState<number | undefined>(
     undefined
   );
-
-  const isUploading = Object.values(uploadStatus).some((status) => status === "loading");
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -70,11 +68,6 @@ export function useOutlookForm() {
       return { error: null };
     }
 
-    const loadingStatus: Record<string, UploadStatus> = {};
-    selectedDocuments.forEach((doc) => {
-      loadingStatus[doc.attachment.id] = "loading";
-    });
-    setUploadStatus(loadingStatus);
     showUploadingToast(selectedDocuments.length, zaak.data?.identificatie || "");
 
     selectedDocuments.forEach((doc, index) => {
@@ -163,20 +156,20 @@ export function useOutlookForm() {
           titel: doc.attachment.name,
         };
       });
+      //as Array<ProcessedDocument & { zaakidentificatie: string; inhoud: string; titel: string }>;
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
-      DEBUG("🚀 Uploading documents to Zaak via mutation...");
+      DEBUG("🚀 Uploading documents to Zaak via per-file mutations...");
 
-      // Upload each document in parallel, update status as soon as each finishes
+      // Upload each document in parallel
+      // Each call has same mutationKey but different attachment data
+      // useMutationState can filter on this to track per-file
       const mutationResults = await Promise.all(
         uploadPayload.map(async (doc) => {
-          const attachmentId = doc.attachment?.id;
           try {
             const result = await mutateAsync(doc);
-            setUploadStatus((prev) => ({ ...prev, [attachmentId]: "success" }));
             return { status: "fulfilled", value: result };
           } catch {
-            setUploadStatus((prev) => ({ ...prev, [attachmentId]: "error" }));
             return { status: "rejected" };
           }
         })
@@ -205,14 +198,8 @@ export function useOutlookForm() {
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
-      const errorStatus: Record<string, UploadStatus> = {};
-      const currentDocuments = form.getValues("documents");
-      currentDocuments?.forEach((doc) => {
-        if (doc.selected) {
-          errorStatus[doc.attachment.id] = "error";
-        }
-      });
-      setUploadStatus(errorStatus);
+      // Note: Individual mutation errors are already tracked by TanStack Query
+      // This is a catch-all for orchestration-level errors (not file-level errors)
       showGeneralErrorToast();
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }
@@ -243,12 +230,11 @@ export function useOutlookForm() {
         documents: defaultDocuments,
       });
       form.trigger();
-      setUploadStatus({});
+      // Note: TanStack Query mutation states are automatically reset when component unmounts
     }
   }, [files, form, zaak.data?.identificatie]);
 
   const resetUploadState = React.useCallback(() => {
-    setUploadStatus({});
     setUploadedEmail(undefined);
     setUploadedAttachments(undefined);
   }, []);
@@ -259,8 +245,6 @@ export function useOutlookForm() {
     handleSubmit,
     zaak,
     hasSelectedDocuments: documents?.some(({ selected }) => selected),
-    isUploading,
-    uploadStatus,
     uploadedEmail,
     uploadedAttachments,
     resetUploadState,

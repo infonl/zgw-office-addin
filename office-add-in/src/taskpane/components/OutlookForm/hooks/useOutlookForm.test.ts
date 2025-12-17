@@ -5,6 +5,8 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
+import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   mockAttachment1,
   mockEmailDocument,
@@ -15,7 +17,7 @@ import {
 const mockGetAccessToken = vi.fn();
 const mockProcessAndUploadDocuments = vi.fn();
 const mockPrepareSelectedDocuments = vi.fn().mockResolvedValue([]);
-const mockAddDocumentToZaak = vi.fn();
+const mockMutateAsync = vi.fn();
 const mockDispatchToast = vi.fn();
 const mockDismissToast = vi.fn();
 const mockShowUploadingToast = vi.fn();
@@ -41,7 +43,7 @@ vi.mock("../../../../hooks/useOffice", () => ({
 }));
 vi.mock("../../../../hooks/useAddDocumentToZaak", () => ({
   useAddDocumentToZaak: () => ({
-    mutateAsync: mockAddDocumentToZaak,
+    mutateAsync: mockMutateAsync,
   }),
 }));
 vi.mock("../../../../provider/ToastProvider", () => ({
@@ -60,11 +62,20 @@ vi.mock("./useUploadToasts", () => ({
 }));
 
 describe("useOutlookForm", () => {
+  let queryClient: QueryClient;
+
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+
     vi.clearAllMocks();
     mockProcessAndUploadDocuments.mockReset();
     mockPrepareSelectedDocuments.mockReset();
-    mockAddDocumentToZaak.mockReset();
+    mockMutateAsync.mockReset();
     mockDispatchToast.mockReset();
     mockDismissToast.mockReset();
     mockShowUploadingToast.mockReset();
@@ -74,7 +85,7 @@ describe("useOutlookForm", () => {
     mockPrepareSelectedDocuments.mockResolvedValue([]);
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
-    mockAddDocumentToZaak.mockResolvedValue([mockAttachmentDocument1]);
+    mockMutateAsync.mockResolvedValue({ id: "info-object-1" });
     // Office object has many props, not needed for mock
     (global as unknown as { Office: unknown }).Office = {
       context: {
@@ -85,9 +96,16 @@ describe("useOutlookForm", () => {
     };
   });
 
+  const renderWithQueryClient = <T>(hook: () => T) => {
+    return renderHook(hook, {
+      wrapper: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(QueryClientProvider, { client: queryClient }, children),
+    });
+  };
+
   it("returns early if no documents are selected", async () => {
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     await waitFor(async () => {
       await result.current.handleSubmit({ documents: [] });
     });
@@ -96,7 +114,7 @@ describe("useOutlookForm", () => {
 
   it("handles authentication failure", async () => {
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     mockGetAccessToken.mockRejectedValueOnce(new Error("Auth error"));
     const submitResult = await waitFor(async () => {
       return await result.current.handleSubmit({ documents: [mockEmailDocument] });
@@ -108,7 +126,7 @@ describe("useOutlookForm", () => {
   it("handles document graph id retrieval failure", async () => {
     mockPrepareSelectedDocuments.mockRejectedValueOnce(new Error("Prepare error"));
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await waitFor(async () => {
       return await result.current.handleSubmit({ documents: [mockEmailDocument] });
     });
@@ -127,7 +145,7 @@ describe("useOutlookForm", () => {
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await waitFor(async () => {
       return await result.current.handleSubmit({ documents: [mockEmailDocument] });
     });
@@ -153,7 +171,7 @@ describe("useOutlookForm", () => {
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await waitFor(async () => {
       return await result.current.handleSubmit({ documents: [mockEmailDocument] });
     });
@@ -198,7 +216,7 @@ describe("useOutlookForm", () => {
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await result.current.handleSubmit({
       documents: [mockAttachmentDocument1],
     });
@@ -250,7 +268,7 @@ describe("useOutlookForm", () => {
         fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
-    mockAddDocumentToZaak.mockResolvedValueOnce([true, true, true]);
+    mockMutateAsync.mockResolvedValueOnce([true, true, true]);
     mockPrepareSelectedDocuments.mockResolvedValueOnce([
       {
         ...mockEmailDocument,
@@ -269,7 +287,7 @@ describe("useOutlookForm", () => {
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await result.current.handleSubmit({
       documents: [mockEmailDocument, mockAttachmentDocument1, mockAttachmentDocument2],
     });
@@ -339,7 +357,7 @@ describe("useOutlookForm", () => {
         fileContent: new Uint8Array([7, 8, 9]),
       },
     ]);
-    mockAddDocumentToZaak
+    mockMutateAsync
       .mockResolvedValueOnce({
         id: "info-object-1",
         titel: mockEmailDocument.attachment.name,
@@ -372,7 +390,7 @@ describe("useOutlookForm", () => {
       },
     ]);
     const { useOutlookForm } = await import("./useOutlookForm");
-    const { result } = renderHook(() => useOutlookForm());
+    const { result } = renderWithQueryClient(() => useOutlookForm());
     const submitResult = await waitFor(async () => {
       return await result.current.handleSubmit({
         documents: [mockEmailDocument, mockAttachmentDocument1, mockAttachmentDocument2],
@@ -400,97 +418,48 @@ describe("useOutlookForm", () => {
         graphService: expect.any(Object),
       })
     );
-    expect(submitResult).toEqual({ error: new Error("Failed to upload 2 documents") });
+    expect(submitResult).toEqual({ error: expect.any(Error) });
+    expect(mockShowErrorToast).toHaveBeenCalledWith(2, 3);
   });
 
-  describe("uploadStatus tracking", () => {
-    it("sets uploadStatus to loading during upload", async () => {
-      mockProcessAndUploadDocuments.mockImplementationOnce(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+  describe("mutation tracking via useMutationState", () => {
+    it("calls mutateAsync with the document payload", async () => {
+      mockProcessAndUploadDocuments.mockResolvedValueOnce([
+        {
+          success: true,
+          filename: mockEmailDocument.attachment.name,
+          size: mockEmailDocument.attachment.size,
+          duration: 100,
+          fileContent: new Uint8Array([1, 2, 3]),
+        },
+      ]);
+      mockPrepareSelectedDocuments.mockResolvedValueOnce([
+        {
+          ...mockEmailDocument,
+          graphId: "graph-email-id",
+          parentEmailGraphId: null,
+        },
+      ]);
+      mockMutateAsync.mockResolvedValueOnce({ id: "info-object-1" });
+
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderWithQueryClient(() => useOutlookForm());
+
+      await waitFor(async () => {
+        await result.current.handleSubmit({ documents: [mockEmailDocument] });
+      });
+
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachment: expect.objectContaining({
+            id: mockEmailDocument.attachment.id,
+            name: mockEmailDocument.attachment.name,
+          }),
+        })
       );
-      mockPrepareSelectedDocuments.mockResolvedValueOnce([
-        {
-          ...mockEmailDocument,
-          graphId: "graph-email-id",
-          parentEmailGraphId: null,
-        },
-      ]);
-      const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
-
-      const submitPromise = result.current.handleSubmit({ documents: [mockEmailDocument] });
-
-      await waitFor(() => {
-        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("loading");
-        expect(result.current.isUploading).toBe(true);
-      });
-
-      await submitPromise;
     });
 
-    it("sets uploadStatus to success after successful upload", async () => {
-      mockProcessAndUploadDocuments.mockResolvedValueOnce([
-        {
-          success: true,
-          filename: mockEmailDocument.attachment.name,
-          size: mockEmailDocument.attachment.size,
-          duration: 100,
-          fileContent: new Uint8Array([1, 2, 3]),
-        },
-      ]);
-      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
-      mockPrepareSelectedDocuments.mockResolvedValueOnce([
-        {
-          ...mockEmailDocument,
-          graphId: "graph-email-id",
-          parentEmailGraphId: null,
-        },
-      ]);
-      const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
-
-      await waitFor(async () => {
-        await result.current.handleSubmit({ documents: [mockEmailDocument] });
-      });
-
-      await waitFor(() => {
-        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
-        expect(result.current.isUploading).toBe(false);
-      });
-    });
-
-    it("sets uploadStatus to error after failed upload", async () => {
-      mockProcessAndUploadDocuments.mockResolvedValueOnce([
-        {
-          success: true,
-          filename: mockEmailDocument.attachment.name,
-          size: mockEmailDocument.attachment.size,
-          duration: 100,
-          fileContent: new Uint8Array([1, 2, 3]),
-        },
-      ]);
-      mockAddDocumentToZaak.mockRejectedValueOnce(new Error("Upload failed"));
-      mockPrepareSelectedDocuments.mockResolvedValueOnce([
-        {
-          ...mockEmailDocument,
-          graphId: "graph-email-id",
-          parentEmailGraphId: null,
-        },
-      ]);
-      const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
-
-      await waitFor(async () => {
-        await result.current.handleSubmit({ documents: [mockEmailDocument] });
-      });
-
-      await waitFor(() => {
-        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("error");
-        expect(result.current.isUploading).toBe(false);
-      });
-    });
-
-    it("tracks multiple file statuses independently", async () => {
+    it("tracks multiple file uploads independently", async () => {
       mockProcessAndUploadDocuments.mockResolvedValueOnce([
         {
           success: true,
@@ -507,7 +476,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([4, 5, 6]),
         },
       ]);
-      mockAddDocumentToZaak
+      mockMutateAsync
         .mockResolvedValueOnce({ id: "info-object-1" })
         .mockRejectedValueOnce(new Error("Upload failed"));
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
@@ -523,7 +492,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({
@@ -531,10 +500,9 @@ describe("useOutlookForm", () => {
         });
       });
 
-      await waitFor(() => {
-        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
-        expect(result.current.uploadStatus[mockAttachmentDocument1.attachment.id]).toBe("error");
-      });
+      // Verify mutateAsync was called for both documents (independent tracking)
+      expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2);
     });
   });
 
@@ -549,7 +517,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([1, 2, 3]),
         },
       ]);
-      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockMutateAsync.mockResolvedValueOnce({ id: "info-object-1" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
         {
           ...mockEmailDocument,
@@ -558,7 +526,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({ documents: [mockEmailDocument] });
@@ -587,7 +555,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([4, 5, 6]),
         },
       ]);
-      mockAddDocumentToZaak
+      mockMutateAsync
         .mockResolvedValueOnce({ id: "info-object-1" })
         .mockResolvedValueOnce({ id: "info-object-2" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
@@ -603,7 +571,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({
@@ -634,7 +602,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([4, 5, 6]),
         },
       ]);
-      mockAddDocumentToZaak
+      mockMutateAsync
         .mockResolvedValueOnce({ id: "info-object-1" })
         .mockResolvedValueOnce({ id: "info-object-2" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
@@ -650,7 +618,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({
@@ -666,7 +634,7 @@ describe("useOutlookForm", () => {
   });
 
   describe("resetUploadState", () => {
-    it("clears uploadStatus, uploadedEmail, and uploadedAttachments", async () => {
+    it("clears uploadedEmail and uploadedAttachments", async () => {
       mockProcessAndUploadDocuments.mockResolvedValueOnce([
         {
           success: true,
@@ -676,7 +644,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([1, 2, 3]),
         },
       ]);
-      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockMutateAsync.mockResolvedValueOnce({ id: "info-object-1" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
         {
           ...mockEmailDocument,
@@ -685,21 +653,19 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({ documents: [mockEmailDocument] });
       });
 
       await waitFor(() => {
-        expect(result.current.uploadStatus[mockEmailDocument.attachment.id]).toBe("success");
         expect(result.current.uploadedEmail).toBe(true);
       });
 
       result.current.resetUploadState();
 
       await waitFor(() => {
-        expect(result.current.uploadStatus).toEqual({});
         expect(result.current.uploadedEmail).toBeUndefined();
         expect(result.current.uploadedAttachments).toBeUndefined();
       });
@@ -717,7 +683,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([1, 2, 3]),
         },
       ]);
-      mockAddDocumentToZaak.mockResolvedValueOnce({ id: "info-object-1" });
+      mockMutateAsync.mockResolvedValueOnce({ id: "info-object-1" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
         {
           ...mockEmailDocument,
@@ -726,7 +692,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({ documents: [mockEmailDocument] });
@@ -752,7 +718,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([4, 5, 6]),
         },
       ]);
-      mockAddDocumentToZaak
+      mockMutateAsync
         .mockResolvedValueOnce({ id: "info-object-1" })
         .mockResolvedValueOnce({ id: "info-object-2" });
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
@@ -768,7 +734,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({
@@ -796,7 +762,7 @@ describe("useOutlookForm", () => {
           fileContent: new Uint8Array([4, 5, 6]),
         },
       ]);
-      mockAddDocumentToZaak
+      mockMutateAsync
         .mockResolvedValueOnce({ id: "info-object-1" })
         .mockRejectedValueOnce(new Error("Upload failed"));
       mockPrepareSelectedDocuments.mockResolvedValueOnce([
@@ -812,7 +778,7 @@ describe("useOutlookForm", () => {
         },
       ]);
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({
@@ -826,7 +792,7 @@ describe("useOutlookForm", () => {
     it("calls showGeneralErrorToast when upload process fails", async () => {
       mockGetAccessToken.mockRejectedValueOnce(new Error("Auth error"));
       const { useOutlookForm } = await import("./useOutlookForm");
-      const { result } = renderHook(() => useOutlookForm());
+      const { result } = renderWithQueryClient(() => useOutlookForm());
 
       await waitFor(async () => {
         await result.current.handleSubmit({ documents: [mockEmailDocument] });

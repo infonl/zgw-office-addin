@@ -12,8 +12,6 @@ export const documentstatus = [
   "gearchiveerd",
 ] as const;
 
-export type UploadStatus = "idle" | "loading" | "success" | "error";
-
 export const addDocumentSchema = z.object({
   vertrouwelijkheidaanduiding: z.string(),
   informatieobjecttype: z.string().url(),
