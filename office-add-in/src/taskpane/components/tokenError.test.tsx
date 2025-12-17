@@ -9,7 +9,6 @@ import { errorMessages, defaultError } from "../../tokenErrors";
 import { describe, expect, it } from "vitest";
 import { ShowTokenError } from "./TokenError";
 
-
 type OfficeErrorCase = {
   code: number;
   title: string;
