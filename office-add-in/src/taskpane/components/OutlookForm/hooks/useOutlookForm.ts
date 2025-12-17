@@ -213,7 +213,7 @@ export function useOutlookForm() {
         }
       });
       setUploadStatus(errorStatus);
-      showGeneralErrorToast(error);
+      showGeneralErrorToast();
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }
   };

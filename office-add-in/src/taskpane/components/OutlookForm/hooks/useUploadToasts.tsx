@@ -62,14 +62,13 @@ export function useUploadToasts() {
     );
   };
 
-  const showGeneralErrorToast = (error: Error | unknown) => {
+  const showGeneralErrorToast = () => {
     dismissToast("uploading-documents");
-    const errorMessage = error instanceof Error ? error.message : String(error);
 
     dispatchToast(
       <Toast>
         <ToastTitle>Koppeling mislukt</ToastTitle>
-        <ToastBody>Er is een onverwachte fout opgetreden: {errorMessage}</ToastBody>
+        <ToastBody>Er is een onverwachte fout opgetreden.</ToastBody>
       </Toast>,
       { intent: "error" }
     );

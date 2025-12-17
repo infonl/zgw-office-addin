@@ -824,8 +824,7 @@ describe("useOutlookForm", () => {
     });
 
     it("calls showGeneralErrorToast when upload process fails", async () => {
-      const authError = new Error("Auth error");
-      mockGetAccessToken.mockRejectedValueOnce(authError);
+      mockGetAccessToken.mockRejectedValueOnce(new Error("Auth error"));
       const { useOutlookForm } = await import("./useOutlookForm");
       const { result } = renderHook(() => useOutlookForm());
 
@@ -833,7 +832,7 @@ describe("useOutlookForm", () => {
         await result.current.handleSubmit({ documents: [mockEmailDocument] });
       });
 
-      expect(mockShowGeneralErrorToast).toHaveBeenCalledWith(authError);
+      expect(mockShowGeneralErrorToast).toHaveBeenCalled();
     });
   });
 });

@@ -98,11 +98,11 @@ function Main() {
   const styles = useStyles();
   const common = useCommonStyles();
 
-  const { isOutlook, isWord, isInBrowser } = useOffice();
+  const { isOutlook, isWord, isExcel, isInBrowser } = useOffice();
   const { documentAddedToZaak, reset } = useZaak();
 
   // in desktop apps, closing the taskpane via a button is not supported.
-  const canCloseTaskpane = isWord && isInBrowser && !!window.Office?.addin?.hide;
+  const canCloseTaskpane = (isWord || isExcel) && isInBrowser && !!window.Office?.addin?.hide;
 
   const handleClose = () => {
     window.Office?.addin?.hide?.();

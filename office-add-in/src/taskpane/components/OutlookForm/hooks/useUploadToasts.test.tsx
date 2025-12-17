@@ -60,8 +60,7 @@ describe("useUploadToasts", () => {
   describe("showGeneralErrorToast", () => {
     it("dismisses uploading toast before showing general error toast", () => {
       const { result } = renderHook(() => useUploadToasts());
-      const error = new Error("Test error");
-      result.current.showGeneralErrorToast(error);
+      result.current.showGeneralErrorToast();
 
       expect(mockDismissToast).toHaveBeenCalledWith("uploading-documents");
       expect(mockDismissToast).toHaveBeenCalledBefore(mockDispatchToast);
