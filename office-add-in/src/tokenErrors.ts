@@ -42,7 +42,7 @@ export const errorMessages: Record<number, { title: string; message: string }> =
   13007: {
     title: "Onjuiste toepassingstoegang",
     message:
-      "Deze toepassing heeft geen toegang tot de gevraagde resource. Controleer of u bent aangemeld met het juiste account of neem contact op met de beheerder.",
+      "De ZGW Office Add-in heeft geen toegang tot de gevraagde resource. Controleer of u bent aangemeld met het juiste account of neem contact op met de beheerder.",
   },
 
   13012: {
