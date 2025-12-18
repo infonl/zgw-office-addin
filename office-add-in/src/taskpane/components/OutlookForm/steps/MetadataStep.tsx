@@ -92,8 +92,8 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
 
   const documents = form.watch("documents");
 
-  // Check if any document is currently being uploaded (has pending mutations)
-  const hasUploadActivity = isUploading || isDisabled;
+  // Disable form when uploading or after upload completes
+  const isFormDisabled = isUploading || isDisabled;
 
   const defaultOpenItems = React.useMemo(() => {
     return documents
@@ -118,7 +118,7 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
           </tbody>
         </table>
       </section>
-      {!hasUploadActivity && (
+      {!isFormDisabled && (
         <section className={common.title}>
           <Body1>Vul bij elk bestand de bijbehorende metadata in.</Body1>
         </section>
@@ -141,11 +141,11 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
                       {document.attachment.name}
                     </div>
 
-                    {!hasUploadActivity && <DocumentIndicator index={index} />}
+                    {!isFormDisabled && <DocumentIndicator index={index} />}
                   </section>
                 </AccordionHeader>
                 <AccordionPanel className={styles.panel}>
-                  <fieldset disabled={hasUploadActivity} className={styles.fieldsetReset}>
+                  <fieldset disabled={isFormDisabled} className={styles.fieldsetReset}>
                     <DocumentMetadataFields
                       namePrefix={`documents.${index}.`}
                       zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}

@@ -7,6 +7,7 @@ import React from "react";
 import { Spinner, tokens, makeStyles } from "@fluentui/react-components";
 import { Warning16Filled, CheckmarkCircle16Filled } from "@fluentui/react-icons";
 import { useMutationState } from "@tanstack/react-query";
+import type { UploadDocumentMutationVariables } from "../../../../hooks/types";
 
 type UploadStatusIconProps = {
   attachmentId: string;
@@ -42,9 +43,7 @@ export function UploadStatusIcon({ attachmentId }: UploadStatusIconProps) {
   });
 
   const mutationState = allMutationStates.find(
-    (state) =>
-      (state.variables as unknown as { attachment?: { id?: string } })?.attachment?.id ===
-      attachmentId
+    (state) => (state.variables as UploadDocumentMutationVariables)?.attachment?.id === attachmentId
   );
 
   const status = mutationState?.status;
