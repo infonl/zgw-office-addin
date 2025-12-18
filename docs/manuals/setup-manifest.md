@@ -31,6 +31,7 @@ Replace the `CLIENT_ID` and `APP_URI_ID` with the correct values from Azure
 
 ## Loading the add-in into Office
 
+### Office Add-ins
 To load the add-in into office select Add-ins
 
 ![Add-Ins](./images/setup-manifest/add-ins.png)
@@ -41,3 +42,5 @@ From here select **Advanced → Upload My Add-In → Browse** to your saved mani
 - For Outlook: upload `manifest-outlook.xml`
 
 The add-ins are now available for use. Follow the [user manual](./user-manual.md) for detailed instructions.
+
+### Outlook Add-in
