@@ -1,4 +1,4 @@
-# Manifest
+# Manifest Loading Errors
 
 This document describes the errors that can occur when loading the Office Add-in manifest.
 
