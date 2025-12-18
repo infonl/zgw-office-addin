@@ -83,7 +83,7 @@ To successfully remove an add-in in Office and install a new version:
 
 If the taskpane doesn't appear when you open the add-in:
 
-1. Open your browser and navigate to: [https://localhost:3000/taskpane.html](https://localhost:3000/taskpane.html)
+1. Open your browser and navigate to: https://localhost:3000/taskpane.html
 2. Your browser will show a security warning
 3. Click "Advanced" and then "Proceed to localhost" (or similar option)
 4. This tells your browser to trust the self-signed certificate
@@ -99,7 +99,7 @@ If the taskpane doesn't appear when you open the add-in:
 npm run dev
 ```
 2. Verify the URLs in your manifest are accessible
-3. Test if [https://localhost:3000](https://localhost:3000) loads in your browser
+3. Test if https://localhost:3000 loads in your browser
 
 ### 6. Try Another Office Application
 
