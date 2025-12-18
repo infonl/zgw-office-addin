@@ -30,7 +30,7 @@ export const errorMessages: Record<number, { title: string; message: string }> =
   13004: {
     title: "Ongeldige configuratie",
     message:
-      "De toepassing is onjuist geconfigureerd (ongeldige bron-URL in het manifest). Neem contact op met de beheerder.",
+      "De ZGW Office Add-in is onjuist geconfigureerd. Neem contact op met de beheerder.",
   },
 
   13006: {
