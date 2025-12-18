@@ -13,7 +13,7 @@ export const errorMessages: Record<number, { title: string; message: string }> =
   13001: {
     title: "Niet aangemeld bij Office",
     message:
-      "U bent niet aangemeld bij Office. Meld u aan met uw werk- of schoolaccount en probeer het opnieuw.",
+      "U bent niet aangemeld bij Office. Meld u aan en probeer het opnieuw.",
   },
 
   13002: {
