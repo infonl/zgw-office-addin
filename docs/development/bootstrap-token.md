@@ -1,6 +1,6 @@
 # Bootstrap Token
 
-This document describes the Bootstrap Token that is retrieved for the usage of Graph API in the add-in and user details. It also describes how to handle the errors that can be thrown when requesting this token
+This document describes the Bootstrap Token that is retrieved for the usage of Graph API in the add-in and user details. It also describes how to handle the errors that can be thrown when requesting this token.
 
 ## What is a Bootstrap Token?
 
@@ -202,7 +202,10 @@ The add-in logs debug information to the browser console (development mode only)
 ```
 
 ### Bootstrap Token Inspection
-Bootstrap tokens are JWT tokens that can be inspected on [jwt.io](https://jwt.io) to:
+Bootstrap tokens are JWT tokens. When you need to inspect a bootstrap token, use local/offline JWT inspection tooling (for example, language-specific JWT libraries or CLI utilities) rather than online web sites.
+
+⚠️ **Security warning:** Never paste real access tokens or bootstrap tokens into third-party online token decoders (such as public JWT viewer sites). Treat these tokens as secrets; if exposed, they can be used to call Microsoft Graph and other protected APIs as the signed-in user.
+With a trusted local tool you can:
 - Check expiration time
 - Verify claims
 - Validate audience

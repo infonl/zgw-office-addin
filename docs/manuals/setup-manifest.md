@@ -29,7 +29,7 @@ Inside the `<WebApplicationInfo>` place the following values
 
 Replace the `CLIENT_ID` and `APP_URI_ID` with the correct values from Azure
 
-## Loading in the add-ins
+## Loading add-ins
 
 ### Office Add-ins
 To load the add-in into office select Add-ins
@@ -46,7 +46,7 @@ The add-ins are now available for use. Follow the [user manual](./user-manual.md
 To load the add-in into outlook visit the following page
 
 - [https://aka.ms/olksideload](https://aka.ms/olksideload)
-- Select Mijn Invoegtoepassingen (My Add-ins)
+- Select **My Add-ins** (called **Mijn invoegtoepassingen** in the Dutch Outlook interface)  
 - Click the + Add and select the manifest-outlook.xml file
     ![add-add-in-outlook](./images/setup-manifest/outlook-loader.png)
 - Install the manifest and reload the page (CTRL R)
