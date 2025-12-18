@@ -30,6 +30,11 @@ const useStyles = makeStyles({
     maxWidth: "100%",
     overflow: "hidden",
   },
+  resultSection: {
+    marginTop: tokens.spacingHorizontalL,
+    maxWidth: "100%",
+    overflow: "hidden",
+  },
 });
 
 export function OutlookForm() {
