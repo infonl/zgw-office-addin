@@ -54,3 +54,9 @@ export type GraphServiceType = {
     _graphAttachmentId: string
   ) => Promise<ArrayBuffer>;
 };
+
+export type UploadDocumentMutationVariables = {
+  attachment?: {
+    id?: string;
+  };
+};

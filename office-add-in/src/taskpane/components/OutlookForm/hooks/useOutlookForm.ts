@@ -17,6 +17,7 @@ import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocum
 import { useLogger } from "../../../../hooks/useLogger";
 import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
 import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
+import { useUploadToasts } from "./useUploadToasts";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
@@ -36,7 +37,9 @@ export function useOutlookForm() {
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
-  const { mutateAsync } = useAddDocumentToZaak();
+  const { mutateAsync } = useAddDocumentToZaak(); // Per-file tracking happens via UploadStatusIcon component using attachment.id
+  const { showUploadingToast, showErrorToast, showSuccessToast, showGeneralErrorToast } =
+    useUploadToasts();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -55,6 +58,13 @@ export function useOutlookForm() {
     ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
+    if (selectedDocuments.length === 0) {
+      WARN("⚠️ No documents selected for upload");
+      return { error: null };
+    }
+
+    showUploadingToast(selectedDocuments.length, zaak.data?.identificatie || "");
+
     selectedDocuments.forEach((doc, index) => {
       DEBUG(`📋 File ${index + 1}:`, {
         name: doc.attachment.name,
@@ -70,11 +80,6 @@ export function useOutlookForm() {
         },
       });
     });
-
-    if (selectedDocuments.length === 0) {
-      WARN("⚠️ No documents selected for upload");
-      return { error: null };
-    }
 
     try {
       DEBUG("🔧 Initializing GraphService...");
@@ -146,17 +151,21 @@ export function useOutlookForm() {
           titel: doc.attachment.name,
         };
       });
+
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
-      DEBUG("🚀 Uploading documents to Zaak via mutation...");
+      DEBUG("🚀 Uploading documents to Zaak via per-file mutations...");
 
+      // Upload each document in parallel
+      // Each call has same mutationKey but different attachment data
+      // useMutationState can filter on this to track per-file
       const mutationResults = await Promise.all(
         uploadPayload.map(async (doc) => {
           try {
             const result = await mutateAsync(doc);
             return { status: "fulfilled", value: result };
-          } catch (error) {
-            return { status: "rejected", reason: error };
+          } catch {
+            return { status: "rejected" };
           }
         })
       );
@@ -165,13 +174,25 @@ export function useOutlookForm() {
 
       if (failed > 0) {
         ERROR(`❌ Failed to upload ${failed} documents`);
+        showErrorToast(failed, selectedDocuments.length);
         return { error: new Error(`Failed to upload ${failed} documents`) };
       }
 
       DEBUG("✅ All documents uploaded successfully");
+      const emailSelected = selectedDocuments.some(
+        (doc) => doc.attachment.attachmentType === "item"
+      );
+      const attachmentsSelected = selectedDocuments.filter(
+        (doc) => doc.attachment.attachmentType !== "item"
+      ).length;
+
+      showSuccessToast(emailSelected, attachmentsSelected);
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
+      // Note: Individual mutation errors are already tracked by TanStack Query
+      // This is a catch-all for orchestration-level errors (not file-level errors)
+      showGeneralErrorToast();
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }
   };
@@ -201,6 +222,7 @@ export function useOutlookForm() {
         documents: defaultDocuments,
       });
       form.trigger();
+      // Note: TanStack Query mutation states are automatically reset when component unmounts
     }
   }, [files, form, zaak.data?.identificatie]);
 
