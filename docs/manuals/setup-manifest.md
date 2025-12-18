@@ -45,16 +45,16 @@ The add-ins are now available for use. Follow the [user manual](./user-manual.md
 ### Outlook Add-in
 To load the add-in into outlook visit the following page
 
-- [https://aka.ms/olksideload](https://aka.ms/olksideload)
-- Select **My Add-ins** (called **Mijn invoegtoepassingen** in the Dutch Outlook interface)  
-- Click the + Add and select the manifest-outlook.xml file
+1. Go to [https://aka.ms/olksideload](https://aka.ms/olksideload).
+2. Select **My Add-ins** (called **Mijn invoegtoepassingen** in the Dutch Outlook interface).  
+3. Click the **+ Add** button and select the `manifest-outlook.xml` file.
     ![add-add-in-outlook](./images/setup-manifest/outlook-loader.png)
-- Install the manifest and reload the page (CTRL R)
-- Select the email which you want to link to the case
-- Click on Apps 
+4. Install the manifest and reload the page (CTRL+R).
+5. Select the email which you want to link to the case.
+6. Click on **Apps**.
 
     ![apps](./images/setup-manifest/outlook-apps.png)
-- Select the Add-in
+7. Select the add-in.
 
 The add-in is now available for use. Follow the [user manual](./user-manual.md) for detailed instructions.
 
