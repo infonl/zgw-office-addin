@@ -81,9 +81,10 @@ const useStyles = makeStyles({
 
 type MetadataStepProps = {
   isUploading?: boolean;
+  isDisabled?: boolean;
 };
 
-export function MetadataStep({ isUploading = false }: MetadataStepProps) {
+export function MetadataStep({ isUploading = false, isDisabled = false }: MetadataStepProps) {
   const form = useFormContext<Schema>();
   const styles = useStyles();
   const common = useCommonStyles();
@@ -92,7 +93,7 @@ export function MetadataStep({ isUploading = false }: MetadataStepProps) {
   const documents = form.watch("documents");
 
   // Check if any document is currently being uploaded (has pending mutations)
-  const hasUploadActivity = isUploading;
+  const hasUploadActivity = isUploading || isDisabled;
 
   const defaultOpenItems = React.useMemo(() => {
     return documents

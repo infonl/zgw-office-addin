@@ -37,14 +37,9 @@ export function useOutlookForm() {
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
-  const { mutateAsync } = useAddDocumentToZaak(); // Initialize one mutation without fileId - track per-file via useMutationState
+  const { mutateAsync } = useAddDocumentToZaak(); // Per-file tracking happens via UploadStatusIcon component using attachment.id
   const { showUploadingToast, showErrorToast, showSuccessToast, showGeneralErrorToast } =
     useUploadToasts();
-
-  const [uploadedEmail, setUploadedEmail] = React.useState<boolean | undefined>(undefined);
-  const [uploadedAttachments, setUploadedAttachments] = React.useState<number | undefined>(
-    undefined
-  );
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -156,7 +151,7 @@ export function useOutlookForm() {
           titel: doc.attachment.name,
         };
       });
-      //as Array<ProcessedDocument & { zaakidentificatie: string; inhoud: string; titel: string }>;
+
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
       DEBUG("🚀 Uploading documents to Zaak via per-file mutations...");
@@ -192,9 +187,6 @@ export function useOutlookForm() {
       ).length;
 
       showSuccessToast(emailSelected, attachmentsSelected);
-      // Store upload results locally instead of calling documentAdded (which triggers redirect)
-      setUploadedEmail(emailSelected);
-      setUploadedAttachments(attachmentsSelected);
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
@@ -234,19 +226,11 @@ export function useOutlookForm() {
     }
   }, [files, form, zaak.data?.identificatie]);
 
-  const resetUploadState = React.useCallback(() => {
-    setUploadedEmail(undefined);
-    setUploadedAttachments(undefined);
-  }, []);
-
   return {
     form,
     documents,
     handleSubmit,
     zaak,
     hasSelectedDocuments: documents?.some(({ selected }) => selected),
-    uploadedEmail,
-    uploadedAttachments,
-    resetUploadState,
   };
 }

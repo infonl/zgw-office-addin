@@ -45,7 +45,7 @@ export function useUploadToasts() {
 
     let message = "";
     if (emailSelected && attachmentsCount > 0) {
-      message = `De e-mail en ${attachmentsCount} ${pluralize(attachmentsCount, "bijlage", "bijlagen")} ${getVerbForm(attachmentsCount + 1, "is", "zijn")} succesvol gekoppeld`;
+      message = `De e-mail en ${attachmentsCount} ${pluralize(attachmentsCount, "bijlage", "bijlagen")} zijn succesvol gekoppeld`;
     } else if (emailSelected) {
       message = "De e-mail is succesvol gekoppeld.";
     } else if (attachmentsCount > 0) {

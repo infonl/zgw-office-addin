@@ -17,7 +17,7 @@ export function useOffice() {
   const isWord = host === Office.HostType.Word;
   const isExcel = host === Office.HostType.Excel;
   const isOutlook = host === Office.HostType.Outlook;
-  const isInBrowser = Office?.context?.platform === window.Office?.PlatformType?.OfficeOnline;
+  const isInBrowser = Office?.context?.platform === Office.PlatformType.OfficeOnline;
 
   const getDocumentFileName = useCallback(() => {
     return new Promise<string>((resolve, reject) => {

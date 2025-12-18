@@ -25,11 +25,11 @@ export function ZaakProvider({ children }: PropsWithChildren) {
   const getZaak = useGetZaak(zaakToSearch);
 
   const documentAdded = useCallback(
-    (_options?: { uploadedEmail?: boolean; uploadedAttachments?: number }) => {
+    (options?: { uploadedEmail?: boolean; uploadedAttachments?: number }) => {
       setDocumentAddedToZaak(zaakToSearch);
       setZaakToSearch(null);
-      setUploadedEmail(_options?.uploadedEmail);
-      setUploadedAttachments(_options?.uploadedAttachments);
+      setUploadedEmail(options?.uploadedEmail);
+      setUploadedAttachments(options?.uploadedAttachments);
     },
     [zaakToSearch]
   );

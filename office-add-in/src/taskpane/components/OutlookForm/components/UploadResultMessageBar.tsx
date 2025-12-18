@@ -48,7 +48,7 @@ export const getSuccessMessage = (
   uploadedAttachments: number | undefined
 ): string | null => {
   if (uploadedEmail && uploadedAttachments && uploadedAttachments > 0) {
-    return `De e-mail en ${uploadedAttachments} ${pluralize(uploadedAttachments, "bijlage", "bijlagen")} ${getVerbForm(uploadedAttachments + 1, "is", "zijn")} succesvol gekoppeld.`;
+    return `De e-mail en ${uploadedAttachments} ${pluralize(uploadedAttachments, "bijlage", "bijlagen")} zijn succesvol gekoppeld.`;
   }
   if (uploadedEmail) {
     return `De e-mail is succesvol gekoppeld.`;

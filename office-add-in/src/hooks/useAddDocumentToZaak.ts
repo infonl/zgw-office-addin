@@ -14,16 +14,22 @@ import { useLogger } from "./useLogger";
 type SuccessData = ZrcType<"ZaakInformatieObject">;
 
 export function useAddDocumentToZaak(
-  options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>,
-  fileId?: string
+  options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>
 ) {
   const { getDocumentData, getFileName, host } = useOffice();
   const { POST } = useHttp();
   const { DEBUG } = useLogger(useAddDocumentToZaak.name);
 
   return useMutation({
-    mutationKey: ["upload_document", fileId || "batch"],
+    mutationKey: ["upload_document", "batch"],
     mutationFn: async (data: AddDocumentSchema) => {
+      // Test logic: log incoming data
+      const dataWithTitel = data as unknown as { titel?: string };
+      DEBUG("[useAddDocumentToZaak] Received data:", {
+        titel: dataWithTitel.titel,
+        zaakidentificatie: data.zaakidentificatie,
+      });
+
       // If zaakidentificatie is empty, log a warning with a sanitized snapshot
       if (!data.zaakidentificatie || data.zaakidentificatie.trim() === "") {
         try {

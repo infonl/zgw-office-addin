@@ -14,6 +14,7 @@ import { UploadResultMessageBar } from "./components/UploadResultMessageBar";
 import { useOutlookForm } from "./hooks/useOutlookForm";
 import { useZaak } from "../../../provider/ZaakProvider";
 import { useOffice } from "../../../hooks/useOffice";
+import { DocumentSchema } from "../../../hooks/types";
 
 /**
  * - Step 1: Search Zaak and select email and/or attachments to attach
@@ -36,15 +37,7 @@ const useStyles = makeStyles({
 export function OutlookForm() {
   const styles = useStyles();
   const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
-  const {
-    form,
-    zaak,
-    hasSelectedDocuments,
-    handleSubmit,
-    uploadedEmail,
-    uploadedAttachments,
-    resetUploadState,
-  } = useOutlookForm();
+  const { form, zaak, hasSelectedDocuments, handleSubmit } = useOutlookForm();
   const { reset: resetZaak, setZaakToSearch } = useZaak();
   const queryClient = useQueryClient();
 
@@ -52,25 +45,56 @@ export function OutlookForm() {
     filters: { mutationKey: ["upload_document"] },
   });
 
-  // Calculate isUploading directly from mutation states (same source as uploadedIds/failedIds)
-  // Disabled while mutations are: pending, success, or error (anything != idle)
-  const isUploading = allMutationStates.some((state) => state.status !== "idle");
+  // Derive upload results directly from form data and upload status
+  const selectedDocuments = form.watch("documents").filter((doc: DocumentSchema) => doc.selected);
+  const selectedDocumentIds = selectedDocuments.map((doc: DocumentSchema) => doc.attachment.id);
 
-  const failedIds = allMutationStates
-    .filter((state) => state.status === "error" && state.variables)
-    .map(
-      (state) => (state.variables as unknown as { attachment?: { id?: string } })?.attachment?.id
-    )
-    .filter(Boolean) as string[];
+  const failedIds: string[] = [];
+  const completedIds: string[] = [];
+
+  // Count mutations for selected documents
+  const activeMutations = new Set<string>();
+
+  allMutationStates.forEach((state) => {
+    if (state.variables) {
+      const attachmentId = (state.variables as unknown as { attachment?: { id?: string } })
+        ?.attachment?.id;
+      if (attachmentId && selectedDocumentIds.includes(attachmentId)) {
+        if (state.status === "pending") {
+          activeMutations.add(attachmentId);
+        }
+        if (state.status === "success") {
+          completedIds.push(attachmentId);
+        }
+        if (state.status === "error") {
+          failedIds.push(attachmentId);
+        }
+      }
+    }
+  });
+
+  const isUploading = activeMutations.size > 0;
+  const hasCompletedMutations =
+    selectedDocuments.length > 0 &&
+    selectedDocumentIds.every((id) => completedIds.includes(id) || failedIds.includes(id));
+  const uploadComplete = !isUploading && hasCompletedMutations;
+
+  // Derive upload results from status - derived from selectedDocuments
+  const uploadedEmail = uploadComplete
+    ? selectedDocuments.some((doc: DocumentSchema) => doc.attachment.attachmentType === "item")
+    : false;
+  const uploadedAttachments = uploadComplete
+    ? selectedDocuments.filter((doc: DocumentSchema) => doc.attachment.attachmentType !== "item")
+        .length
+    : 0;
 
   const handleReset = React.useCallback(() => {
     form.reset();
-    resetUploadState();
     resetZaak();
     setZaakToSearch("");
     queryClient.getMutationCache().clear();
     setStep("selectItems");
-  }, [form, resetUploadState, resetZaak, setZaakToSearch, queryClient]);
+  }, [form, resetZaak, setZaakToSearch, queryClient]);
   const { isInBrowser } = useOffice();
 
   // in desktop apps, closing the taskpane via a button is not supported.
@@ -83,10 +107,10 @@ export function OutlookForm() {
     window.Office?.context?.ui?.closeContainer?.();
   }, []);
 
-  const uploadComplete = uploadedEmail !== undefined && uploadedAttachments !== undefined;
-  const uploadError = failedIds.length > 0;
+  const uploadError = uploadComplete && failedIds.length > 0;
   const uploadSuccess = uploadComplete && failedIds.length === 0;
   const errorCount = failedIds.length;
+  const formDisabled = isUploading || uploadComplete;
 
   if (!zaak.data) return <ZaakSearch />;
 
@@ -111,7 +135,7 @@ export function OutlookForm() {
           )}
           {step === "metaData" && (
             <>
-              <MetadataStep isUploading={isUploading} />
+              <MetadataStep isUploading={isUploading} isDisabled={formDisabled} />
               {uploadComplete && (
                 <section className={styles.resultSection}>
                   <UploadResultMessageBar
@@ -140,14 +164,14 @@ export function OutlookForm() {
                     appearance="secondary"
                     type="button"
                     onClick={() => setStep("selectItems")}
-                    disabled={isUploading}
+                    disabled={formDisabled}
                   >
                     Vorige stap
                   </Button>
                   <Button
                     appearance="primary"
                     type="submit"
-                    disabled={!form.formState.isValid || isUploading}
+                    disabled={!form.formState.isValid || formDisabled}
                   >
                     {isUploading ? "Bestanden koppelen..." : "Bestanden koppelen"}
                   </Button>
