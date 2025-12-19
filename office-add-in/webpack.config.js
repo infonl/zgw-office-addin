@@ -14,8 +14,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 
 async function getHttpsOptions() {
-  const certPath = path.resolve(__dirname, "certs/cert.pem");
-  const keyPath = path.resolve(__dirname, "certs/key.pem");
+  const certPath = path.resolve(__dirname, "ssl-certs/cert.pem");
+  const keyPath = path.resolve(__dirname, "ssl-certs/key.pem");
 
   if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
     console.log("[dev-server] Using mkcert certificates from", certPath);
