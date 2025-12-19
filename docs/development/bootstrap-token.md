@@ -6,6 +6,33 @@ This document describes the Bootstrap Token that is retrieved for the usage of G
 
 A bootstrap token is the initial access token provided by Office to authenticate the user. This token is used to access Microsoft Graph API and other resources. The add-in automatically retrieves a bootstrap token when it is loaded.
 
+## Firefox Not Supported for Development
+
+**Browser:** Firefox
+
+**Issue:**
+Firefox is not supported or recommended for developing Office Add-ins due to browser-level security restrictions that interfere with the Office SSO bootstrap token flow.
+
+**Description:**
+Office Add-ins rely on embedded browser contexts and redirect-based authentication flows to retrieve a bootstrap token using Office SSO. Firefox applies stricter isolation and privacy controls around embedded authentication, including storage partitioning, third-party cookie handling, and redirect behavior.
+
+These restrictions prevent the Office authentication flow from completing successfully when attempting to retrieve a bootstrap token, even when the add-in configuration, manifest, and Azure AD registration are correct.
+
+This behavior is caused by **browser-level security enforcement** and cannot be resolved through add-in code changes or configuration.
+
+**Impact:**
+- Bootstrap token retrieval fails
+- Single Sign-On (SSO) authentication does not complete
+- User authentication cannot be established
+- Microsoft Graph API calls cannot be made
+- Add-in functionality that depends on authentication is unavailable
+
+**Recommended browsers for development:**
+- **Microsoft Edge (Chromium-based)** – Recommended
+- **Google Chrome**
+- **Safari (macOS)**
+
+
 ## Error 13006 - Token Expired During Authentication
 
 **Error code:** `13006`
