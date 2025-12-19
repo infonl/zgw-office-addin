@@ -7,7 +7,12 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
+import {
+  document,
+  DocumentSchema,
+  SelectedDocument,
+  vertrouwelijkheidaanduidingSchema,
+} from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
@@ -63,6 +68,8 @@ export function useOutlookForm() {
   });
 
   const documents = form.watch("documents");
+
+  const documentTypes = documents?.map((doc) => doc.informatieobjecttype) || [];
 
   const handleSubmit = async (data: Schema): Promise<SubmitResult> => {
     const selectedDocuments = data.documents.filter(
@@ -237,6 +244,44 @@ export function useOutlookForm() {
       // Note: TanStack Query mutation states are automatically reset when component unmounts
     }
   }, [files, form, zaak.data?.identificatie]);
+
+  React.useEffect(() => {
+    if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
+      zaak.data.vertrouwelijkheidaanduiding
+    );
+    if (!parsed.success) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((_, index) => {
+      form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+    });
+  }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue]);
+
+  React.useEffect(() => {
+    if (!zaak.data?.zaakinformatieobjecten) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((doc, index) => {
+      if (!doc.informatieobjecttype) return;
+
+      // Find matching zaakinformatieobject
+      const zio = zaak.data.zaakinformatieobjecten.find((z) => z.url === doc.informatieobjecttype);
+
+      if (zio?.vertrouwelijkheidaanduiding) {
+        const parsed = vertrouwelijkheidaanduidingSchema.safeParse(zio.vertrouwelijkheidaanduiding);
+        if (parsed.success) {
+          const currentValue = form.getValues(`documents.${index}.vertrouwelijkheidaanduiding`);
+          if (currentValue !== parsed.data) {
+            form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+          }
+        }
+      }
+    });
+  }, [documentTypes, zaak.data?.zaakinformatieobjecten, form]);
 
   return {
     form,

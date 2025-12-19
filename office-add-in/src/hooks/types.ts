@@ -12,8 +12,23 @@ export const documentstatus = [
   "gearchiveerd",
 ] as const;
 
+export const vertrouwelijkheidaanduiding = [
+  "openbaar",
+  "beperkt_openbaar",
+  "intern",
+  "zaakvertrouwelijk",
+  "vertrouwelijk",
+  "confidentieel",
+  "geheim",
+  "zeer_geheim",
+] as const;
+
+export const vertrouwelijkheidaanduidingSchema = z.enum(vertrouwelijkheidaanduiding);
+
+export type VertrouwelijkheidaanduidingType = z.infer<typeof vertrouwelijkheidaanduidingSchema>;
+
 export const addDocumentSchema = z.object({
-  vertrouwelijkheidaanduiding: z.string(),
+  vertrouwelijkheidaanduiding: z.enum(vertrouwelijkheidaanduiding),
   informatieobjecttype: z.string().url(),
   status: z.enum(documentstatus),
   creatiedatum: z.date(),

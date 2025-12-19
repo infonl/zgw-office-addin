@@ -7,7 +7,7 @@ import React from "react";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
-import { addDocumentSchema, documentstatus } from "../../hooks/types";
+import { addDocumentSchema, documentstatus, vertrouwelijkheidaanduiding } from "../../hooks/types";
 import { mq } from "./styles/layout";
 
 const useStyles = makeStyles({
@@ -32,9 +32,14 @@ const useStyles = makeStyles({
 });
 
 export type DocumentMetadataFieldsProps = {
-  zaakinformatieobjecten: { omschrijving: string; url?: string }[];
+  zaakinformatieobjecten: {
+    omschrijving: string;
+    url?: string;
+    vertrouwelijkheidaanduiding?: string;
+  }[];
   statuses: typeof documentstatus;
   namePrefix?: string;
+  selectedInformatieobjecttype?: string;
 };
 
 // To be used within a react-hook-form FormProvider
@@ -42,8 +47,14 @@ export function DocumentMetadataFields({
   zaakinformatieobjecten,
   statuses,
   namePrefix = "",
+  selectedInformatieobjecttype,
 }: DocumentMetadataFieldsProps) {
   const styles = useStyles();
+
+  const vertrouwelijkheidOptions = vertrouwelijkheidaanduiding.map((value) => ({
+    label: value.replace(/_/g, " "),
+    value,
+  }));
 
   return (
     <section className={styles.grid}>
@@ -63,12 +74,13 @@ export function DocumentMetadataFields({
         }))}
         required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
       />
-      <Input
+      <Select
         className={styles.gridColumnSpan1}
-        readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
         name={`${namePrefix}vertrouwelijkheidaanduiding`}
         label="Vertrouwelijkheid"
+        options={vertrouwelijkheidOptions}
         required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
+        disabled={!selectedInformatieobjecttype}
       />
       <Select
         className={styles.gridColumnSpan1}

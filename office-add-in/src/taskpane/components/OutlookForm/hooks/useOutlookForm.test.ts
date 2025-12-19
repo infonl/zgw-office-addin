@@ -9,9 +9,11 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   mockAttachment1,
+  mockAttachment2,
   mockEmailDocument,
   mockAttachmentDocument1,
   mockAttachmentDocument2,
+  mockZaakData as mockZaakDataImport,
 } from "./mockDocuments";
 
 const mockGetAccessToken = vi.fn();
@@ -25,13 +27,18 @@ const mockShowErrorToast = vi.fn();
 const mockShowSuccessToast = vi.fn();
 const mockShowGeneralErrorToast = vi.fn();
 
+let mockZaakData = mockZaakDataImport;
+
+const mockUseZaak = vi.fn(() => ({ zaak: { data: mockZaakData } }));
+const mockUseOutlook = vi.fn(() => ({ files: [] as Office.AttachmentDetails[] }));
+
 vi.mock("../../../../provider/AuthProvider", () => ({
   useAuth: () => ({ authService: { getAccessToken: mockGetAccessToken } }),
 }));
 vi.mock("../../../../provider/ZaakProvider", () => ({
-  useZaak: () => ({ zaak: { data: { identificatie: "ZAAK-001" } } }),
+  useZaak: mockUseZaak,
 }));
-vi.mock("../../../../hooks/useOutlook", () => ({ useOutlook: () => ({ files: [] }) }));
+vi.mock("../../../../hooks/useOutlook", () => ({ useOutlook: mockUseOutlook }));
 vi.mock("../../../../hooks/useLogger", () => ({
   useLogger: () => ({ DEBUG: vi.fn(), WARN: vi.fn(), ERROR: vi.fn() }),
 }));
@@ -86,6 +93,9 @@ describe("useOutlookForm", () => {
     mockGetAccessToken.mockReset();
     mockGetAccessToken.mockResolvedValue("dummy-token");
     mockMutateAsync.mockResolvedValue({ id: "info-object-1" });
+    mockZaakData = mockZaakDataImport;
+    mockUseZaak.mockReturnValue({ zaak: { data: mockZaakData } });
+    mockUseOutlook.mockReturnValue({ files: [] });
     // Office object has many props, not needed for mock
     (global as unknown as { Office: unknown }).Office = {
       context: {
@@ -633,6 +643,48 @@ describe("useOutlookForm", () => {
       });
 
       expect(mockShowGeneralErrorToast).toHaveBeenCalled();
+    });
+  });
+
+  describe("vertrouwelijkheidaanduiding management", () => {
+    it("applies zaak vertrouwelijkheidaanduiding to all documents on initialization", async () => {
+      mockUseOutlook.mockReturnValue({
+        files: [mockAttachment1, mockAttachment2] as Office.AttachmentDetails[],
+      });
+
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderWithQueryClient(() => useOutlookForm());
+
+      await waitFor(() => {
+        const documents = result.current.form.getValues("documents");
+        expect(documents.length).toBeGreaterThan(0);
+      });
+
+      const documents = result.current.form.getValues("documents");
+      documents.forEach((doc) => {
+        expect(doc.vertrouwelijkheidaanduiding).toBe("intern");
+      });
+    });
+
+    it("ignores invalid vertrouwelijkheidaanduiding values from zaak", async () => {
+      mockUseOutlook.mockReturnValue({ files: [mockAttachment1] });
+
+      mockZaakData = {
+        ...mockZaakData,
+        vertrouwelijkheidaanduiding: "invalid_value" as "intern",
+      };
+      mockUseZaak.mockReturnValue({ zaak: { data: mockZaakData } });
+
+      const { useOutlookForm } = await import("./useOutlookForm");
+      const { result } = renderWithQueryClient(() => useOutlookForm());
+
+      await waitFor(() => {
+        expect(result.current.form.getValues("documents")).toBeDefined();
+      });
+
+      const documents = result.current.form.getValues("documents");
+
+      expect(documents[0].vertrouwelijkheidaanduiding).toBe("openbaar");
     });
   });
 });
