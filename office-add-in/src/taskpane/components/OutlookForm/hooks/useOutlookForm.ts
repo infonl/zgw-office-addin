@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -69,7 +69,10 @@ export function useOutlookForm() {
 
   const documents = form.watch("documents");
 
-  const documentTypes = documents?.map((doc) => doc.informatieobjecttype) || [];
+  const documentTypes = useMemo(
+    () => documents?.map((doc) => doc.informatieobjecttype) || [],
+    [documents]
+  );
 
   const handleSubmit = async (data: Schema): Promise<SubmitResult> => {
     const selectedDocuments = data.documents.filter(
