@@ -284,7 +284,7 @@ export function useOutlookForm() {
         }
       }
     });
-  }, [documentTypes, zaak.data?.zaakinformatieobjecten, form]);
+  }, [documentTypes, zaak.data?.zaakinformatieobjecten, form.getValues, form.setValue]);
 
   return {
     form,
