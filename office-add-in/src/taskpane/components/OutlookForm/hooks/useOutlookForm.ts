@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React, { useEffect, useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import {
@@ -53,7 +53,7 @@ export function useOutlookForm() {
       .then(() => setTokenError(false))
       .catch((error) => {
         const errorCode = error?.code;
-        setTokenError(error);
+        setTokenError(true);
         console.log("Token error code:", errorCode);
       });
   }, []);
@@ -68,11 +68,6 @@ export function useOutlookForm() {
   });
 
   const documents = form.watch("documents");
-
-  const documentTypes = useMemo(
-    () => documents?.map((doc) => doc.informatieobjecttype) || [],
-    [documents]
-  );
 
   const handleSubmit = async (data: Schema): Promise<SubmitResult> => {
     const selectedDocuments = data.documents.filter(
@@ -248,6 +243,7 @@ export function useOutlookForm() {
     }
   }, [files, form, zaak.data?.identificatie]);
 
+  // Set vertrouwelijkheidaanduiding to zaak default when no informatieobjecttype is set
   React.useEffect(() => {
     if (!zaak.data?.vertrouwelijkheidaanduiding) return;
 
@@ -258,33 +254,78 @@ export function useOutlookForm() {
 
     const currentDocuments = form.getValues("documents");
 
-    currentDocuments.forEach((_, index) => {
-      form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+    currentDocuments.forEach((doc, index) => {
+      if (!doc.informatieobjecttype) {
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+      }
     });
-  }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue]);
+  }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue, form]);
 
+  // Track the last selected ZIO per file
+  const previousZioByAttachmentIdRef = React.useRef<Record<string, string>>(
+    {} as Record<string, string>
+  );
+
+  const allDocuments = useWatch({ name: "documents", control: form.control });
+
+  // Auto-update Vertrouwelijkheidaanduiding when ZIO changes for any document
   React.useEffect(() => {
-    if (!zaak.data?.zaakinformatieobjecten) return;
+    if (!zaak.data?.zaakinformatieobjecten || !allDocuments) return;
 
     const currentDocuments = form.getValues("documents");
 
     currentDocuments.forEach((doc, index) => {
-      if (!doc.informatieobjecttype) return;
+      const attachmentId = doc.attachment?.id;
+      if (!attachmentId) return;
 
-      // Find matching zaakinformatieobject
-      const zio = zaak.data.zaakinformatieobjecten.find((z) => z.url === doc.informatieobjecttype);
+      // Get current and previous ZIO for this file
+      const currentZio = doc.informatieobjecttype || "";
+      const previousZio = previousZioByAttachmentIdRef.current[attachmentId] || "";
 
-      if (zio?.vertrouwelijkheidaanduiding) {
-        const parsed = vertrouwelijkheidaanduidingSchema.safeParse(zio.vertrouwelijkheidaanduiding);
-        if (parsed.success) {
-          const currentValue = form.getValues(`documents.${index}.vertrouwelijkheidaanduiding`);
-          if (currentValue !== parsed.data) {
-            form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
-          }
-        }
+      // Only update if ZIO actually changed
+      if (currentZio === previousZio) return;
+
+      // Track the new ZIO for this attachment
+      if (typeof attachmentId === "string" && typeof currentZio === "string") {
+        previousZioByAttachmentIdRef.current[attachmentId] = currentZio;
       }
+
+      // If ZIO is chosen yet, set vertrouwelijkheidaanduiding to zaak default
+      if (!currentZio) {
+        if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+        const parsedZaakVa = vertrouwelijkheidaanduidingSchema.safeParse(
+          zaak.data.vertrouwelijkheidaanduiding
+        );
+        if (!parsedZaakVa.success) return;
+
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsedZaakVa.data);
+        return;
+      }
+
+      const zio = zaak.data.zaakinformatieobjecten.find((z) => z.url === currentZio);
+      if (!zio?.vertrouwelijkheidaanduiding) {
+        return;
+      }
+
+      const parsedZioVertrouwelijkheidaanduiding = vertrouwelijkheidaanduidingSchema.safeParse(
+        zio.vertrouwelijkheidaanduiding
+      );
+      if (!parsedZioVertrouwelijkheidaanduiding.success) {
+        return;
+      }
+
+      form.setValue(
+        `documents.${index}.vertrouwelijkheidaanduiding`,
+        parsedZioVertrouwelijkheidaanduiding.data
+      );
     });
-  }, [documentTypes, zaak.data?.zaakinformatieobjecten, form.getValues, form.setValue]);
+  }, [
+    allDocuments,
+    zaak.data?.zaakinformatieobjecten,
+    zaak.data?.vertrouwelijkheidaanduiding,
+    form,
+  ]);
 
   return {
     form,

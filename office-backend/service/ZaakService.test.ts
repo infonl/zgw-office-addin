@@ -82,7 +82,18 @@ describe("ZaakService", () => {
       expect(result).toEqual({
         ...mockZaak,
         status: mockStatus,
-        zaakinformatieobjecten: mockInformatieobjecttypen,
+        zaakinformatieobjecten: [
+          {
+            omschrijving: "Document type 1",
+            vertrouwelijkheidaanduiding: "openbaar",
+            url: "https://api.example.com/informatieobjecttypen/1",
+          },
+          {
+            omschrijving: "Document type 2",
+            vertrouwelijkheidaanduiding: "vertrouwelijk",
+            url: "https://api.example.com/informatieobjecttypen/2",
+          },
+        ],
         zaaktype: mockZaaktype,
       });
 
@@ -121,10 +132,12 @@ describe("ZaakService", () => {
       expect(result.zaakinformatieobjecten[0]).toEqual({
         omschrijving: "Document type 1",
         vertrouwelijkheidaanduiding: "openbaar",
+        url: "https://api.example.com/informatieobjecttypen/1",
       });
       expect(result.zaakinformatieobjecten[1]).toEqual({
         omschrijving: "Document type 2",
         vertrouwelijkheidaanduiding: "vertrouwelijk",
+        url: "https://api.example.com/informatieobjecttypen/2",
       });
     });
 

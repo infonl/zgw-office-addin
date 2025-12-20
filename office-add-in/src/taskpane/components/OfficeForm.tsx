@@ -123,13 +123,15 @@ export function OfficeForm() {
       ({ url }) => url === informatieobjecttype
     );
 
-    if (zaakinformatieobject?.vertrouwelijkheidaanduiding) {
-      const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
-        zaakinformatieobject.vertrouwelijkheidaanduiding
-      );
-      if (parsed.success) {
-        form.setValue("vertrouwelijkheidaanduiding", parsed.data);
-      }
+    if (!zaakinformatieobject?.vertrouwelijkheidaanduiding) return;
+
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
+      zaakinformatieobject.vertrouwelijkheidaanduiding
+    );
+    if (!parsed.success) return;
+
+    if (form.getValues("vertrouwelijkheidaanduiding") !== parsed.data) {
+      form.setValue("vertrouwelijkheidaanduiding", parsed.data);
     }
   }, [informatieobjecttype, data?.zaakinformatieobjecten, form.setValue]);
 
@@ -168,7 +170,7 @@ export function OfficeForm() {
             <DocumentMetadataFields
               zaakinformatieobjecten={data.zaakinformatieobjecten}
               statuses={documentstatus}
-              selectedInformatieobjecttype={informatieobjecttype}
+              control={form.control}
             />
             <Button
               disabled={!form.formState.isValid || isPending}

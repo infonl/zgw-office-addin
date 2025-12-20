@@ -1,9 +1,11 @@
+import type { Control, FieldValues } from "react-hook-form";
 /*
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
 import React from "react";
+import { useWatch } from "react-hook-form";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
@@ -31,7 +33,7 @@ const useStyles = makeStyles({
   },
 });
 
-export type DocumentMetadataFieldsProps = {
+export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   zaakinformatieobjecten: {
     omschrijving: string;
     url?: string;
@@ -39,17 +41,29 @@ export type DocumentMetadataFieldsProps = {
   }[];
   statuses: typeof documentstatus;
   namePrefix?: string;
-  selectedInformatieobjecttype?: string;
+  control: Control<T>;
 };
 
 // To be used within a react-hook-form FormProvider
-export function DocumentMetadataFields({
+export function DocumentMetadataFields<T extends FieldValues>({
   zaakinformatieobjecten,
   statuses,
   namePrefix = "",
-  selectedInformatieobjecttype,
-}: DocumentMetadataFieldsProps) {
+  control,
+}: DocumentMetadataFieldsProps<T>) {
   const styles = useStyles();
+
+  // Watch the ZIO field to determine if vertrouwelijkheidsaanduiding dropdown should be enabled
+  const selectedInformatieobjecttype = useWatch({
+    name: `${namePrefix}informatieobjecttype` as import("react-hook-form").Path<T>,
+    control,
+  });
+
+  // Watch vertrouwelijkheidsaanduiding field to ensure re-render when form.setValue is called from parent
+  useWatch({
+    name: `${namePrefix}vertrouwelijkheidaanduiding` as import("react-hook-form").Path<T>,
+    control,
+  });
 
   const vertrouwelijkheidOptions = vertrouwelijkheidaanduiding.map((value) => ({
     label: value.replace(/_/g, " "),
