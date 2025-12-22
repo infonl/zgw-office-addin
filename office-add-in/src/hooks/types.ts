@@ -89,6 +89,8 @@ export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   statuses: typeof documentstatus;
   namePrefix?: string;
   control: Control<T>;
+};
+
 export type UseUploadStatusProps = {
   selectedDocuments: DocumentSchema[];
 };
