@@ -20,7 +20,12 @@ export class HttpService {
   }
 
   public async GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
-    return this.request<T>("GET", url, { headers, params }, { preferedUsername: "Office Add-in", name: "Office Add-in" });
+    return this.request<T>(
+      "GET",
+      url,
+      { headers, params },
+      { preferedUsername: "Office Add-in", name: "Office Add-in" },
+    );
   }
 
   private async request<T>(

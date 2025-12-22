@@ -290,7 +290,11 @@ describe("ZaakService", () => {
     });
 
     it("should handle empty body parameter", async () => {
-      const bodyWithDefaults = { titel: "default.docx", creatiedatum: "2025-01-15", userInfo: mockUserInfo };
+      const bodyWithDefaults = {
+        titel: "default.docx",
+        creatiedatum: "2025-01-15",
+        userInfo: mockUserInfo,
+      };
       mockHttpService.POST.mockResolvedValue(mockInformatieobject);
 
       await zaakService.addDocumentToZaak("ZAAK-001", bodyWithDefaults);

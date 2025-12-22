@@ -292,7 +292,9 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow("HTTP error! status: 400");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+        "HTTP error! status: 400",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         expect.any(Error),
@@ -303,7 +305,9 @@ describe("HttpService", () => {
       const networkError = new Error("Connection refused");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow("Connection refused");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+        "Connection refused",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         networkError,
