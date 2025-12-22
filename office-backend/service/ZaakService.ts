@@ -41,6 +41,10 @@ export class ZaakService {
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
     const userInfo = body.userInfo;
+
+    if (userInfo === undefined) {
+      throw new Error("User info is required to add document to zaak");
+    }
     
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
