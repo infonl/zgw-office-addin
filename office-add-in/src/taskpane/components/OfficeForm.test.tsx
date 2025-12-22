@@ -86,6 +86,10 @@ describe("OfficeForm", () => {
       submittedAt: 0,
     });
 
+    vi.mock("../../utils/getAccessToken", () => ({
+      getToken: vi.fn().mockResolvedValue("mock-token"),
+    }));
+
     vi.mocked(useOffice).mockReturnValue({
       getSignedInUser: mockGetSignedInUser,
       processAndUploadDocuments: vi.fn(),

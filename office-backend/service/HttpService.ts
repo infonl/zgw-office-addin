@@ -16,6 +16,9 @@ export class HttpService {
     userInfo: { preferedUsername: string; name: string },
     headers: HeadersInit = {},
   ) {
+    if (userInfo === undefined) {
+      throw new Error("User info is required to add document to zaak");
+    }
     return this.request<T>("POST", url, { body, headers }, userInfo);
   }
 
