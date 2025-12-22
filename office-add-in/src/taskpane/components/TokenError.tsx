@@ -16,6 +16,7 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground1,
     borderRadius: tokens.borderRadiusMedium,
     border: `1px solid ${tokens.colorPaletteRedBorder1}`,
+    marginBottom: tokens.spacingVerticalL,
   },
   content: {
     display: "flex",
