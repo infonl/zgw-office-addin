@@ -150,6 +150,7 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
                       namePrefix={`documents.${index}.`}
                       zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
                       statuses={documentstatus}
+                      control={form.control}
                     />
                   </fieldset>
                 </AccordionPanel>

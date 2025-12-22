@@ -24,7 +24,9 @@ export class ZaakService {
 
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url: string) =>
-        this.httpService.GET<{ omschrijving: string }>(url),
+        this.httpService
+          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url)
+          .then((result) => ({ ...result, url })),
       ),
     );
 

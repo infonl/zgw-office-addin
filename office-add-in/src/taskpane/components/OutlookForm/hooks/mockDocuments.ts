@@ -31,7 +31,7 @@ export const mockEmailAttachment = {
 };
 
 export const mockEmailDocument = {
-  vertrouwelijkheidaanduiding: "openbaar",
+  vertrouwelijkheidaanduiding: "openbaar" as const,
   informatieobjecttype: "https://example.com/type/email",
   status: "in_bewerking" as const,
   creatiedatum: new Date(),
@@ -42,7 +42,7 @@ export const mockEmailDocument = {
 };
 
 export const mockAttachmentDocument1 = {
-  vertrouwelijkheidaanduiding: "openbaar",
+  vertrouwelijkheidaanduiding: "openbaar" as const,
   informatieobjecttype: "https://example.com/type/attachment",
   status: "in_bewerking" as const,
   creatiedatum: new Date(),
@@ -53,7 +53,7 @@ export const mockAttachmentDocument1 = {
 };
 
 export const mockAttachmentDocument2 = {
-  vertrouwelijkheidaanduiding: "openbaar",
+  vertrouwelijkheidaanduiding: "openbaar" as const,
   informatieobjecttype: "https://example.com/type/attachment",
   status: "in_bewerking" as const,
   creatiedatum: new Date(),
@@ -61,4 +61,21 @@ export const mockAttachmentDocument2 = {
   auteur: "vi-test",
   selected: true as const,
   attachment: mockAttachment2,
+};
+
+export const mockZaakData = {
+  identificatie: "ZAAK-001",
+  vertrouwelijkheidaanduiding: "intern" as const,
+  zaakinformatieobjecten: [
+    {
+      url: "https://example.com/type/email",
+      omschrijving: "Email",
+      vertrouwelijkheidaanduiding: "vertrouwelijk" as const,
+    },
+    {
+      url: "https://example.com/type/attachment",
+      omschrijving: "Bijlage",
+      vertrouwelijkheidaanduiding: "openbaar" as const,
+    },
+  ],
 };

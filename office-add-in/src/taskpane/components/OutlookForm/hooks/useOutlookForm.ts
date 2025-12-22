@@ -4,10 +4,15 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
+import {
+  document,
+  DocumentSchema,
+  SelectedDocument,
+  vertrouwelijkheidaanduidingSchema,
+} from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
@@ -237,6 +242,94 @@ export function useOutlookForm() {
       // Note: TanStack Query mutation states are automatically reset when component unmounts
     }
   }, [files, form, zaak.data?.identificatie]);
+
+  // Set vertrouwelijkheidaanduiding to zaak default when no informatieobjecttype is set
+  useEffect(() => {
+    if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
+      zaak.data.vertrouwelijkheidaanduiding
+    );
+    if (!parsed.success) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((doc, index) => {
+      if (!doc.informatieobjecttype) {
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+      }
+    });
+  }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue, form]);
+
+  // Track the last selected Zaak InformatieObjectType per file
+  const previousZaakInformatieObjectTypeByAttachmentIdRef = React.useRef<Record<string, string>>(
+    {} as Record<string, string>
+  );
+
+  const allDocuments = useWatch({ name: "documents", control: form.control });
+
+  // Auto-update Vertrouwelijkheidaanduiding when Zaak Informatieobjecten changes for any document
+  useEffect(() => {
+    if (!zaak.data?.zaakinformatieobjecten || !allDocuments) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((doc, index) => {
+      const attachmentId = doc.attachment?.id;
+      if (!attachmentId) return;
+
+      // Get current and previous Zaak InformatieObjectType for this file
+      const currentZaakInformatieobjecttype = doc.informatieobjecttype || "";
+      const previousZaakInformatieObjectType =
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] || "";
+
+      // Only update if Zaak InformatieObjectType actually changed
+      if (currentZaakInformatieobjecttype === previousZaakInformatieObjectType) return;
+      // Track the new Zaak InformatieObjectType for this attachment
+      if (typeof attachmentId === "string" && typeof currentZaakInformatieobjecttype === "string") {
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] =
+          currentZaakInformatieobjecttype;
+      }
+
+      // If Zaak InformatieObjectType is chosen yet, set vertrouwelijkheidaanduiding to zaak default
+      if (!currentZaakInformatieobjecttype) {
+        if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+        const parsedZaakVa = vertrouwelijkheidaanduidingSchema.safeParse(
+          zaak.data.vertrouwelijkheidaanduiding
+        );
+        if (!parsedZaakVa.success) return;
+
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsedZaakVa.data);
+        return;
+      }
+
+      const zaakInformatieObjectType = zaak.data.zaakinformatieobjecten.find(
+        (z) => z.url === currentZaakInformatieobjecttype
+      );
+      if (!zaakInformatieObjectType?.vertrouwelijkheidaanduiding) {
+        return;
+      }
+
+      const parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding =
+        vertrouwelijkheidaanduidingSchema.safeParse(
+          zaakInformatieObjectType.vertrouwelijkheidaanduiding
+        );
+      if (!parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.success) {
+        return;
+      }
+
+      form.setValue(
+        `documents.${index}.vertrouwelijkheidaanduiding`,
+        parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.data
+      );
+    });
+  }, [
+    allDocuments,
+    zaak.data?.zaakinformatieobjecten,
+    zaak.data?.vertrouwelijkheidaanduiding,
+    form,
+  ]);
 
   return {
     form,
