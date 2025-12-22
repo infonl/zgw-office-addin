@@ -53,7 +53,7 @@ export function useOutlookForm() {
       .then(() => setTokenError(false))
       .catch((error) => {
         const errorCode = error?.code;
-        setTokenError(true);
+        setTokenError(error);
         console.log("Token error code:", errorCode);
       });
   }, []);
@@ -244,7 +244,7 @@ export function useOutlookForm() {
   }, [files, form, zaak.data?.identificatie]);
 
   // Set vertrouwelijkheidaanduiding to zaak default when no informatieobjecttype is set
-  React.useEffect(() => {
+  useEffect(() => {
     if (!zaak.data?.vertrouwelijkheidaanduiding) return;
 
     const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
@@ -261,15 +261,15 @@ export function useOutlookForm() {
     });
   }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue, form]);
 
-  // Track the last selected ZIO per file
-  const previousZioByAttachmentIdRef = React.useRef<Record<string, string>>(
+  // Track the last selected Zaak InformatieObjectType per file
+  const previousZaakInformatieObjectTypeByAttachmentIdRef = React.useRef<Record<string, string>>(
     {} as Record<string, string>
   );
 
   const allDocuments = useWatch({ name: "documents", control: form.control });
 
-  // Auto-update Vertrouwelijkheidaanduiding when ZIO changes for any document
-  React.useEffect(() => {
+  // Auto-update Vertrouwelijkheidaanduiding when Zaak Informatieobjecten changes for any document
+  useEffect(() => {
     if (!zaak.data?.zaakinformatieobjecten || !allDocuments) return;
 
     const currentDocuments = form.getValues("documents");
@@ -278,20 +278,21 @@ export function useOutlookForm() {
       const attachmentId = doc.attachment?.id;
       if (!attachmentId) return;
 
-      // Get current and previous ZIO for this file
-      const currentZio = doc.informatieobjecttype || "";
-      const previousZio = previousZioByAttachmentIdRef.current[attachmentId] || "";
+      // Get current and previous Zaak InformatieObjectType for this file
+      const currentZaakInformatieobjecttype = doc.informatieobjecttype || "";
+      const previousZaakInformatieObjectType =
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] || "";
 
-      // Only update if ZIO actually changed
-      if (currentZio === previousZio) return;
-
-      // Track the new ZIO for this attachment
-      if (typeof attachmentId === "string" && typeof currentZio === "string") {
-        previousZioByAttachmentIdRef.current[attachmentId] = currentZio;
+      // Only update if Zaak InformatieObjectType actually changed
+      if (currentZaakInformatieobjecttype === previousZaakInformatieObjectType) return;
+      // Track the new Zaak InformatieObjectType for this attachment
+      if (typeof attachmentId === "string" && typeof currentZaakInformatieobjecttype === "string") {
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] =
+          currentZaakInformatieobjecttype;
       }
 
-      // If ZIO is chosen yet, set vertrouwelijkheidaanduiding to zaak default
-      if (!currentZio) {
+      // If Zaak InformatieObjectType is chosen yet, set vertrouwelijkheidaanduiding to zaak default
+      if (!currentZaakInformatieobjecttype) {
         if (!zaak.data?.vertrouwelijkheidaanduiding) return;
 
         const parsedZaakVa = vertrouwelijkheidaanduidingSchema.safeParse(
@@ -303,21 +304,24 @@ export function useOutlookForm() {
         return;
       }
 
-      const zio = zaak.data.zaakinformatieobjecten.find((z) => z.url === currentZio);
-      if (!zio?.vertrouwelijkheidaanduiding) {
+      const zaakInformatieObjectType = zaak.data.zaakinformatieobjecten.find(
+        (z) => z.url === currentZaakInformatieobjecttype
+      );
+      if (!zaakInformatieObjectType?.vertrouwelijkheidaanduiding) {
         return;
       }
 
-      const parsedZioVertrouwelijkheidaanduiding = vertrouwelijkheidaanduidingSchema.safeParse(
-        zio.vertrouwelijkheidaanduiding
-      );
-      if (!parsedZioVertrouwelijkheidaanduiding.success) {
+      const parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding =
+        vertrouwelijkheidaanduidingSchema.safeParse(
+          zaakInformatieObjectType.vertrouwelijkheidaanduiding
+        );
+      if (!parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.success) {
         return;
       }
 
       form.setValue(
         `documents.${index}.vertrouwelijkheidaanduiding`,
-        parsedZioVertrouwelijkheidaanduiding.data
+        parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.data
       );
     });
   }, [

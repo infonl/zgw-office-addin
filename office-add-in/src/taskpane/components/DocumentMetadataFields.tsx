@@ -1,15 +1,15 @@
-import type { Control, FieldValues } from "react-hook-form";
 /*
- * SPDX-FileCopyrightText: 2025 INFO.nl
- * SPDX-License-Identifier: EUPL-1.2+
- */
+* SPDX-FileCopyrightText: 2025 INFO.nl
+* SPDX-License-Identifier: EUPL-1.2+
+*/
 
+import type { FieldValues } from "react-hook-form";
 import React from "react";
 import { useWatch } from "react-hook-form";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
-import { addDocumentSchema, documentstatus, vertrouwelijkheidaanduiding } from "../../hooks/types";
+import { addDocumentSchema, vertrouwelijkheidaanduiding, DocumentMetadataFieldsProps } from "../../hooks/types";
 import { mq } from "./styles/layout";
 
 const useStyles = makeStyles({
@@ -33,16 +33,6 @@ const useStyles = makeStyles({
   },
 });
 
-export type DocumentMetadataFieldsProps<T extends FieldValues> = {
-  zaakinformatieobjecten: {
-    omschrijving: string;
-    url?: string;
-    vertrouwelijkheidaanduiding?: string;
-  }[];
-  statuses: typeof documentstatus;
-  namePrefix?: string;
-  control: Control<T>;
-};
 
 // To be used within a react-hook-form FormProvider
 export function DocumentMetadataFields<T extends FieldValues>({

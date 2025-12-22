@@ -4,6 +4,7 @@
  */
 
 import z from "zod";
+import type { Control, FieldValues } from "react-hook-form";
 
 export const documentstatus = [
   "in_bewerking",
@@ -77,4 +78,15 @@ export type UploadDocumentMutationVariables = {
   attachment?: {
     id?: string;
   };
+};
+
+export type DocumentMetadataFieldsProps<T extends FieldValues> = {
+  zaakinformatieobjecten: {
+    omschrijving: string;
+    url?: string;
+    vertrouwelijkheidaanduiding?: string;
+  }[];
+  statuses: typeof documentstatus;
+  namePrefix?: string;
+  control: Control<T>;
 };
