@@ -89,6 +89,7 @@ describe("OfficeForm", () => {
     vi.mocked(useOffice).mockReturnValue({
       getSignedInUser: mockGetSignedInUser,
       processAndUploadDocuments: vi.fn(),
+      getUserInfo: vi.fn(),
       host: 0,
       isInBrowser: false,
       getDocumentData: vi.fn(),

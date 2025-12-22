@@ -40,7 +40,8 @@ export class ZaakService {
 
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
-
+    const userInfo = body.userInfo;
+    
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
       "/documenten/api/v1/enkelvoudiginformatieobjecten",
@@ -52,10 +53,15 @@ export class ZaakService {
         bestandsnaam: body.titel,
         creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").at(0),
       }),
+      userInfo as { preferedUsername: string; name: string },
     );
     LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
-    this.createGebruiksrechten(informatieobject.url!, new Date(String(body.creatiedatum)));
+    this.createGebruiksrechten(
+      informatieobject.url!,
+      new Date(String(body.creatiedatum)),
+      userInfo as { preferedUsername: string; name: string },
+    );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
     await this.httpService.POST(
@@ -64,6 +70,7 @@ export class ZaakService {
         informatieobject: informatieobject.url,
         zaak: zaak.url,
       }),
+      userInfo as { preferedUsername: string; name: string },
     );
 
     return informatieobject;
@@ -110,7 +117,11 @@ export class ZaakService {
     return zaak;
   }
 
-  private async createGebruiksrechten(url: string, startdatum: Date) {
+  private async createGebruiksrechten(
+    url: string,
+    startdatum: Date,
+    userInfo: { preferedUsername: string; name: string },
+  ) {
     await this.httpService.POST(
       "/documenten/api/v1/gebruiksrechten",
       JSON.stringify({
@@ -118,6 +129,7 @@ export class ZaakService {
         startdatum,
         omschrijvingVoorwaarden: "geen",
       }),
+      userInfo,
     );
   }
 }

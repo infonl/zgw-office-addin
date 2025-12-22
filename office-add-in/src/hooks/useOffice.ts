@@ -86,6 +86,20 @@ export function useOffice() {
     }
   }, []);
 
+  const getUserInfo = useCallback(async () => {
+    try {
+      const userTokenEncoded = await getToken();
+      const userToken = jwtDecode<{ preferred_username?: string; name?: string }>(userTokenEncoded);
+      return {
+        preferedUsername: userToken.preferred_username ?? null,
+        name: userToken.name ?? null,
+      };
+    } catch (error) {
+      WARN("Unable to get user access token", error);
+      return null;
+    }
+  }, []);
+
   const getOfficeDocumentData = useCallback(async () => {
     DEBUG("Getting Word document data");
     let file: Office.File | undefined;
@@ -300,6 +314,7 @@ export function useOffice() {
   return {
     getDocumentData,
     getSignedInUser,
+    getUserInfo,
     getFileName,
     getDocumentFileName,
     getOutlookSubject,

@@ -16,7 +16,7 @@ type SuccessData = ZrcType<"ZaakInformatieObject">;
 export function useAddDocumentToZaak(
   options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>
 ) {
-  const { getDocumentData, getFileName, host } = useOffice();
+  const { getDocumentData, getFileName, host, getUserInfo } = useOffice();
   const { POST } = useHttp();
   const { DEBUG } = useLogger(useAddDocumentToZaak.name);
 
@@ -47,15 +47,18 @@ export function useAddDocumentToZaak(
         }
       }
 
+      const userInfo = await getUserInfo();
+
       return POST<SuccessData>(
         `/zaken/${data.zaakidentificatie}/documenten`,
         JSON.stringify(
           host === Office.HostType.Outlook
-            ? { ...data }
+            ? { ...data, userInfo }
             : {
                 ...data,
                 inhoud: await getDocumentData(),
                 titel: await getFileName(),
+                userInfo,
               }
         )
       );
