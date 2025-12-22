@@ -89,4 +89,20 @@ export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   statuses: typeof documentstatus;
   namePrefix?: string;
   control: Control<T>;
+export type UseUploadStatusProps = {
+  selectedDocuments: DocumentSchema[];
+};
+
+export type UseUploadStatusReturn = {
+  selectedDocumentIds: string[];
+  activeMutations: Set<string>;
+  completedIds: Set<string>;
+  failedIds: Set<string>;
+  isUploading: boolean;
+  uploadComplete: boolean;
+  uploadedEmail: boolean;
+  uploadedAttachments: number;
+  errorCount: number;
+  uploadError: boolean;
+  uploadSuccess: boolean;
 };

@@ -5,25 +5,12 @@
 
 import { useMemo } from "react";
 import { useMutationState } from "@tanstack/react-query";
-import type { UploadDocumentMutationVariables, DocumentSchema } from "../../../../hooks/types";
-
-type UseUploadStatusProps = {
-  selectedDocuments: DocumentSchema[];
-};
-
-type UseUploadStatusReturn = {
-  selectedDocumentIds: string[];
-  activeMutations: Set<string>;
-  completedIds: Set<string>;
-  failedIds: Set<string>;
-  isUploading: boolean;
-  uploadComplete: boolean;
-  uploadedEmail: boolean;
-  uploadedAttachments: number;
-  errorCount: number;
-  uploadError: boolean;
-  uploadSuccess: boolean;
-};
+import type {
+  UploadDocumentMutationVariables,
+  DocumentSchema,
+  UseUploadStatusProps,
+  UseUploadStatusReturn,
+} from "../../../../hooks/types";
 
 /**
  * Custom hook to manage upload state tracking and calculations.
