@@ -20,6 +20,11 @@ vi.mock("./LoggerService", () => ({
   },
 }));
 
+const mockUserInfo = {
+  preferedUsername: "test-user",
+  name: "Test User",
+};
+
 describe("ZaakService", () => {
   let zaakService: ZaakService;
   let mockHttpService: {
@@ -177,6 +182,7 @@ describe("ZaakService", () => {
       titel: "test-document.docx",
       creatiedatum: "2025-01-15",
       inhoud: "base64content",
+      userInfo: mockUserInfo,
     };
 
     beforeEach(() => {
@@ -204,6 +210,7 @@ describe("ZaakService", () => {
           bestandsnaam: documentBody.titel,
           creatiedatum: "2025-01-15",
         }),
+        mockUserInfo,
       );
 
       // Verify gebruiksrechten creation
@@ -215,6 +222,7 @@ describe("ZaakService", () => {
           startdatum: new Date("2025-01-15"),
           omschrijvingVoorwaarden: "geen",
         }),
+        mockUserInfo,
       );
 
       // Verify document linking to zaak
@@ -225,6 +233,7 @@ describe("ZaakService", () => {
           informatieobject: mockInformatieobject.url,
           zaak: mockZaak.url,
         }),
+        mockUserInfo,
       );
 
       expect(LoggerService.debug).toHaveBeenCalledWith("creating document", "ZAAK-001");
@@ -254,6 +263,7 @@ describe("ZaakService", () => {
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.stringContaining(`"formaat":"${expectedFormat}"`),
+        mockUserInfo,
       );
     });
 
@@ -280,7 +290,7 @@ describe("ZaakService", () => {
     });
 
     it("should handle empty body parameter", async () => {
-      const bodyWithDefaults = { titel: "default.docx", creatiedatum: "2025-01-15" };
+      const bodyWithDefaults = { titel: "default.docx", creatiedatum: "2025-01-15", userInfo: mockUserInfo };
       mockHttpService.POST.mockResolvedValue(mockInformatieobject);
 
       await zaakService.addDocumentToZaak("ZAAK-001", bodyWithDefaults);
@@ -289,6 +299,7 @@ describe("ZaakService", () => {
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.stringContaining('"bronorganisatie":"123456789"'),
+        mockUserInfo,
       );
     });
   });
@@ -309,11 +320,13 @@ describe("ZaakService", () => {
       await zaakService.addDocumentToZaak("ZAAK-001", {
         titel: "test.docx",
         creatiedatum: "2025-01-15",
+        userInfo: mockUserInfo,
       });
 
       expect(mockHttpService.POST).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining('"formaat":"application/msword"'),
+        mockUserInfo,
       );
     });
 
@@ -324,11 +337,13 @@ describe("ZaakService", () => {
       await zaakService.addDocumentToZaak("ZAAK-001", {
         titel: "test.doc",
         creatiedatum: "2025-01-15",
+        userInfo: mockUserInfo,
       });
 
       expect(mockHttpService.POST).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining('"formaat":"application/msword"'),
+        mockUserInfo,
       );
     });
 

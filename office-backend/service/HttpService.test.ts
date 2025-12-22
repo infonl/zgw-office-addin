@@ -24,6 +24,11 @@ vi.mock("./LoggerService", () => ({
   },
 }));
 
+const mockUserInfo = {
+  preferedUsername: "test-user",
+  name: "Test User",
+};
+
 describe("HttpService", () => {
   let httpService: HttpService;
 
@@ -192,7 +197,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ name: "Test" });
-      const result = await httpService.POST("/create", requestBody);
+      const result = await httpService.POST("/create", requestBody, mockUserInfo);
 
       expect(result).toEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/create"), {
@@ -218,7 +223,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ data: "test" });
-      await httpService.POST("/submit", requestBody, { "X-API-Key": "secret" });
+      await httpService.POST("/submit", requestBody, mockUserInfo, { "X-API-Key": "secret" });
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/submit"), {
         method: "POST",
@@ -245,7 +250,7 @@ describe("HttpService", () => {
       const formData = new FormData();
       formData.append("file", "test-content");
 
-      await httpService.POST("/upload", formData);
+      await httpService.POST("/upload", formData, mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/upload"), {
         method: "POST",
@@ -268,7 +273,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("https://external-api.com/submit", "{}");
+      await httpService.POST("https://external-api.com/submit", "{}", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://external-api.com/submit",
@@ -287,7 +292,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.POST("/create", "{}")).rejects.toThrow("HTTP error! status: 400");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow("HTTP error! status: 400");
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         expect.any(Error),
@@ -298,7 +303,7 @@ describe("HttpService", () => {
       const networkError = new Error("Connection refused");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.POST("/create", "{}")).rejects.toThrow("Connection refused");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow("Connection refused");
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         networkError,
@@ -322,8 +327,8 @@ describe("HttpService", () => {
           iss: "office-add-in",
           iat: expect.any(Number),
           client_id: "office-add-in",
-          user_id: "office-add-in",
-          user_representation: "office-add-in",
+          user_id: "Office Add-in",
+          user_representation: "Office Add-in",
         },
         "test-secret",
         {
@@ -393,7 +398,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("/create", "{}");
+      await httpService.POST("/create", "{}", mockUserInfo);
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         2,
