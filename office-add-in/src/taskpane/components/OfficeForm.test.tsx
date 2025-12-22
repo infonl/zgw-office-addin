@@ -205,7 +205,8 @@ describe("OfficeForm", () => {
     it("should handle invalid vertrouwelijkheidaanduiding value gracefully", async () => {
       const zaakWithInvalidValue = fromPartial<Zaak>({
         ...mockZaak,
-        vertrouwelijkheidaanduiding: "invalid_value" as unknown as typeof mockZaak.vertrouwelijkheidaanduiding,
+        vertrouwelijkheidaanduiding:
+          "invalid_value" as unknown as typeof mockZaak.vertrouwelijkheidaanduiding,
       });
 
       vi.mocked(useGetZaakModule.useGetZaak).mockReturnValue(
@@ -321,7 +322,8 @@ describe("OfficeForm", () => {
       for (const value of validValues) {
         const zaakWithValue = fromPartial<Zaak>({
           ...mockZaak,
-          vertrouwelijkheidaanduiding: value as unknown as typeof mockZaak.vertrouwelijkheidaanduiding,
+          vertrouwelijkheidaanduiding:
+            value as unknown as typeof mockZaak.vertrouwelijkheidaanduiding,
         });
 
         vi.mocked(useGetZaakModule.useGetZaak).mockReturnValue(
@@ -368,7 +370,9 @@ describe("OfficeForm", () => {
 
       await waitFor(() => {
         const statusSelect = screen.getByLabelText(/status/i) as HTMLSelectElement;
-        const infoObjectSelect = screen.getByLabelText(/informatieobjecttype/i) as HTMLSelectElement;
+        const infoObjectSelect = screen.getByLabelText(
+          /informatieobjecttype/i
+        ) as HTMLSelectElement;
         expect(statusSelect.value).toBe("in_bewerking");
         expect(infoObjectSelect.value).toBe("");
       });
