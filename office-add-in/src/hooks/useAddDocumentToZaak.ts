@@ -10,13 +10,14 @@ import { useOffice } from "./useOffice";
 import { useHttp } from "./useHttp";
 import { ZrcType } from "../../../generated/zrc-generated-types";
 import { useLogger } from "./useLogger";
+import { getToken } from "../utils/getAccessToken";
 
 type SuccessData = ZrcType<"ZaakInformatieObject">;
 
 export function useAddDocumentToZaak(
   options?: UseMutationOptions<SuccessData, unknown, AddDocumentSchema>
 ) {
-  const { getDocumentData, getFileName, host, getUserInfo } = useOffice();
+  const { getDocumentData, getFileName, host } = useOffice();
   const { POST } = useHttp();
   const { DEBUG } = useLogger(useAddDocumentToZaak.name);
 
@@ -47,20 +48,23 @@ export function useAddDocumentToZaak(
         }
       }
 
-      const userInfo = await getUserInfo();
+      const token = await getToken();
+      const authorizattionHeader = {
+        Authorization: `Bearer ${token}`,
+      };
 
       return POST<SuccessData>(
         `/zaken/${data.zaakidentificatie}/documenten`,
         JSON.stringify(
           host === Office.HostType.Outlook
-            ? { ...data, userInfo }
+            ? { ...data }
             : {
                 ...data,
                 inhoud: await getDocumentData(),
                 titel: await getFileName(),
-                userInfo,
               }
-        )
+        ),
+        authorizattionHeader
       );
     },
     ...options,

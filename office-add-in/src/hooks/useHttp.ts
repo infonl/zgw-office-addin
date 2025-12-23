@@ -14,7 +14,7 @@ export function useHttp() {
     return request<T>("POST", url, { body, headers });
   }
 
-  async function GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
+  async function GET<T>(url: string, headers: HeadersInit = {}, params?: Record<string, string>) {
     return request<T>("GET", url, { headers, params });
   }
 

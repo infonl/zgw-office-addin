@@ -9,23 +9,27 @@ import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
 import { type DrcType } from "../../generated/drc-generated-types";
 import { type ZrcType } from "../../generated/zrc-generated-types";
-
+import { TokenService } from "./TokenService";
 export class ZaakService {
-  constructor(private readonly httpService: HttpService) {}
+  private userInfo: { preferedUsername: string; name: string } | null = null;
+  constructor(private readonly httpService: HttpService, private readonly tokenService: TokenService) {}
 
   public async getZaak(zaakIdentificatie: string) {
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
 
-    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype);
+    const userInfo = this.userInfo!;
+    
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
+
+    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype, userInfo);
 
     const status = zaak.status
-      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status)
+      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, userInfo)
       : ({ statustoelichting: "-" } satisfies Partial<ZrcType<"Status">>);
 
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url: string) =>
         this.httpService
-          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url)
+          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url, userInfo)
           .then((result) => ({ ...result, url })),
       ),
     );
@@ -39,8 +43,9 @@ export class ZaakService {
   }
 
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie);
-    const userInfo = body.userInfo;
+    const userInfo = this.userInfo!;
+    
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
 
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
@@ -103,10 +108,10 @@ export class ZaakService {
     }
   }
 
-  private async getZaakFromOpenZaak(zaakIdentificatie: string) {
-    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>("/zaken/api/v1/zaken", {
+  private async getZaakFromOpenZaak(zaakIdentificatie: string, userInfo: { preferedUsername: string; name: string }) {
+    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>("/zaken/api/v1/zaken", userInfo,{
       identificatie: zaakIdentificatie,
-    });
+    },);
 
     const zaak = zaken.results.at(0);
 
@@ -131,5 +136,9 @@ export class ZaakService {
       }),
       userInfo,
     );
+  }
+
+  public setUserInfo(jwt: string | undefined) {
+    this.userInfo = this.tokenService.getUserInfo(jwt);
   }
 }

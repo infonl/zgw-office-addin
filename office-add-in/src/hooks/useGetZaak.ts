@@ -6,6 +6,7 @@
 import { ZrcType } from "../../../generated/zrc-generated-types";
 import { useQuery } from "@tanstack/react-query";
 import { useHttp } from "./useHttp";
+import { getToken } from "../utils/getAccessToken";
 
 export type Zaak = Omit<ZrcType<"Zaak">, "zaakinformatieobjecten"> & {
   zaaktype: ZrcType<"ZaakType">;
@@ -24,6 +25,14 @@ export function useGetZaak(zaaknummer: string | null) {
   return useQuery({
     queryKey: ["zaak", zaaknummer],
     enabled: !!zaaknummer,
-    queryFn: () => GET<Zaak>(`/zaken/${zaaknummer}`),
+    queryFn: async () => {
+      const token = await getToken();
+      const authorizattionHeader = {
+        Authorization: `Bearer ${token}`,
+      };
+      console.log(authorizattionHeader);
+
+      return GET<Zaak>(`/zaken/${zaaknummer}`, authorizattionHeader);
+    },
   });
 }

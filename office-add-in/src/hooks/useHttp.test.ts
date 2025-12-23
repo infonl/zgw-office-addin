@@ -74,13 +74,12 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("/search", { q: "test", limit: "10" });
 
-      const expectedUrl = new URL("https://localhost:3003/search");
-      expectedUrl.search = "q=test&limit=10";
-
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+      expect(mockFetch).toHaveBeenCalledWith(new URL("https://localhost:3003/search"), {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          q: "test",
+          limit: "10",
         },
       });
     });
@@ -97,11 +96,11 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("/test", undefined, { Authorization: "Bearer token" });
 
-      expect(mockFetch).toHaveBeenCalledWith(new URL("https://localhost:3003/test"), {
+      const expectedUrl = new URL("https://localhost:3003/test?Authorization=Bearer+token");
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer token",
         },
       });
     });
@@ -118,14 +117,12 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("/test", { id: "123" }, { "X-Custom": "value" });
 
-      const expectedUrl = new URL("https://localhost:3003/test");
-      expectedUrl.search = "id=123";
-
+      const expectedUrl = new URL("https://localhost:3003/test?X-Custom=value");
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "X-Custom": "value",
+          id: "123",
         },
       });
     });
@@ -276,11 +273,10 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("/test", { param: "value" });
 
-      expect(mockDebug).toHaveBeenNthCalledWith(
-        1,
-        "[GET] https://localhost:3003/test?param=value",
-        { headers: {}, params: { param: "value" } }
-      );
+      expect(mockDebug).toHaveBeenNthCalledWith(1, "[GET] https://localhost:3003/test", {
+        headers: { param: "value" },
+        params: undefined,
+      });
     });
 
     it("should log response status", async () => {

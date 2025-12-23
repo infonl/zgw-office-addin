@@ -12,8 +12,12 @@ export class ZaakController {
   constructor(private readonly zaakService: ZaakService) {}
 
   public async getZaak(request: FastifyRequest<{ Params: ZaakParam }>, reply: FastifyReply) {
+    console.log("AUTHOR:", request.headers["authorization"]);
+
+    const jwt = request.headers["authorization"];
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
+      this.zaakService.setUserInfo(jwt);
       const response = await this.zaakService.getZaak(zaakIdentificatie);
       reply.status(200).send(response);
     } catch (error) {
@@ -30,7 +34,13 @@ export class ZaakController {
   ) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      const data = await this.zaakService.addDocumentToZaak(zaakIdentificatie, request.body);
+      const jwt = request.headers["authorization"];
+
+      this.zaakService.setUserInfo(jwt);
+      const data = await this.zaakService.addDocumentToZaak(
+        zaakIdentificatie,
+        request.body,
+      );
       reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
