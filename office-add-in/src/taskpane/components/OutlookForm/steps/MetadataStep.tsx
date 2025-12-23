@@ -20,6 +20,7 @@ import { addDocumentSchema, documentstatus } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { DocumentIndicator } from "./DocumentIndicator";
+import { UploadStatusIcon } from "./UploadStatusIcon";
 import { Schema } from "../hooks/useOutlookForm";
 import { useCommonStyles } from "../../styles/shared";
 
@@ -31,12 +32,12 @@ const useStyles = makeStyles({
   item: {
     marginBlockEnd: 0,
     borderRadius: tokens.borderRadiusNone,
-  },
-  header: {
-    backgroundColor: tokens.colorNeutralBackground2,
     borderBottomWidth: tokens.strokeWidthThin,
     borderBottomStyle: "solid",
     borderBottomColor: tokens.colorNeutralStroke1,
+  },
+  header: {
+    backgroundColor: tokens.colorNeutralBackground2,
     minHeight: tokens.spacingVerticalXXL,
     paddingBlock: tokens.spacingVerticalXS,
     borderRadius: tokens.borderRadiusNone,
@@ -60,15 +61,40 @@ const useStyles = makeStyles({
     background: tokens.colorNeutralForegroundInverted,
     borderBottom: `1px solid ${tokens.colorBrandForegroundLink}`,
   },
+  statusIconContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: tokens.spacingHorizontalXS,
+  },
+  metadataSection: {
+    marginTop: tokens.spacingVerticalM,
+  },
+  fieldsetReset: {
+    border: 0,
+    margin: 0,
+    padding: 0,
+    "&[disabled] *": {
+      color: tokens.colorNeutralForegroundDisabled,
+    },
+  },
 });
 
-export function MetadataStep() {
+type MetadataStepProps = {
+  isUploading?: boolean;
+  isDisabled?: boolean;
+};
+
+export function MetadataStep({ isUploading = false, isDisabled = false }: MetadataStepProps) {
   const form = useFormContext<Schema>();
   const styles = useStyles();
   const common = useCommonStyles();
   const { zaak } = useZaak();
 
   const documents = form.watch("documents");
+
+  // Disable form when uploading or after upload completes
+  const isFormDisabled = isUploading || isDisabled;
+
   const defaultOpenItems = React.useMemo(() => {
     return documents
       .filter((document) => document.selected && !addDocumentSchema.safeParse(document).success)
@@ -80,7 +106,7 @@ export function MetadataStep() {
       <section className={common.title}>
         <Subtitle1>Bestandsgegevens</Subtitle1>
       </section>
-      <section style={{ marginTop: tokens.spacingVerticalM }}>
+      <section className={styles.metadataSection}>
         <table className={styles.table}>
           <tbody>
             <tr>
@@ -92,9 +118,11 @@ export function MetadataStep() {
           </tbody>
         </table>
       </section>
-      <section className={common.title}>
-        <Body1>Vul bij elk bestand de bijbehorende metadata in.</Body1>
-      </section>
+      {!isFormDisabled && (
+        <section className={common.title}>
+          <Body1>Vul bij elk bestand de bijbehorende metadata in.</Body1>
+        </section>
+      )}
       <Accordion collapsible defaultOpenItems={defaultOpenItems} className={styles.accordion}>
         {documents.map(
           (document, index) =>
@@ -108,16 +136,23 @@ export function MetadataStep() {
               >
                 <AccordionHeader className={styles.header} expandIconPosition="end">
                   <section className={styles.accordionHeader}>
-                    {document.attachment.name}
-                    <DocumentIndicator index={index} />
+                    <div className={styles.statusIconContainer}>
+                      <UploadStatusIcon attachmentId={document.attachment.id} />
+                      {document.attachment.name}
+                    </div>
+
+                    {!isFormDisabled && <DocumentIndicator index={index} />}
                   </section>
                 </AccordionHeader>
                 <AccordionPanel className={styles.panel}>
-                  <DocumentMetadataFields
-                    namePrefix={`documents.${index}.`}
-                    zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
-                    statuses={documentstatus}
-                  />
+                  <fieldset disabled={isFormDisabled} className={styles.fieldsetReset}>
+                    <DocumentMetadataFields
+                      namePrefix={`documents.${index}.`}
+                      zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
+                      statuses={documentstatus}
+                      control={form.control}
+                    />
+                  </fieldset>
                 </AccordionPanel>
               </AccordionItem>
             )

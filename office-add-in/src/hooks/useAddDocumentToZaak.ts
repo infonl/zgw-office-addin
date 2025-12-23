@@ -21,7 +21,15 @@ export function useAddDocumentToZaak(
   const { DEBUG } = useLogger(useAddDocumentToZaak.name);
 
   return useMutation({
+    mutationKey: ["upload_document", "batch"],
     mutationFn: async (data: AddDocumentSchema) => {
+      // Test logic: log incoming data
+      const dataWithTitel = data as unknown as { titel?: string };
+      DEBUG("[useAddDocumentToZaak] Received data:", {
+        titel: dataWithTitel.titel,
+        zaakidentificatie: data.zaakidentificatie,
+      });
+
       // If zaakidentificatie is empty, log a warning with a sanitized snapshot
       if (!data.zaakidentificatie || data.zaakidentificatie.trim() === "") {
         try {

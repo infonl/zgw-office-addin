@@ -5,30 +5,13 @@
 
 import type { GraphAuthService } from "./GraphTypes";
 import { useLogger } from "../hooks/useLogger";
-
 import { MsalAuthContextType } from "../provider/MsalAuthProvider";
 import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { addMinutes } from "date-fns";
 import { MicrosoftJwtPayload } from "./GraphTypes";
 import { TOKEN_EXPIRY_OFFSET_MINUTES } from "../constants";
 import { jwtDecode } from "jwt-decode";
-
-interface ExtendedOfficeContext extends Office.Context {
-  auth?: {
-    getAccessTokenAsync: (
-      _options: {
-        forMSGraphAccess?: boolean;
-        allowSignInPrompt?: boolean;
-        allowConsentPrompt?: boolean;
-      },
-      _callback: (_result: {
-        status: Office.AsyncResultStatus;
-        value?: string;
-        error?: Office.Error;
-      }) => void
-    ) => void;
-  };
-}
+import { getToken } from "../utils/getAccessToken";
 
 /**
  * Microsoft Graph authentication service for Office Add-ins
@@ -115,37 +98,8 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     this.logger.DEBUG("🔑 Requesting new Graph API access token...");
 
-    // Use Office SSO (Single Sign-On) to get Graph API access token
     this.tokenRequest = new Promise<string>((resolve, reject) => {
-      const officeContext = Office.context as ExtendedOfficeContext;
-      if (officeContext.auth?.getAccessTokenAsync) {
-        this.logger.DEBUG("office context");
-        officeContext.auth.getAccessTokenAsync(
-          {
-            forMSGraphAccess: true,
-            allowSignInPrompt: true,
-            allowConsentPrompt: true,
-          },
-          (result) => {
-            if (result.status === Office.AsyncResultStatus.Succeeded) {
-              resolve(result.value!);
-            } else {
-              reject(result.error);
-            }
-          }
-        );
-      } else {
-        // Fallback to Office.auth.getAccessToken if context.auth is not available
-        this.logger.DEBUG("office without context");
-        Office.auth
-          .getAccessToken({
-            forMSGraphAccess: true,
-            allowSignInPrompt: true,
-            allowConsentPrompt: true,
-          })
-          .then(resolve)
-          .catch(reject);
-      }
+      getToken().then(resolve).catch(reject);
     })
       .then(async (token) => {
         let jwtPayload = this.decodeJwtPayload(token);

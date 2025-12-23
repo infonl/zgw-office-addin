@@ -3,11 +3,17 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
+import type { FieldValues } from "react-hook-form";
 import React from "react";
+import { useWatch } from "react-hook-form";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
-import { addDocumentSchema, documentstatus } from "../../hooks/types";
+import {
+  addDocumentSchema,
+  vertrouwelijkheidaanduiding,
+  DocumentMetadataFieldsProps,
+} from "../../hooks/types";
 import { mq } from "./styles/layout";
 
 const useStyles = makeStyles({
@@ -31,19 +37,31 @@ const useStyles = makeStyles({
   },
 });
 
-export type DocumentMetadataFieldsProps = {
-  zaakinformatieobjecten: { omschrijving: string; url?: string }[];
-  statuses: typeof documentstatus;
-  namePrefix?: string;
-};
-
 // To be used within a react-hook-form FormProvider
-export function DocumentMetadataFields({
+export function DocumentMetadataFields<T extends FieldValues>({
   zaakinformatieobjecten,
   statuses,
   namePrefix = "",
-}: DocumentMetadataFieldsProps) {
+  control,
+}: DocumentMetadataFieldsProps<T>) {
   const styles = useStyles();
+
+  // Watch the ZIO field to determine if vertrouwelijkheidsaanduiding dropdown should be enabled
+  const selectedInformatieobjecttype = useWatch({
+    name: `${namePrefix}informatieobjecttype` as import("react-hook-form").Path<T>,
+    control,
+  });
+
+  // Watch vertrouwelijkheidsaanduiding field to ensure re-render when form.setValue is called from parent
+  useWatch({
+    name: `${namePrefix}vertrouwelijkheidaanduiding` as import("react-hook-form").Path<T>,
+    control,
+  });
+
+  const vertrouwelijkheidOptions = vertrouwelijkheidaanduiding.map((value) => ({
+    label: value.replace(/_/g, " "),
+    value,
+  }));
 
   return (
     <section className={styles.grid}>
@@ -63,12 +81,13 @@ export function DocumentMetadataFields({
         }))}
         required={!addDocumentSchema.shape.informatieobjecttype.isOptional()}
       />
-      <Input
+      <Select
         className={styles.gridColumnSpan1}
-        readOnly // https://dimpact.atlassian.net/browse/PZ-9205 deals with the possible values
         name={`${namePrefix}vertrouwelijkheidaanduiding`}
         label="Vertrouwelijkheid"
+        options={vertrouwelijkheidOptions}
         required={!addDocumentSchema.shape.vertrouwelijkheidaanduiding.isOptional()}
+        disabled={!selectedInformatieobjecttype}
       />
       <Select
         className={styles.gridColumnSpan1}

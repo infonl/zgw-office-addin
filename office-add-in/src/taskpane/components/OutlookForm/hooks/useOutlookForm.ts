@@ -3,11 +3,16 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { document, DocumentSchema, SelectedDocument } from "../../../../hooks/types";
+import {
+  document,
+  DocumentSchema,
+  SelectedDocument,
+  vertrouwelijkheidaanduidingSchema,
+} from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { useOutlook } from "../../../../hooks/useOutlook";
 import { useOffice } from "../../../../hooks/useOffice";
@@ -17,6 +22,8 @@ import { prepareSelectedDocuments } from "../../../../utils/prepareSelectedDocum
 import { useLogger } from "../../../../hooks/useLogger";
 import { useAddDocumentToZaak } from "../../../../hooks/useAddDocumentToZaak";
 import { arrayBufferToBase64 } from "../../../../utils/arrayBuffer";
+import { useUploadToasts } from "./useUploadToasts";
+import { getToken } from "../../../../utils/getAccessToken";
 
 export type TranslateItem = { type: "email" | "attachment"; id: string };
 
@@ -36,7 +43,20 @@ export function useOutlookForm() {
   const { files } = useOutlook();
   const { processAndUploadDocuments } = useOffice();
   const { DEBUG, WARN, ERROR } = useLogger(useOutlookForm.name);
-  const { mutateAsync } = useAddDocumentToZaak();
+  const { mutateAsync } = useAddDocumentToZaak(); // Per-file tracking happens via UploadStatusIcon component using attachment.id
+  const { showUploadingToast, showErrorToast, showSuccessToast, showGeneralErrorToast } =
+    useUploadToasts();
+  const [tokenError, setTokenError] = useState(false);
+
+  useEffect(() => {
+    getToken()
+      .then(() => setTokenError(false))
+      .catch((error) => {
+        const errorCode = error?.code;
+        setTokenError(error);
+        console.log("Token error code:", errorCode);
+      });
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -55,6 +75,13 @@ export function useOutlookForm() {
     ) as SelectedDocument[];
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
+    if (selectedDocuments.length === 0) {
+      WARN("⚠️ No documents selected for upload");
+      return { error: null };
+    }
+
+    showUploadingToast(selectedDocuments.length, zaak.data?.identificatie || "");
+
     selectedDocuments.forEach((doc, index) => {
       DEBUG(`📋 File ${index + 1}:`, {
         name: doc.attachment.name,
@@ -70,11 +97,6 @@ export function useOutlookForm() {
         },
       });
     });
-
-    if (selectedDocuments.length === 0) {
-      WARN("⚠️ No documents selected for upload");
-      return { error: null };
-    }
 
     try {
       DEBUG("🔧 Initializing GraphService...");
@@ -146,17 +168,21 @@ export function useOutlookForm() {
           titel: doc.attachment.name,
         };
       });
+
       DEBUG("[TRACE] uploadPayload:", uploadPayload);
 
-      DEBUG("🚀 Uploading documents to Zaak via mutation...");
+      DEBUG("🚀 Uploading documents to Zaak via per-file mutations...");
 
+      // Upload each document in parallel
+      // Each call has same mutationKey but different attachment data
+      // useMutationState can filter on this to track per-file
       const mutationResults = await Promise.all(
         uploadPayload.map(async (doc) => {
           try {
             const result = await mutateAsync(doc);
             return { status: "fulfilled", value: result };
-          } catch (error) {
-            return { status: "rejected", reason: error };
+          } catch {
+            return { status: "rejected" };
           }
         })
       );
@@ -165,13 +191,25 @@ export function useOutlookForm() {
 
       if (failed > 0) {
         ERROR(`❌ Failed to upload ${failed} documents`);
+        showErrorToast(failed, selectedDocuments.length);
         return { error: new Error(`Failed to upload ${failed} documents`) };
       }
 
       DEBUG("✅ All documents uploaded successfully");
+      const emailSelected = selectedDocuments.some(
+        (doc) => doc.attachment.attachmentType === "item"
+      );
+      const attachmentsSelected = selectedDocuments.filter(
+        (doc) => doc.attachment.attachmentType !== "item"
+      ).length;
+
+      showSuccessToast(emailSelected, attachmentsSelected);
       return { error: null };
     } catch (error) {
       ERROR("❌ Upload process failed:", error);
+      // Note: Individual mutation errors are already tracked by TanStack Query
+      // This is a catch-all for orchestration-level errors (not file-level errors)
+      showGeneralErrorToast();
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }
   };
@@ -201,8 +239,97 @@ export function useOutlookForm() {
         documents: defaultDocuments,
       });
       form.trigger();
+      // Note: TanStack Query mutation states are automatically reset when component unmounts
     }
   }, [files, form, zaak.data?.identificatie]);
+
+  // Set vertrouwelijkheidaanduiding to zaak default when no informatieobjecttype is set
+  useEffect(() => {
+    if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
+      zaak.data.vertrouwelijkheidaanduiding
+    );
+    if (!parsed.success) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((doc, index) => {
+      if (!doc.informatieobjecttype) {
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsed.data);
+      }
+    });
+  }, [zaak.data?.vertrouwelijkheidaanduiding, form.setValue, form]);
+
+  // Track the last selected Zaak InformatieObjectType per file
+  const previousZaakInformatieObjectTypeByAttachmentIdRef = React.useRef<Record<string, string>>(
+    {} as Record<string, string>
+  );
+
+  const allDocuments = useWatch({ name: "documents", control: form.control });
+
+  // Auto-update Vertrouwelijkheidaanduiding when Zaak Informatieobjecten changes for any document
+  useEffect(() => {
+    if (!zaak.data?.zaakinformatieobjecten || !allDocuments) return;
+
+    const currentDocuments = form.getValues("documents");
+
+    currentDocuments.forEach((doc, index) => {
+      const attachmentId = doc.attachment?.id;
+      if (!attachmentId) return;
+
+      // Get current and previous Zaak InformatieObjectType for this file
+      const currentZaakInformatieobjecttype = doc.informatieobjecttype || "";
+      const previousZaakInformatieObjectType =
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] || "";
+
+      // Only update if Zaak InformatieObjectType actually changed
+      if (currentZaakInformatieobjecttype === previousZaakInformatieObjectType) return;
+      // Track the new Zaak InformatieObjectType for this attachment
+      if (typeof attachmentId === "string" && typeof currentZaakInformatieobjecttype === "string") {
+        previousZaakInformatieObjectTypeByAttachmentIdRef.current[attachmentId] =
+          currentZaakInformatieobjecttype;
+      }
+
+      // If Zaak InformatieObjectType is chosen yet, set vertrouwelijkheidaanduiding to zaak default
+      if (!currentZaakInformatieobjecttype) {
+        if (!zaak.data?.vertrouwelijkheidaanduiding) return;
+
+        const parsedZaakVa = vertrouwelijkheidaanduidingSchema.safeParse(
+          zaak.data.vertrouwelijkheidaanduiding
+        );
+        if (!parsedZaakVa.success) return;
+
+        form.setValue(`documents.${index}.vertrouwelijkheidaanduiding`, parsedZaakVa.data);
+        return;
+      }
+
+      const zaakInformatieObjectType = zaak.data.zaakinformatieobjecten.find(
+        (z) => z.url === currentZaakInformatieobjecttype
+      );
+      if (!zaakInformatieObjectType?.vertrouwelijkheidaanduiding) {
+        return;
+      }
+
+      const parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding =
+        vertrouwelijkheidaanduidingSchema.safeParse(
+          zaakInformatieObjectType.vertrouwelijkheidaanduiding
+        );
+      if (!parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.success) {
+        return;
+      }
+
+      form.setValue(
+        `documents.${index}.vertrouwelijkheidaanduiding`,
+        parsedZaakInformatieObjectTypeVertrouwelijkheidaanduiding.data
+      );
+    });
+  }, [
+    allDocuments,
+    zaak.data?.zaakinformatieobjecten,
+    zaak.data?.vertrouwelijkheidaanduiding,
+    form,
+  ]);
 
   return {
     form,
@@ -210,5 +337,6 @@ export function useOutlookForm() {
     handleSubmit,
     zaak,
     hasSelectedDocuments: documents?.some(({ selected }) => selected),
+    tokenError,
   };
 }

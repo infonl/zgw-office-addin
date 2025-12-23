@@ -4,6 +4,7 @@
  */
 
 import z from "zod";
+import type { Control, FieldValues } from "react-hook-form";
 
 export const documentstatus = [
   "in_bewerking",
@@ -12,8 +13,23 @@ export const documentstatus = [
   "gearchiveerd",
 ] as const;
 
+export const vertrouwelijkheidaanduiding = [
+  "openbaar",
+  "beperkt_openbaar",
+  "intern",
+  "zaakvertrouwelijk",
+  "vertrouwelijk",
+  "confidentieel",
+  "geheim",
+  "zeer_geheim",
+] as const;
+
+export const vertrouwelijkheidaanduidingSchema = z.enum(vertrouwelijkheidaanduiding);
+
+export type VertrouwelijkheidaanduidingType = z.infer<typeof vertrouwelijkheidaanduidingSchema>;
+
 export const addDocumentSchema = z.object({
-  vertrouwelijkheidaanduiding: z.string(),
+  vertrouwelijkheidaanduiding: z.enum(vertrouwelijkheidaanduiding),
   informatieobjecttype: z.string().url(),
   status: z.enum(documentstatus),
   creatiedatum: z.date(),
@@ -40,6 +56,9 @@ export type DocumentSchema = z.infer<typeof document>;
 
 export type SelectedDocument = Extract<DocumentSchema, { selected: true }>;
 
+export type TokenErrorProps = {
+  error: { code?: number; message?: string } | boolean;
+};
 export type ProcessedDocument = SelectedDocument & {
   graphId: string | null;
   parentEmailGraphId: string | null;
@@ -53,4 +72,39 @@ export type GraphServiceType = {
     _parentGraphId: string,
     _graphAttachmentId: string
   ) => Promise<ArrayBuffer>;
+};
+
+export type UploadDocumentMutationVariables = {
+  attachment?: {
+    id?: string;
+  };
+};
+
+export type DocumentMetadataFieldsProps<T extends FieldValues> = {
+  zaakinformatieobjecten: {
+    omschrijving: string;
+    url?: string;
+    vertrouwelijkheidaanduiding?: string;
+  }[];
+  statuses: typeof documentstatus;
+  namePrefix?: string;
+  control: Control<T>;
+};
+
+export type UseUploadStatusProps = {
+  selectedDocuments: DocumentSchema[];
+};
+
+export type UseUploadStatusReturn = {
+  selectedDocumentIds: string[];
+  activeMutations: Set<string>;
+  completedIds: Set<string>;
+  failedIds: Set<string>;
+  isUploading: boolean;
+  uploadComplete: boolean;
+  uploadedEmail: boolean;
+  uploadedAttachments: number;
+  errorCount: number;
+  uploadError: boolean;
+  uploadSuccess: boolean;
 };

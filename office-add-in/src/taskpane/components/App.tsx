@@ -98,9 +98,15 @@ function Main() {
   const styles = useStyles();
   const common = useCommonStyles();
 
-  const { isOutlook } = useOffice();
-
+  const { isOutlook, isWord, isExcel, isInBrowser } = useOffice();
   const { documentAddedToZaak, reset } = useZaak();
+
+  // in desktop apps, closing the taskpane via a button is not supported.
+  const canCloseTaskpane = (isWord || isExcel) && isInBrowser && !!window.Office?.addin?.hide;
+
+  const handleClose = () => {
+    window.Office?.addin?.hide?.();
+  };
 
   if (documentAddedToZaak) {
     return (
@@ -117,11 +123,13 @@ function Main() {
         </section>
         <section className={styles.actions}>
           <Button appearance="primary" onClick={reset}>
-            Volgend document
+            Volgende koppeling
           </Button>
-          <Button appearance="secondary" onClick={() => Office.addin.hide()}>
-            Sluiten
-          </Button>
+          {canCloseTaskpane && (
+            <Button appearance="secondary" onClick={handleClose}>
+              Sluiten
+            </Button>
+          )}
         </section>
       </div>
     );

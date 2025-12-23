@@ -18,7 +18,12 @@ import { useEffect } from "react";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AddDocumentSchema, addDocumentSchema, documentstatus } from "../../hooks/types";
+import {
+  AddDocumentSchema,
+  addDocumentSchema,
+  documentstatus,
+  vertrouwelijkheidaanduidingSchema,
+} from "../../hooks/types";
 import { useAddDocumentToZaak } from "../../hooks/useAddDocumentToZaak";
 import { useOffice } from "../../hooks/useOffice";
 import { DocumentMetadataFields } from "./DocumentMetadataFields";
@@ -89,7 +94,7 @@ export function OfficeForm() {
     resolver: zodResolver(addDocumentSchema),
     defaultValues: {
       zaakidentificatie: data?.identificatie ?? "",
-      vertrouwelijkheidaanduiding: "openbaar",
+      vertrouwelijkheidaanduiding: "openbaar" as const,
       informatieobjecttype: "",
       auteur: "",
       creatiedatum: new Date(),
@@ -120,13 +125,23 @@ export function OfficeForm() {
 
     if (!zaakinformatieobject?.vertrouwelijkheidaanduiding) return;
 
-    form.setValue("vertrouwelijkheidaanduiding", zaakinformatieobject.vertrouwelijkheidaanduiding);
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(
+      zaakinformatieobject.vertrouwelijkheidaanduiding
+    );
+    if (!parsed.success) return;
+
+    if (form.getValues("vertrouwelijkheidaanduiding") !== parsed.data) {
+      form.setValue("vertrouwelijkheidaanduiding", parsed.data);
+    }
   }, [informatieobjecttype, data?.zaakinformatieobjecten, form.setValue]);
 
   useEffect(() => {
     if (!data?.vertrouwelijkheidaanduiding) return;
 
-    form.setValue("vertrouwelijkheidaanduiding", data.vertrouwelijkheidaanduiding);
+    const parsed = vertrouwelijkheidaanduidingSchema.safeParse(data.vertrouwelijkheidaanduiding);
+    if (parsed.success) {
+      form.setValue("vertrouwelijkheidaanduiding", parsed.data);
+    }
   }, [data?.vertrouwelijkheidaanduiding, form.setValue]);
 
   useEffect(() => {
@@ -155,6 +170,7 @@ export function OfficeForm() {
             <DocumentMetadataFields
               zaakinformatieobjecten={data.zaakinformatieobjecten}
               statuses={documentstatus}
+              control={form.control}
             />
             <Button
               disabled={!form.formState.isValid || isPending}

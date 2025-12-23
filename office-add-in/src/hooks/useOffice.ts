@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { useLogger } from "./useLogger";
 import { jwtDecode } from "jwt-decode";
 import { ZaakResponse, ProcessedDocument, GraphServiceType } from "./types";
+import { getToken } from "../utils/getAccessToken";
 
 type State = { file: Office.File; currentSlice: number };
 
@@ -15,8 +16,9 @@ export function useOffice() {
   const { DEBUG, WARN, ERROR } = useLogger(useOffice.name);
   const host = Office.context.host;
   const isWord = host === Office.HostType.Word;
-  const isOutlook = host === Office.HostType.Outlook;
   const isExcel = host === Office.HostType.Excel;
+  const isOutlook = host === Office.HostType.Outlook;
+  const isInBrowser = Office?.context?.platform === Office.PlatformType.OfficeOnline;
 
   const getDocumentFileName = useCallback(() => {
     return new Promise<string>((resolve, reject) => {
@@ -75,7 +77,7 @@ export function useOffice() {
 
   const getSignedInUser = useCallback(async () => {
     try {
-      const userTokenEncoded = await Office.auth.getAccessToken();
+      const userTokenEncoded = await getToken();
       const userToken = jwtDecode<{ preferred_username?: string; name?: string }>(userTokenEncoded);
       return userToken.preferred_username ?? userToken.name ?? null;
     } catch (error) {
@@ -304,6 +306,7 @@ export function useOffice() {
     host,
     isWord,
     isOutlook,
+    isInBrowser,
     isExcel,
     processAndUploadDocuments,
   };

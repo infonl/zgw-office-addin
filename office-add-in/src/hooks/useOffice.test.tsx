@@ -6,6 +6,7 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { useOffice } from "./useOffice";
+import { clearToken } from "../utils/getAccessToken";
 
 // Mock Office.js types
 interface MockAsyncResult<T> {
@@ -64,6 +65,14 @@ global.Office = {
     Visio: 6,
     OneNote: 7,
   },
+  PlatformType: {
+    PC: 0,
+    Mac: 1,
+    OfficeOnline: 2,
+    IOS: 3,
+    Android: 4,
+    Web: 5,
+  },
   AsyncResultStatus: {
     Succeeded: 0,
     Failed: 1,
@@ -79,6 +88,7 @@ global.Office = {
 describe("useOffice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearToken();
     mockOfficeContext.host = Office.HostType.Word;
   });
 
