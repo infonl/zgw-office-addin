@@ -12,12 +12,14 @@ import { type ZrcType } from "../../generated/zrc-generated-types";
 import { TokenService } from "./TokenService";
 export class ZaakService {
   private userInfo: { preferedUsername: string; name: string } | null = null;
-  constructor(private readonly httpService: HttpService, private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly tokenService: TokenService,
+  ) {}
 
   public async getZaak(zaakIdentificatie: string) {
-
     const userInfo = this.userInfo!;
-    
+
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
 
     const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype, userInfo);
@@ -44,7 +46,7 @@ export class ZaakService {
 
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const userInfo = this.userInfo!;
-    
+
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
 
     LoggerService.debug("creating document", zaakIdentificatie);
@@ -108,10 +110,17 @@ export class ZaakService {
     }
   }
 
-  private async getZaakFromOpenZaak(zaakIdentificatie: string, userInfo: { preferedUsername: string; name: string }) {
-    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>("/zaken/api/v1/zaken", userInfo,{
-      identificatie: zaakIdentificatie,
-    },);
+  private async getZaakFromOpenZaak(
+    zaakIdentificatie: string,
+    userInfo: { preferedUsername: string; name: string },
+  ) {
+    const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
+      "/zaken/api/v1/zaken",
+      userInfo,
+      {
+        identificatie: zaakIdentificatie,
+      },
+    );
 
     const zaak = zaken.results.at(0);
 

@@ -44,7 +44,10 @@ describe("ZaakService", () => {
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
     };
-    zaakService = new ZaakService(mockHttpService as unknown as HttpService, mockTokenService as unknown as TokenService);
+    zaakService = new ZaakService(
+      mockHttpService as unknown as HttpService,
+      mockTokenService as unknown as TokenService,
+    );
     vi.clearAllMocks();
   });
 
@@ -83,8 +86,9 @@ describe("ZaakService", () => {
     ];
 
     it("should return a complete zaak with all related data", async () => {
-      mockHttpService.GET
-        .mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }))
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      )
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockZaaktype))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockStatus))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
@@ -121,8 +125,9 @@ describe("ZaakService", () => {
     it("should handle zaak without status", async () => {
       const zaakWithoutStatus = { ...mockZaak, status: null };
 
-      mockHttpService.GET
-        .mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [zaakWithoutStatus] }))
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [zaakWithoutStatus] }),
+      )
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockZaaktype))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[1]));
@@ -134,8 +139,9 @@ describe("ZaakService", () => {
     });
 
     it("should include vertrouwelijkheidaanduiding in zaakinformatieobjecten", async () => {
-      mockHttpService.GET
-        .mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }))
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      )
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockZaaktype))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockStatus))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
@@ -157,7 +163,9 @@ describe("ZaakService", () => {
     });
 
     it("should throw ZaakNotFound when zaak does not exist", async () => {
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [] }),
+      );
 
       await expect(zaakService.getZaak("NONEXISTENT")).rejects.toThrow(ZaakNotFound);
 
@@ -196,12 +204,15 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
     });
 
     it("should successfully add a document to zaak", async () => {
-      mockHttpService.POST
-        .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve(mockInformatieobject)) // create document
+      mockHttpService.POST.mockImplementationOnce((_url, _body, _userInfo) =>
+        Promise.resolve(mockInformatieobject),
+      ) // create document
         .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({})) // create gebruiksrechten
         .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({})); // link document to zaak
 
@@ -266,7 +277,9 @@ describe("ZaakService", () => {
       { extension: "jpeg", expectedFormat: "image/jpeg" },
     ])("should handle .$extension files", async ({ extension, expectedFormat }) => {
       const body = { ...documentBody, titel: `test-document.${extension}` };
-      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) => Promise.resolve(mockInformatieobject));
+      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) =>
+        Promise.resolve(mockInformatieobject),
+      );
 
       await zaakService.addDocumentToZaak("ZAAK-001", body);
 
@@ -286,14 +299,18 @@ describe("ZaakService", () => {
       );
 
       // Reset mock for second call
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
       await expect(zaakService.addDocumentToZaak("ZAAK-001", unsupportedBody)).rejects.toThrow(
         "Bestand wordt niet ondersteund: test-document.xyz",
       );
     });
 
     it("should throw ZaakNotFound when zaak does not exist", async () => {
-      mockHttpService.GET.mockReset().mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [] }));
+      mockHttpService.GET.mockReset().mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [] }),
+      );
 
       await expect(zaakService.addDocumentToZaak("NONEXISTENT", documentBody)).rejects.toThrow(
         ZaakNotFound,
@@ -306,7 +323,9 @@ describe("ZaakService", () => {
         creatiedatum: "2025-01-15",
         userInfo: mockUserInfo,
       };
-      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) => Promise.resolve(mockInformatieobject));
+      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) =>
+        Promise.resolve(mockInformatieobject),
+      );
 
       await zaakService.addDocumentToZaak("ZAAK-001", bodyWithDefaults);
 
@@ -327,8 +346,12 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
-      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) => Promise.resolve({ url: "test" }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
+      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) =>
+        Promise.resolve({ url: "test" }),
+      );
     });
 
     it("should return correct format for .docx files", async () => {
@@ -347,7 +370,9 @@ describe("ZaakService", () => {
 
     it("should return correct format for .doc files", async () => {
       // Reset mock for this test
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
 
       await zaakService.addDocumentToZaak("ZAAK-001", {
         titel: "test.doc",
@@ -364,7 +389,9 @@ describe("ZaakService", () => {
 
     it("should throw FileNotSupported for unsupported extensions", async () => {
       // Reset mock for this test
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
 
       await expect(
         zaakService.addDocumentToZaak("ZAAK-001", {
@@ -376,7 +403,9 @@ describe("ZaakService", () => {
 
     it("should handle files without extension", async () => {
       // Reset mock for this test
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) => Promise.resolve({ results: [mockZaak] }));
+      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
+        Promise.resolve({ results: [mockZaak] }),
+      );
 
       await expect(
         zaakService.addDocumentToZaak("ZAAK-001", { titel: "test", creatiedatum: "2025-01-15" }),

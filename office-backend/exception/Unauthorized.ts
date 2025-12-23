@@ -6,7 +6,7 @@
 export class Unauthorized extends Error {
   public readonly statusCode = 401;
   constructor() {
-    super('Je bent niet geautoriseerd om deze actie uit te voeren.');
+    super("Je bent niet geautoriseerd om deze actie uit te voeren.");
     this.name = Unauthorized.name;
   }
 }

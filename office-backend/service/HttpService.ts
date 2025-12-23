@@ -22,13 +22,13 @@ export class HttpService {
     return this.request<T>("POST", url, { body, headers }, userInfo);
   }
 
-  public async GET<T>(url: string, userInfo: { preferedUsername: string; name: string }, params?: Record<string, string>, headers: HeadersInit = {}) {
-    return this.request<T>(
-      "GET",
-      url,
-      { headers, params },
-      userInfo,
-    );
+  public async GET<T>(
+    url: string,
+    userInfo: { preferedUsername: string; name: string },
+    params?: Record<string, string>,
+    headers: HeadersInit = {},
+  ) {
+    return this.request<T>("GET", url, { headers, params }, userInfo);
   }
 
   private async request<T>(

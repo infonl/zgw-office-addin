@@ -167,7 +167,9 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.GET("/nonexistent", mockUserInfo)).rejects.toThrow("HTTP error! status: 404");
+      await expect(httpService.GET("/nonexistent", mockUserInfo)).rejects.toThrow(
+        "HTTP error! status: 404",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/nonexistent",
         expect.any(Error),

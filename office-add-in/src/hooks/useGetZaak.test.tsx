@@ -11,8 +11,6 @@ import { type Zaak } from "./useGetZaak";
 import { useGetZaak } from "./useGetZaak";
 import { fromPartial } from "@total-typescript/shoehorn";
 
-
-
 // Mock console methods to avoid noise in tests
 vi.spyOn(console, "debug").mockImplementation(() => {});
 vi.spyOn(console, "log").mockImplementation(() => {});

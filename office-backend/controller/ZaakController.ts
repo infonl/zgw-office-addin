@@ -37,10 +37,7 @@ export class ZaakController {
       const jwt = request.headers["authorization"];
 
       this.zaakService.setUserInfo(jwt);
-      const data = await this.zaakService.addDocumentToZaak(
-        zaakIdentificatie,
-        request.body,
-      );
+      const data = await this.zaakService.addDocumentToZaak(zaakIdentificatie, request.body);
       reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
