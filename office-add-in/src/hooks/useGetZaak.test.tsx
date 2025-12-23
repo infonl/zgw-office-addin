@@ -1,7 +1,3 @@
-// Mock getToken to always resolve
-vi.mock("../utils/getAccessToken", () => ({
-  getToken: vi.fn().mockResolvedValue("dummy-token"),
-}));
 /*
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
@@ -12,15 +8,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type Zaak } from "./useGetZaak";
-// Hoist the mock for useHttp before importing useGetZaak
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-vi.mock("./useHttp", () => ({
-  useHttp: () => ({
-    GET: mockGet,
-    POST: mockPost,
-  }),
-}));
 import { useGetZaak } from "./useGetZaak";
 import { fromPartial } from "@total-typescript/shoehorn";
 
@@ -31,6 +18,19 @@ vi.spyOn(console, "debug").mockImplementation(() => {});
 vi.spyOn(console, "log").mockImplementation(() => {});
 vi.spyOn(console, "warn").mockImplementation(() => {});
 vi.spyOn(console, "error").mockImplementation(() => {});
+
+// Hoist the mock for useHttp before importing useGetZaak
+const mockGet = vi.fn();
+const mockPost = vi.fn();
+vi.mock("./useHttp", () => ({
+  useHttp: () => ({
+    GET: mockGet,
+    POST: mockPost,
+  }),
+}));
+vi.mock("../utils/getAccessToken", () => ({
+  getToken: vi.fn().mockResolvedValue("dummy-token"),
+}));
 
 describe("useGetZaak", () => {
   let queryClient: QueryClient;
