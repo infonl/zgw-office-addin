@@ -14,7 +14,7 @@ import {
   Subtitle1,
   tokens,
 } from "@fluentui/react-components";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import zod from "zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,8 @@ import { Zaak } from "../../hooks/useGetZaak";
 import { useOffice } from "../../hooks/useOffice";
 import { mq } from "./styles/layout";
 import { useCommonStyles } from "./styles/shared";
+import { ShowTokenError } from "./TokenError";
+import { getToken } from "../../utils/getAccessToken";
 
 const useStyles = makeStyles({
   form: {
@@ -65,6 +67,17 @@ export function ZaakSearch() {
   const helperText = isOutlook
     ? "Vul het zaaknummer in waar je bestanden aan wil koppelen."
     : "Vul het zaaknummer in waar je dit document aan wil koppelen.";
+  const [tokenError, setTokenError] = useState(false);
+
+  useEffect(() => {
+    getToken()
+      .then(() => setTokenError(false))
+      .catch((error) => {
+        const errorCode = error?.code;
+        setTokenError(error);
+        console.log("Token error code:", errorCode);
+      });
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(zaakSearchSchema),
@@ -93,7 +106,7 @@ export function ZaakSearch() {
           <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
           <Button
             className={styles.button}
-            disabled={!form.formState.isValid || isLoading}
+            disabled={!form.formState.isValid || isLoading || !!tokenError}
             type="submit"
             appearance={isLoading ? "secondary" : "primary"}
           >
@@ -103,6 +116,7 @@ export function ZaakSearch() {
       </FormProvider>
       <ZaakZoekNotifications />
       {data && <ZaakDetails zaak={data} />}
+      {tokenError && <ShowTokenError error={tokenError} />}
     </>
   );
 }

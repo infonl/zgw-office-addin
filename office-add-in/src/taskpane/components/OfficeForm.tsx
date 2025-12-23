@@ -14,7 +14,7 @@ import {
   ToastTitle,
   tokens,
 } from "@fluentui/react-components";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,8 +31,6 @@ import { useToast } from "../../provider/ToastProvider";
 import { useZaak } from "../../provider/ZaakProvider";
 import { useCommonStyles } from "./styles/shared";
 import { ZaakSearch } from "./ZaakSearch";
-import { ShowTokenError } from "./TokenError";
-import { getToken } from "../../utils/getAccessToken";
 
 const useStyles = makeStyles({
   form: {
@@ -52,23 +50,12 @@ const useStyles = makeStyles({
 export function OfficeForm() {
   const styles = useStyles();
   const common = useCommonStyles();
-  const [tokenError, setTokenError] = useState(false);
 
   const { dispatchToast, dismissToast } = useToast();
   const {
     zaak: { data },
     documentAdded,
   } = useZaak();
-
-  useEffect(() => {
-    getToken()
-      .then(() => setTokenError(false))
-      .catch((error) => {
-        const errorCode = error?.code;
-        setTokenError(error);
-        console.log("Token error code:", errorCode);
-      });
-  }, []);
 
   const { mutateAsync, isPending } = useAddDocumentToZaak({
     onMutate: () => {
@@ -186,13 +173,12 @@ export function OfficeForm() {
               control={form.control}
             />
             <Button
-              disabled={!form.formState.isValid || isPending || !!tokenError}
+              disabled={!form.formState.isValid || isPending}
               appearance="primary"
               type="submit"
             >
               Document koppelen
             </Button>
-            {tokenError && <ShowTokenError error={tokenError} />}
           </form>
         )}
       </FormProvider>

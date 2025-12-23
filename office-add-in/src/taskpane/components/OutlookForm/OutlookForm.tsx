@@ -16,7 +16,6 @@ import { useUploadStatus } from "./hooks/useUploadStatus";
 import { useZaak } from "../../../provider/ZaakProvider";
 import { useOffice } from "../../../hooks/useOffice";
 import { DocumentSchema } from "../../../hooks/types";
-import { ShowTokenError } from "../TokenError";
 
 const useStyles = makeStyles({
   actions: {
@@ -35,7 +34,7 @@ const useStyles = makeStyles({
 export function OutlookForm() {
   const styles = useStyles();
   const [step, setStep] = React.useState<"selectItems" | "metaData">("selectItems");
-  const { form, zaak, hasSelectedDocuments, handleSubmit, tokenError } = useOutlookForm();
+  const { form, zaak, hasSelectedDocuments, handleSubmit } = useOutlookForm();
   const { reset: resetZaak, setZaakToSearch } = useZaak();
   const queryClient = useQueryClient();
 
@@ -86,13 +85,12 @@ export function OutlookForm() {
               <section className={styles.actions}>
                 <Button
                   appearance="primary"
-                  disabled={!hasSelectedDocuments || !!tokenError}
+                  disabled={!hasSelectedDocuments}
                   onClick={() => setStep("metaData")}
                 >
                   Volgende stap: bestandsgegevens
                 </Button>
               </section>
-              {tokenError && <ShowTokenError error={tokenError} />}
             </>
           )}
           {step === "metaData" && (
