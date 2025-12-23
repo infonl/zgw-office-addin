@@ -13,7 +13,7 @@ import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
-import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
+import { exchangeBootstrapTokenForGraphToken } from "../service/OboService";
 import { TokenService } from "../service/TokenService";
 
 let fastify: FastifyInstance;
