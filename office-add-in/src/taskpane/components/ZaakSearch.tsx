@@ -95,6 +95,10 @@ export function ZaakSearch() {
     setZaakToSearch(data.zaaknummer);
   };
 
+  if (tokenError) {
+    return <ShowTokenError error={tokenError} />;
+  }
+
   return (
     <>
       <section className={common.title}>
@@ -106,7 +110,7 @@ export function ZaakSearch() {
           <Input className={styles.input} name="zaaknummer" label="Zaaknummer" />
           <Button
             className={styles.button}
-            disabled={!form.formState.isValid || isLoading || !!tokenError}
+            disabled={!form.formState.isValid || isLoading}
             type="submit"
             appearance={isLoading ? "secondary" : "primary"}
           >
@@ -116,7 +120,6 @@ export function ZaakSearch() {
       </FormProvider>
       <ZaakZoekNotifications />
       {data && <ZaakDetails zaak={data} />}
-      {tokenError && <ShowTokenError error={tokenError} />}
     </>
   );
 }
