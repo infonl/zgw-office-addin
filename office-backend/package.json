@@ -39,7 +39,7 @@
     "@types/node": "22.19.3",
     "@types/send": "1.2.1",
     "@types/serve-static": "2.2.0",
-    "eslint": "9.39.1",
+    "eslint": "9.39.2",
     "neostandard": "0.12.2",
     "prettier": "3.7.4",
     "ts-node": "10.9.2",
