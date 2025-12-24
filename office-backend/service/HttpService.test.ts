@@ -24,6 +24,11 @@ vi.mock("./LoggerService", () => ({
   },
 }));
 
+const mockUserInfo = {
+  preferedUsername: "test-user",
+  name: "Test User",
+};
+
 describe("HttpService", () => {
   let httpService: HttpService;
 
@@ -49,7 +54,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      const result = await httpService.GET("/test");
+      const result = await httpService.GET("/test", mockUserInfo);
 
       expect(result).toEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/test"), {
@@ -73,7 +78,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/search", { q: "test", limit: "10" });
+      await httpService.GET("/search", mockUserInfo, { q: "test", limit: "10" });
 
       const expectedUrl = new URL("https://api.test.com/search");
       expectedUrl.search = "q=test&limit=10";
@@ -95,7 +100,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", undefined, { "X-Custom": "value" });
+      await httpService.GET("/test", mockUserInfo, undefined, { "X-Custom": "value" });
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/test"), {
         method: "GET",
@@ -118,7 +123,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", { id: "123" }, { "X-Custom": "value" });
+      await httpService.GET("/test", mockUserInfo, { id: "123" }, { "X-Custom": "value" });
 
       const expectedUrl = new URL("https://api.test.com/test");
       expectedUrl.search = "id=123";
@@ -144,7 +149,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("https://external-api.com/data");
+      await httpService.GET("https://external-api.com/data", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://external-api.com/data",
@@ -162,7 +167,9 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.GET("/nonexistent")).rejects.toThrow("HTTP error! status: 404");
+      await expect(httpService.GET("/nonexistent", mockUserInfo)).rejects.toThrow(
+        "HTTP error! status: 404",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/nonexistent",
         expect.any(Error),
@@ -173,7 +180,7 @@ describe("HttpService", () => {
       const networkError = new Error("Network error");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.GET("/test")).rejects.toThrow("Network error");
+      await expect(httpService.GET("/test", mockUserInfo)).rejects.toThrow("Network error");
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/test",
         networkError,
@@ -192,7 +199,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ name: "Test" });
-      const result = await httpService.POST("/create", requestBody);
+      const result = await httpService.POST("/create", requestBody, mockUserInfo);
 
       expect(result).toEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/create"), {
@@ -218,7 +225,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ data: "test" });
-      await httpService.POST("/submit", requestBody, { "X-API-Key": "secret" });
+      await httpService.POST("/submit", requestBody, mockUserInfo, { "X-API-Key": "secret" });
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/submit"), {
         method: "POST",
@@ -245,7 +252,7 @@ describe("HttpService", () => {
       const formData = new FormData();
       formData.append("file", "test-content");
 
-      await httpService.POST("/upload", formData);
+      await httpService.POST("/upload", formData, mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/upload"), {
         method: "POST",
@@ -268,7 +275,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("https://external-api.com/submit", "{}");
+      await httpService.POST("https://external-api.com/submit", "{}", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://external-api.com/submit",
@@ -287,7 +294,9 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.POST("/create", "{}")).rejects.toThrow("HTTP error! status: 400");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+        "HTTP error! status: 400",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         expect.any(Error),
@@ -298,7 +307,9 @@ describe("HttpService", () => {
       const networkError = new Error("Connection refused");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.POST("/create", "{}")).rejects.toThrow("Connection refused");
+      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+        "Connection refused",
+      );
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [POST] [ERROR] https://api.test.com/create",
         networkError,
@@ -315,15 +326,15 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test");
+      await httpService.GET("/test", mockUserInfo);
 
       expect(jwt.sign).toHaveBeenCalledWith(
         {
           iss: "office-add-in",
           iat: expect.any(Number),
           client_id: "office-add-in",
-          user_id: "office-add-in",
-          user_representation: "office-add-in",
+          user_id: mockUserInfo.preferedUsername,
+          user_representation: mockUserInfo.name,
         },
         "test-secret",
         {
@@ -340,7 +351,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test");
+      await httpService.GET("/test", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(Object),
@@ -360,8 +371,8 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValue(mockResponse);
 
-      await httpService.GET("/test1");
-      await httpService.GET("/test2");
+      await httpService.GET("/test1", mockUserInfo);
+      await httpService.GET("/test2", mockUserInfo);
 
       expect(jwt.sign).toHaveBeenCalledTimes(2);
     });
@@ -376,7 +387,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", { param: "value" });
+      await httpService.GET("/test", mockUserInfo, { param: "value" });
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         1,
@@ -393,7 +404,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("/create", "{}");
+      await httpService.POST("/create", "{}", mockUserInfo);
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         2,
@@ -411,7 +422,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test");
+      await httpService.GET("/test", mockUserInfo);
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         3,
@@ -424,7 +435,7 @@ describe("HttpService", () => {
       const error = new Error("Test error");
       mockFetch.mockRejectedValueOnce(error);
 
-      await expect(httpService.GET("/test")).rejects.toThrow("Test error");
+      await expect(httpService.GET("/test", mockUserInfo)).rejects.toThrow("Test error");
 
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/test",
@@ -442,7 +453,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/api/test");
+      await httpService.GET("/api/test", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://api.test.com/api/test"),
@@ -458,7 +469,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("http://external.com/api");
+      await httpService.GET("http://external.com/api", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith("http://external.com/api", expect.any(Object));
     });
@@ -471,7 +482,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("https://external.com/api");
+      await httpService.GET("https://external.com/api", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith("https://external.com/api", expect.any(Object));
     });
@@ -484,7 +495,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("api/test");
+      await httpService.GET("api/test", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://api.test.com/api/test"),
@@ -502,7 +513,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test");
+      await httpService.GET("/test", mockUserInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(Object),
@@ -525,7 +536,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", undefined, {
+      await httpService.GET("/test", mockUserInfo, undefined, {
         "X-Custom": "value",
         "Content-Type": "application/xml", // Should override default
       });

@@ -14,6 +14,7 @@ import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
 import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
+import { TokenService } from "../service/TokenService";
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
@@ -67,7 +68,8 @@ fastify.addHook("onRequest", (request, reply, done) => {
 fastify.addHook("onRequest", onRequestLoggerHook);
 
 const httpService = new HttpService();
-const zaakService = new ZaakService(httpService);
+const tokenService = new TokenService();
+const zaakService = new ZaakService(httpService, tokenService);
 const zaakController = new ZaakController(zaakService);
 
 // Health check endpoint for Kubernetes probes

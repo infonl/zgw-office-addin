@@ -50,6 +50,19 @@ export class GraphServiceClient {
     }
   }
 
+  async getUserInfo(oid: string): Promise<GraphMessage> {
+    const endpoint = `/users/${encodeURIComponent(oid)}`;
+    this.logger.DEBUG("getUserInfo:", { oid, endpoint });
+    try {
+      const result = await this.client.api(endpoint).get();
+      this.logger.DEBUG("getUserInfo result:", result);
+      return result;
+    } catch (error) {
+      this.logger.ERROR("getUserInfo error:", error);
+      throw error;
+    }
+  }
+
   async getAttachmentContent(
     graphMessageId: string,
     graphAttachmentId: string

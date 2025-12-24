@@ -11,11 +11,12 @@ import { errorMessages, defaultError } from "../../tokenErrors";
 
 const useStyles = makeStyles({
   container: {
-    marginTop: tokens.spacingVerticalM,
     padding: tokens.spacingVerticalM,
+    paddingTop: tokens.spacingVerticalM,
     backgroundColor: tokens.colorPaletteRedBackground1,
     borderRadius: tokens.borderRadiusMedium,
     border: `1px solid ${tokens.colorPaletteRedBorder1}`,
+    marginBottom: tokens.spacingVerticalL,
   },
   content: {
     display: "flex",

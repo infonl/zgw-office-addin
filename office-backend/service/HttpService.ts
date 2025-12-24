@@ -10,12 +10,25 @@ import { envServerSchema } from "../src/envSchema";
 export class HttpService {
   private readonly baseUrl = envServerSchema.API_BASE_URL;
 
-  public async POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
-    return this.request<T>("POST", url, { body, headers });
+  public async POST<T>(
+    url: string,
+    body: BodyInit,
+    userInfo: { preferedUsername: string; name: string },
+    headers: HeadersInit = {},
+  ) {
+    if (userInfo === undefined) {
+      throw new Error("User info is required to add document to zaak");
+    }
+    return this.request<T>("POST", url, { body, headers }, userInfo);
   }
 
-  public async GET<T>(url: string, params?: Record<string, string>, headers: HeadersInit = {}) {
-    return this.request<T>("GET", url, { headers, params });
+  public async GET<T>(
+    url: string,
+    userInfo: { preferedUsername: string; name: string },
+    params?: Record<string, string>,
+    headers: HeadersInit = {},
+  ) {
+    return this.request<T>("GET", url, { headers, params }, userInfo);
   }
 
   private async request<T>(
@@ -26,6 +39,7 @@ export class HttpService {
       headers: HeadersInit;
       params?: Record<string, string>;
     } = { headers: {} },
+    userInfo: { preferedUsername: string; name: string },
   ): Promise<T> {
     const fullUrl = /^https?:\/\//i.test(url) ? url : new URL(url, this.baseUrl);
     if (options.params) {
@@ -41,7 +55,7 @@ export class HttpService {
           "Content-Type": "application/json",
           "Accept-Crs": "EPSG:4326",
           "Content-Crs": "EPSG:4326",
-          Authorization: `Bearer ${this.generateJwtToken()}`,
+          Authorization: `Bearer ${this.generateJwtToken(userInfo)}`,
           ...options.headers,
         },
       };
@@ -71,19 +85,17 @@ export class HttpService {
     }
   }
 
-  private readonly generateJwtToken = () => {
+  private readonly generateJwtToken = (userInfo: { preferedUsername: string; name: string }) => {
     return jwt.sign(
       {
         iss: "office-add-in",
         iat: Math.floor(Date.now() / 1000),
         client_id: "office-add-in",
-        user_id: "office-add-in",
-        user_representation: "office-add-in",
+        user_id: userInfo.preferedUsername,
+        user_representation: userInfo.name,
       },
       envServerSchema.JWT_SECRET,
-      {
-        algorithm: "HS256",
-      },
+      { algorithm: "HS256" },
     );
   };
 }

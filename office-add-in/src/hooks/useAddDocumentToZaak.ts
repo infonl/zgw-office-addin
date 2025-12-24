@@ -10,6 +10,7 @@ import { useOffice } from "./useOffice";
 import { useHttp } from "./useHttp";
 import { ZrcType } from "../../../generated/zrc-generated-types";
 import { useLogger } from "./useLogger";
+import { getToken } from "../utils/getAccessToken";
 
 type SuccessData = ZrcType<"ZaakInformatieObject">;
 
@@ -47,6 +48,11 @@ export function useAddDocumentToZaak(
         }
       }
 
+      const token = await getToken();
+      const authorizattionHeader = {
+        Authorization: `Bearer ${token}`,
+      };
+
       return POST<SuccessData>(
         `/zaken/${data.zaakidentificatie}/documenten`,
         JSON.stringify(
@@ -57,7 +63,8 @@ export function useAddDocumentToZaak(
                 inhoud: await getDocumentData(),
                 titel: await getFileName(),
               }
-        )
+        ),
+        authorizattionHeader
       );
     },
     ...options,
