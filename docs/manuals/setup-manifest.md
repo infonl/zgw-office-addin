@@ -29,15 +29,33 @@ Inside the `<WebApplicationInfo>` place the following values
 
 Replace the `CLIENT_ID` and `APP_URI_ID` with the correct values from Azure
 
-## Loading the add-in into Office
+## Loading add-ins
 
+### Office Add-ins
 To load the add-in into office select Add-ins
 
 ![Add-Ins](./images/setup-manifest/add-ins.png)
 
 From here select **Advanced → Upload My Add-In → Browse** to your saved manifest and upload it:
 
-- For Word: upload `manifest-office.xml`
-- For Outlook: upload `manifest-outlook.xml`
+- For Word & Excel: upload `manifest-office.xml`
 
 The add-ins are now available for use. Follow the [user manual](./user-manual.md) for detailed instructions.
+
+### Outlook Add-in
+To load the add-in into outlook visit the following page
+
+1. Go to [https://aka.ms/olksideload](https://aka.ms/olksideload).
+2. Select **My Add-ins** (called **Mijn invoegtoepassingen** in the Dutch Outlook interface).  
+3. Click the **+ Add** button and select the `manifest-outlook.xml` file.
+    ![add-add-in-outlook](./images/setup-manifest/outlook-loader.png)
+4. Install the manifest and reload the page (CTRL+R).
+5. Select the email which you want to link to the case.
+6. Click on **Apps**.
+
+    ![apps](./images/setup-manifest/outlook-apps.png)
+7. Select the add-in.
+
+The add-in is now available for use. Follow the [user manual](./user-manual.md) for detailed instructions.
+
+
