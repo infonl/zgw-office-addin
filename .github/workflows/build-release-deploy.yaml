@@ -35,7 +35,6 @@ jobs:
       - name: Use selected version bump
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          
           echo "Version will be bumped to next ${{ github.event.inputs.version_bump || 'patch' }} number."
 
       - name: Manual version bump only allowed on main branch
