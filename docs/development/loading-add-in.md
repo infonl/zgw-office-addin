@@ -128,7 +128,7 @@ If you are using “New Outlook”, the process may be under **Apps > Add Apps**
 
 ### Outlook on the Web (OWA)
 
-1. Go to [Outlook Client Store](https://outlook.office365.com/mail/inclientstore)
+1. Go to the Outlook Client Store in your browser (for most tenants this is [https://outlook.office.com/mail/inclientstore](https://outlook.office.com/mail/inclientstore); for some regional tenants the domain, such as `outlook.office365.com`, may differ)
 2. Click **My add-ins/Mijn invoegtoepassingen**
 3. Add a custom add-in
 4. Select the **manifest-outlook.xml** and install it
