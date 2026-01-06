@@ -158,6 +158,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRERELEASE: false
+          FORCE_WITHOUT_CHANGES: true # Always build of a new version, even if there have been no code changes
           DEFAULT_BUMP: ${{ needs.validate-input.outputs.version-bump }}
           WITH_V: true
           RELEASE_BRANCHES: main
@@ -169,6 +170,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRERELEASE: false
+          FORCE_WITHOUT_CHANGES: false
           DEFAULT_BUMP: patch
           WITH_V: true
           RELEASE_BRANCHES: main
