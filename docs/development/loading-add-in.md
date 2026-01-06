@@ -37,11 +37,13 @@ npm run dev
 
 ---
 
-## 3. Use office-addin-debugging
+## 3. Loading the Office Add-in in desktop
+
+### Use office-addin-debugging
 
 💡 **Start & Stop Commands**
 
-These commands sideload your add-in into Office (desktop or web):
+These commands sideload your add-in into Office desktop. CAUTION! This is not used for Outlook. Only for Word, Excel and etc.
 
 ```bash
 # Start sideloading & hosting
@@ -53,53 +55,9 @@ npx office-addin-debugging stop ./office-add-in/manifest-office.xml desktop
 
 `desktop` tells the tool to sideload into the Office desktop application.
 
-You can specify a host app by adding `--app <app>` (e.g., `--app excel`, `--app word`, `--app outlook`) if you want to target one specific Office host.  
-If you don’t specify an app, the tool will open the host(s) defined in the manifest.
+The tool will open the host(s) defined in the manifest and you will be able to select from these hosts.
 
 **Always run the stop command when you are done to unregister the add-in and stop the server** — closing terminals or Office alone doesn’t clean up registration.
-
----
-
-## 4. Desktop Office Sideload (Mac & Windows)
-
-Below are the ways to load your add-in manifest locally in desktop Office if the CLI doesn’t automatically open it or you want to test manually.
-
-### 📍 On Mac (Office Desktop)
-
-#### Word/Excel/PowerPoint
-
-You can sideload an add-in by copying the manifest into the application’s WEF folder:
-
-1. Open Finder
-2. Go to:
-	- `~/Library/Containers/com.microsoft.Word/Data/Documents/wef`
-	- `~/Library/Containers/com.microsoft.Excel/Data/Documents/wef`
-	- `~/Library/Containers/com.microsoft.Powerpoint/Data/Documents/wef`
-3. Copy your `manifest-office.xml` into the appropriate folder
-4. Restart the Office app
-5. In the application UI:  
-	**Insert > Add-ins > My Add-ins** and open your add-in from the list.
-
-If the `wef` folder doesn’t exist, create it manually.
-
----
-
-### 📍 On Windows (Office Desktop)
-
-On Windows, there isn’t a simple WEF folder method. Instead:
-
-**Using Shared Folder (Trusted Catalog)**
-
-1. Create a local folder (e.g., `C:\OfficeAddInManifests`)
-2. Place your manifest(s) there
-3. In an Office app (Word, Excel, PowerPoint):
-	- **Insert > My Add-ins > Shared Folder > Add a shared folder**
-	- Select your folder with the manifest
-	- Load the add-in from the list
-
-This method uses a trusted catalog that Office reads for sideloaded add-ins.
-
-📌 For some Office versions, you may need to configure registry keys for Trusted Catalogs. Windows sideloading of manifest files isn’t as automatic as on Mac and relies on shared catalogs or using the office-addin-debugging tool. [See Microsoft Docs](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/create-a-network-shared-folder-catalog-for-task-pane-and-content-add-ins)
 
 ---
 
@@ -143,18 +101,3 @@ If you are using “New Outlook”, the process may be under **Apps > Add Apps**
 - For Outlook add-ins on Mac, auto-sideloading via the CLI may not reliably register — manual manifest install is recommended.
 
 ---
-
-## Summary of Commands
-
-```bash
-# Build and serve
-npm install
-npm run build
-npm run dev
-
-# Sideload via CLI
-npx office-addin-debugging start ./office-add-in/manifest-office.xml desktop
-npx office-addin-debugging stop ./office-add-in/manifest-office.xml desktop
-```
-
-Use these commands whenever you want to load/unload your add-in for testing or debugging.
