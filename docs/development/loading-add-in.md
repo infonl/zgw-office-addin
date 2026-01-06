@@ -150,7 +150,7 @@ If you are using “New Outlook”, the process may be under **Apps > Add Apps**
 # Build and serve
 npm install
 npm run build
-npm start
+npm run dev
 
 # Sideload via CLI
 npx office-addin-debugging start ./office-add-in/manifest-office.xml desktop
