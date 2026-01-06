@@ -158,12 +158,3 @@ npx office-addin-debugging stop ./office-add-in/manifest-office.xml desktop
 ```
 
 Use these commands whenever you want to load/unload your add-in for testing or debugging.
-
----
-
-## Links & References
-
-- [Microsoft: Sideload Office Add-ins on Mac](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-on-mac)
-- [Microsoft: Sideload Outlook Add-ins for testing](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/sideload-outlook-add-ins-for-testing)
-- [Microsoft: office-addin-debugging CLI](https://www.npmjs.com/package/office-addin-debugging)
-
