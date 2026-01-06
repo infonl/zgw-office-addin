@@ -1,5 +1,5 @@
 
-# Loading the ZGW Office Add-In Locally  
+# Loading the Office Add-In Locally  
 *For Developers — Mac & Windows (Desktop and Web/Outlook)*
 
 This document explains how to load and test your Office Add-In locally using the **office-addin-debugging tool** and manual sideloading where needed.
