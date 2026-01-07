@@ -11,10 +11,11 @@ This document explains how to load and test your Office Add-In locally using the
 Before loading your add-in:
 
 - **Node.js** (LTS recommended)  
-- **npm** or **yarn**  
-- Office desktop apps installed (Word, Excel, PowerPoint, Outlook)  
+- **npm** or **use nvm**
+- Valid office account. Must be logged in online
+- Optional: Office desktop apps installed (Word, Excel, PowerPoint, Outlook)
 - Your add-in manifest(s) e.g., `manifest-office.xml`, `manifest-outlook.xml`  
-- Optional: **Office Add-in CLI** (`office-addin-debugging`) installed globally or run via `npx`
+- **Office Add-in CLI** (`office-addin-debugging`) installed globally or run via `npx`
 
 ---
 
@@ -31,9 +32,17 @@ npm run build
 
 To host your add-in files locally during development:
 
+Start de development servers of the frontend and backend
 ```bash
 npm run dev
 ```
+
+Start the docker containers
+```bash
+docker-compose up
+```
+
+This will start all necessary containers as defined in the `docker-compose.yml` file. Leave this running while developing and testing the add-in.
 
 ---
 
