@@ -83,3 +83,20 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.backend.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- range . }}
+        - maxSkew: {{ .maxSkew }}
+          topologyKey: {{ .topologyKey }}
+          whenUnsatisfiable: {{ .whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              {{- range $key, $value := .labelSelector.matchLabels }}
+              {{- if eq $value "RELEASE-NAME" }}
+              {{ $key }}: {{ $.Release.Name }}
+              {{- else }}
+              {{ $key }}: {{ $value }}
+              {{- end }}
+              {{- end }}
+        {{- end }}
+      {{- end }}
