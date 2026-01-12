@@ -45,7 +45,8 @@ frontend:
   affinity: {}
   # -- Tolerations for the frontend deployment
   tolerations: []
-  # -- Topology spread constraints for the frontend deployment
+  # -- Topology spread constraints for the frontend deployment.
+  # app.kubernetes.io/instance will be dynamically set to the Helm release name at deployment time.
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
@@ -111,6 +112,7 @@ backend:
   # -- Tolerations for the backend deployment
   tolerations: []
   # -- Topology spread constraints for the backend deployment
+  # app.kubernetes.io/instance will be dynamically set to the Helm release name at deployment time.
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
