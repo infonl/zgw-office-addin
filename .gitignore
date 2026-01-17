@@ -42,5 +42,6 @@ dist/
 **/dist/
 
 ### Testing ###
+**/build/
 coverage/
 **/coverage/
