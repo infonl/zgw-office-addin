@@ -1,3 +1,13 @@
+common:
+  # -- Application environment, e.g. production, development, staging
+  appEnv: "production"
+  # -- The frontend public URL where the manifest files and static js file are served
+  frontendUrl: "http://localhost:3000"
+  # -- MS Azure Tenant ID of the Organization
+  msalTenantId: ""
+  # -- MS Azure Client ID assigned to the Office Add-in application
+  msalClientId: ""
+
 frontend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-frontend
@@ -6,14 +16,11 @@ frontend:
   service:
     type: ClusterIP
     port: 80
-  # -- The frontend public URL where the manifest files and static js file are served
-  frontendUrl: "http://localhost:3000"
   # -- If enabled nginx will also listen on port 443. You will need to volume map a key
   # and certificate valid for your frontendUrl
   enableHttps: false
   # -- Maximum content body size (e.g. for attachments)
   maxBodySize: 80M
-  appEnv: "production"
   # -- Resource limits and requests for the frontend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious
@@ -66,21 +73,11 @@ backend:
   service:
     type: ClusterIP
     port: 3003
-  # -- Secret key used for generating and validating JWT tokens for secure communication
-  jwtSecret: "SECRET_KEY_PLACEHOLDER"
-  # -- Base URL to the openzaak API
-  apiBaseUrl: "http://localhost:8020"
-  # -- Client ID for MSAL authentication towards Azure AD
-  msalClientId: "MSAL_CLIENT_ID_PLACEHOLDER"
-  # -- Authority URL for MSAL authentication towards Azure AD
-  msalAuthorityUrl: "https://login.microsoftonline.com/"
-  # -- Scope for MSAL authentication towards Azure AD
-  msalScope: "https://graph.microsoft.com/.default"
-  # -- Redirect URI for MSAL authentication towards Azure AD
-  msalRedirectUri: "http://localhost:3003/auth/callback"
+  # -- ZGW API configuration for integration with the ZGW APIs provider (OpenZaak)
+  zgwApis:
+    url: "http://localhost:8020"
+    secret: ""
   # -- Client secret for MSAL authentication towards Azure AD
-  msalSecret: "MSAL_CLIENT_SECRET_PLACEHOLDER"
-  # -- Resource limits and requests for the backend container
   resources: {}
     # We usually recommend not specifying default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little

@@ -44,5 +44,6 @@ generated/drc-types.ts
 WARP.md
 
 ### Testing ###
+**/build/
 coverage/
 **/coverage/
