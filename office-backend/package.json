@@ -27,7 +27,6 @@
   "license": "EUPL-1.2+",
   "description": "",
   "dependencies": {
-    "@fastify/otel": "0.16.0",
     "dotenv": "17.2.3",
     "fastify": "5.6.2",
     "jsonwebtoken": "9.0.3"
