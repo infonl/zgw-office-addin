@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-FileCopyrightText: 2024 Lifely
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import jwt from "jsonwebtoken";
 import { HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
-import { mockFetch } from "../test/setup";
+import { mockFetch } from "../../test/setup";
 
 // Mock dependencies
 vi.mock("jsonwebtoken", () => ({
@@ -25,7 +25,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 
@@ -333,7 +333,7 @@ describe("HttpService", () => {
           iss: "office-add-in",
           iat: expect.any(Number),
           client_id: "office-add-in",
-          user_id: mockUserInfo.preferedUsername,
+          user_id: mockUserInfo.preferredUsername,
           user_representation: mockUserInfo.name,
         },
         "test-secret",

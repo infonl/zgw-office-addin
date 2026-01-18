@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-FileCopyrightText: 2024 Lifely
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
@@ -22,7 +22,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 

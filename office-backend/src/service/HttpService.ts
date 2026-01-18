@@ -1,11 +1,11 @@
 /*
- * SPDX-FileCopyrightText: 2025 INFO.nl
+ * SPDX-FileCopyrightText: 2024 Lifely
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
 import jwt from "jsonwebtoken";
 import { LoggerService } from "./LoggerService";
-import { envServerSchema } from "../src/envSchema";
+import { envServerSchema } from "../envSchema";
 
 export class HttpService {
   private readonly baseUrl = envServerSchema.API_BASE_URL;
@@ -13,7 +13,7 @@ export class HttpService {
   public async POST<T>(
     url: string,
     body: BodyInit,
-    userInfo: { preferedUsername: string; name: string },
+    userInfo: { preferredUsername: string; name: string },
     headers: HeadersInit = {},
   ) {
     if (userInfo === undefined) {
@@ -24,7 +24,7 @@ export class HttpService {
 
   public async GET<T>(
     url: string,
-    userInfo: { preferedUsername: string; name: string },
+    userInfo: { preferredUsername: string; name: string },
     params?: Record<string, string>,
     headers: HeadersInit = {},
   ) {
@@ -39,7 +39,7 @@ export class HttpService {
       headers: HeadersInit;
       params?: Record<string, string>;
     } = { headers: {} },
-    userInfo: { preferedUsername: string; name: string },
+    userInfo: { preferredUsername: string; name: string },
   ): Promise<T> {
     const fullUrl = /^https?:\/\//i.test(url) ? url : new URL(url, this.baseUrl);
     if (options.params) {
@@ -85,13 +85,13 @@ export class HttpService {
     }
   }
 
-  private readonly generateJwtToken = (userInfo: { preferedUsername: string; name: string }) => {
+  private readonly generateJwtToken = (userInfo: { preferredUsername: string; name: string }) => {
     return jwt.sign(
       {
         iss: "office-add-in",
         iat: Math.floor(Date.now() / 1000),
         client_id: "office-add-in",
-        user_id: userInfo.preferedUsername,
+        user_id: userInfo.preferredUsername,
         user_representation: userInfo.name,
       },
       envServerSchema.JWT_SECRET,

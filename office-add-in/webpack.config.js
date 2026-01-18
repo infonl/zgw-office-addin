@@ -31,8 +31,10 @@ async function getHttpsOptions() {
 }
 
 module.exports = async (env, options) => {
+  const isProduction = options.mode === 'production';
+  
   const config = {
-    devtool: "source-map",
+    devtool: isProduction ? false : "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
       react: ["react", "react-dom"],
@@ -50,6 +52,25 @@ module.exports = async (env, options) => {
     },
     resolve: {
       extensions: [".ts", ".tsx", ".html", ".js"],
+    },
+    optimization: {
+      minimize: isProduction,
+      usedExports: true,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: 10,
+          },
+          fluentui: {
+            test: /[\\/]node_modules[\\/]@fluentui[\\/]/,
+            name: 'fluentui',
+            priority: 20,
+          },
+        },
+      },
     },
     module: {
       rules: [
@@ -114,7 +135,13 @@ module.exports = async (env, options) => {
             from: "manifest*.xml",
             to: "[name]" + "[ext]",
             transform(content) {
-              return content;
+              // Replace the version with the package.json version during build
+              const packageJson = require("./package.json");
+              const version = packageJson.version || "1.0.0";
+              return content.toString().replace(
+                /<Version>.*?<\/Version>/,
+                `<Version>${version}</Version>`
+              );
             },
           },
         ],
