@@ -1,0 +1,22 @@
+# Test values file for validating Helm chart in kind
+# DO NOT commit real secrets to version control
+
+common:
+  appEnv: "production"
+  frontendUrl: "https://localhost:30443"
+  msalTenantId: "00000000-0000-0000-0000-000000000001"
+  msalClientId: "00000000-0000-0000-0000-000000000000"
+
+frontend:
+  image:
+    tag: "dev"
+    pullPolicy: "IfNotPresent"
+
+backend:
+  image:
+    tag: "dev"
+    pullPolicy: "IfNotPresent"
+  zgwApis:
+    url: "http://localhost:8020"
+    secret: "test-zgw-secret"
+  msalSecret: "test-msal-secret"
