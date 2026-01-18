@@ -13,7 +13,7 @@ esbuild
     bundle: true,
     platform: "node",
     target: "node22",
-    format: "esm",
+    format: "cjs",
     outfile: "dist/app.js",
     external: [],
     sourcemap: !isProd,
