@@ -1,15 +1,24 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
+
+# Local development setup
+# Requires .env file with MSAL configuration - see .env.example
+
 services:
   frontend:
     image: ghcr.io/infonl/zgw-office-add-in-frontend:dev
     ports:
       - "3000:443"
     environment:
+      - APP_ENV=local
       - FRONTEND_URL=https://localhost:3000
       - BACKEND_URL=https://localhost:3003
       - MAX_BODY_SIZE=20M
       - ENABLE_HTTPS=true
+      - MSAL_CLIENT_ID=${MSAL_CLIENT_ID}
+      - MSAL_AUTHORITY=${MSAL_AUTHORITY}
+      - MSAL_REDIRECT_URI=https://localhost:3000
+      - MSAL_SCOPES=${MSAL_SCOPES}
     volumes:
       - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
     healthcheck:
@@ -26,6 +35,14 @@ services:
     image: ghcr.io/infonl/zgw-office-add-in-backend:dev
     ports:
       - "3003:3003"
+    environment:
+      - APP_ENV=local
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
+      - API_BASE_URL=http://openzaak.local:8000
+      - FRONTEND_URL=https://localhost:3000
+      - MSAL_CLIENT_ID=${MSAL_CLIENT_ID}
+      - MSAL_AUTHORITY=${MSAL_AUTHORITY}
+      - MSAL_SECRET=${MSAL_SECRET}
     healthcheck:
       test: ["CMD-SHELL", "wget -O- -q http://127.0.0.1:3003/health || exit 1"]
       interval: 10s
