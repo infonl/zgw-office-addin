@@ -4,17 +4,17 @@
  */
 
 import path from "path";
-import { ZaakController } from "../controller/ZaakController";
-import { ZaakParam } from "../dto/ZaakParam";
+import { ZaakController } from "./controller/ZaakController";
+import { ZaakParam } from "./dto/ZaakParam";
 import Fastify, { FastifyInstance } from "fastify";
-import { ZaakService } from "../service/ZaakService";
-import { HttpService } from "../service/HttpService";
-import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
-import { LoggerService } from "../service/LoggerService";
+import { ZaakService } from "./service/ZaakService";
+import { HttpService } from "./service/HttpService";
+import { onRequestLoggerHook } from "./hooks/onRequestLoggerHook";
+import { LoggerService } from "./service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
-import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
-import { TokenService } from "../service/TokenService";
+import { exchangeBootstrapTokenForGraphToken } from "./service/oboService";
+import { TokenService } from "./service/TokenService";
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
