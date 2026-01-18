@@ -12,7 +12,7 @@ permissions:
   contents: write
   checks: write
 
-# Only allow a single concurrent run per branch. Cancel in-progress runs on multiple pushes when not on main branch.  
+# Only allow a single concurrent run per branch. Cancel in-progress runs on multiple pushes when not on main branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !contains(github.ref, 'main')}}
@@ -20,9 +20,9 @@ concurrency:
 jobs:
   helm-lint:
     runs-on: ubuntu-24.04
-    outputs: 
+    outputs:
       changed: ${{ steps.list-changed.outputs.changed }}
-      needsbump: ${{ steps.testbump.outputs.needsbump }} 
+      needsbump: ${{ steps.testbump.outputs.needsbump }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -83,6 +83,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate types
+        run: npm run types
+
       - name: Build project
         run: npm run build
 
@@ -93,7 +96,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           file: ./office-add-in/Dockerfile
-          context: .
+          context: office-add-in
           push: false
           load: true
           tags: ghcr.io/infonl/zgw-office-add-in-frontend:test
@@ -102,7 +105,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           file: ./office-backend/Dockerfile
-          context: .
+          context: office-backend
           push: false
           load: true
           tags: ghcr.io/infonl/zgw-office-add-in-backend:test

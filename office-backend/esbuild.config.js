@@ -19,8 +19,5 @@ esbuild
     sourcemap: !isProd,
     minify: isProd,
     treeShaking: true,
-    banner: {
-      js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
-    },
   })
   .catch(() => process.exit(1));

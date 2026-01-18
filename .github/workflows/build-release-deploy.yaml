@@ -167,15 +167,6 @@ jobs:
               body: comment
             });
 
-      - name: Commit version updates
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json office-add-in/package.json office-backend/package.json
-          git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }}"
-          git push
-
       - name: Build project
         run: npm run build
 
@@ -276,6 +267,19 @@ jobs:
           attests: |
             type=provenance,mode=max
             type=sbom
+
+  commit-version-update:
+    needs: [next-version, create-release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Commit version updates
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json office-add-in/package.json office-backend/package.json
+          git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }}"
+          git push
 
   trigger-provision:
     needs: [next-version, create-docker-image]

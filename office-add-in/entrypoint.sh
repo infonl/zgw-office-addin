@@ -35,6 +35,12 @@ TO_REPLACE_URL="localhost:3000"
 # MSAL client ID have be set via environment variables.
 MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
 
+# Validate that MSAL_CLIENT_ID is properly configured and not using the placeholder.
+if [ -z "$MSAL_CLIENT_ID" ] || [ "$MSAL_CLIENT_ID" = "your-client-id" ]; then
+  echo "Error: MSAL_CLIENT_ID environment variable must be set to a valid Azure AD application (client) ID." >&2
+  exit 1
+fi
+
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
 FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
 FRONTEND_API="$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')/${MSAL_CLIENT_ID}"
