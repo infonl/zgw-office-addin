@@ -37,7 +37,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
-| backend.resources | object | `{}` | Client secret for MSAL authentication towards Azure AD |
+| backend.resources | object | `{}` |  |
 | backend.securityContext | object | `{}` | Security context for the backend container |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
