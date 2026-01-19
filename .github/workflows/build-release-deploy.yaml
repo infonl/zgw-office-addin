@@ -269,6 +269,9 @@ jobs:
             type=sbom
 
   commit-version-update:
+# Only commit version update if we are on main branch, only there we have the correct version to set
+# This also catches the manual version bump via workflow_dispatch on main branch
+# The commit message contains [skip actions] to avoid retriggering the workflow!
     needs: [next-version, create-release]
     runs-on: ubuntu-24.04
     steps:
@@ -278,8 +281,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json office-add-in/package.json office-backend/package.json
-          git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }}"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }} [skip actions]"
+            git push
+          else
+            echo "No version change to commit."
+          fi
 
   trigger-provision:
     needs: [next-version, create-docker-image]
