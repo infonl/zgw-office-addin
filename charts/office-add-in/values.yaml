@@ -73,6 +73,8 @@ backend:
   service:
     type: ClusterIP
     port: 3003
+  # -- Client secret for MSAL authentication towards Azure AD
+  msalSecret: ""
   # -- ZGW API configuration for integration with the ZGW APIs provider (OpenZaak)
   zgwApis:
     url: "http://localhost:8020"

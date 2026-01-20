@@ -37,11 +37,11 @@ spec:
               value: {{ .Values.common.msalClientId | required "common.msalClientId is required" | quote }}
             {{- if eq .Values.common.appEnv "local" }}
             - name: MSAL_AUTHORITY
-              value: "https://login.microsoftonline.com/{{ .Values.common.msalTenantId | required "common.msalTenantId is required" }}"
+              value: "https://login.microsoftonline.com/{{ .Values.common.msalTenantId }}"
             - name: MSAL_REDIRECT_URI
-              value: {{ .Values.common.frontendUrl | required "common.frontendUrl is required" | quote }}
+              value: {{ .Values.common.frontendUrl | quote }}
             - name: MSAL_SCOPES
-              value: api{{ .Values.common.frontendUrl | trimPrefix "http" | trimPrefix "s" }}/{{ .Values.common.msalClientId }}/access_as_user
+              value: "api{{ .Values.common.frontendUrl | trimPrefix "http" | trimPrefix "s" }}/{{ .Values.common.msalClientId }}/access_as_user"
             {{- end }}
             - name: FRONTEND_URL
               value: {{ .Values.common.frontendUrl | required "common.frontendUrl is required" | quote }}

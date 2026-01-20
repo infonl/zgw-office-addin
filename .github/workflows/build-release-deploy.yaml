@@ -269,12 +269,25 @@ jobs:
             type=sbom
 
   commit-version-update:
-# Only commit version update if we are on main branch, only there we have the correct version to set
-# This also catches the manual version bump via workflow_dispatch on main branch
-# The commit message contains [skip actions] to avoid retriggering the workflow!
+    # Only commit version update if we are on main branch, only there we have the correct version to set.concurrency.
+    # Resets the version in package files, to ensure this can be committed correctly.
+    # This also catches the manual version bump via workflow_dispatch on main branch
+    # The commit message contains [skip actions] to avoid retriggering the workflow!
     needs: [next-version, create-release]
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Update package.json versions
+        run: |
+          V_VERSION=${{ needs.next-version.outputs.version }}
+          VERSION=${V_VERSION#v}
+          # Update package.json files
+          npm pkg set version="$VERSION"
+          npm pkg set version="$VERSION" --workspace=office-add-in
+          npm pkg set version="$VERSION" --workspace=office-backend
+
       - name: Commit version updates
         if: github.ref == 'refs/heads/main'
         run: |

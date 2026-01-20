@@ -32,7 +32,7 @@ NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 TO_REPLACE_CLIENT_ID="10000000-0001-1001-1001-100000000001"
 TO_REPLACE_URL="localhost:3000"
 
-# MSAL client ID have be set via environment variables.
+# MSAL client ID has be set via environment variables.
 MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
 
 # Validate that MSAL_CLIENT_ID is properly configured and not using the placeholder.
