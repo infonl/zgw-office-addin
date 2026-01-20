@@ -43,9 +43,50 @@ jobs:
           echo "Version bump input only valid on main branch."
           exit 1
 
-  build:
+  next-version:
     runs-on: ubuntu-24.04
     needs: [validate-input]
+    outputs:
+      old-version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.old_tag || steps.get-tag-non-main.outputs.old_tag }}
+      version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}
+    steps:
+      # Checkout the repository including tags
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+      # Determine the next semantic version based on the commit message tags
+      - name: Get next tag on main
+        id: get-tag-main
+        if: ${{ github.ref == 'refs/heads/main'}}
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: false
+          FORCE_WITHOUT_CHANGES: true # Always build of a new version, even if there have been no code changes
+          DEFAULT_BUMP: ${{ needs.validate-input.outputs.version-bump }}
+          WITH_V: true
+          RELEASE_BRANCHES: main
+      # If not on main, Determine the next semantic version based on the commit message tags without pushing tags`
+      - name: Get next tag on non-main
+        id: get-tag-non-main
+        if: ${{ github.ref != 'refs/heads/main'}}
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: false
+          FORCE_WITHOUT_CHANGES: false
+          DEFAULT_BUMP: patch
+          WITH_V: true
+          RELEASE_BRANCHES: main
+          DRY_RUN: true
+      - name: Print new version
+        run: |
+          echo "Next version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}"
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: [validate-input, next-version]
 
     steps:
       - name: Checkout repository
@@ -62,6 +103,17 @@ jobs:
       - name: Create .env file from secrets
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Update package.json versions
+        run: |
+          VERSION=${{ needs.next-version.outputs.version }}
+          VERSION_NO_V=${VERSION#v}
+          echo "Setting version to: $VERSION_NO_V"
+          
+          # Update package.json files
+          npm pkg set version="$VERSION_NO_V"
+          npm pkg set version="$VERSION_NO_V" --workspace=office-add-in
+          npm pkg set version="$VERSION_NO_V" --workspace=office-backend
 
       - name: Run code validation
         id: validation
@@ -137,47 +189,6 @@ jobs:
           path: |
             office-add-in/dist/
             office-backend/dist/
-
-  next-version:
-    runs-on: ubuntu-24.04
-    needs: [validate-input]
-    outputs:
-      old-version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.old_tag || steps.get-tag-non-main.outputs.old_tag }}
-      version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}
-    steps:
-      # Checkout the repository including tags
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 0
-      # Determine the next semantic version based on the commit message tags
-      - name: Get next tag on main
-        id: get-tag-main
-        if: ${{ github.ref == 'refs/heads/main'}}
-        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRERELEASE: false
-          FORCE_WITHOUT_CHANGES: true # Always build of a new version, even if there have been no code changes
-          DEFAULT_BUMP: ${{ needs.validate-input.outputs.version-bump }}
-          WITH_V: true
-          RELEASE_BRANCHES: main
-      # If not on main, Determine the next semantic version based on the commit message tags without pushing tags`
-      - name: Get next tag on non-main
-        id: get-tag-non-main
-        if: ${{ github.ref != 'refs/heads/main'}}
-        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRERELEASE: false
-          FORCE_WITHOUT_CHANGES: false
-          DEFAULT_BUMP: patch
-          WITH_V: true
-          RELEASE_BRANCHES: main
-          DRY_RUN: true
-      - name: Print new version
-        run: |
-          echo "Next version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}"
 
   create-release:
     needs: [build, next-version]
@@ -256,6 +267,39 @@ jobs:
           attests: |
             type=provenance,mode=max
             type=sbom
+
+  commit-version-update:
+    # Only commit version update if we are on main branch, only there we have the correct version to set.concurrency.
+    # Resets the version in package files, to ensure this can be committed correctly.
+    # This also catches the manual version bump via workflow_dispatch on main branch
+    # The commit message contains [skip actions] to avoid retriggering the workflow!
+    needs: [next-version, create-release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Update package.json versions
+        run: |
+          V_VERSION=${{ needs.next-version.outputs.version }}
+          VERSION=${V_VERSION#v}
+          # Update package.json files
+          npm pkg set version="$VERSION"
+          npm pkg set version="$VERSION" --workspace=office-add-in
+          npm pkg set version="$VERSION" --workspace=office-backend
+
+      - name: Commit version updates
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json office-add-in/package.json office-backend/package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }} [skip actions]"
+            git push
+          else
+            echo "No version change to commit."
+          fi
 
   trigger-provision:
     needs: [next-version, create-docker-image]

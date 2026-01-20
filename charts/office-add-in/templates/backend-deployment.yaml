@@ -34,25 +34,19 @@ spec:
             - containerPort: 3003
           env:
             - name: APP_ENV
-              value: "production"
+              value: {{ .Values.common.appEnv | default "production" | quote }}
             - name: JWT_SECRET
-              value: {{ .Values.backend.jwtSecret | quote }}
+              value: {{ .Values.backend.zgwApis.secret | required "backend.zgwApis.secret is required" | quote }}
             - name: API_BASE_URL
-              value: {{ .Values.backend.apiBaseUrl | quote }}
-            {{- if .Values.frontend.frontendUrl }}
+              value: {{ .Values.backend.zgwApis.url | required "backend.zgwApis.url is required" | quote }}
             - name: FRONTEND_URL
-              value: {{ .Values.frontend.frontendUrl | quote }}
-            {{- end }}
+              value: {{ .Values.common.frontendUrl | required "common.frontendUrl is required" | quote }}
             - name: MSAL_CLIENT_ID
-              value: {{ .Values.backend.msalClientId | quote }}
+              value: {{ .Values.common.msalClientId | required "common.msalClientId is required" | quote }}
             - name: MSAL_AUTHORITY
-              value: {{ .Values.backend.msalAuthority | quote }}
-            - name: MSAL_REDIRECT_URI
-              value: {{ .Values.backend.msalRedirectUri | quote }}
-            - name: MSAL_SCOPES
-              value: {{ .Values.backend.msalScopes | quote }}
+              value: "https://login.microsoftonline.com/{{ .Values.common.msalTenantId | required "common.msalTenantId is required" }}"
             - name: MSAL_SECRET
-              value: {{ .Values.backend.msalSecret | quote }}
+              value: {{ .Values.backend.msalSecret | required "backend.msalSecret is required" | quote }}
           livenessProbe:
             httpGet:
               path: /health
