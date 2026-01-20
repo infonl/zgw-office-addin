@@ -3,20 +3,15 @@
 # SPDX-License-Identifier: EUPL-1.2+
 #
 
-### BUILD ###
-dist/
-**/dist/
-
-### INTELLIJ ###
+### IDEs ###
 *.iml
 .idea
+.vscode/
+**/.vscode/
+WARP.md
 
 ### DIRENV ###
 .envrc
-
-### ENVIRONMENT ###
-.env
-.env.local.frontend
 
 ### OS specific ###
 *.swp
@@ -28,20 +23,23 @@ dist/
 node_modules/
 **/node_modules/
 
-### Custom ###
+### Application Specific ###
+.env
+.env.local.frontend
 .turbo/
-.vscode/
-**/.vscode/
 *.pem
 *.srl
 openzaak-database-data
-generated-client
-generated/types.ts
-generated/zrc-types.ts
-generated/drc-types.ts
-/office-add-in/docker-metadata.json
-/office-backend/docker-metadata.json
-WARP.md
+office-add-in/docker-metadata.json
+office-backend/docker-metadata.json
+
+### BUILD ###
+generated/
+**/generated/
+build/
+**/build/
+dist/
+**/dist/
 
 ### Testing ###
 coverage/

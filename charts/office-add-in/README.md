@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.64](https://img.shields.io/badge/Version-0.0.64-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.65](https://img.shields.io/badge/Version-0.0.65-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -30,30 +30,27 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for the backend deployment |
-| backend.apiBaseUrl | string | `"http://localhost:8020"` | Base URL to the openzaak API |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
 | backend.image.tag | string | `"v0.2.198@sha256:fac48db1f43ad9f4f88ade4f56b4f28c16a2618b0f98cc4a1b29d9050c42d0f4"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
-| backend.jwtSecret | string | `"SECRET_KEY_PLACEHOLDER"` | Secret key used for generating and validating JWT tokens for secure communication |
-| backend.msalAuthorityUrl | string | `"https://login.microsoftonline.com/"` | Authority URL for MSAL authentication towards Azure AD |
-| backend.msalClientId | string | `"MSAL_CLIENT_ID_PLACEHOLDER"` | Client ID for MSAL authentication towards Azure AD |
-| backend.msalRedirectUri | string | `"http://localhost:3003/auth/callback"` | Redirect URI for MSAL authentication towards Azure AD |
-| backend.msalScope | string | `"https://graph.microsoft.com/.default"` | Scope for MSAL authentication towards Azure AD |
-| backend.msalSecret | string | `"MSAL_CLIENT_SECRET_PLACEHOLDER"` | Client secret for MSAL authentication towards Azure AD |
+| backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
-| backend.resources | object | `{}` | Resource limits and requests for the backend container |
+| backend.resources | object | `{}` |  |
 | backend.securityContext | object | `{}` | Security context for the backend container |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
 | backend.topologySpreadConstraints | list | `[{"labelSelector":{"matchLabels":{"app.kubernetes.io/instance":"RELEASE-NAME","app.kubernetes.io/name":"backend"}},"maxSkew":1,"topologyKey":"kubernetes.io/hostname","whenUnsatisfiable":"DoNotSchedule"}]` | Topology spread constraints for the backend deployment app.kubernetes.io/instance will be dynamically set to the Helm release name at deployment time. |
+| backend.zgwApis | object | `{"secret":"","url":"http://localhost:8020"}` | ZGW API configuration for integration with the ZGW APIs provider (OpenZaak) |
+| common.appEnv | string | `"production"` | Application environment, e.g. production, development, staging |
+| common.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
+| common.msalClientId | string | `""` | MS Azure Client ID assigned to the Office Add-in application |
+| common.msalTenantId | string | `""` | MS Azure Tenant ID of the Organization |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
-| frontend.appEnv | string | `"production"` |  |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
-| frontend.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
 | frontend.image.tag | string | `"v0.2.198@sha256:fcac444b8436348187526c8ae0c332c3d4baef1ffd61930c25543872ba765529"` |  |
