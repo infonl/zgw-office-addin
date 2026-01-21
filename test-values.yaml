@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+
+# Local testing values for office-add-in Helm chart
+frontend:
+  image:
+    # Use a simple nginx image for testing if the main images aren't available
+    repository: nginx
+    tag: alpine
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  # Use localhost for local testing
+  frontendUrl: "https://localhost:30443"
+
+backend:
+  image:
+    # Use a simple node image for testing if the main images aren't available
+    repository: node
+    tag: alpine
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3003
+  # Test values
+  jwtSecret: "test-secret-for-local-development-only"
+  apiBaseUrl: "http://mock-api:8080"
