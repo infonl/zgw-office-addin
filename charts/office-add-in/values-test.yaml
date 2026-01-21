@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
 # Test values file for validating Helm chart in kind
 # DO NOT commit real secrets to version control
 

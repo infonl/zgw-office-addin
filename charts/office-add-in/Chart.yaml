@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+
 apiVersion: v2
 name: zgw-office-addin
 description: A Helm chart for deploying the zgw-office-addin (frontend and backend)

@@ -31,7 +31,7 @@ async function getHttpsOptions() {
 }
 
 module.exports = async (env, options) => {
-  const isProduction = options.mode === 'production';
+  const isProduction = options.mode === "production";
 
   const config = {
     devtool: isProduction ? false : "source-map",
@@ -57,16 +57,16 @@ module.exports = async (env, options) => {
       minimize: isProduction,
       usedExports: true,
       splitChunks: {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
+            name: "vendors",
             priority: 10,
           },
           fluentui: {
             test: /[\\/]node_modules[\\/]@fluentui[\\/]/,
-            name: 'fluentui',
+            name: "fluentui",
             priority: 20,
           },
         },
