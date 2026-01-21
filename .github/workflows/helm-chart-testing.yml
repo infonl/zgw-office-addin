@@ -83,6 +83,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate types
+        run: npm run types
+
       - name: Build project
         run: npm run build
 
@@ -93,7 +96,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           file: ./office-add-in/Dockerfile
-          context: .
+          context: office-add-in
           push: false
           load: true
           tags: ghcr.io/infonl/zgw-office-add-in-frontend:test
@@ -102,7 +105,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           file: ./office-backend/Dockerfile
-          context: .
+          context: office-backend
           push: false
           load: true
           tags: ghcr.io/infonl/zgw-office-add-in-backend:test
