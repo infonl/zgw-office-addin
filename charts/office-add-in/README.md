@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.68](https://img.shields.io/badge/Version-0.0.68-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.69](https://img.shields.io/badge/Version-0.0.69-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -34,7 +34,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
 | backend.image.tag | string | `"v0.9.33@sha256:6dced9214bee8efddbe55f6a3b581115ac2104273952296a1506bfe5b49134e0"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
-| backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
+| backend.msalSecret | object | `{"msalOfficeSecret":"","msalOutlookSecret":""}` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
 | backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
@@ -47,8 +47,8 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.zgwApis | object | `{"secret":"","url":"http://localhost:8020"}` | ZGW API configuration for integration with the ZGW APIs provider (OpenZaak) |
 | common.appEnv | string | `"production"` | Application environment, e.g. production, development, staging |
 | common.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
-| common.msalClientId | string | `""` | MS Azure Client ID assigned to the Office Add-in application |
-| common.msalTenantId | string | `""` | MS Azure Tenant ID of the Organization |
+| common.office | object | `{"msalClientId":"","msalTenantId":""}` | MS Azure Office Add-in configuration |
+| common.outlook | object | `{"msalClientId":"","msalTenantId":""}` | MS Azure Outlook Add-in configuration |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
