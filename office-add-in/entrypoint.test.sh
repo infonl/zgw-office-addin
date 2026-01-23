@@ -63,10 +63,14 @@ export APP_VERSION="test-version"
 
 # environment
 export APP_ENV="local"
-export MSAL_CLIENT_ID="696724da-f71f-40c4-9dce-53ab2bc8e0cb"
-export MSAL_AUTHORITY="https://login.microsoftonline.com/5ac40c21-50a2-414f-93d1-495d1324322b"
-export MSAL_REDIRECT_URI="http://localhost:3000"
-export MSAL_SCOPES="api://localhost:3000/e5bfd847-4b36-4766-9b1b-3b6f2c4c41c3/access_as_user"
+export MSAL_OFFICE_CLIENT_ID="696724da-office-53ab2bc8e0ca"
+export MSAL_OFFICE_AUTHORITY="https://login.microsoftonline.com/5ac40c21-office-495d1324322b"
+export MSAL_OFFICE_REDIRECT_URI="http://localhost:3000"
+export MSAL_OFFICE_SCOPES="api://localhost:3000/e5bfd847-office-3b6f2c4c41c3/access_as_user"
+export MSAL_OUTLOOK_CLIENT_ID="796724da-outlook-53ab2bc8e0cf"
+export MSAL_OUTLOOK_AUTHORITY="https://login.microsoftonline.com/5ac40c21-outlook-495d1324322b"
+export MSAL_OUTLOOK_REDIRECT_URI="http://localhost:3000"
+export MSAL_OUTLOOK_SCOPES="api://localhost:3000/e5bfd847-outlook-3b6f2c4c41c3/access_as_user"
 
 
 #Copy source files to test directory

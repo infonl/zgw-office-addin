@@ -31,32 +31,44 @@ NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 # These have to match exactly with the used values in the manifest files!
 TO_REPLACE_CLIENT_ID="10000000-0001-1001-1001-100000000001"
 TO_REPLACE_URL="localhost:3000"
+TO_REPLACE_BACKEND_URL="localhost:3003"
 
-# MSAL client ID has be set via environment variables.
-MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
+# Validate that MSAL_OFFICE_CLIENT_ID is properly configured and not using the placeholder.
+if [ -z "$MSAL_OFFICE_CLIENT_ID" ] || [ "$MSAL_OFFICE_CLIENT_ID" = "your-client-id" ]; then
+  echo "Error: MSAL_OFFICE_CLIENT_ID environment variable must be set to a valid Azure AD application (client) ID." >&2
+  exit 1
+fi
 
-# Validate that MSAL_CLIENT_ID is properly configured and not using the placeholder.
-if [ -z "$MSAL_CLIENT_ID" ] || [ "$MSAL_CLIENT_ID" = "your-client-id" ]; then
-  echo "Error: MSAL_CLIENT_ID environment variable must be set to a valid Azure AD application (client) ID." >&2
+# Validate that MSAL_OUTLOOK_CLIENT_ID is properly configured and not using the placeholder.
+if [ -z "$MSAL_OUTLOOK_CLIENT_ID" ] || [ "$MSAL_OUTLOOK_CLIENT_ID" = "your-client-id" ]; then
+  echo "Error: MSAL_OUTLOOK_CLIENT_ID environment variable must be set to a valid Azure AD application (client) ID." >&2
   exit 1
 fi
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
 FRONTEND_URL="${FRONTEND_URL:-https://localhost:3000}"
-FRONTEND_API="$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')/${MSAL_CLIENT_ID}"
-MANIFEST_OFFICE_FILE="${NGINX_PUBLIC_HTML}/manifest-office.xml"
-MANIFEST_OUTLOOK_FILE="${NGINX_PUBLIC_HTML}/manifest-outlook.xml"
 
-echo "MSAL Client ID is set to ${MSAL_CLIENT_ID}."
-echo "Frontend URL is set to ${FRONTEND_URL}."
-echo "Frontend API is set to ${FRONTEND_API}."
-for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
-  [ -f "$MANIFEST_FILE" ] || continue
-  sed -i -e "s|http://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
-  sed -i -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
-  sed -i -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" "$MANIFEST_FILE"
-  sed -i -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" "$MANIFEST_FILE"
-done
+## Office Add-in manifest replacements
+MANIFEST_FILE="${NGINX_PUBLIC_HTML}/manifest-office.xml"
+MSAL_CLIENT_ID="${MSAL_OFFICE_CLIENT_ID:-your-office-client-id}"
+FRONTEND_API="$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')/${MSAL_CLIENT_ID}"
+echo "Update office manifest..."
+sed -i -e "s|http://${TO_REPLACE_URL}|${FRONTEND_URL}|g" \
+  -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" \
+  -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" \
+  -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" \
+  "$MANIFEST_FILE"
+
+# Outlook Add-in manifest replacements
+MANIFEST_FILE="${NGINX_PUBLIC_HTML}/manifest-outlook.xml"
+MSAL_CLIENT_ID="${MSAL_OUTLOOK_CLIENT_ID:-your-outlook-client-id}"
+FRONTEND_API="$(echo "$FRONTEND_URL" | sed 's/https/api/' | sed 's/http/api/')/${MSAL_CLIENT_ID}"
+echo "Update outlook manifest..."
+sed -i -e "s|http://${TO_REPLACE_URL}|${FRONTEND_URL}|g" \
+  -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" \
+  -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" \
+  -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" \
+  "$MANIFEST_FILE"
 
 ####
 # To ensure the Office Add-in frontend can communicate with the backend,
@@ -67,9 +79,14 @@ done
 BACKEND_PROXY_URL="${FRONTEND_URL}/proxy"
 ENABLE_HTTPS="${ENABLE_HTTPS:-false}"
 
-echo "Backend proxy URL is set to ${BACKEND_PROXY_URL}. Rewriting references."
-find "$NGINX_PUBLIC_HTML" -type f -exec sed -i \
-  -e "s|https\?://localhost:3003|$BACKEND_PROXY_URL|g" {} +
+echo "Backend proxy URL is set to ${BACKEND_PROXY_URL} in files:"
+FILES=$(find "$NGINX_PUBLIC_HTML" -type f -exec grep -l -E "$TO_REPLACE_BACKEND_URL" {} +)
+for file in $FILES; do
+  sed -i -e "s|http://${TO_REPLACE_BACKEND_URL}|${BACKEND_PROXY_URL}|g" \
+    -e "s|https://${TO_REPLACE_BACKEND_URL}|${BACKEND_PROXY_URL}|g" \
+    "$file"
+  echo "$file"
+done
 
 ###
 BACKEND_URL="${BACKEND_URL%/}"

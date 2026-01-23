@@ -37,7 +37,7 @@ spec:
               value: {{ .Values.common.msalClientId | required "common.msalClientId is required" | quote }}
             {{- if eq .Values.common.appEnv "local" }}
             - name: MSAL_AUTHORITY
-              value: "https://login.microsoftonline.com/{{ .Values.common.msalTenantId }}"
+              value: "https://login.microsoftonline.com/{{ .Values.common.office.msalTenantId }}"
             - name: MSAL_REDIRECT_URI
               value: {{ .Values.common.frontendUrl | quote }}
             - name: MSAL_SCOPES

@@ -11,6 +11,7 @@ import { useHttp } from "./useHttp";
 import { ZrcType } from "../../../generated/zrc-generated-types";
 import { useLogger } from "./useLogger";
 import { getToken } from "../utils/getAccessToken";
+import {uuid} from "zod/mini";
 
 type SuccessData = ZrcType<"ZaakInformatieObject">;
 

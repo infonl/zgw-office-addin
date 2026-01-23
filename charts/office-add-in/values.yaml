@@ -3,10 +3,14 @@ common:
   appEnv: "production"
   # -- The frontend public URL where the manifest files and static js file are served
   frontendUrl: "http://localhost:3000"
-  # -- MS Azure Tenant ID of the Organization
-  msalTenantId: ""
-  # -- MS Azure Client ID assigned to the Office Add-in application
-  msalClientId: ""
+  # -- MS Azure Office Add-in configuration
+  office:
+    msalTenantId: ""
+    msalClientId: ""
+  # -- MS Azure Outlook Add-in configuration
+  outlook:
+    msalTenantId: ""
+    msalClientId: ""
 
 frontend:
   image:
@@ -74,7 +78,9 @@ backend:
     type: ClusterIP
     port: 3003
   # -- Client secret for MSAL authentication towards Azure AD
-  msalSecret: ""
+  msalSecret:
+    msalOfficeSecret: ""
+    msalOutlookSecret: ""
   # -- ZGW API configuration for integration with the ZGW APIs provider (OpenZaak)
   zgwApis:
     url: "http://localhost:8020"

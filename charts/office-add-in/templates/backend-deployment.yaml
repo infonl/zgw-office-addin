@@ -41,12 +41,18 @@ spec:
               value: {{ .Values.backend.zgwApis.url | required "backend.zgwApis.url is required" | quote }}
             - name: FRONTEND_URL
               value: {{ .Values.common.frontendUrl | required "common.frontendUrl is required" | quote }}
-            - name: MSAL_CLIENT_ID
-              value: {{ .Values.common.msalClientId | required "common.msalClientId is required" | quote }}
-            - name: MSAL_AUTHORITY
-              value: "https://login.microsoftonline.com/{{ .Values.common.msalTenantId | required "common.msalTenantId is required" }}"
-            - name: MSAL_SECRET
-              value: {{ .Values.backend.msalSecret | required "backend.msalSecret is required" | quote }}
+            - name: MSAL_OFFICE_CLIENT_ID
+              value: {{ .Values.common.office.msalClientId | required "common.office.msalClientId is required" | quote }}
+            - name: MSAL_OUTLOOK_CLIENT_ID
+              value: {{ .Values.common.outlook.msalClientId | required "common.outlook.msalClientId is required" | quote }}
+            - name: MSAL_OFFICE_AUTHORITY
+              value: "https://login.microsoftonline.com/{{ .Values.common.office.msalTenantId | required "common.office.msalTenantId is required" }}"
+            - name: MSAL_OUTLOOK_AUTHORITY
+              value: "https://login.microsoftonline.com/{{ .Values.common.outlook.msalTenantId | required "common.outlook.msalTenantId is required" }}"
+            - name: MSAL_OFFICE_SECRET
+              value: {{ .Values.common.office.msalSecret | required "common.office.msalSecret is required" | quote }}
+            - name: MSAL_OUTLOOK_SECRET
+              value: {{ .Values.common.outlook.msalSecret | required "common.outlook.msalSecret is required" | quote }}
           livenessProbe:
             httpGet:
               path: /health

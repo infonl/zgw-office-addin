@@ -13,9 +13,9 @@ const msalConfig = {
   },
 };
 
-const cca = new ConfidentialClientApplication(msalConfig);
-
 export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {
+  const cca = new ConfidentialClientApplication(msalConfig);
+
   try {
     LoggerService.debug("config: ", msalConfig);
     const result = await cca.acquireTokenOnBehalfOf({
@@ -29,7 +29,7 @@ export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string
 
     return result.accessToken;
   } catch (err: any) {
-    LoggerService.error("❌ MSAL OBO Error:", err);
+    LoggerService.error("MSAL OBO Error:", err);
     throw new Error("OBO exchange failed: " + err.message);
   }
 }

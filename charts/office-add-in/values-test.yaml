@@ -4,8 +4,14 @@
 common:
   appEnv: "production"
   frontendUrl: "https://localhost:30443"
-  msalTenantId: "00000000-0000-0000-0000-000000000001"
-  msalClientId: "00000000-0000-0000-0000-000000000000"
+  office:
+    msalTenantId: "00000000-0000-0000-0000-000000000001"
+    msalClientId: "00000000-0000-0000-0000-000000000010"
+    msalSecret: "test-msal-office-secret"
+  outlook:
+    msalTenantId: "00000000-0000-0000-0000-000000000002"
+    msalClientId: "00000000-0000-0000-0000-000000000020"
+    msalSecret: "test-msal-outlook-secret"
 
 frontend:
   image:
@@ -19,4 +25,3 @@ backend:
   zgwApis:
     url: "http://localhost:8020"
     secret: "test-zgw-secret"
-  msalSecret: "test-msal-secret"

@@ -6,7 +6,7 @@
 
 # Check if mkcert is installed
 if ! command -v mkcert &> /dev/null; then
-    echo "❌ mkcert is not installed. Please install it first:"
+    echo "mkcert is not installed. Please install it first:"
     echo "   brew install mkcert"
     exit 1
 fi

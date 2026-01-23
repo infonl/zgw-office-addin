@@ -5,26 +5,27 @@
 
 import React from "react";
 import {
-  Button,
-  makeStyles,
-  MessageBar,
-  MessageBarBody,
-  MessageBarTitle,
-  tokens,
+    Button,
+    FluentProvider,
+    makeStyles,
+    MessageBar,
+    MessageBarBody,
+    MessageBarTitle,
+    tokens,
+    webDarkTheme,
+    webLightTheme,
 } from "@fluentui/react-components";
-import { Configuration } from "@azure/msal-browser";
-import { useOffice } from "../../hooks/useOffice";
-import { FluentProvider, webLightTheme, webDarkTheme } from "@fluentui/react-components";
-import { useDarkMode } from "usehooks-ts";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ToastProvider } from "../../provider/ToastProvider";
-import { useZaak, ZaakProvider } from "../../provider/ZaakProvider";
-import { AuthProvider } from "../../provider/AuthProvider";
-import { MsalAuthProvider } from "../../provider/MsalAuthProvider";
-import { FRONTEND_ENV } from "../../provider/envFrontendSchema";
-import { OfficeForm } from "./OfficeForm";
-import { OutlookForm } from "./OutlookForm/OutlookForm";
-import { useCommonStyles } from "./styles/shared";
+import {useOffice} from "../../hooks/useOffice";
+import {useDarkMode} from "usehooks-ts";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {ToastProvider} from "../../provider/ToastProvider";
+import {useZaak, ZaakProvider} from "../../provider/ZaakProvider";
+import {AuthProvider} from "../../provider/AuthProvider";
+import {MsalAuthProvider} from "../../provider/MsalAuthProvider";
+import {OfficeForm} from "./OfficeForm";
+import {OutlookForm} from "./OutlookForm/OutlookForm";
+import {useCommonStyles} from "./styles/shared";
+import {extractLocalMsalConfig} from "../../provider/LocalMsalConfig";
 
 const useStyles = makeStyles({
   root: {
@@ -58,29 +59,9 @@ const AppContent = ({ isDarkMode }: { isDarkMode: boolean }) => (
 
 export function App() {
   const { isDarkMode } = useDarkMode();
+  let msalConfig = extractLocalMsalConfig();
 
-  // Only create MSAL config on localhost
-  let msalConfig: Configuration | undefined;
-
-  if (
-    FRONTEND_ENV.MSAL_CLIENT_ID &&
-    FRONTEND_ENV.MSAL_AUTHORITY &&
-    FRONTEND_ENV.MSAL_REDIRECT_URI
-  ) {
-    msalConfig = {
-      auth: {
-        clientId: FRONTEND_ENV.MSAL_CLIENT_ID,
-        authority: FRONTEND_ENV.MSAL_AUTHORITY,
-        redirectUri: FRONTEND_ENV.MSAL_REDIRECT_URI,
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: false,
-      },
-    };
-  }
-
-  // Wrap with MsalAuthProvider only if MSAL config is available
+  // Wrap with MsalAuthProvider if available
   if (msalConfig) {
     return (
       <MsalAuthProvider config={msalConfig}>

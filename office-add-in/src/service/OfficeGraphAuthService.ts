@@ -34,9 +34,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
   }
 
   private async exchangeTokenWithBackend(bootstrapToken: string): Promise<string> {
-    const baseUrl = "https://localhost:3003";
-
-    const response = await fetch(baseUrl + "/auth/obo", {
+    const response = await fetch(FRONTEND_ENV.BASE_URL + "/auth/obo", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

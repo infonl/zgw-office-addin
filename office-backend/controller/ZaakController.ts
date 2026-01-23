@@ -12,7 +12,7 @@ export class ZaakController {
   constructor(private readonly zaakService: ZaakService) {}
 
   public async getZaak(request: FastifyRequest<{ Params: ZaakParam }>, reply: FastifyReply) {
-    console.log("AUTHOR:", request.headers["authorization"]);
+    console.info("getZaak:", request.headers["authorization"]);
 
     const jwt = request.headers["authorization"];
     const zaakIdentificatie = request.params.zaakIdentificatie;

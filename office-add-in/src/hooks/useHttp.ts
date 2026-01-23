@@ -2,13 +2,11 @@
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
-
+import { FRONTEND_ENV } from "../provider/envFrontendSchema";
 import { useLogger } from "./useLogger";
 
 export function useHttp() {
   const { DEBUG, ERROR } = useLogger(useHttp.name);
-
-  const baseUrl = "https://localhost:3003";
 
   async function POST<T>(url: string, body: BodyInit, headers: HeadersInit = {}) {
     return request<T>("POST", url, { body, headers });
@@ -27,7 +25,7 @@ export function useHttp() {
       params?: Record<string, string>;
     } = { headers: {} }
   ): Promise<T> {
-    const fullUrl = new URL(`${baseUrl}${url}`);
+    const fullUrl = new URL(`${FRONTEND_ENV.BASE_URL}${url}`);
     if (options.params) {
       fullUrl.search = new URLSearchParams(options.params).toString();
     }
