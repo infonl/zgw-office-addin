@@ -56,7 +56,7 @@
     "react-hook-form": "7.70.0",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
-    "zod": "4.1.13"
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@babel/core": "7.28.6",
