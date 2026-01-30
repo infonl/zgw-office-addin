@@ -9,6 +9,7 @@
 .vscode/
 **/.vscode/
 WARP.md
+wip/
 
 ### DIRENV ###
 .envrc
@@ -42,6 +43,5 @@ dist/
 **/dist/
 
 ### Testing ###
-**/build/
 coverage/
 **/coverage/
