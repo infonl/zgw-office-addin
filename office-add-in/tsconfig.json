@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["office-js", "node"]
   },
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/mock*.ts"]
+  "exclude": ["build","**/*.test.ts", "**/*.test.tsx", "**/mock*.ts"]
 }
