@@ -9,6 +9,7 @@
 .vscode/
 **/.vscode/
 WARP.md
+wip/
 
 ### DIRENV ###
 .envrc

@@ -4,13 +4,13 @@
 name: Helm chart release
 
 on:
-  workflow_dispatch:  
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'charts/**'
 
-# Only allow a single concurrent run per branch. Cancel in-progress runs on multiple pushes when not on main branch.  
+# Only allow a single concurrent run per branch. Cancel in-progress runs on multiple pushes when not on main branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !contains(github.ref, 'main')}}
