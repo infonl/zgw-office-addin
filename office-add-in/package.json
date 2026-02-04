@@ -59,8 +59,8 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@babel/core": "7.28.6",
-    "@babel/preset-env": "7.28.6",
+    "@babel/core": "7.29.0",
+    "@babel/preset-env": "7.29.0",
     "@babel/preset-typescript": "7.28.5",
     "@prettier/plugin-xml": "3.4.2",
     "@tanstack/eslint-plugin-query": "5.91.4",
