@@ -22,7 +22,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 
