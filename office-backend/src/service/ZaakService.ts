@@ -7,11 +7,11 @@ import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { FileNotSupported } from "../exception/FileNotSupported";
 import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
-import { type DrcType } from "../../generated/drc-generated-types";
-import { type ZrcType } from "../../generated/zrc-generated-types";
+import { type DrcType } from "../../../generated/drc-generated-types";
+import { type ZrcType } from "../../../generated/zrc-generated-types";
 import { TokenService } from "./TokenService";
 export class ZaakService {
-  private userInfo: { preferedUsername: string; name: string } | null = null;
+  private userInfo: { preferredUsername: string; name: string } | null = null;
   constructor(
     private readonly httpService: HttpService,
     private readonly tokenService: TokenService,
@@ -60,14 +60,14 @@ export class ZaakService {
         bestandsnaam: body.titel,
         creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").at(0),
       }),
-      userInfo as { preferedUsername: string; name: string },
+      userInfo as { preferredUsername: string; name: string },
     );
     LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
     this.createGebruiksrechten(
       informatieobject.url!,
       new Date(String(body.creatiedatum)),
-      userInfo as { preferedUsername: string; name: string },
+      userInfo as { preferredUsername: string; name: string },
     );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
@@ -77,7 +77,7 @@ export class ZaakService {
         informatieobject: informatieobject.url,
         zaak: zaak.url,
       }),
-      userInfo as { preferedUsername: string; name: string },
+      userInfo as { preferredUsername: string; name: string },
     );
 
     return informatieobject;
@@ -112,7 +112,7 @@ export class ZaakService {
 
   private async getZaakFromOpenZaak(
     zaakIdentificatie: string,
-    userInfo: { preferedUsername: string; name: string },
+    userInfo: { preferredUsername: string; name: string },
   ) {
     const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
       "/zaken/api/v1/zaken",
@@ -134,7 +134,7 @@ export class ZaakService {
   private async createGebruiksrechten(
     url: string,
     startdatum: Date,
-    userInfo: { preferedUsername: string; name: string },
+    userInfo: { preferredUsername: string; name: string },
   ) {
     await this.httpService.POST(
       "/documenten/api/v1/gebruiksrechten",
