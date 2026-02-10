@@ -38,7 +38,7 @@ describe("TokenService", () => {
       name: "User",
     });
     const result = service.getUserInfo("Bearer validtoken");
-    expect(result).toEqual({ preferedUsername: "user", name: "User" });
+    expect(result).toEqual({ preferredUsername: "user", name: "User" });
   });
 
   it("should throw Unauthorized if jwtDecode throws", () => {

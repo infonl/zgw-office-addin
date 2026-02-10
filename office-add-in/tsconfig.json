@@ -2,5 +2,6 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": ["office-js", "node"]
-  }
+  },
+  "exclude": ["build","**/*.test.ts", "**/*.test.tsx", "**/mock*.ts"]
 }

@@ -11,11 +11,11 @@ ENV APP_VERSION=${APP_VERSION:-unknown}
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy the built frontend files
-COPY ./office-add-in/dist/ /usr/share/nginx/html/
-COPY --chmod=755 ./office-add-in/entrypoint.sh /docker-entrypoint.d/entrypoint.sh
+COPY ./dist/ /usr/share/nginx/html/
+COPY --chmod=755 ./entrypoint.sh /docker-entrypoint.d/entrypoint.sh
 
 # Copy nginx configuration
-COPY ./office-add-in/nginx.conf.template /etc/nginx/
-COPY ./office-add-in/nginx.https.template /etc/nginx/
+COPY ./nginx.conf.template /etc/nginx/
+COPY ./nginx.https.template /etc/nginx/
 
 EXPOSE 80
