@@ -29,7 +29,7 @@ export function useOffice() {
           return;
         }
 
-        resolve(result.value.url.split("/").at(-1) ?? "");
+        resolve(result.value.url.split("/").slice(-1)[0] ?? "");
       });
     });
   }, []);
