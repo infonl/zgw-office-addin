@@ -67,7 +67,7 @@
     "@types/node": "22.19.7",
     "@types/office-js": "1.0.570",
     "@types/office-runtime": "1.0.35",
-    "@types/react": "19.2.10",
+    "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
     "@types/webpack": "5.28.5",
     "acorn": "8.15.0",
