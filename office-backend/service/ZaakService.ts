@@ -58,7 +58,7 @@ export class ZaakService {
         formaat: this.getFileFormat(String(body.titel)),
         taal: "dut",
         bestandsnaam: body.titel,
-        creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").at(0),
+        creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").slice(0, 1)[0],
       }),
       userInfo as { preferedUsername: string; name: string },
     );
@@ -84,7 +84,7 @@ export class ZaakService {
   }
 
   private getFileFormat(file: string) {
-    const extention = file.split(".").at(-1)!;
+    const extention = file.split(".").slice(-1)[0]!;
 
     switch (extention) {
       case "doc":
@@ -122,7 +122,7 @@ export class ZaakService {
       },
     );
 
-    const zaak = zaken.results.at(0);
+    const zaak = zaken.results.slice(0, 1)[0];
 
     if (!zaak) {
       throw new ZaakNotFound(zaakIdentificatie);

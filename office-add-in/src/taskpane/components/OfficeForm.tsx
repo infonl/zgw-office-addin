@@ -98,7 +98,7 @@ export function OfficeForm() {
       informatieobjecttype: "",
       auteur: "",
       creatiedatum: new Date(),
-      status: documentstatus.at(0)!,
+      status: documentstatus.slice(0, 1)[0]!,
     },
   });
 
