@@ -8,6 +8,7 @@ export const mockAttachment1 = {
   name: "mockfile1.txt",
   size: 1234,
   contentType: "text/plain",
+  contentId: "",
   attachmentType: "file",
   isInline: false,
 };
@@ -17,6 +18,7 @@ export const mockAttachment2 = {
   name: "mockfile2.txt",
   size: 5678,
   contentType: "text/plain",
+  contentId: "",
   attachmentType: "file",
   isInline: false,
 };
@@ -26,6 +28,7 @@ export const mockEmailAttachment = {
   name: "email.eml",
   size: 2048,
   contentType: "message/rfc822",
+  contentId: "",
   attachmentType: "item",
   isInline: false,
 };
