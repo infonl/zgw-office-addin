@@ -67,7 +67,7 @@
     "@tanstack/eslint-plugin-query": "5.91.4",
     "@testing-library/react": "16.3.2",
     "@types/node": "22.19.11",
-    "@types/office-js": "1.0.570",
+    "@types/office-js": "1.0.572",
     "@types/office-runtime": "1.0.35",
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
