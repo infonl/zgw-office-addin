@@ -44,7 +44,7 @@
     "docker:validate": "docker buildx build --check ."
   },
   "dependencies": {
-    "@fluentui/react-components": "9.72.11",
+    "@fluentui/react-components": "9.73.0",
     "@fluentui/react-icons": "2.0.319",
     "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.90.21",
