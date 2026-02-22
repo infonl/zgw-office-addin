@@ -11,7 +11,7 @@
     "office-add-in",
     "office-backend"
   ],
-  "packageManager": "npm@11.10.0",
+  "packageManager": "npm@11.10.1",
   "scripts": {
     "clean": "sh -c 'read -p \"Clean all project build files? (y/n): \" ans; [ \"$ans\" = \"y\" ] && turbo clean || echo \"Skipped\"'",
     "clean:deep": "npm run clean && turbo clean:deep && rm -rf node_modules && rm -rf package-lock.json",
