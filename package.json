@@ -35,8 +35,8 @@
     "@total-typescript/shoehorn": "0.1.2",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",
-    "happy-dom": "20.6.3",
-    "turbo": "2.8.9",
+    "happy-dom": "20.6.5",
+    "turbo": "2.8.10",
     "vitest": "4.0.18"
   },
   "engines": {
