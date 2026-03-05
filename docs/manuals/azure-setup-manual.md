@@ -12,7 +12,7 @@ For the example we use the name of "zgw-office-add-in".
 
 The redirect URI can be one of the following, depending on the Office host:
 - For Word: `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-office.xml`, where `<OFFICE_ADD_IN_HOST_NAME>` is the host name of the server where the add-in is hosted.
-- For Outlook: `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-outlook.xml`
+- For Outlook: `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-outlook.xml`, where `<OFFICE_ADD_IN_HOST_NAME>` is the host name of the server where the add-in is hosted.
 
 ## Expose a web API
 Replace `client_id` with your own client_id. This will have been generated and can be found in the overview page under Applicatien (client) ID.
