@@ -14,8 +14,8 @@ The manifest files serve as guides for Outlook and other Office applications on 
 
 Follow the following steps:
 
-1. For Word: go to `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`
-2. For Outlook: go to `https://ontw-office-addin.dimpact.info.nl/manifest-outlook.xml`
+1. For Word: go to `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-office.xml`, where `<OFFICE_ADD_IN_HOST_NAME>` is the host name of the server where the add-in is hosted.
+2. For Outlook: go to `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-outlook.xml`
 3. Save the desired manifest file by choosing File → Save As (or right-click the link and select Save link as…) to download it as a .xml file.
 4. Locate the `<WebApplicationInfo>` section in the text file — these values need to be updated in the next step.
 5. Save the file using the same name as the variant (for example, `manifest-office.xml` or `manifest-outlook.xml`).

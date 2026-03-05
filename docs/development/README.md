@@ -179,7 +179,7 @@ This launches the local dev server and opens Microsoft Word with the add-in load
 ```shell
 npm run validate:office
 ```
-To sideload, upload the manifest: `manifest-office.xml` (or fetch it from `https://ontw-office-addin.dimpact.info.nl/manifest-office.xml`).
+To sideload, upload the manifest: `manifest-office.xml` (or fetch it from `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-office.xml`, where `<OFFICE_ADD_IN_HOST_NAME>` is the host name of the server where the add-in is hosted).
 
 ---
 
