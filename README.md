@@ -10,6 +10,11 @@ Microsoft Office add-in for integration with Dimpact's PodiumD.
 
 This monorepo contains a Microsoft Office add-in designed to integrate with Dimpact's PodiumD platform. The add-in enables seamless interaction between Microsoft Office applications (primarily Word) and PodiumD services, enhancing productivity and streamlining workflows for municipal document management.
 
+Besides this readme, the following documentation is available:
+- [Architecture Overview](docs/architecture): Architectural diagrams and explanations of the system's components and their interactions.
+- [Development Setup](docs/development): Instructions for setting up the development environment, including prerequisites and configuration.
+- [Manuals](docs/manuals): Manuals for administrators and end-users on how to install, configure, and use the Office Add-in.
+
 ## Project Structure
 
 The project is organized as a monorepo using npm workspaces:
