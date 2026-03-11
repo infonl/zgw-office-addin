@@ -57,7 +57,6 @@
     "react-hook-form": "7.71.2",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
-    "vitest": "4.0.18",
     "zod": "4.3.6"
   },
   "devDependencies": {
@@ -95,6 +94,7 @@
     "source-map-loader": "5.0.0",
     "ts-loader": "9.5.4",
     "typescript": "5.9.3",
+    "vitest": "4.0.18",
     "webpack": "5.105.4",
     "webpack-cli": "6.0.1",
     "webpack-dev-server": "5.2.3"
