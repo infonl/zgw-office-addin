@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
-import {AuthenticationResult, ConfidentialClientApplication} from "@azure/msal-node";
+import {ConfidentialClientApplication} from "@azure/msal-node";
 import { LoggerService } from "./LoggerService";
 
 const msalConfig = {
