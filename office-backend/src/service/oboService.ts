@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2025 INFO.nl
  * SPDX-License-Identifier: EUPL-1.2+
  */
-import { ConfidentialClientApplication } from "@azure/msal-node";
+import {AuthenticationResult, ConfidentialClientApplication} from "@azure/msal-node";
 import { LoggerService } from "./LoggerService";
 
 const msalConfig = {
@@ -15,21 +15,29 @@ const msalConfig = {
 
 const cca = new ConfidentialClientApplication(msalConfig);
 
-export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {
-  try {
-    LoggerService.debug("config: ", msalConfig);
-    const result = await cca.acquireTokenOnBehalfOf({
-      oboAssertion: bootstrapToken,
-      scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
-    });
-
-    if (!result?.accessToken) {
-      throw new Error("No accessToken returned by MSAL OBO");
+async function acquireTokenOnBehalfOf(bootstrapToken: string): Promise<string | Error> {
+  return await cca.acquireTokenOnBehalfOf({
+    oboAssertion: bootstrapToken,
+    scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
+  }).then(
+    (response) => {
+      if (!response?.accessToken) {
+        return Error("No accessToken returned by MSAL OBO");
+      }
+      return response.accessToken
+    },
+    (error) => {
+      return Error("MSAL OBO acquisition failed: " + (error instanceof Error ? error.message : String(error)));
     }
+  )
+}
 
-    return result.accessToken;
-  } catch (err: any) {
+export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {
+  LoggerService.debug("config: ", msalConfig);
+  const tokenOrError = await acquireTokenOnBehalfOf(bootstrapToken);
+  if (tokenOrError instanceof Error) {
     LoggerService.error("❌ MSAL OBO Error:", err);
-    throw new Error("OBO exchange failed: " + err.message);
+    throw tokenOrError;
   }
+  return tokenOrError;
 }

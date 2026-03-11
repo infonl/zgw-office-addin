@@ -64,10 +64,10 @@ export class ZaakService {
     );
     LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
-    this.createGebruiksrechten(
-      informatieobject.url!,
-      new Date(String(body.creatiedatum)),
-      userInfo as { preferredUsername: string; name: string },
+    await this.createGebruiksrechten(
+        informatieobject.url,
+        new Date(String(body.creatiedatum)),
+        userInfo as { preferredUsername: string; name: string },
     );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
@@ -84,9 +84,9 @@ export class ZaakService {
   }
 
   private getFileFormat(file: string) {
-    const extention = file.split(".").slice(-1)[0]!;
+    const extension = file.split(".").slice(-1)[0];
 
-    switch (extention) {
+    switch (extension) {
       case "doc":
       case "docx":
         return "application/msword";

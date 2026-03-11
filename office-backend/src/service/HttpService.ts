@@ -74,10 +74,12 @@ export class HttpService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = await response.json();
 
       LoggerService.debug(`[HTTP] [${method}] [RESULT] ${fullUrl}`, data);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return data;
     } catch (error) {
       LoggerService.error(`[HTTP] [${method}] [ERROR] ${fullUrl}`, error);

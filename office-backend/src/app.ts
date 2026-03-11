@@ -92,18 +92,22 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
 // === OBO AUTH ENDPOINT ===
 fastify.post("/auth/obo", async (req, res) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     const body = req.body as any;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!body?.token) {
       return res.status(400).send("Missing bootstrap token");
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
     const graphToken = await exchangeBootstrapTokenForGraphToken(body.token);
 
     return res.status(200).send({ access_token: graphToken });
-  } catch (err: any) {
+  } catch (err) {
     LoggerService.error("❌ /auth/obo error:", err);
-    return res.status(500).send(err.message);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return res.status(500).send(errorMessage);
   }
 });
 

@@ -38,8 +38,8 @@ describe("ZaakService", () => {
 
   beforeEach(() => {
     mockHttpService = {
-      GET: vi.fn((_url, _userInfo, _params) => Promise.resolve()),
-      POST: vi.fn((_url, _body, _userInfo) => Promise.resolve()),
+      GET: vi.fn((_, _userInfo, _params) => Promise.resolve()),
+      POST: vi.fn((_, _body, _userInfo) => Promise.resolve()),
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),

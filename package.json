@@ -42,8 +42,8 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": "22.22.0",
-    "npm": "11.9.0"
+    "node": "22.22.1",
+    "npm": "10.9.4"
   },
   "dependencies": {
     "@microsoft/microsoft-graph-client": "3.0.7",
