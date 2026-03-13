@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.73](https://img.shields.io/badge/Version-0.0.73-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.74](https://img.shields.io/badge/Version-0.0.74-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -32,7 +32,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.affinity | object | `{}` | Affinity rules for the backend deployment |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
-| backend.image.tag | string | `"v0.9.119@sha256:ada66cb3b9e169ee37b123fe4db6dd7a2fc3c7425bc714d5010aecb22fbfe550"` |  |
+| backend.image.tag | string | `"v0.9.149@sha256:e6d422868a51fa69da863374af2ea8a54cdbf71874af25c7eedb79c01e88e8b6"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
@@ -53,7 +53,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
 | frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
-| frontend.image.tag | string | `"v0.9.119@sha256:91c41f7704aa1a6cd905956f8ff1fd6aa8470b4441cd6f6997039861523b427b"` |  |
+| frontend.image.tag | string | `"v0.9.149@sha256:f2cd20de5791f61608b8619165a338fbc450fd4e0e628f1979d6763292a02325"` |  |
 | frontend.imagePullSecrets | list | `[]` | Image pull secrets for the frontend deployment |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |
