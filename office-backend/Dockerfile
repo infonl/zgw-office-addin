@@ -5,19 +5,14 @@ FROM node:22.22.1-alpine@sha256:8094c002d08262dba12645a3b4a15cd6cd627d30bc782f53
 # Set the working directory
 WORKDIR /app
 
-# Copy root code to workdir
-COPY . .
+# Copy bundled application
+COPY dist/app.js ./
 
-# Install dependencies
-RUN npm ci
+# Copy generated types (needed at runtime)
+COPY dist/generated ./generated
 
-# Generate the types
-RUN npm run types
-
-# Set the working directory to the office-backend directory
-WORKDIR /app/office-backend
-
-RUN npm run build
+# Copy entrypoint script and make it executable
+COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
 # Expose ports

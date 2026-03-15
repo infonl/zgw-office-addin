@@ -7,22 +7,23 @@ import { jwtDecode } from "jwt-decode";
 import { Unauthorized } from "../exception/Unauthorized";
 
 export class TokenService {
-  public getUserInfo(token?: string): { preferedUsername: string; name: string } {
-    try {
-      if (!token) {
-        throw new Unauthorized();
-      }
-      const cleanedToken = String(token).replace("Bearer ", "");
+  public getUserInfo(token?: string): { preferredUsername: string; name: string } {
+    if (!token) {
+      throw new Unauthorized();
+    }
 
+    try {
+      const cleanedToken = String(token).replace("Bearer ", "");
       const decodedToken = jwtDecode<{ preferred_username: string; name: string }>(cleanedToken);
 
       if (!decodedToken.preferred_username || !decodedToken.name) {
         throw new Unauthorized();
       }
       return {
-        preferedUsername: decodedToken.preferred_username,
+        preferredUsername: decodedToken.preferred_username,
         name: decodedToken.name,
       };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new Unauthorized();
     }

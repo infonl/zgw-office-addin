@@ -4,17 +4,17 @@
  */
 
 import path from "path";
-import { ZaakController } from "../controller/ZaakController";
-import { ZaakParam } from "../dto/ZaakParam";
+import { ZaakController } from "./controller/ZaakController";
+import { ZaakParam } from "./dto/ZaakParam";
 import Fastify, { FastifyInstance } from "fastify";
-import { ZaakService } from "../service/ZaakService";
-import { HttpService } from "../service/HttpService";
-import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
-import { LoggerService } from "../service/LoggerService";
+import { ZaakService } from "./service/ZaakService";
+import { HttpService } from "./service/HttpService";
+import { onRequestLoggerHook } from "./hooks/onRequestLoggerHook";
+import { LoggerService } from "./service/LoggerService";
 import fs from "fs";
 import { envServerSchema } from "./envSchema";
-import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
-import { TokenService } from "../service/TokenService";
+import { exchangeBootstrapTokenForGraphToken } from "./service/oboService";
+import { TokenService } from "./service/TokenService";
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
@@ -92,18 +92,22 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
 // === OBO AUTH ENDPOINT ===
 fastify.post("/auth/obo", async (req, res) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     const body = req.body as any;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!body?.token) {
       return res.status(400).send("Missing bootstrap token");
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
     const graphToken = await exchangeBootstrapTokenForGraphToken(body.token);
 
     return res.status(200).send({ access_token: graphToken });
-  } catch (err: any) {
+  } catch (err) {
     LoggerService.error("❌ /auth/obo error:", err);
-    return res.status(500).send(err.message);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return res.status(500).send(errorMessage);
   }
 });
 
