@@ -56,7 +56,7 @@
     "react-hook-form": "7.71.2",
     "regenerator-runtime": "0.14.1",
     "usehooks-ts": "3.1.1",
-    "vitest": "4.0.18",
+    "vitest": "4.1.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
