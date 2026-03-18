@@ -11,7 +11,7 @@ common:
 frontend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-frontend
-    tag: v0.9.152@sha256:a2b40baec88bf491e7eb6219e181f3209dd4914388cc23ac7b9b498f4618d383
+    tag: v0.9.167@sha256:e3eb94f9bea03583403dd9f45c13a0fa88153bcd75b3d655fc8f77a35a8cadf0
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -68,7 +68,7 @@ frontend:
 backend:
   image:
     repository: ghcr.io/infonl/zgw-office-add-in-backend
-    tag: v0.9.152@sha256:4b7d4858cc2fdbc90e40f99729facbff4bebe2d6bce76c2944234c5a7dc7a353
+    tag: v0.9.167@sha256:e7cf93cbdd9fabc80007e8e30ef8d62cac69c885e82bc50231c28b93b39b4450
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
