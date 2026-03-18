@@ -10,7 +10,6 @@ export class AiService {
   public async getMetadata(documentInfo: DocumentInfo) {
     LoggerService.debug(`Getting AI metadata for document "${documentInfo.title}"`, {
       title: documentInfo.title,
-      size: documentInfo.size,
       contentType: documentInfo.contentType,
       attachmentType: documentInfo.attachmentType,
       inhoud: documentInfo.inhoud,

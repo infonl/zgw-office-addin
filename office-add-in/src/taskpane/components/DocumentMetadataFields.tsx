@@ -49,7 +49,7 @@ export function DocumentMetadataFields<T extends FieldValues>({
 }: DocumentMetadataFieldsProps<T>) {
   const styles = useStyles();
   const { setValue } = useFormContext();
-  const { generateMetaData, isLoading } = useGenerateMetaData();
+  const { mutateAsync: generateMetaData, isPending } = useGenerateMetaData();
 
   // Watch the ZIO field to determine if vertrouwelijkheidsaanduiding dropdown should be enabled
   const selectedInformatieobjecttype = useWatch({
@@ -80,10 +80,10 @@ export function DocumentMetadataFields<T extends FieldValues>({
       <Button
         className={`${styles.gridColumnSpan2}`}
         appearance="primary"
-        disabled={isLoading}
+        disabled={isPending}
         onClick={handleGenerateMetaData}
       >
-        {isLoading ? "Bezig met genereren..." : "Voorinvullen met AI"}
+        {isPending ? "Bezig met genereren..." : "Voorinvullen met AI"}
       </Button>{" "}
       <Input
         className={styles.gridColumnSpan2}

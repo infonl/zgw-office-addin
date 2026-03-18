@@ -83,7 +83,6 @@ export type UploadDocumentMutationVariables = {
 
 export type DocumentInfo = {
   title: string;
-  size?: number;
   contentType?: string;
   attachmentType?: string;
   inhoud?: string;

@@ -153,7 +153,6 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
                       control={form.control}
                       documentInfo={{
                         title: document.attachment.name,
-                        size: document.attachment.size,
                         contentType: document.attachment.contentType,
                         attachmentType: String(document.attachment.attachmentType),
                         attachmentOfficeId: document.attachment.id,

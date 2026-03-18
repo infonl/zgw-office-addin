@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useHttp } from "./useHttp";
 import { useDocumentInfo } from "./useDocumentInfo";
 import { DocumentInfo, GenerateMetaDataResponse } from "./types";
@@ -11,20 +11,13 @@ import { DocumentInfo, GenerateMetaDataResponse } from "./types";
 export function useGenerateMetaData() {
   const { POST } = useHttp();
   const { getEnrichedDocumentInfo } = useDocumentInfo();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const generateMetaData = async (
-    documentInfo: DocumentInfo
-  ): Promise<GenerateMetaDataResponse> => {
-    setIsLoading(true);
-    try {
+  return useMutation({
+    mutationKey: ["generate_metadata"],
+    mutationFn: async (documentInfo: DocumentInfo) => {
       const enrichedInfo = await getEnrichedDocumentInfo(documentInfo);
 
-      return await POST<GenerateMetaDataResponse>("/ai/metadata", JSON.stringify(enrichedInfo));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { generateMetaData, isLoading };
+      return POST<GenerateMetaDataResponse>("/ai/metadata", JSON.stringify(enrichedInfo));
+    },
+  });
 }
