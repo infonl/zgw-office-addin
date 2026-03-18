@@ -88,17 +88,20 @@ just relay-test-request path/to/payload.json
 
 ## Configuration
 
-All configuration is via environment variables (set in `.env` at the repo root or passed via docker-compose):
+All configuration is via environment variables. When running via docker-compose, set these in `.env` at the **repo root** (docker-compose maps them to the container). When running locally with `just relay-dev`, the app reads `.env` from the `llm-relay/` directory.
 
 | Variable | Default | Description |
 |---|---|---|
 | `OPENROUTER_API_KEY` | (empty) | OpenRouter API key. Required for requests to succeed. |
 | `DEFAULT_MODEL` | `mistralai/mistral-small-3.2-24b-instruct-2506` | Fallback model when none specified in request |
-| `LLM_RELAY_LOG_LEVEL` | `INFO` | Log level |
-| `LLM_RELAY_DEBUG` | `false` | Debug mode |
+| `LOG_LEVEL` | `INFO` | Log level |
+| `DEBUG` | `false` | Debug mode |
 | `LLM_TEMPERATURE` | `0.1` | Sampling temperature |
 | `LLM_TIMEOUT_SECONDS` | `120` | Request timeout |
 | `LLM_MAX_TOKENS` | `16384` | Max tokens in LLM response |
+| `MAX_CONTENT_LENGTH` | `500000` | Max input content size in bytes |
+
+Note: docker-compose uses `LLM_RELAY_LOG_LEVEL` / `LLM_RELAY_DEBUG` as outer variable names and maps them to `LOG_LEVEL` / `DEBUG` inside the container to avoid collisions with other services.
 
 ## Development
 

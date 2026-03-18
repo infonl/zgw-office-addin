@@ -21,10 +21,15 @@ def _decode_content(raw: str) -> tuple[str, bool]:
     Falls back to plain text passthrough on failure.
     """
     try:
-        decoded = base64.b64decode(raw, validate=True).decode("utf-8")
-        return decoded, True
+        raw_bytes = base64.b64decode(raw, validate=True)
     except Exception:
-        logger.warning("Content is not valid base64 — using as plain text")
+        logger.info("Content is not base64 — using as plain text")
+        return raw, False
+
+    try:
+        return raw_bytes.decode("utf-8"), True
+    except UnicodeDecodeError:
+        logger.warning("Base64 content is not valid UTF-8 text (binary file?) — using raw base64 string")
         return raw, False
 
 
@@ -54,6 +59,14 @@ async def relay_to_openrouter(
     model: str,
     settings: Settings,
 ) -> dict:
+    if len(content_b64) > settings.max_content_length:
+        return {
+            "success": False,
+            "error": f"Content exceeds maximum size of {settings.max_content_length} bytes",
+            "data": None,
+            "model_used": None,
+        }
+
     decoded_content, _was_base64 = _decode_content(content_b64)
 
     if not settings.openrouter_api_key:

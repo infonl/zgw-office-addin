@@ -72,6 +72,7 @@ def test_generate_success(client, sample_payload):
         mock_settings.llm_timeout_seconds = 30
         mock_settings.app_url = "http://test"
         mock_settings.app_name = "test"
+        mock_settings.max_content_length = 500_000
 
         response = client.post("/api/v1/generate", json=sample_payload)
 
@@ -99,6 +100,7 @@ def test_generate_with_explicit_model(client, sample_payload):
         mock_settings.llm_timeout_seconds = 30
         mock_settings.app_url = "http://test"
         mock_settings.app_name = "test"
+        mock_settings.max_content_length = 500_000
 
         response = client.post("/api/v1/generate", json=sample_payload)
 

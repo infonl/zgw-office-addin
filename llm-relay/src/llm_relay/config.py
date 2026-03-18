@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1
     llm_timeout_seconds: int = 120
     llm_max_tokens: int = 16384
+    max_content_length: int = 500_000  # ~500KB
 
 
 @lru_cache
