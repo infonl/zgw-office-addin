@@ -5,25 +5,22 @@
 
 import { useState } from "react";
 import { useHttp } from "./useHttp";
-
-type GenerateMetaDataResponse = {
-  succes: boolean;
-  data: {
-    beschrijving: string;
-  };
-};
+import { useDocumentInfo } from "./useDocumentInfo";
+import { DocumentInfo, GenerateMetaDataResponse } from "./types";
 
 export function useGenerateMetaData() {
   const { POST } = useHttp();
+  const { getEnrichedDocumentInfo } = useDocumentInfo();
   const [isLoading, setIsLoading] = useState(false);
 
-  const generateMetaData = async (documentTitle: string): Promise<GenerateMetaDataResponse> => {
+  const generateMetaData = async (
+    documentInfo: DocumentInfo
+  ): Promise<GenerateMetaDataResponse> => {
     setIsLoading(true);
     try {
-      return await POST<GenerateMetaDataResponse>(
-        "/ai/metadata",
-        JSON.stringify({ document: documentTitle })
-      );
+      const enrichedInfo = await getEnrichedDocumentInfo(documentInfo);
+
+      return await POST<GenerateMetaDataResponse>("/ai/metadata", JSON.stringify(enrichedInfo));
     } finally {
       setIsLoading(false);
     }

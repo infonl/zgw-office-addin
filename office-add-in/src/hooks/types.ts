@@ -81,6 +81,15 @@ export type UploadDocumentMutationVariables = {
   };
 };
 
+export type DocumentInfo = {
+  title: string;
+  size?: number;
+  contentType?: string;
+  attachmentType?: string;
+  inhoud?: string;
+  attachmentOfficeId?: string;
+};
+
 export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   zaakinformatieobjecten: {
     omschrijving: string;
@@ -90,7 +99,7 @@ export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   statuses: typeof documentstatus;
   namePrefix?: string;
   control: Control<T>;
-  documentTitle: string;
+  documentInfo: DocumentInfo;
 };
 
 export type UseUploadStatusProps = {
@@ -109,4 +118,11 @@ export type UseUploadStatusReturn = {
   errorCount: number;
   uploadError: boolean;
   uploadSuccess: boolean;
+};
+
+export type GenerateMetaDataResponse = {
+  succes: boolean;
+  data: {
+    beschrijving: string;
+  };
 };

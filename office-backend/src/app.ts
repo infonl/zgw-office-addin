@@ -17,6 +17,7 @@ import fs from "fs";
 import { envServerSchema } from "./envSchema";
 import { exchangeBootstrapTokenForGraphToken } from "../service/oboService";
 import { TokenService } from "../service/TokenService";
+import { DocumentInfo } from "./types";
 
 let fastify: FastifyInstance;
 const isLocal = envServerSchema.APP_ENV === "local";
@@ -111,7 +112,7 @@ fastify.post("/auth/obo", async (req, res) => {
   }
 });
 
-fastify.post<{ Body: { document: string } }>(
+fastify.post<{ Body: DocumentInfo }>(
   "/ai/metadata",
   (req, res) => aiController.getMetadata(req, res),
 );

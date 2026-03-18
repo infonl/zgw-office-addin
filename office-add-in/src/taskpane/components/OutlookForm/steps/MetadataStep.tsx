@@ -16,7 +16,7 @@ import {
   Body1Strong,
 } from "@fluentui/react-components";
 import { useFormContext } from "react-hook-form";
-import { addDocumentSchema, documentstatus } from "../../../../hooks/types";
+import { addDocumentSchema, documentstatus, DocumentInfo } from "../../../../hooks/types";
 import { useZaak } from "../../../../provider/ZaakProvider";
 import { DocumentMetadataFields } from "../../DocumentMetadataFields";
 import { DocumentIndicator } from "./DocumentIndicator";
@@ -151,7 +151,13 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
                       zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
                       statuses={documentstatus}
                       control={form.control}
-                      documentTitle={document.attachment.name}
+                      documentInfo={{
+                        title: document.attachment.name,
+                        size: document.attachment.size,
+                        contentType: document.attachment.contentType,
+                        attachmentType: String(document.attachment.attachmentType),
+                        attachmentOfficeId: document.attachment.id,
+                      } satisfies DocumentInfo}
                     />
                   </fieldset>
                 </AccordionPanel>

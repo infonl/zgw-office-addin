@@ -45,7 +45,7 @@ export function DocumentMetadataFields<T extends FieldValues>({
   statuses,
   namePrefix = "",
   control,
-  documentTitle,
+  documentInfo,
 }: DocumentMetadataFieldsProps<T>) {
   const styles = useStyles();
   const { setValue } = useFormContext();
@@ -70,7 +70,7 @@ export function DocumentMetadataFields<T extends FieldValues>({
 
   const handleGenerateMetaData = async () => {
     console.log("AI CALL!!");
-    const response = await generateMetaData(documentTitle);
+    const response = await generateMetaData(documentInfo);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setValue(`${namePrefix}beschrijving` as any, response.data.beschrijving);
   };

@@ -23,6 +23,7 @@ import {
   addDocumentSchema,
   documentstatus,
   vertrouwelijkheidaanduidingSchema,
+  DocumentInfo,
 } from "../../hooks/types";
 import { useAddDocumentToZaak } from "../../hooks/useAddDocumentToZaak";
 import { useOffice } from "../../hooks/useOffice";
@@ -109,10 +110,18 @@ export function OfficeForm() {
   };
 
   const { getSignedInUser, getFileName } = useOffice();
-  const [documentTitle, setDocumentTitle] = useState("");
+  const [documentInfo, setDocumentInfo] = useState<DocumentInfo>({ title: "" });
 
   useEffect(() => {
-    getFileName().then(setDocumentTitle);
+    getFileName().then((title) => {
+      const ext = title.split(".").pop()?.toLowerCase();
+      const contentTypeMap: Record<string, string> = {
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        pdf: "application/pdf",
+      };
+      setDocumentInfo({ title, contentType: contentTypeMap[ext ?? ""] });
+    });
   }, []);
 
   useEffect(() => {
@@ -176,7 +185,7 @@ export function OfficeForm() {
               zaakinformatieobjecten={data.zaakinformatieobjecten}
               statuses={documentstatus}
               control={form.control}
-              documentTitle={documentTitle}
+              documentInfo={documentInfo}
             />
             <Button
               disabled={!form.formState.isValid || isPending}
