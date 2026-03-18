@@ -29,8 +29,8 @@ async def health():
     return {"status": "ok", "service": "llm-relay"}
 
 
-@app.post("/api/v1/relay", response_model=RelayResponse)
-async def relay(request: RelayRequest):
+@app.post("/api/v1/generate", response_model=RelayResponse)
+async def generate(request: RelayRequest):
     model = request.model or settings.default_model
 
     result = await relay_to_openrouter(
