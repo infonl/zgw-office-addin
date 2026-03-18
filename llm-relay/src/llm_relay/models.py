@@ -7,7 +7,21 @@ from pydantic import BaseModel, Field
 
 
 class RelayRequest(BaseModel):
-    content: str = Field(..., description="Base64-encoded document content")
+    content: str = Field(..., description="Base64-encoded document content (or plain text)")
+    content_type: str | None = Field(
+        None,
+        description=(
+            "MIME type of the content, e.g. 'application/vnd.openxmlformats-"
+            "officedocument.wordprocessingml.document', 'image/png', 'message/rfc822'."
+        ),
+    )
+    attachment_type: str | None = Field(
+        None,
+        description=(
+            "Type of attachment: 'file' (standalone document or email attachment) "
+            "or 'item' (email message). Passed as context to the LLM."
+        ),
+    )
     model: str | None = Field(
         None, description="OpenRouter model ID. Falls back to configured default if not supplied."
     )

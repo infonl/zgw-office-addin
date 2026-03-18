@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
     openrouter_api_key: str = ""
-    default_model: str = "mistralai/mistral-small-3.2-24b-instruct-2506"
+    default_model: str = "mistral/mistral-small-2603"
     app_name: str = "llm-relay"
     app_url: str = "http://localhost:8080"
     debug: bool = False

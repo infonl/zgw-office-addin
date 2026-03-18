@@ -14,7 +14,7 @@ settings = get_settings()
 
 logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO))
 
-app = FastAPI(title="LLM Relay", version="0.1.0")
+app = FastAPI(title="LLM Relay", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,7 +34,9 @@ async def generate(request: RelayRequest):
     model = request.model or settings.default_model
 
     result = await relay_to_openrouter(
-        content_b64=request.content,
+        content=request.content,
+        content_type=request.content_type,
+        attachment_type=request.attachment_type,
         prompt=request.prompt,
         output_schema=request.output_schema,
         model=model,

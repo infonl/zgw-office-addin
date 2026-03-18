@@ -3,7 +3,7 @@
 
 [project]
 name = "llm-relay"
-version = "0.1.0"
+version = "0.2.0"
 description = "FastAPI relay service for OpenRouter LLM API"
 requires-python = ">=3.12"
 dependencies = [
@@ -12,6 +12,8 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "uvicorn[standard]>=0.34.0",
+    "python-docx>=1.1.0",
+    "openpyxl>=3.1.0",
 ]
 
 [project.optional-dependencies]

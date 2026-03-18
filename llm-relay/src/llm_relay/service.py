@@ -1,42 +1,22 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
-import base64
 import json
 import logging
 
 import httpx
 
 from llm_relay.config import Settings
+from llm_relay.extractor import extract_text, is_image
 
 logger = logging.getLogger(__name__)
 
 OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
-def _decode_content(raw: str) -> tuple[str, bool]:
-    """Decode content. Returns (decoded_text, was_base64).
-
-    Attempts base64 decode first (with strict validation).
-    Falls back to plain text passthrough on failure.
-    """
-    try:
-        raw_bytes = base64.b64decode(raw, validate=True)
-    except Exception:
-        logger.info("Content is not base64 — using as plain text")
-        return raw, False
-
-    try:
-        return raw_bytes.decode("utf-8"), True
-    except UnicodeDecodeError:
-        logger.warning("Base64 content is not valid UTF-8 text (binary file?) — using raw base64 string")
-        return raw, False
-
-
-def _build_messages(prompt: str, decoded_content: str, output_schema: dict) -> list[dict]:
+def _build_system_prompt(output_schema: dict) -> str:
     schema_description = json.dumps(output_schema, indent=2)
-
-    system_prompt = (
+    return (
         "You are a document analysis assistant. "
         "You will receive a document and a user instruction. "
         "You MUST respond with valid JSON that conforms exactly to the output schema provided. "
@@ -44,7 +24,19 @@ def _build_messages(prompt: str, decoded_content: str, output_schema: dict) -> l
         f"Required output schema:\n{schema_description}"
     )
 
-    user_message = f"{prompt}\n\n---\nDOCUMENT:\n{decoded_content}"
+
+def _build_text_messages(
+    prompt: str, text_content: str, output_schema: dict, attachment_type: str | None
+) -> list[dict]:
+    system_prompt = _build_system_prompt(output_schema)
+
+    context_hint = ""
+    if attachment_type == "item":
+        context_hint = "This is an email message.\n\n"
+    elif attachment_type == "file":
+        context_hint = "This is a file attachment.\n\n"
+
+    user_message = f"{prompt}\n\n---\n{context_hint}DOCUMENT:\n{text_content}"
 
     return [
         {"role": "system", "content": system_prompt},
@@ -52,27 +44,52 @@ def _build_messages(prompt: str, decoded_content: str, output_schema: dict) -> l
     ]
 
 
+def _build_vision_messages(prompt: str, image_b64: str, content_type: str, output_schema: dict) -> list[dict]:
+    system_prompt = _build_system_prompt(output_schema)
+
+    user_content = [
+        {"type": "text", "text": prompt},
+        {
+            "type": "image_url",
+            "image_url": {"url": f"data:{content_type};base64,{image_b64}"},
+        },
+    ]
+
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_content},
+    ]
+
+
+def _error(msg: str, model: str | None = None) -> dict:
+    return {"success": False, "error": msg, "data": None, "model_used": model}
+
+
 async def relay_to_openrouter(
-    content_b64: str,
+    content: str,
+    content_type: str | None,
+    attachment_type: str | None,
     prompt: str,
     output_schema: dict,
     model: str,
     settings: Settings,
 ) -> dict:
-    if len(content_b64) > settings.max_content_length:
-        return {
-            "success": False,
-            "error": f"Content exceeds maximum size of {settings.max_content_length} bytes",
-            "data": None,
-            "model_used": None,
-        }
-
-    decoded_content, _was_base64 = _decode_content(content_b64)
+    if len(content) > settings.max_content_length:
+        return _error(f"Content exceeds maximum size of {settings.max_content_length} bytes")
 
     if not settings.openrouter_api_key:
-        return {"success": False, "error": "OPENROUTER_API_KEY is not configured", "data": None, "model_used": None}
+        return _error("OPENROUTER_API_KEY is not configured")
 
-    messages = _build_messages(prompt, decoded_content, output_schema)
+    # Route by content type: images go via vision API, everything else gets text extracted
+    if is_image(content_type):
+        messages = _build_vision_messages(prompt, content, content_type, output_schema)
+    else:
+        try:
+            text_content = extract_text(content, content_type)
+        except Exception as exc:
+            logger.error("Failed to extract text from content_type=%s: %s", content_type, exc)
+            return _error(f"Failed to extract text from document: {exc}", model)
+        messages = _build_text_messages(prompt, text_content, output_schema, attachment_type)
 
     payload = {
         "model": model,
@@ -96,37 +113,22 @@ async def relay_to_openrouter(
     except httpx.HTTPStatusError as exc:
         body = exc.response.text
         logger.error("OpenRouter API error: %s %s", exc.response.status_code, body)
-        return {
-            "success": False,
-            "error": f"OpenRouter API error {exc.response.status_code}: {body}",
-            "data": None,
-            "model_used": model,
-        }
+        return _error(f"OpenRouter API error {exc.response.status_code}: {body}", model)
     except httpx.TimeoutException:
         logger.error("OpenRouter request timed out after %ss", settings.llm_timeout_seconds)
-        return {
-            "success": False,
-            "error": f"LLM request timed out after {settings.llm_timeout_seconds}s",
-            "data": None,
-            "model_used": model,
-        }
+        return _error(f"LLM request timed out after {settings.llm_timeout_seconds}s", model)
     except httpx.RequestError as exc:
         logger.error("OpenRouter request failed: %s", exc)
-        return {"success": False, "error": f"Request failed: {exc}", "data": None, "model_used": model}
+        return _error(f"Request failed: {exc}", model)
 
     try:
         result = response.json()
-        content = result["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
+        llm_content = result["choices"][0]["message"]["content"]
+        parsed = json.loads(llm_content)
     except (KeyError, IndexError, json.JSONDecodeError) as exc:
         logger.error("Failed to parse OpenRouter response: %s", exc)
         raw = response.text[:500]
-        return {
-            "success": False,
-            "error": f"Failed to parse LLM response: {exc}. Raw: {raw}",
-            "data": None,
-            "model_used": model,
-        }
+        return _error(f"Failed to parse LLM response: {exc}. Raw: {raw}", model)
 
     expected_keys = set(output_schema.keys())
     actual_keys = set(parsed.keys())

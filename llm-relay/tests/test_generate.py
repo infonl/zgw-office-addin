@@ -9,10 +9,7 @@ import httpx
 
 def test_generate_missing_api_key(client, sample_payload):
     """Without OPENROUTER_API_KEY, returns a clear error."""
-    with patch("llm_relay.service.Settings") as mock:
-        # The actual settings object used by the endpoint has openrouter_api_key=""
-        response = client.post("/api/v1/generate", json=sample_payload)
-
+    response = client.post("/api/v1/generate", json=sample_payload)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is False
@@ -51,12 +48,23 @@ def test_generate_model_is_optional(client, sample_payload):
     assert response.status_code == 200
 
 
+def test_generate_content_type_is_optional(client, b64_content):
+    """content_type can be omitted."""
+    payload = {
+        "content": b64_content,
+        "prompt": "Summarize.",
+        "output_schema": {"summary": "str"},
+    }
+    response = client.post("/api/v1/generate", json=payload)
+    assert response.status_code == 200
+
+
 def _mock_openrouter_response(data: dict) -> httpx.Response:
     body = {"choices": [{"message": {"content": json.dumps(data)}}]}
     return httpx.Response(200, json=body, request=httpx.Request("POST", "https://fake"))
 
 
-def test_generate_success(client, sample_payload):
+def test_generate_success(client, sample_payload, mock_settings_attrs):
     """Successful round-trip with mocked OpenRouter."""
     llm_data = {"summary": "About housing.", "topics": ["housing", "policy"]}
     mock_response = _mock_openrouter_response(llm_data)
@@ -65,14 +73,8 @@ def test_generate_success(client, sample_payload):
         patch("llm_relay.main.settings") as mock_settings,
         patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response),
     ):
-        mock_settings.openrouter_api_key = "sk-test"
-        mock_settings.default_model = "test-model"
-        mock_settings.llm_temperature = 0.1
-        mock_settings.llm_max_tokens = 4096
-        mock_settings.llm_timeout_seconds = 30
-        mock_settings.app_url = "http://test"
-        mock_settings.app_name = "test"
-        mock_settings.max_content_length = 500_000
+        for k, v in mock_settings_attrs.items():
+            setattr(mock_settings, k, v)
 
         response = client.post("/api/v1/generate", json=sample_payload)
 
@@ -83,9 +85,9 @@ def test_generate_success(client, sample_payload):
     assert data["error"] is None
 
 
-def test_generate_with_explicit_model(client, sample_payload):
+def test_generate_with_explicit_model(client, sample_payload, mock_settings_attrs):
     """Explicit model in request is used."""
-    sample_payload["model"] = "mistralai/mistral-large-latest"
+    sample_payload["model"] = "mistral/mistral-small-2603"
     llm_data = {"summary": "Test.", "topics": ["test"]}
     mock_response = _mock_openrouter_response(llm_data)
 
@@ -93,14 +95,8 @@ def test_generate_with_explicit_model(client, sample_payload):
         patch("llm_relay.main.settings") as mock_settings,
         patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response),
     ):
-        mock_settings.openrouter_api_key = "sk-test"
-        mock_settings.default_model = "default-model"
-        mock_settings.llm_temperature = 0.1
-        mock_settings.llm_max_tokens = 4096
-        mock_settings.llm_timeout_seconds = 30
-        mock_settings.app_url = "http://test"
-        mock_settings.app_name = "test"
-        mock_settings.max_content_length = 500_000
+        for k, v in mock_settings_attrs.items():
+            setattr(mock_settings, k, v)
 
         response = client.post("/api/v1/generate", json=sample_payload)
 
@@ -115,9 +111,51 @@ def test_generate_plain_text_content(client):
         "prompt": "Summarize.",
         "output_schema": {"summary": "str"},
     }
-    # Will fail at API key check, but content decoding should not error
     response = client.post("/api/v1/generate", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is False
     assert "OPENROUTER_API_KEY" in data["error"]
+
+
+def test_generate_with_attachment_type(client, sample_payload):
+    """attachment_type is accepted without error."""
+    sample_payload["attachment_type"] = "item"
+    response = client.post("/api/v1/generate", json=sample_payload)
+    assert response.status_code == 200
+
+
+def test_generate_image_content_type(client, mock_settings_attrs):
+    """Image content_type uses vision message format."""
+    import base64
+
+    # Tiny 1x1 PNG
+    pixel = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"\x00" * 50).decode()
+    payload = {
+        "content": pixel,
+        "content_type": "image/png",
+        "prompt": "Describe this image.",
+        "output_schema": {"description": "str"},
+    }
+    llm_data = {"description": "A tiny image."}
+    mock_response = _mock_openrouter_response(llm_data)
+
+    with (
+        patch("llm_relay.main.settings") as mock_settings,
+        patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response) as mock_post,
+    ):
+        for k, v in mock_settings_attrs.items():
+            setattr(mock_settings, k, v)
+
+        response = client.post("/api/v1/generate", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+    # Verify the vision message format was used
+    call_kwargs = mock_post.call_args
+    sent_payload = call_kwargs.kwargs.get("json") or call_kwargs[1].get("json")
+    user_msg = sent_payload["messages"][1]
+    assert isinstance(user_msg["content"], list)
+    assert user_msg["content"][1]["type"] == "image_url"
+    assert "data:image/png;base64," in user_msg["content"][1]["image_url"]["url"]
