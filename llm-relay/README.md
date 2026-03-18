@@ -55,8 +55,8 @@ Returns `{"status": "ok", "service": "llm-relay"}`.
 
 ### Swagger / OpenAPI docs
 
-- Swagger UI: <http://localhost:8080/docs>
-- ReDoc: <http://localhost:8080/redoc>
+- Swagger UI: `http://localhost:8080/docs`
+- ReDoc: `http://localhost:8080/redoc`
 
 ## Running
 

@@ -35,4 +35,5 @@ header:
     - "**/*.example.cnf"
     - ".hintrc"
     - "**/entrypoint.sh"
+    - "**/uv.lock"
   comment: on-failure
