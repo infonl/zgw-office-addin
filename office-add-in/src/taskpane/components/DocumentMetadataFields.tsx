@@ -5,9 +5,10 @@
 
 import type { FieldValues } from "react-hook-form";
 import React from "react";
-import { useWatch } from "react-hook-form";
-import { makeStyles, tokens } from "@fluentui/react-components";
+import { useWatch, useFormContext } from "react-hook-form";
+import { Button, makeStyles, tokens } from "@fluentui/react-components";
 import { Input } from "./form/Input";
+import { Textarea } from "./form/Textarea";
 import { Select } from "./form/Select";
 import {
   addDocumentSchema,
@@ -15,6 +16,7 @@ import {
   DocumentMetadataFieldsProps,
 } from "../../hooks/types";
 import { mq } from "./styles/layout";
+import { useGenerateMetaData } from "../../hooks/useGenerateMetaData";
 
 const useStyles = makeStyles({
   grid: {
@@ -43,8 +45,11 @@ export function DocumentMetadataFields<T extends FieldValues>({
   statuses,
   namePrefix = "",
   control,
+  documentTitle,
 }: DocumentMetadataFieldsProps<T>) {
   const styles = useStyles();
+  const { setValue } = useFormContext();
+  const { generateMetaData, isLoading } = useGenerateMetaData();
 
   // Watch the ZIO field to determine if vertrouwelijkheidsaanduiding dropdown should be enabled
   const selectedInformatieobjecttype = useWatch({
@@ -63,13 +68,34 @@ export function DocumentMetadataFields<T extends FieldValues>({
     value,
   }));
 
+  const handleGenerateMetaData = async () => {
+    console.log("AI CALL!!");
+    const response = await generateMetaData(documentTitle);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setValue(`${namePrefix}beschrijving` as any, response.data.beschrijving);
+  };
+
   return (
     <section className={styles.grid}>
+      <Button
+        className={`${styles.gridColumnSpan2}`}
+        appearance="primary"
+        disabled={isLoading}
+        onClick={handleGenerateMetaData}
+      >
+        {isLoading ? "Bezig met genereren..." : "Voorinvullen met AI"}
+      </Button>{" "}
       <Input
         className={styles.gridColumnSpan2}
         name={`${namePrefix}auteur`}
         label="Auteur"
         required={!addDocumentSchema.shape.auteur.isOptional()}
+      />
+      <Textarea
+        className={styles.gridColumnSpan2}
+        name={`${namePrefix}beschrijving`}
+        label="Beschrijving"
+        required={!addDocumentSchema.shape.beschrijving.isOptional()}
       />
       <Select
         className={styles.gridColumnSpan1}

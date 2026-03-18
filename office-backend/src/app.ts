@@ -5,10 +5,12 @@
 
 import path from "path";
 import { ZaakController } from "../controller/ZaakController";
+import { AiController } from "../controller/AiController";
 import { ZaakParam } from "../dto/ZaakParam";
 import Fastify, { FastifyInstance } from "fastify";
 import { ZaakService } from "../service/ZaakService";
 import { HttpService } from "../service/HttpService";
+import { AiService } from "../service/AiService";
 import { onRequestLoggerHook } from "../hooks/onRequestLoggerHook";
 import { LoggerService } from "../service/LoggerService";
 import fs from "fs";
@@ -71,6 +73,8 @@ const httpService = new HttpService();
 const tokenService = new TokenService();
 const zaakService = new ZaakService(httpService, tokenService);
 const zaakController = new ZaakController(zaakService);
+const aiService = new AiService();
+const aiController = new AiController(aiService);
 
 // Health check endpoint for Kubernetes probes
 fastify.get("/health", async (_req, res) => {
@@ -106,6 +110,11 @@ fastify.post("/auth/obo", async (req, res) => {
     return res.status(500).send(err.message);
   }
 });
+
+fastify.post<{ Body: { document: string } }>(
+  "/ai/metadata",
+  (req, res) => aiController.getMetadata(req, res),
+);
 
 const port = Number(envServerSchema.PORT || 3003);
 

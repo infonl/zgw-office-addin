@@ -151,6 +151,7 @@ export function MetadataStep({ isUploading = false, isDisabled = false }: Metada
                       zaakinformatieobjecten={zaak.data?.zaakinformatieobjecten ?? []}
                       statuses={documentstatus}
                       control={form.control}
+                      documentTitle={document.attachment.name}
                     />
                   </fieldset>
                 </AccordionPanel>

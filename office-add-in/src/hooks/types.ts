@@ -35,6 +35,7 @@ export const addDocumentSchema = z.object({
   creatiedatum: z.date(),
   zaakidentificatie: z.string(),
   auteur: z.string().min(1),
+  beschrijving: z.string().max(1000).optional(),
 });
 
 export type AddDocumentSchema = z.infer<typeof addDocumentSchema>;
@@ -89,6 +90,7 @@ export type DocumentMetadataFieldsProps<T extends FieldValues> = {
   statuses: typeof documentstatus;
   namePrefix?: string;
   control: Control<T>;
+  documentTitle: string;
 };
 
 export type UseUploadStatusProps = {

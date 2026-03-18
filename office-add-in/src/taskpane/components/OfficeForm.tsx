@@ -14,7 +14,7 @@ import {
   ToastTitle,
   tokens,
 } from "@fluentui/react-components";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,7 +108,12 @@ export function OfficeForm() {
     await mutateAsync(formData);
   };
 
-  const { getSignedInUser } = useOffice();
+  const { getSignedInUser, getFileName } = useOffice();
+  const [documentTitle, setDocumentTitle] = useState("");
+
+  useEffect(() => {
+    getFileName().then(setDocumentTitle);
+  }, []);
 
   useEffect(() => {
     if (!data?.identificatie) return;
@@ -171,6 +176,7 @@ export function OfficeForm() {
               zaakinformatieobjecten={data.zaakinformatieobjecten}
               statuses={documentstatus}
               control={form.control}
+              documentTitle={documentTitle}
             />
             <Button
               disabled={!form.formState.isValid || isPending}
