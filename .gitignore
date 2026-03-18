@@ -41,6 +41,13 @@ build/
 dist/
 **/dist/
 
+### Python ###
+__pycache__/
+**/__pycache__/
+*.egg-info/
+**/*.egg-info/
+.venv/
+
 ### Testing ###
 coverage/
 **/coverage/
