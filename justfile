@@ -45,6 +45,10 @@ relay-dev:
 relay-install:
     cd llm-relay && uv sync --extra dev
 
+# Run tests
+test:
+    cd llm-relay && uv run pytest tests -v
+
 # Format and lint all Python code
 fmt:
     cd llm-relay && uv run ruff format src && uv run ruff check --fix src
