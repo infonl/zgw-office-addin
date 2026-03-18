@@ -144,3 +144,54 @@ def test_extract_text_windows_encoding():
     b64 = base64.b64encode(text_bytes).decode()
     result = extract_text(b64, "text/plain")
     assert "wörld" in result or len(result) > 0  # Should not crash
+
+
+def test_extract_text_eml_with_attachment():
+    """Test that .eml extraction mentions attachment filenames."""
+    eml_content = (
+        "From: sender@example.com\r\n"
+        "To: recipient@example.com\r\n"
+        "Subject: With attachment\r\n"
+        "MIME-Version: 1.0\r\n"
+        "Content-Type: multipart/mixed; boundary=boundary123\r\n"
+        "\r\n"
+        "--boundary123\r\n"
+        "Content-Type: text/plain\r\n"
+        "\r\n"
+        "See the attached file.\r\n"
+        "--boundary123\r\n"
+        "Content-Type: application/pdf\r\n"
+        'Content-Disposition: attachment; filename="report.pdf"\r\n'
+        "\r\n"
+        "fake pdf content\r\n"
+        "--boundary123--\r\n"
+    )
+    b64 = base64.b64encode(eml_content.encode()).decode()
+    result = extract_text(b64, "message/rfc822")
+    assert "sender@example.com" in result
+    assert "With attachment" in result
+    assert "report.pdf" in result
+
+
+def test_extract_text_empty_docx():
+    """Empty .docx returns empty string."""
+    import docx
+
+    doc = docx.Document()
+    buf = io.BytesIO()
+    doc.save(buf)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    result = extract_text(b64, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    assert result.strip() == ""
+
+
+def test_extract_text_empty_xlsx():
+    """Empty .xlsx returns just sheet header."""
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    buf = io.BytesIO()
+    wb.save(buf)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    result = extract_text(b64, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    assert "Sheet:" in result

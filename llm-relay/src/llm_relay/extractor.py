@@ -21,17 +21,17 @@ IMAGE_MIME_TYPES = frozenset(
 )
 
 # MIME types for Office documents that need extraction
+# Note: only OOXML (.docx/.xlsx) is supported — legacy .doc/.xls (application/msword,
+# application/vnd.ms-excel) are binary formats that python-docx/openpyxl cannot read.
 DOCX_MIME_TYPES = frozenset(
     {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/msword",
     }
 )
 
 XLSX_MIME_TYPES = frozenset(
     {
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-excel",
     }
 )
 
@@ -132,5 +132,10 @@ def _extract_eml(data: bytes) -> str:
         if isinstance(content, bytes):
             content = content.decode("utf-8", errors="replace")
         parts.append(content)
+
+    # Note any attachments
+    attachments = [part.get_filename() for part in msg.iter_attachments() if part.get_filename()]
+    if attachments:
+        parts.append(f"\n[Attachments: {', '.join(attachments)}]")
 
     return "\n".join(parts)

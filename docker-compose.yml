@@ -133,11 +133,11 @@ services:
         required: false
     environment:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - DEFAULT_MODEL=${DEFAULT_MODEL:-mistralai/mistral-small-3.2-24b-instruct-2506}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-mistral/mistral-small-2603}
       - LOG_LEVEL=${LLM_RELAY_LOG_LEVEL:-INFO}
       - DEBUG=${LLM_RELAY_DEBUG:-false}
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8080/health').raise_for_status()"]
+      test: ["CMD", "/app/.venv/bin/python", "-c", "import httpx; httpx.get('http://localhost:8080/health').raise_for_status()"]
       interval: 30s
       timeout: 5s
       retries: 3

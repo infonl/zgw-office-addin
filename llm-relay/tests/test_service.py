@@ -87,7 +87,7 @@ def test_build_vision_messages_structure():
     assert isinstance(user_content, list)
     assert len(user_content) == 2
     assert user_content[0]["type"] == "text"
-    assert user_content[0]["text"] == "Describe this image."
+    assert "Describe this image." in user_content[0]["text"]
     assert user_content[1]["type"] == "image_url"
     assert user_content[1]["image_url"]["url"] == "data:image/png;base64,abc123"
 
@@ -101,3 +101,15 @@ def test_build_vision_messages_jpeg():
     )
     url = messages[1]["content"][1]["image_url"]["url"]
     assert url.startswith("data:image/jpeg;base64,")
+
+
+def test_build_vision_messages_reinforces_json_instruction():
+    messages = _build_vision_messages(
+        prompt="Describe this.",
+        image_b64="abc",
+        content_type="image/png",
+        output_schema={"description": "str"},
+    )
+    text_part = messages[1]["content"][0]["text"]
+    assert "JSON" in text_part
+    assert "Describe this." in text_part

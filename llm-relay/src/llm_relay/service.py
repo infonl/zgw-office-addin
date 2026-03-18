@@ -48,7 +48,7 @@ def _build_vision_messages(prompt: str, image_b64: str, content_type: str, outpu
     system_prompt = _build_system_prompt(output_schema)
 
     user_content = [
-        {"type": "text", "text": prompt},
+        {"type": "text", "text": f"{prompt}\n\nRespond with JSON matching the required output schema."},
         {
             "type": "image_url",
             "image_url": {"url": f"data:{content_type};base64,{image_b64}"},
@@ -89,6 +89,8 @@ async def relay_to_openrouter(
         except Exception as exc:
             logger.error("Failed to extract text from content_type=%s: %s", content_type, exc)
             return _error(f"Failed to extract text from document: {exc}", model)
+        if not text_content.strip():
+            return _error("Document appears to be empty or contains no extractable text", model)
         messages = _build_text_messages(prompt, text_content, output_schema, attachment_type)
 
     payload = {

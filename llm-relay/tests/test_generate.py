@@ -159,3 +159,54 @@ def test_generate_image_content_type(client, mock_settings_attrs):
     assert isinstance(user_msg["content"], list)
     assert user_msg["content"][1]["type"] == "image_url"
     assert "data:image/png;base64," in user_msg["content"][1]["image_url"]["url"]
+
+
+def test_generate_content_too_large(client, mock_settings_attrs):
+    """Content exceeding max size is rejected."""
+    mock_settings_attrs["max_content_length"] = 10
+    payload = {
+        "content": "x" * 100,
+        "content_type": "text/plain",
+        "prompt": "Summarize.",
+        "output_schema": {"summary": "str"},
+    }
+
+    with patch("llm_relay.main.settings") as mock_settings:
+        for k, v in mock_settings_attrs.items():
+            setattr(mock_settings, k, v)
+        response = client.post("/api/v1/generate", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is False
+    assert "maximum size" in data["error"]
+
+
+def test_generate_empty_document(client, mock_settings_attrs):
+    """Empty document content returns an error, not hallucinated output."""
+    import base64
+    import io
+
+    import docx as docx_lib
+
+    doc = docx_lib.Document()  # empty doc, no paragraphs
+    buf = io.BytesIO()
+    doc.save(buf)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+
+    payload = {
+        "content": b64,
+        "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "prompt": "Summarize.",
+        "output_schema": {"summary": "str"},
+    }
+
+    with patch("llm_relay.main.settings") as mock_settings:
+        for k, v in mock_settings_attrs.items():
+            setattr(mock_settings, k, v)
+        response = client.post("/api/v1/generate", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is False
+    assert "empty" in data["error"].lower()
