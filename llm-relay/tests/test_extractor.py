@@ -195,3 +195,76 @@ def test_extract_text_empty_xlsx():
     b64 = base64.b64encode(buf.getvalue()).decode()
     result = extract_text(b64, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     assert "Sheet:" in result
+
+
+def test_extract_text_unpadded_base64():
+    """Base64 with missing padding should still decode."""
+    text = "Unpadded content"
+    b64 = base64.b64encode(text.encode()).decode().rstrip("=")
+    result = extract_text(b64, "text/plain")
+    assert result == text
+
+
+def test_extract_text_xlsx_multi_sheet():
+    """Multi-sheet .xlsx extracts all sheets."""
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    ws1 = wb.active
+    ws1.title = "Invoices"
+    ws1["A1"] = "Amount"
+    ws1["B1"] = 1234
+
+    ws2 = wb.create_sheet("Summary")
+    ws2["A1"] = "Total"
+    ws2["B1"] = 5678
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+
+    result = extract_text(b64, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    assert "Sheet: Invoices" in result
+    assert "1234" in result
+    assert "Sheet: Summary" in result
+    assert "5678" in result
+
+
+def test_extract_text_docx_unicode():
+    """Docx with non-ASCII (Dutch/German) characters extracts correctly."""
+    import docx
+
+    doc = docx.Document()
+    doc.add_paragraph("Beschrijving van het zaaktype voor gemeentelijke übersicht.")
+    doc.add_paragraph("Coördinatie en reïntegratie zijn belangrijk.")
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+
+    result = extract_text(b64, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    assert "übersicht" in result
+    assert "Coördinatie" in result
+    assert "reïntegratie" in result
+
+
+def test_extract_text_binary_content_raises():
+    """Binary content that isn't text/docx/xlsx/eml raises ValueError."""
+    binary_data = bytes(range(256))  # all byte values — not valid text
+    b64 = base64.b64encode(binary_data).decode()
+    import pytest
+
+    with pytest.raises(ValueError, match="Cannot decode binary content"):
+        extract_text(b64, "application/octet-stream")
+
+
+def test_is_image_all_supported_types():
+    """All documented image types are recognized."""
+    for mime in ("image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"):
+        assert is_image(mime) is True, f"{mime} should be recognized as image"
+
+
+def test_is_image_case_insensitive():
+    """Image detection is case-insensitive."""
+    assert is_image("Image/PNG") is True
+    assert is_image("IMAGE/JPEG") is True
