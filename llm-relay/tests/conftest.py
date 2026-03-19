@@ -9,6 +9,12 @@ from fastapi.testclient import TestClient
 from llm_relay.main import app
 
 
+@pytest.fixture(autouse=True)
+def _isolate_env(monkeypatch):
+    """Ensure tests never hit the real OpenRouter API, even if env vars are set."""
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+
+
 @pytest.fixture
 def client():
     return TestClient(app)

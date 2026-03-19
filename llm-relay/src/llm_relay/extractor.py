@@ -53,9 +53,14 @@ def extract_text(raw_b64: str, content_type: str | None) -> str:
     """
     ct = (content_type or "").lower()
 
-    # Try to decode base64 first
+    # Try to decode base64 first (normalize missing padding)
+    stripped = raw_b64.strip()
+    padding_needed = len(stripped) % 4
+    if padding_needed:
+        stripped += "=" * (4 - padding_needed)
+
     try:
-        raw_bytes = base64.b64decode(raw_b64, validate=True)
+        raw_bytes = base64.b64decode(stripped, validate=True)
     except Exception:
         # Not base64 — treat as plain text
         logger.info("Content is not base64 — using as plain text")
@@ -77,7 +82,7 @@ def extract_text(raw_b64: str, content_type: str | None) -> str:
                 return raw_bytes.decode("cp1252")
             except UnicodeDecodeError:
                 logger.warning("Could not decode content as text for content_type=%s", content_type)
-                return raw_b64
+                raise ValueError(f"Cannot decode binary content for content_type={content_type}")
 
 
 def _extract_docx(data: bytes) -> str:
