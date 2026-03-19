@@ -75,7 +75,7 @@ async def relay_to_openrouter(
     settings: Settings,
 ) -> dict:
     if len(content) > settings.max_content_length:
-        return _error(f"Content exceeds maximum size of {settings.max_content_length} bytes")
+        return _error(f"Content exceeds maximum size of {settings.max_content_length} bytes", model)
 
     if not settings.openrouter_api_key:
         return _error("OPENROUTER_API_KEY is not configured")

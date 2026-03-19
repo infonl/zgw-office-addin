@@ -100,16 +100,18 @@ def _extract_xlsx(data: bytes) -> str:
     import openpyxl
 
     wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
-    parts = []
-    for sheet_name in wb.sheetnames:
-        ws = wb[sheet_name]
-        parts.append(f"=== Sheet: {sheet_name} ===")
-        for row in ws.iter_rows(values_only=True):
-            cells = [str(c) if c is not None else "" for c in row]
-            if any(cells):
-                parts.append(" | ".join(cells))
-    wb.close()
-    return "\n".join(parts)
+    try:
+        parts = []
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            parts.append(f"=== Sheet: {sheet_name} ===")
+            for row in ws.iter_rows(values_only=True):
+                cells = [str(c) if c is not None else "" for c in row]
+                if any(cells):
+                    parts.append(" | ".join(cells))
+        return "\n".join(parts)
+    finally:
+        wb.close()
 
 
 def _extract_eml(data: bytes) -> str:
