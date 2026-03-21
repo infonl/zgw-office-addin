@@ -64,7 +64,7 @@
     "@babel/preset-env": "7.29.2",
     "@babel/preset-typescript": "7.28.5",
     "@prettier/plugin-xml": "3.4.2",
-    "@tanstack/eslint-plugin-query": "5.91.4",
+    "@tanstack/eslint-plugin-query": "5.91.5",
     "@testing-library/react": "16.3.2",
     "@types/node": "22.19.15",
     "@types/office-js": "1.0.582",
