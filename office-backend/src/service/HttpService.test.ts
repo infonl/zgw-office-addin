@@ -25,7 +25,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 
@@ -333,7 +333,7 @@ describe("HttpService", () => {
           iss: "office-add-in",
           iat: expect.any(Number),
           client_id: "office-add-in",
-          user_id: mockUserInfo.preferedUsername,
+          user_id: mockUserInfo.preferredUsername,
           user_representation: mockUserInfo.name,
         },
         "test-secret",
