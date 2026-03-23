@@ -101,9 +101,10 @@ fastify.post("/auth/obo", async (req, res) => {
     const graphToken = await exchangeBootstrapTokenForGraphToken(body.token);
 
     return res.status(200).send({ access_token: graphToken });
-  } catch (err: any) {
+  } catch (err) {
     LoggerService.error("❌ /auth/obo error:", err);
-    return res.status(500).send(err.message);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return res.status(500).send(errorMessage);
   }
 });
 
