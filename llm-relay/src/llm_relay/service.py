@@ -78,7 +78,7 @@ async def relay_to_openrouter(
         return _error(f"Content exceeds maximum size of {settings.max_content_length} characters", model)
 
     if not settings.openrouter_api_key:
-        return _error("OPENROUTER_API_KEY is not configured")
+        return _error("OPENROUTER_API_KEY is not configured", model)
 
     # Route by content type: images go via vision API, everything else gets text extracted
     if is_image(content_type):

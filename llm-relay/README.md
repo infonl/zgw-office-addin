@@ -7,8 +7,8 @@ FastAPI service that relays document analysis requests to OpenRouter. Send a doc
 1. You POST a document (base64-encoded or plain text), a prompt, and an output schema
 2. The relay extracts text based on content type (`.docx`, `.xlsx`, `.eml`) or sends images via the vision API
 3. It constructs a system prompt that instructs the LLM to return JSON matching your schema
-4. The LLM response is parsed and validated against your schema keys
-5. You get back structured JSON matching what you asked for
+4. The LLM response is parsed into JSON and checked against your schema keys (missing keys are logged as warnings but do not cause the request to fail)
+5. You get back structured JSON that best-effort follows your schema; you should still perform any critical validation on the client side
 
 ## Supported content types
 
@@ -19,7 +19,7 @@ FastAPI service that relays document analysis requests to OpenRouter. Send a doc
 | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Cell data extracted from .xlsx via openpyxl |
 | `message/rfc822` | Headers + body + attachment list extracted from .eml |
 | `image/png`, `image/jpeg`, `image/webp`, `image/gif` | Sent via vision API as base64 data URL |
-| (any other / none) | Attempt UTF-8 decode, fallback to cp1252, then plain text passthrough |
+| (any other / none) | Attempt UTF-8 decode, fallback to cp1252; undecodable binary content is rejected with an error response |
 
 ## Endpoint
 
