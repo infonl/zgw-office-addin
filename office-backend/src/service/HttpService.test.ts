@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import jwt from "jsonwebtoken";
 import { HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
-import { mockFetch } from "../test/setup";
+import { mockFetch } from "../../test/setup";
 
 // Mock dependencies
 vi.mock("jsonwebtoken", () => ({
