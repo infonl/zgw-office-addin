@@ -5,7 +5,7 @@
 
 import jwt from "jsonwebtoken";
 import { LoggerService } from "./LoggerService";
-import { envServerSchema } from "../src/envSchema";
+import { envServerSchema } from "../envSchema";
 
 export class HttpService {
   private readonly baseUrl = envServerSchema.API_BASE_URL;
