@@ -12,6 +12,13 @@ def test_build_system_prompt_includes_schema():
     assert '"tags"' in prompt
 
 
+def test_build_system_prompt_instructs_dutch_output():
+    """LLM is instructed to formulate response values in Dutch for end users."""
+    prompt = _build_system_prompt({"beschrijving": "str"})
+    assert "Dutch" in prompt
+    assert "Nederlands" in prompt
+
+
 def test_build_text_messages_structure():
     messages = _build_text_messages(
         prompt="Summarize this.",

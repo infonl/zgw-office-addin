@@ -8,9 +8,9 @@ import httpx
 
 
 def test_generate_missing_api_key(client, sample_payload):
-    """Without OPENROUTER_API_KEY, returns a clear error."""
+    """Without OPENROUTER_API_KEY, returns 400 with a clear error."""
     response = client.post("/api/v1/generate", json=sample_payload)
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
     assert "OPENROUTER_API_KEY" in data["error"]
@@ -31,32 +31,37 @@ def test_generate_validation_missing_prompt(client, b64_content):
     assert response.status_code == 422
 
 
-def test_generate_validation_missing_output_schema(client, b64_content):
-    """Missing output_schema returns 422."""
+def test_generate_default_output_schema(client, b64_content):
+    """Missing output_schema uses default {'beschrijving': 'str'}."""
     response = client.post(
         "/api/v1/generate",
-        json={"content": b64_content, "prompt": "Summarize."},
+        json={"content": b64_content, "prompt": "Beschrijf dit document."},
     )
-    assert response.status_code == 422
+    # Returns 400 (API key error) — not 422, because output_schema has a default
+    assert response.status_code == 400
+    data = response.json()
+    assert data["success"] is False
+    assert "OPENROUTER_API_KEY" in data["error"]
 
 
 def test_generate_model_is_optional(client, sample_payload):
     """model field can be omitted — should not cause 422."""
     assert "model" not in sample_payload
     response = client.post("/api/v1/generate", json=sample_payload)
-    # Will fail at API key check, but not at validation
-    assert response.status_code == 200
+    # Will fail at API key check (400), but not at validation (422)
+    assert response.status_code == 400
 
 
 def test_generate_content_type_is_optional(client, b64_content):
-    """content_type can be omitted."""
+    """content_type can be omitted — not a 422."""
     payload = {
         "content": b64_content,
         "prompt": "Summarize.",
         "output_schema": {"summary": "str"},
     }
     response = client.post("/api/v1/generate", json=payload)
-    assert response.status_code == 200
+    # Fails at API key check (400), but content_type being absent is fine
+    assert response.status_code == 400
 
 
 def _mock_openrouter_response(data: dict) -> httpx.Response:
@@ -87,7 +92,7 @@ def test_generate_success(client, sample_payload, mock_settings_attrs):
 
 def test_generate_with_explicit_model(client, sample_payload, mock_settings_attrs):
     """Explicit model in request is used."""
-    sample_payload["model"] = "mistral/mistral-small-2603"
+    sample_payload["model"] = "mistralai/mistral-small-3.2-24b-instruct-2506"
     llm_data = {"summary": "Test.", "topics": ["test"]}
     mock_response = _mock_openrouter_response(llm_data)
 
@@ -112,7 +117,7 @@ def test_generate_plain_text_content(client):
         "output_schema": {"summary": "str"},
     }
     response = client.post("/api/v1/generate", json=payload)
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
     assert "OPENROUTER_API_KEY" in data["error"]
@@ -122,7 +127,7 @@ def test_generate_with_attachment_type(client, sample_payload):
     """attachment_type is accepted without error."""
     sample_payload["attachment_type"] = "item"
     response = client.post("/api/v1/generate", json=sample_payload)
-    assert response.status_code == 200
+    assert response.status_code == 400  # API key missing, but attachment_type is valid
 
 
 def test_generate_image_content_type(client, mock_settings_attrs):
@@ -176,7 +181,7 @@ def test_generate_content_too_large(client, mock_settings_attrs):
             setattr(mock_settings, k, v)
         response = client.post("/api/v1/generate", json=payload)
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
     assert "maximum size" in data["error"]
@@ -206,7 +211,7 @@ def test_generate_empty_document(client, mock_settings_attrs):
             setattr(mock_settings, k, v)
         response = client.post("/api/v1/generate", json=payload)
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
     assert "empty" in data["error"].lower()

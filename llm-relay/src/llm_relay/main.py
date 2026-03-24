@@ -5,6 +5,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from llm_relay.config import get_settings
 from llm_relay.models import RelayRequest, RelayResponse
@@ -43,4 +44,8 @@ async def generate(request: RelayRequest):
         settings=settings,
     )
 
-    return RelayResponse(**result)
+    http_status = result.pop("http_status", 200)
+    response = RelayResponse(**result)
+    if not response.success:
+        return JSONResponse(status_code=http_status, content=response.model_dump())
+    return response

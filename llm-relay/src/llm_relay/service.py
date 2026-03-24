@@ -20,7 +20,9 @@ def _build_system_prompt(output_schema: dict) -> str:
         "You are a document analysis assistant. "
         "You will receive a document and a user instruction. "
         "You MUST respond with valid JSON that conforms exactly to the output schema provided. "
-        "Do NOT include any text outside the JSON object. No markdown fences, no explanation.\n\n"
+        "Do NOT include any text outside the JSON object. No markdown fences, no explanation. "
+        "Unless the prompt explicitly specifies another language, formulate all text values in the JSON response "
+        "in Dutch (Nederlands), as the end users of this data are Dutch-speaking.\n\n"
         f"Required output schema:\n{schema_description}"
     )
 
@@ -61,8 +63,8 @@ def _build_vision_messages(prompt: str, image_b64: str, content_type: str, outpu
     ]
 
 
-def _error(msg: str, model: str | None = None) -> dict:
-    return {"success": False, "error": msg, "data": None, "model_used": model}
+def _error(msg: str, model: str | None = None, status: int = 400) -> dict:
+    return {"success": False, "error": msg, "data": None, "model_used": model, "http_status": status}
 
 
 async def relay_to_openrouter(
@@ -115,13 +117,13 @@ async def relay_to_openrouter(
     except httpx.HTTPStatusError as exc:
         body = exc.response.text
         logger.error("OpenRouter API error: %s %s", exc.response.status_code, body)
-        return _error(f"OpenRouter API error {exc.response.status_code}: {body}", model)
+        return _error(f"OpenRouter API error {exc.response.status_code}: {body}", model, status=502)
     except httpx.TimeoutException:
         logger.error("OpenRouter request timed out after %ss", settings.llm_timeout_seconds)
-        return _error(f"LLM request timed out after {settings.llm_timeout_seconds}s", model)
+        return _error(f"LLM request timed out after {settings.llm_timeout_seconds}s", model, status=504)
     except httpx.RequestError as exc:
         logger.error("OpenRouter request failed: %s", exc)
-        return _error(f"Request failed: {exc}", model)
+        return _error(f"Request failed: {exc}", model, status=502)
 
     try:
         result = response.json()
@@ -130,7 +132,7 @@ async def relay_to_openrouter(
     except (KeyError, IndexError, json.JSONDecodeError) as exc:
         logger.error("Failed to parse OpenRouter response: %s", exc)
         raw = response.text[:500]
-        return _error(f"Failed to parse LLM response: {exc}. Raw: {raw}", model)
+        return _error(f"Failed to parse LLM response: {exc}. Raw: {raw}", model, status=502)
 
     expected_keys = set(output_schema.keys())
     actual_keys = set(parsed.keys())
@@ -138,4 +140,4 @@ async def relay_to_openrouter(
     if missing:
         logger.warning("LLM response missing expected schema keys: %s", missing)
 
-    return {"success": True, "data": parsed, "model_used": model, "error": None}
+    return {"success": True, "data": parsed, "model_used": model, "error": None, "http_status": 200}

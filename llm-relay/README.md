@@ -58,11 +58,11 @@ FastAPI service that relays document analysis requests to OpenRouter. Send a doc
 **Fields:**
 
 - `content` (required) — base64-encoded document content. Plain text is accepted as fallback.
+- `prompt` (required) — the instruction for the LLM.
 - `content_type` (optional) — MIME type. Determines how content is extracted/sent. If omitted, defaults to UTF-8 text decode.
 - `attachment_type` (optional) — `"file"` or `"item"` (email). Adds context to the LLM prompt.
-- `prompt` (required) — the instruction for the LLM.
-- `output_schema` (required) — JSON dict describing the desired return shape.
-- `model` (optional) — OpenRouter model ID. Defaults to `mistral/mistral-small-2603`.
+- `output_schema` (optional) — JSON dict describing the desired return shape. Defaults to `{"beschrijving": "str"}`.
+- `model` (optional) — OpenRouter model ID. Defaults to `mistralai/mistral-small-3.2-24b-instruct-2506`.
 
 **Response:**
 
@@ -74,7 +74,7 @@ FastAPI service that relays document analysis requests to OpenRouter. Send a doc
     "topics": ["climate", "policy"],
     "language": "en"
   },
-  "model_used": "mistral/mistral-small-2603",
+  "model_used": "mistralai/mistral-small-3.2-24b-instruct-2506",
   "error": null
 }
 ```
@@ -121,7 +121,7 @@ All configuration is via environment variables. When running via docker-compose,
 | Variable | Default | Description |
 |---|---|---|
 | `OPENROUTER_API_KEY` | (empty) | OpenRouter API key. Required for requests to succeed. |
-| `DEFAULT_MODEL` | `mistral/mistral-small-2603` | Fallback model (vision + JSON capable) |
+| `DEFAULT_MODEL` | `mistralai/mistral-small-3.2-24b-instruct-2506` | Fallback model (vision + JSON capable) |
 | `LOG_LEVEL` | `INFO` | Log level |
 | `DEBUG` | `false` | Debug mode |
 | `LLM_TEMPERATURE` | `0.1` | Sampling temperature |
