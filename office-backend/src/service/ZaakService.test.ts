@@ -22,7 +22,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 
@@ -38,8 +38,8 @@ describe("ZaakService", () => {
 
   beforeEach(() => {
     mockHttpService = {
-      GET: vi.fn((_url, _userInfo, _params) => Promise.resolve()),
-      POST: vi.fn((_url, _body, _userInfo) => Promise.resolve()),
+      GET: vi.fn((_, _userInfo, _params) => Promise.resolve()),
+      POST: vi.fn((_, _body, _userInfo) => Promise.resolve()),
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
@@ -410,6 +410,65 @@ describe("ZaakService", () => {
       await expect(
         zaakService.addDocumentToZaak("ZAAK-001", { titel: "test", creatiedatum: "2025-01-15" }),
       ).rejects.toThrow(FileNotSupported);
+    });
+  });
+
+  describe("setUserInfo", () => {
+    let zaakService: ZaakService;
+    let mockHttpService: {
+      GET: MockedFunction<HttpService["GET"]>;
+      POST: MockedFunction<HttpService["POST"]>;
+    };
+    let mockTokenService: {
+      getUserInfo: MockedFunction<TokenService["getUserInfo"]>;
+    };
+
+    beforeEach(() => {
+      mockHttpService = {
+        GET: vi.fn(),
+        POST: vi.fn(),
+      };
+      mockTokenService = {
+        getUserInfo: vi.fn(),
+      };
+      zaakService = new ZaakService(
+        mockHttpService as unknown as HttpService,
+        mockTokenService as unknown as TokenService,
+      );
+    });
+
+    it("should set userInfo when a valid JWT is provided", () => {
+      const jwt = "valid.jwt.token";
+      const userInfo = { preferredUsername: "user", name: "User" };
+      mockTokenService.getUserInfo.mockReturnValue(userInfo);
+      zaakService.setUserInfo(jwt);
+      // @ts-expect-error: access private for test
+      expect(zaakService.userInfo).toEqual(userInfo);
+      expect(mockTokenService.getUserInfo).toHaveBeenCalledWith(jwt);
+    });
+
+    it("should set userInfo to null when getUserInfo returns null", () => {
+      mockTokenService.getUserInfo.mockReturnValue(null);
+      zaakService.setUserInfo(undefined);
+      // @ts-expect-error: access private for test
+      expect(zaakService.userInfo).toBeNull();
+    });
+
+    it("should use set userInfo in subsequent getZaak calls", async () => {
+      const jwt = "valid.jwt.token";
+      const userInfo = { preferredUsername: "user", name: "User" };
+      mockTokenService.getUserInfo.mockReturnValue(userInfo);
+      zaakService.setUserInfo(jwt);
+      const mockZaak = { url: "url", zaaktype: "type", bronorganisatie: "org", status: null };
+      const mockZaaktype = { informatieobjecttypen: [] };
+      mockHttpService.GET.mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve(mockZaaktype));
+      await zaakService.getZaak("ZAAK-001");
+      expect(mockHttpService.GET).toHaveBeenCalledWith(
+        "/zaken/api/v1/zaken",
+        userInfo,
+        { identificatie: "ZAAK-001" },
+      );
     });
   });
 });
