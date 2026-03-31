@@ -448,7 +448,9 @@ describe("ZaakService", () => {
     });
 
     it("should set userInfo to null when getUserInfo returns null", () => {
-      mockTokenService.getUserInfo.mockImplementation(() => { throw new Error("Unauthorized"); });
+      mockTokenService.getUserInfo.mockImplementation(() => {
+        throw new Error("Unauthorized");
+      });
       zaakService.setUserInfo(undefined);
       // @ts-expect-error: access private for test
       expect(zaakService.userInfo).toBeNull();
