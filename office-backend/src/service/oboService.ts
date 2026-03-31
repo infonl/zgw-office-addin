@@ -16,20 +16,25 @@ const msalConfig = {
 const cca = new ConfidentialClientApplication(msalConfig);
 
 async function acquireTokenOnBehalfOf(bootstrapToken: string): Promise<string | Error> {
-  return await cca.acquireTokenOnBehalfOf({
-    oboAssertion: bootstrapToken,
-    scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
-  }).then(
-    (response) => {
-      if (!response?.accessToken) {
-        return Error("No accessToken returned by MSAL OBO");
-      }
-      return response.accessToken
-    },
-    (error) => {
-      return Error("MSAL OBO acquisition failed: " + (error instanceof Error ? error.message : String(error)));
-    }
-  )
+  return await cca
+    .acquireTokenOnBehalfOf({
+      oboAssertion: bootstrapToken,
+      scopes: ["https://graph.microsoft.com/.default"], // REQUIRED for OBO
+    })
+    .then(
+      (response) => {
+        if (!response?.accessToken) {
+          return Error("No accessToken returned by MSAL OBO");
+        }
+        return response.accessToken;
+      },
+      (error) => {
+        return Error(
+          "MSAL OBO acquisition failed: " +
+            (error instanceof Error ? error.message : String(error)),
+        );
+      },
+    );
 }
 
 export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string): Promise<string> {

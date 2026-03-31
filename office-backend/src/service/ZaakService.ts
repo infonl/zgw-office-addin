@@ -65,9 +65,9 @@ export class ZaakService {
     LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
     await this.createGebruiksrechten(
-        informatieobject.url,
-        new Date(String(body.creatiedatum)),
-        userInfo as { preferredUsername: string; name: string },
+      informatieobject.url,
+      new Date(String(body.creatiedatum)),
+      userInfo as { preferredUsername: string; name: string },
     );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);

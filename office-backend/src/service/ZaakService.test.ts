@@ -461,14 +461,13 @@ describe("ZaakService", () => {
       zaakService.setUserInfo(jwt);
       const mockZaak = { url: "url", zaaktype: "type", bronorganisatie: "org", status: null };
       const mockZaaktype = { informatieobjecttypen: [] };
-      mockHttpService.GET.mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
-        .mockImplementationOnce(() => Promise.resolve(mockZaaktype));
+      mockHttpService.GET.mockImplementationOnce(() =>
+        Promise.resolve({ results: [mockZaak] }),
+      ).mockImplementationOnce(() => Promise.resolve(mockZaaktype));
       await zaakService.getZaak("ZAAK-001");
-      expect(mockHttpService.GET).toHaveBeenCalledWith(
-        "/zaken/api/v1/zaken",
-        userInfo,
-        { identificatie: "ZAAK-001" },
-      );
+      expect(mockHttpService.GET).toHaveBeenCalledWith("/zaken/api/v1/zaken", userInfo, {
+        identificatie: "ZAAK-001",
+      });
     });
   });
 });
