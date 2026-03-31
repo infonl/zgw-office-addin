@@ -148,6 +148,10 @@ export class ZaakService {
   }
 
   public setUserInfo(jwt: string | undefined) {
-    this.userInfo = this.tokenService.getUserInfo(jwt);
+    try {
+      this.userInfo = this.tokenService.getUserInfo(jwt);
+    } catch (e) {
+      this.userInfo = null;
+    }
   }
 }

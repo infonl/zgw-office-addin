@@ -41,7 +41,7 @@ export async function exchangeBootstrapTokenForGraphToken(bootstrapToken: string
   LoggerService.debug("config: ", msalConfig);
   const tokenOrError = await acquireTokenOnBehalfOf(bootstrapToken);
   if (tokenOrError instanceof Error) {
-    LoggerService.error("❌ MSAL OBO Error:", err);
+    LoggerService.error("❌ MSAL OBO Error:", tokenOrError);
     throw tokenOrError;
   }
   return tokenOrError;
