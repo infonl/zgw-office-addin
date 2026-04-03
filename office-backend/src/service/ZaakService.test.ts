@@ -42,14 +42,14 @@ describe("ZaakService", () => {
       _userInfo: { preferredUsername: string; name: string },
       _params?: Record<string, string>,
       _headers: HeadersInit = {},
-    ) => ({} as T);
+    ) => ({}) as T;
 
     const defaultPost: HttpService["POST"] = async <T>(
       _url: string,
       _body: BodyInit,
       _userInfo: { preferredUsername: string; name: string },
       _headers: HeadersInit = {},
-    ) => ({} as T);
+    ) => ({}) as T;
 
     mockHttpService = {
       GET: vi.fn(defaultGet),
@@ -458,14 +458,14 @@ describe("ZaakService", () => {
         _userInfo: { preferredUsername: string; name: string },
         _params?: Record<string, string>,
         _headers: HeadersInit = {},
-      ) => ({} as T);
+      ) => ({}) as T;
 
       const defaultPost: HttpService["POST"] = async <T>(
         _url: string,
         _body: BodyInit,
         _userInfo: { preferredUsername: string; name: string },
         _headers: HeadersInit = {},
-      ) => ({} as T);
+      ) => ({}) as T;
 
       mockHttpService = {
         GET: vi.fn(defaultGet),
