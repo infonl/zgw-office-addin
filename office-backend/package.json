@@ -17,7 +17,8 @@
     "docker:validate": "docker buildx build --check .",
     "prettier": "prettier --check \"**/*.{ts,js}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
-    "test": "vitest --run --coverage",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage --reporter=default && vitest --run --reporter=junit > junit.xml",
     "test:ui": "vitest --ui",
     "test:watch": "vitest"
   },

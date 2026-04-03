@@ -25,7 +25,7 @@
     "prettier:fix": "turbo prettier:fix",
     "types": "npx openapi-typescript ./resources/api-specs/zrc-openapi.yaml -o ./generated/zrc-types.ts && npx openapi-typescript ./resources/api-specs/drc-openapi.yaml -o ./generated/drc-types.ts",
     "test": "turbo test",
-    "test:coverage": "turbo test -- --coverage",
+    "test:coverage": "turbo test:coverage",
     "test:ui": "turbo test:ui",
     "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
