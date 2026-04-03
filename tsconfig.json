@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
     "allowUnusedLabels": false,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
@@ -16,7 +18,6 @@
     "target": "es5",
     "lib": ["dom", "es2015"],
     "types": ["node"],
-    "strict": true,
     "pretty": true,
     "typeRoots": ["node_modules/@types"]
   },
