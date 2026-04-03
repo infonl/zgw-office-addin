@@ -17,7 +17,7 @@
     "docker:validate": "docker buildx build --check .",
     "prettier": "prettier --check \"**/*.{ts,js}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
-    "test": "vitest --run",
+    "test": "vitest --run --coverage",
     "test:ui": "vitest --ui",
     "test:watch": "vitest"
   },
