@@ -22,7 +22,7 @@ vi.mock("./LoggerService", () => ({
 }));
 
 const mockUserInfo = {
-  preferedUsername: "test-user",
+  preferredUsername: "test-user",
   name: "Test User",
 };
 
@@ -37,9 +37,23 @@ describe("ZaakService", () => {
   };
 
   beforeEach(() => {
+    const defaultGet: HttpService["GET"] = async <T>(
+      _url: string,
+      _userInfo: { preferredUsername: string; name: string },
+      _params?: Record<string, string>,
+      _headers: HeadersInit = {},
+    ) => ({}) as T;
+
+    const defaultPost: HttpService["POST"] = async <T>(
+      _url: string,
+      _body: BodyInit,
+      _userInfo: { preferredUsername: string; name: string },
+      _headers: HeadersInit = {},
+    ) => ({}) as T;
+
     mockHttpService = {
-      GET: vi.fn((_url, _userInfo, _params) => Promise.resolve()),
-      POST: vi.fn((_url, _body, _userInfo) => Promise.resolve()),
+      GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
+      POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
@@ -204,8 +218,13 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
-        Promise.resolve({ results: [mockZaak] }),
+      mockHttpService.GET.mockImplementationOnce(
+        <T>(
+          _url: string,
+          _userInfo: { preferredUsername: string; name: string },
+          _params?: Record<string, string>,
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
       );
     });
 
@@ -346,11 +365,21 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
-        Promise.resolve({ results: [mockZaak] }),
+      mockHttpService.GET.mockImplementationOnce(
+        <T>(
+          _url: string,
+          _userInfo: { preferredUsername: string; name: string },
+          _params?: Record<string, string>,
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
       );
-      mockHttpService.POST.mockImplementation((_url, _body, _userInfo) =>
-        Promise.resolve({ url: "test" }),
+      mockHttpService.POST.mockImplementation(
+        <T>(
+          _url: string,
+          _body: BodyInit,
+          _userInfo: { preferredUsername: string; name: string },
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ url: "test" } as T),
       );
     });
 
@@ -410,6 +439,80 @@ describe("ZaakService", () => {
       await expect(
         zaakService.addDocumentToZaak("ZAAK-001", { titel: "test", creatiedatum: "2025-01-15" }),
       ).rejects.toThrow(FileNotSupported);
+    });
+  });
+
+  describe("setUserInfo", () => {
+    let zaakService: ZaakService;
+    let mockHttpService: {
+      GET: MockedFunction<HttpService["GET"]>;
+      POST: MockedFunction<HttpService["POST"]>;
+    };
+    let mockTokenService: {
+      getUserInfo: MockedFunction<TokenService["getUserInfo"]>;
+    };
+
+    beforeEach(() => {
+      const defaultGet: HttpService["GET"] = async <T>(
+        _url: string,
+        _userInfo: { preferredUsername: string; name: string },
+        _params?: Record<string, string>,
+        _headers: HeadersInit = {},
+      ) => ({}) as T;
+
+      const defaultPost: HttpService["POST"] = async <T>(
+        _url: string,
+        _body: BodyInit,
+        _userInfo: { preferredUsername: string; name: string },
+        _headers: HeadersInit = {},
+      ) => ({}) as T;
+
+      mockHttpService = {
+        GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
+        POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
+      };
+      mockTokenService = {
+        getUserInfo: vi.fn(),
+      };
+      zaakService = new ZaakService(
+        mockHttpService as unknown as HttpService,
+        mockTokenService as unknown as TokenService,
+      );
+    });
+
+    it("should set userInfo when a valid JWT is provided", () => {
+      const jwt = "valid.jwt.token";
+      const userInfo = { preferredUsername: "user", name: "User" };
+      mockTokenService.getUserInfo.mockReturnValue(userInfo);
+      zaakService.setUserInfo(jwt);
+      // @ts-expect-error: access private for test
+      expect(zaakService.userInfo).toEqual(userInfo);
+      expect(mockTokenService.getUserInfo).toHaveBeenCalledWith(jwt);
+    });
+
+    it("should set userInfo to null when getUserInfo returns null", () => {
+      mockTokenService.getUserInfo.mockImplementation(() => {
+        throw new Error("Unauthorized");
+      });
+      zaakService.setUserInfo(undefined);
+      // @ts-expect-error: access private for test
+      expect(zaakService.userInfo).toBeNull();
+    });
+
+    it("should use set userInfo in subsequent getZaak calls", async () => {
+      const jwt = "valid.jwt.token";
+      const userInfo = { preferredUsername: "user", name: "User" };
+      mockTokenService.getUserInfo.mockReturnValue(userInfo);
+      zaakService.setUserInfo(jwt);
+      const mockZaak = { url: "url", zaaktype: "type", bronorganisatie: "org", status: null };
+      const mockZaaktype = { informatieobjecttypen: [] };
+      mockHttpService.GET.mockImplementationOnce(() =>
+        Promise.resolve({ results: [mockZaak] }),
+      ).mockImplementationOnce(() => Promise.resolve(mockZaaktype));
+      await zaakService.getZaak("ZAAK-001");
+      expect(mockHttpService.GET).toHaveBeenCalledWith("/zaken/api/v1/zaken", userInfo, {
+        identificatie: "ZAAK-001",
+      });
     });
   });
 });

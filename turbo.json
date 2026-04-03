@@ -43,8 +43,10 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": ["^build"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"]
     },
     "test:ui": {
       "dependsOn": ["^build"]

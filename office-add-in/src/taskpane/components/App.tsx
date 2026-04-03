@@ -75,7 +75,6 @@ export function App() {
       },
       cache: {
         cacheLocation: "localStorage",
-        storeAuthStateInCookie: false,
       },
     };
   }
