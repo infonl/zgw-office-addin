@@ -38,18 +38,22 @@ describe("ZaakService", () => {
 
   beforeEach(() => {
     mockHttpService = {
-      GET: vi.fn(<T>(
-        _url: string,
-        _userInfo: { preferredUsername: string; name: string },
-        _params?: Record<string, string>,
-        _headers: HeadersInit = {}
-      ) => Promise.resolve({} as T)),
-      POST: vi.fn(<T>(
-        _url: string,
-        _body: BodyInit,
-        _userInfo: { preferredUsername: string; name: string },
-        _headers: HeadersInit = {}
-      ) => Promise.resolve({} as T)),
+      GET: vi.fn(
+        <T>(
+          _url: string,
+          _userInfo: { preferredUsername: string; name: string },
+          _params?: Record<string, string>,
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({} as T),
+      ),
+      POST: vi.fn(
+        <T>(
+          _url: string,
+          _body: BodyInit,
+          _userInfo: { preferredUsername: string; name: string },
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({} as T),
+      ),
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
@@ -214,12 +218,14 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce(<T>(
-        _url: string,
-        _userInfo: { preferredUsername: string; name: string },
-        _params?: Record<string, string>,
-        _headers: HeadersInit = {}
-      ) => Promise.resolve({ results: [mockZaak] } as T));
+      mockHttpService.GET.mockImplementationOnce(
+        <T>(
+          _url: string,
+          _userInfo: { preferredUsername: string; name: string },
+          _params?: Record<string, string>,
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
+      );
     });
 
     it("should successfully add a document to zaak", async () => {
@@ -359,18 +365,22 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
-      mockHttpService.GET.mockImplementationOnce(<T>(
-        _url: string,
-        _userInfo: { preferredUsername: string; name: string },
-        _params?: Record<string, string>,
-        _headers: HeadersInit = {}
-      ) => Promise.resolve({ results: [mockZaak] } as T));
-      mockHttpService.POST.mockImplementation(<T>(
-        _url: string,
-        _body: BodyInit,
-        _userInfo: { preferredUsername: string; name: string },
-        _headers: HeadersInit = {}
-      ) => Promise.resolve({ url: "test" } as T));
+      mockHttpService.GET.mockImplementationOnce(
+        <T>(
+          _url: string,
+          _userInfo: { preferredUsername: string; name: string },
+          _params?: Record<string, string>,
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
+      );
+      mockHttpService.POST.mockImplementation(
+        <T>(
+          _url: string,
+          _body: BodyInit,
+          _userInfo: { preferredUsername: string; name: string },
+          _headers: HeadersInit = {},
+        ) => Promise.resolve({ url: "test" } as T),
+      );
     });
 
     it("should return correct format for .docx files", async () => {
@@ -444,18 +454,22 @@ describe("ZaakService", () => {
 
     beforeEach(() => {
       mockHttpService = {
-        GET: vi.fn(<T>(
-          _url: string,
-          _userInfo: { preferredUsername: string; name: string },
-          _params?: Record<string, string>,
-          _headers: HeadersInit = {}
-        ) => Promise.resolve({} as T)),
-        POST: vi.fn(<T>(
-          _url: string,
-          _body: BodyInit,
-          _userInfo: { preferredUsername: string; name: string },
-          _headers: HeadersInit = {}
-        ) => Promise.resolve({} as T)),
+        GET: vi.fn(
+          <T>(
+            _url: string,
+            _userInfo: { preferredUsername: string; name: string },
+            _params?: Record<string, string>,
+            _headers: HeadersInit = {},
+          ) => Promise.resolve({} as T),
+        ),
+        POST: vi.fn(
+          <T>(
+            _url: string,
+            _body: BodyInit,
+            _userInfo: { preferredUsername: string; name: string },
+            _headers: HeadersInit = {},
+          ) => Promise.resolve({} as T),
+        ),
       };
       mockTokenService = {
         getUserInfo: vi.fn(),
