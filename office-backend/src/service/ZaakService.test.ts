@@ -37,23 +37,23 @@ describe("ZaakService", () => {
   };
 
   beforeEach(() => {
+    const defaultGet: HttpService["GET"] = async <T>(
+      _url: string,
+      _userInfo: { preferredUsername: string; name: string },
+      _params?: Record<string, string>,
+      _headers: HeadersInit = {},
+    ) => ({} as T);
+
+    const defaultPost: HttpService["POST"] = async <T>(
+      _url: string,
+      _body: BodyInit,
+      _userInfo: { preferredUsername: string; name: string },
+      _headers: HeadersInit = {},
+    ) => ({} as T);
+
     mockHttpService = {
-      GET: vi.fn(
-        <T>(
-          _url: string,
-          _userInfo: { preferredUsername: string; name: string },
-          _params?: Record<string, string>,
-          _headers: HeadersInit = {},
-        ) => Promise.resolve({} as T),
-      ),
-      POST: vi.fn(
-        <T>(
-          _url: string,
-          _body: BodyInit,
-          _userInfo: { preferredUsername: string; name: string },
-          _headers: HeadersInit = {},
-        ) => Promise.resolve({} as T),
-      ),
+      GET: vi.fn(defaultGet),
+      POST: vi.fn(defaultPost),
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
@@ -453,23 +453,23 @@ describe("ZaakService", () => {
     };
 
     beforeEach(() => {
+      const defaultGet: HttpService["GET"] = async <T>(
+        _url: string,
+        _userInfo: { preferredUsername: string; name: string },
+        _params?: Record<string, string>,
+        _headers: HeadersInit = {},
+      ) => ({} as T);
+
+      const defaultPost: HttpService["POST"] = async <T>(
+        _url: string,
+        _body: BodyInit,
+        _userInfo: { preferredUsername: string; name: string },
+        _headers: HeadersInit = {},
+      ) => ({} as T);
+
       mockHttpService = {
-        GET: vi.fn(
-          <T>(
-            _url: string,
-            _userInfo: { preferredUsername: string; name: string },
-            _params?: Record<string, string>,
-            _headers: HeadersInit = {},
-          ) => Promise.resolve({} as T),
-        ),
-        POST: vi.fn(
-          <T>(
-            _url: string,
-            _body: BodyInit,
-            _userInfo: { preferredUsername: string; name: string },
-            _headers: HeadersInit = {},
-          ) => Promise.resolve({} as T),
-        ),
+        GET: vi.fn(defaultGet),
+        POST: vi.fn(defaultPost),
       };
       mockTokenService = {
         getUserInfo: vi.fn(),
