@@ -52,8 +52,8 @@ describe("ZaakService", () => {
     ) => ({}) as T;
 
     mockHttpService = {
-      GET: vi.fn(defaultGet),
-      POST: vi.fn(defaultPost),
+      GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
+      POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
     };
     mockTokenService = {
       getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
@@ -468,8 +468,8 @@ describe("ZaakService", () => {
       ) => ({}) as T;
 
       mockHttpService = {
-        GET: vi.fn(defaultGet),
-        POST: vi.fn(defaultPost),
+        GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
+        POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
       };
       mockTokenService = {
         getUserInfo: vi.fn(),
