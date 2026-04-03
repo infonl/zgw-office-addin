@@ -74,8 +74,7 @@ export function App() {
         redirectUri: FRONTEND_ENV.MSAL_REDIRECT_URI,
       },
       cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: false,
+        cacheLocation: "localStorage"
       },
     };
   }
