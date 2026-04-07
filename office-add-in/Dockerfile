@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
-FROM nginx:1.29.7-alpine@sha256:e3f5ac6fb2b0ab577300bad4a9df7d4d0632c4baaa7416ac84e56184cfde9f82
+FROM nginx:1.29.7-alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1
 
 # Environment variable for application version, this should be supplied during build
 ARG APP_VERSION
