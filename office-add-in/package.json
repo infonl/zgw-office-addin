@@ -67,7 +67,7 @@
     "@prettier/plugin-xml": "3.4.2",
     "@tanstack/eslint-plugin-query": "5.96.1",
     "@testing-library/react": "16.3.2",
-    "@types/node": "22.19.15",
+    "@types/node": "22.19.17",
     "@types/office-js": "1.0.587",
     "@types/office-runtime": "1.0.36",
     "@types/react": "19.2.14",
