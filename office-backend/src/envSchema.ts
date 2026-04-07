@@ -21,7 +21,7 @@ if (!process.env.APP_ENV || process.env.APP_ENV === "local") {
 }
 
 export const envSchema = z.object({
-  APP_ENV: z.enum(["local", "production", "test"]).default("production"),
+  APP_ENV: z.enum(["local", "production"]).or(z.string()).default("production"),
   JWT_SECRET: z.string().min(1),
   API_BASE_URL: z.string().url(),
   FRONTEND_URL: z.string().url().optional(),

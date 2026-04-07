@@ -1,5 +1,6 @@
 common:
-  # -- Application environment, e.g. production, development, staging
+  # -- Application environment, where production and local have special meaning. Other values will be used as-is in the
+  # add-in manifest and can be used to differentiate between different non-production environments (e.g. Acc, Test)
   appEnv: "production"
   # -- The frontend public URL where the manifest files and static js file are served
   frontendUrl: "http://localhost:3000"

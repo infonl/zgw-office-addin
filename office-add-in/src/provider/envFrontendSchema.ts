@@ -6,7 +6,7 @@
 import { z } from "zod";
 
 const schema = z.object({
-  APP_ENV: z.enum(["local", "production", "test"]).default("production"),
+  APP_ENV: z.enum(["local", "production"]).or(z.string()).default("production"),
   MSAL_CLIENT_ID: z.string(),
   MSAL_AUTHORITY: z.string().url().or(z.literal("")),
   MSAL_REDIRECT_URI: z.string().url().or(z.literal("")),
