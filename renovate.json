@@ -37,6 +37,11 @@
   ],
   "packageRules": [
     {
+      "groupName": "eslint",
+      "matchPackageNames": ["eslint", "neostandard"],
+      "matchManagers": ["npm"]
+    },
+    {
       "matchDatasources": [
         "docker"
       ],
