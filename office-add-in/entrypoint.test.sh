@@ -62,7 +62,7 @@ export MAX_BODY_SIZE="555M"
 export APP_VERSION="test-version"
 
 # environment
-export APP_ENV="local"
+export APP_ENV="test-entrypoint-env"
 export MSAL_CLIENT_ID="696724da-f71f-40c4-9dce-53ab2bc8e0cb"
 export MSAL_AUTHORITY="https://login.microsoftonline.com/5ac40c21-50a2-414f-93d1-495d1324322b"
 export MSAL_REDIRECT_URI="http://localhost:3000"

@@ -13,8 +13,10 @@
 # Application version for metrics. This can be set via environment variable or defaults to 'unknown'.
 # The dockerfile sets this variable during build time, and the CI build pipeline sets it to the determined version.
 APP_VERSION="${APP_VERSION:-unknown}"
-# Application environment. The default is 'development', but can be overridden via environment variable.
-APP_ENV="${APP_ENV:-development}"
+# Application environment. The default is 'production', but can be overridden via environment variable.
+# Values 'local' and 'production' have special meaning in the application code, but this variable can be
+# used for any custom environment labeling for other environments, such as 'test' or 'acc'.
+APP_ENV="${APP_ENV:-production}"
 echo "Starting $APP_ENV ZGW Office Add-in version $APP_VERSION"
 
 ####
@@ -31,6 +33,7 @@ NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 # These have to match exactly with the used values in the manifest files!
 TO_REPLACE_CLIENT_ID="10000000-0001-1001-1001-100000000001"
 TO_REPLACE_URL="localhost:3000"
+TO_REPLACE_DISPLAY_NAME="TO_REPLACE_DISPLAY_NAME"
 
 # MSAL client ID has be set via environment variables.
 MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
@@ -39,6 +42,14 @@ MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
 if [ -z "$MSAL_CLIENT_ID" ] || [ "$MSAL_CLIENT_ID" = "your-client-id" ]; then
   echo "Error: MSAL_CLIENT_ID environment variable must be set to a valid Azure AD application (client) ID." >&2
   exit 1
+fi
+
+# Determine the display name based on the application environment.
+# For production, we use a simple name, for other environments we append the environment name for clarity.
+if [ "$APP_ENV" = "production" ]; then
+  DISPLAY_NAME="ZGW Office Add-in"
+else
+  DISPLAY_NAME="ZGW Office Add-in ($APP_ENV)"
 fi
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
@@ -50,12 +61,14 @@ MANIFEST_OUTLOOK_FILE="${NGINX_PUBLIC_HTML}/manifest-outlook.xml"
 echo "MSAL Client ID is set to ${MSAL_CLIENT_ID}."
 echo "Frontend URL is set to ${FRONTEND_URL}."
 echo "Frontend API is set to ${FRONTEND_API}."
+echo "Display name for manifest is set to ${DISPLAY_NAME}."
 for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
   [ -f "$MANIFEST_FILE" ] || continue
   sed -i -e "s|http://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
   sed -i -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
   sed -i -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" "$MANIFEST_FILE"
   sed -i -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" "$MANIFEST_FILE"
+  sed -i -e "s|${TO_REPLACE_DISPLAY_NAME}|${DISPLAY_NAME}|g" "$MANIFEST_FILE"
 done
 
 ####

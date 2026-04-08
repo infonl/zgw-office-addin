@@ -10,8 +10,8 @@
   <Version>1.0.0</Version>
   <ProviderName>INFO.nl</ProviderName>
   <DefaultLocale>nl-NL</DefaultLocale>
-  <DisplayName DefaultValue="ZGW Add-in" />
-  <Description DefaultValue="ZGW Office integratie voor Outlook." />
+  <DisplayName DefaultValue="TO_REPLACE_DISPLAY_NAME" />
+  <Description DefaultValue="ZGW Office integratie add-in." />
 
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
@@ -122,7 +122,6 @@
         <Id>10000000-0001-1001-1001-100000000001</Id>
         <Resource>api://localhost:3000/10000000-0001-1001-1001-100000000001</Resource>
         <Scopes>
-          <Scope>access_as_user</Scope>
           <Scope>openid</Scope>
           <Scope>user.read</Scope>
           <Scope>mail.read</Scope>

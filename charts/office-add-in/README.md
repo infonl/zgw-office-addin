@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.79](https://img.shields.io/badge/Version-0.0.79-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.80](https://img.shields.io/badge/Version-0.0.80-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -45,7 +45,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
 | backend.topologySpreadConstraints | list | `[{"labelSelector":{"matchLabels":{"app.kubernetes.io/instance":"RELEASE-NAME","app.kubernetes.io/name":"backend"}},"maxSkew":1,"topologyKey":"kubernetes.io/hostname","whenUnsatisfiable":"DoNotSchedule"}]` | Topology spread constraints for the backend deployment app.kubernetes.io/instance will be dynamically set to the Helm release name at deployment time. |
 | backend.zgwApis | object | `{"secret":"","url":"http://localhost:8020"}` | ZGW API configuration for integration with the ZGW APIs provider (OpenZaak) |
-| common.appEnv | string | `"production"` | Application environment, e.g. production, development, staging |
+| common.appEnv | string | `"production"` | Application environment, where production and local have special meaning. Other values will be used as-is in the add-in manifest and can be used to differentiate between different non-production environments (e.g. Acc, Test) |
 | common.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | common.msalClientId | string | `""` | MS Azure Client ID assigned to the Office Add-in application |
 | common.msalTenantId | string | `""` | MS Azure Tenant ID of the Organization |

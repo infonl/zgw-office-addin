@@ -1,0 +1,290 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["common", "frontend", "backend"],
+  "additionalProperties": false,
+  "properties": {
+    "common": {
+      "type": "object",
+      "description": "Common configuration shared between frontend and backend",
+      "additionalProperties": false,
+      "properties": {
+        "appEnv": {
+          "type": "string",
+          "description": "Application environment, where production and local have special meaning. Other values will be used as-is in the add-in manifest and can be used to differentiate between different non-production environments (e.g. Acc, Test)",
+          "examples": ["production", "local", "Acc", "Test"]
+        },
+        "frontendUrl": {
+          "type": "string",
+          "description": "The frontend public URL where the manifest files and static js file are served",
+          "format": "uri"
+        },
+        "msalTenantId": {
+          "type": "string",
+          "description": "MS Azure Tenant ID of the Organization"
+        },
+        "msalClientId": {
+          "type": "string",
+          "description": "MS Azure Client ID assigned to the Office Add-in application"
+        }
+      }
+    },
+    "frontend": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/image"
+        },
+        "service": {
+          "$ref": "#/$defs/service"
+        },
+        "enableHttps": {
+          "type": "boolean",
+          "description": "If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl"
+        },
+        "maxBodySize": {
+          "type": "string",
+          "description": "Maximum content body size (e.g. for attachments)",
+          "examples": ["80M", "100M"]
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/podAnnotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "topologySpreadConstraints": {
+          "$ref": "#/$defs/topologySpreadConstraints"
+        },
+        "imagePullSecrets": {
+          "$ref": "#/$defs/imagePullSecrets"
+        }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/image"
+        },
+        "service": {
+          "$ref": "#/$defs/service"
+        },
+        "msalSecret": {
+          "type": "string",
+          "description": "Client secret for MSAL authentication towards Azure AD"
+        },
+        "zgwApis": {
+          "type": "object",
+          "description": "ZGW API configuration for integration with the ZGW APIs provider (OpenZaak)",
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Base URL of the ZGW APIs provider",
+              "format": "uri"
+            },
+            "secret": {
+              "type": "string",
+              "description": "Shared secret for ZGW API authentication"
+            }
+          }
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/podAnnotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "topologySpreadConstraints": {
+          "$ref": "#/$defs/topologySpreadConstraints"
+        },
+        "imagePullSecrets": {
+          "$ref": "#/$defs/imagePullSecrets"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Container image repository"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Container image tag"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "description": "Image pull policy",
+          "enum": ["Always", "Never", "IfNotPresent"]
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Kubernetes service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+        },
+        "port": {
+          "type": "integer",
+          "description": "Service port",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "Resource limits and requests for the container",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        },
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string" },
+            "memory": { "type": "string" }
+          }
+        }
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Pod annotations",
+      "additionalProperties": { "type": "string" }
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod-level security context"
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container-level security context"
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector labels",
+      "additionalProperties": { "type": "string" }
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Affinity rules"
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations for pod scheduling",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "operator": { "type": "string", "enum": ["Exists", "Equal"] },
+          "value": { "type": "string" },
+          "effect": { "type": "string", "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"] },
+          "tolerationSeconds": { "type": "integer" }
+        }
+      }
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "description": "Topology spread constraints for pod scheduling",
+      "items": {
+        "type": "object",
+        "required": ["maxSkew", "topologyKey", "whenUnsatisfiable"],
+        "properties": {
+          "maxSkew": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum allowed skew between topology domains"
+          },
+          "topologyKey": {
+            "type": "string",
+            "description": "Node label key for topology"
+          },
+          "whenUnsatisfiable": {
+            "type": "string",
+            "enum": ["DoNotSchedule", "ScheduleAnyway"],
+            "description": "Action when constraint cannot be satisfied"
+          },
+          "labelSelector": {
+            "type": "object",
+            "properties": {
+              "matchLabels": {
+                "type": "object",
+                "additionalProperties": { "type": "string" }
+              },
+              "matchExpressions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["key", "operator"],
+                  "properties": {
+                    "key": { "type": "string" },
+                    "operator": { "type": "string", "enum": ["In", "NotIn", "Exists", "DoesNotExist"] },
+                    "values": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "description": "Image pull secrets",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" }
+        }
+      }
+    }
+  }
+}
