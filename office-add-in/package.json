@@ -86,7 +86,7 @@
     "less": "4.6.4",
     "less-loader": "12.3.2",
     "office-addin-cli": "2.0.6",
-    "office-addin-debugging": "6.0.6",
+    "office-addin-debugging": "6.0.7",
     "office-addin-dev-certs": "2.0.6",
     "office-addin-lint": "3.0.6",
     "office-addin-manifest": "2.1.2",
