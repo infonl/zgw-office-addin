@@ -31,7 +31,7 @@ async function getHttpsOptions() {
 }
 
 module.exports = async (env, options) => {
-  const config = {
+  return {
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
@@ -125,9 +125,7 @@ module.exports = async (env, options) => {
           },
         ],
       }),
-      new webpack.ProvidePlugin({
-        Promise: ["es6-promise", "Promise"],
-      }),
+
     ],
     devServer: {
       hot: true,
@@ -151,6 +149,4 @@ module.exports = async (env, options) => {
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
   };
-
-  return config;
 };

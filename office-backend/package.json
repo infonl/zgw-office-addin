@@ -18,7 +18,7 @@
     "prettier": "prettier --check \"**/*.{ts,js}\"",
     "prettier:fix": "prettier --write \"**/*.{ts,js}\"",
     "test": "vitest --run",
-    "test:coverage": "vitest --run --coverage --reporter=default && vitest --run --reporter=junit > junit.xml",
+    "test:coverage": "vitest --run --coverage --reporter=default && vitest --run --reporter=junit > coverage/junit.xml",
     "test:ui": "vitest --ui",
     "test:watch": "vitest"
   },
