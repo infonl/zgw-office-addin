@@ -45,14 +45,30 @@ if [ -z "$MSAL_CLIENT_ID" ] || [ "$MSAL_CLIENT_ID" = "your-client-id" ]; then
   exit 1
 fi
 
+# Function to escape XML special characters (POSIX-compatible)
+xml_escape() {
+  printf '%s' "$1" | \
+    sed -e 's/&/\&amp;/g' \
+        -e 's/</\&lt;/g' \
+        -e 's/>/\&gt;/g' \
+        -e 's/"/\&quot;/g' \
+        -e "s/'/\&apos;/g"
+}
+
 # Determine the display name based on the application environment.
 # For production, we use a simple name, for other environments we append the environment name for clarity.
 if [ "$APP_ENV" = "production" ]; then
   ENV_INDICATOR=""
   ENV_DESCRIPTION=""
+  ENV_INDICATOR_ESCAPED_FOR_SED=""
+  ENV_DESCRIPTION_ESCAPED_FOR_SED=""
 else
-  ENV_INDICATOR=" ($APP_ENV)"
-  ENV_DESCRIPTION=" Specifiek voor omgeving $APP_ENV."
+  APP_ENV_XML_SAFE="$(xml_escape "$APP_ENV")"
+  ENV_INDICATOR=" ($APP_ENV_XML_SAFE)"
+  ENV_DESCRIPTION=" Specifiek voor omgeving $APP_ENV_XML_SAFE."
+  # Escape & for sed replacement
+  ENV_INDICATOR_ESCAPED_FOR_SED=$(printf '%s' "$ENV_INDICATOR" | sed 's/&/\\&/g')
+  ENV_DESCRIPTION_ESCAPED_FOR_SED=$(printf '%s' "$ENV_DESCRIPTION" | sed 's/&/\\&/g')
 fi
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
@@ -72,8 +88,8 @@ for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
   sed -i -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
   sed -i -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" "$MANIFEST_FILE"
   sed -i -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" "$MANIFEST_FILE"
-  sed -i -e "s|${TO_REPLACE_ENV_INDICATOR}|${ENV_INDICATOR}|g" "$MANIFEST_FILE"
-  sed -i -e "s|${TO_REPLACE_ENV_DESCRIPTION}|${ENV_DESCRIPTION}|g" "$MANIFEST_FILE"
+  sed -i -e "s|${TO_REPLACE_ENV_INDICATOR}|${ENV_INDICATOR_ESCAPED_FOR_SED}|g" "$MANIFEST_FILE"
+  sed -i -e "s|${TO_REPLACE_ENV_DESCRIPTION}|${ENV_DESCRIPTION_ESCAPED_FOR_SED}|g" "$MANIFEST_FILE"
 done
 
 ####
