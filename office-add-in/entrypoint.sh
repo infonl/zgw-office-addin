@@ -51,8 +51,8 @@ if [ "$APP_ENV" = "production" ]; then
   ENV_INDICATOR=""
   ENV_DESCRIPTION=""
 else
-  ENV_INDICATOR="($APP_ENV)"
-  ENV_DESCRIPTION="Specifiek voor omgeving $APP_ENV."
+  ENV_INDICATOR=" ($APP_ENV)"
+  ENV_DESCRIPTION=" Specifiek voor omgeving $APP_ENV."
 fi
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
