@@ -89,8 +89,8 @@ module.exports = async (env, options) => {
         ),
         "process.env.MSAL_AUTHORITY": JSON.stringify(
           envFrontend.MSAL_AUTHORITY ||
-          process.env.MSAL_AUTHORITY ||
-          "https://login.microsoftonline.com/common"
+            process.env.MSAL_AUTHORITY ||
+            "https://login.microsoftonline.com/common"
         ),
         "process.env.MSAL_REDIRECT_URI": JSON.stringify(
           envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
