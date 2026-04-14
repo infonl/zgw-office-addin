@@ -82,21 +82,21 @@ module.exports = async (env, options) => {
     plugins: [
       new webpack.DefinePlugin({
         "process.env.APP_ENV": JSON.stringify(
-            envFrontend.APP_ENV || process.env.APP_ENV || "local"
+          envFrontend.APP_ENV || process.env.APP_ENV || "local"
         ),
         "process.env.MSAL_CLIENT_ID": JSON.stringify(
-            envFrontend.MSAL_CLIENT_ID || process.env.MSAL_CLIENT_ID || ""
+          envFrontend.MSAL_CLIENT_ID || process.env.MSAL_CLIENT_ID || ""
         ),
         "process.env.MSAL_AUTHORITY": JSON.stringify(
-            envFrontend.MSAL_AUTHORITY ||
-            process.env.MSAL_AUTHORITY ||
-            "https://login.microsoftonline.com/common"
+          envFrontend.MSAL_AUTHORITY ||
+          process.env.MSAL_AUTHORITY ||
+          "https://login.microsoftonline.com/common"
         ),
         "process.env.MSAL_REDIRECT_URI": JSON.stringify(
-            envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
+          envFrontend.MSAL_REDIRECT_URI || process.env.MSAL_REDIRECT_URI || "https://localhost:3000"
         ),
         "process.env.MSAL_SCOPES": JSON.stringify(
-            envFrontend.MSAL_SCOPES || process.env.MSAL_SCOPES || ""
+          envFrontend.MSAL_SCOPES || process.env.MSAL_SCOPES || ""
         ),
       }),
       new HtmlWebpackPlugin({
@@ -142,9 +142,9 @@ module.exports = async (env, options) => {
       server: {
         type: "https",
         options:
-            env.WEBPACK_BUILD || options.https !== undefined
-                ? options.https
-                : await getHttpsOptions(),
+          env.WEBPACK_BUILD || options.https !== undefined
+            ? options.https
+            : await getHttpsOptions(),
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
