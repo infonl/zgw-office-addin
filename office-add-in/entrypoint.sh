@@ -33,7 +33,8 @@ NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 # These have to match exactly with the used values in the manifest files!
 TO_REPLACE_CLIENT_ID="10000000-0001-1001-1001-100000000001"
 TO_REPLACE_URL="localhost:3000"
-TO_REPLACE_DISPLAY_NAME="TO_REPLACE_DISPLAY_NAME"
+TO_REPLACE_ENV_INDICATOR="TO_REPLACE_ENV_INDICATOR"
+TO_REPLACE_ENV_DESCRIPTION="TO_REPLACE_ENV_DESCRIPTION"
 
 # MSAL client ID has be set via environment variables.
 MSAL_CLIENT_ID="${MSAL_CLIENT_ID:-your-client-id}"
@@ -47,9 +48,11 @@ fi
 # Determine the display name based on the application environment.
 # For production, we use a simple name, for other environments we append the environment name for clarity.
 if [ "$APP_ENV" = "production" ]; then
-  DISPLAY_NAME="ZGW Office Add-in"
+  ENV_INDICATOR=""
+  ENV_DESCRIPTION=""
 else
-  DISPLAY_NAME="ZGW Office Add-in ($APP_ENV)"
+  ENV_INDICATOR="($APP_ENV)"
+  ENV_DESCRIPTION="Specifiek voor omgeving $APP_ENV."
 fi
 
 # Optionally set the frontend URL to use, defaults to https://localhost:3000.
@@ -61,14 +64,16 @@ MANIFEST_OUTLOOK_FILE="${NGINX_PUBLIC_HTML}/manifest-outlook.xml"
 echo "MSAL Client ID is set to ${MSAL_CLIENT_ID}."
 echo "Frontend URL is set to ${FRONTEND_URL}."
 echo "Frontend API is set to ${FRONTEND_API}."
-echo "Display name for manifest is set to ${DISPLAY_NAME}."
+echo "Display name for manifest is appended with '${ENV_INDICATOR}'."
+echo "Description for manifest is appended with '${ENV_DESCRIPTION}'."
 for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
   [ -f "$MANIFEST_FILE" ] || continue
   sed -i -e "s|http://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
   sed -i -e "s|https://${TO_REPLACE_URL}|${FRONTEND_URL}|g" "$MANIFEST_FILE"
   sed -i -e "s|api://${TO_REPLACE_URL}/${TO_REPLACE_CLIENT_ID}|$FRONTEND_API|g" "$MANIFEST_FILE"
   sed -i -e "s|<Id>${TO_REPLACE_CLIENT_ID}</Id>|<Id>${MSAL_CLIENT_ID}</Id>|g" "$MANIFEST_FILE"
-  sed -i -e "s|${TO_REPLACE_DISPLAY_NAME}|${DISPLAY_NAME}|g" "$MANIFEST_FILE"
+  sed -i -e "s|${TO_REPLACE_ENV_INDICATOR}|${ENV_INDICATOR}|g" "$MANIFEST_FILE"
+  sed -i -e "s|${TO_REPLACE_ENV_DESCRIPTION}|${ENV_DESCRIPTION}|g" "$MANIFEST_FILE"
 done
 
 ####
