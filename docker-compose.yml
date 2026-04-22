@@ -51,7 +51,7 @@ services:
       start_period: 10s
 
   prometheus:
-    image: prom/prometheus@sha256:dda13e28bf95a5e5ca5b8ed56852006094c1c8e8871d9c9dbeed30aa6e55271f
+    image: prom/prometheus@sha256:5550dc63da361dc30f6fe02ac0e4dfc736ededfef3c8d12a634db04a67824d78
     volumes:
       - ./scripts/docker-compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./office-add-in/ssl-certs:/etc/prometheus/certs:ro
