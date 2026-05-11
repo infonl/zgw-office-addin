@@ -80,7 +80,7 @@ services:
 
 
   openzaak.local:
-    image: docker.io/openzaak/open-zaak:1.27.0@sha256:01cb8af4accc9d0c64a12565acbbaae5b93578f247ef30e223797d3d3f98c609
+    image: docker.io/openzaak/open-zaak:1.27.1@sha256:7726e36a1353396fb971929645489e0e8a7e5848e5fdf0ae3fa8075b6ce15da9
     platform: linux/amd64
     environment:
       - ALLOWED_HOSTS="*"
