@@ -120,4 +120,4 @@ services:
         condition: service_started
 
   redis:
-    image: redis:8.6.2@sha256:125f446fbd4c4345cdbd0f60c61ed83c35a10e09436dd797e0e82377325034f5
+    image: redis:8.6.3@sha256:d4a4a4db02748731e6313d60adfd92985b6ad7bc2f2400a6cb0f8b35a2a6b492
