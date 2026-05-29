@@ -17,7 +17,7 @@ function makePrimaryMock(getAccessTokenMock: ReturnType<typeof vi.fn>) {
 
 function makeFallbackMock(
   getAccessTokenMock: ReturnType<typeof vi.fn>,
-  getAccessTokenAsyncMock: ReturnType<typeof vi.fn>,
+  getAccessTokenAsyncMock: ReturnType<typeof vi.fn>
 ) {
   const officeMock = new OfficeMockObject({
     auth: { getAccessToken: getAccessTokenMock },
@@ -82,7 +82,9 @@ describe("getAccessToken", () => {
 
     it("deduplicates concurrent requests — only one Office.auth call is made", async () => {
       let resolve: (_value: string) => void;
-      const delayed = new Promise<string>((r) => { resolve = r; });
+      const delayed = new Promise<string>((r) => {
+        resolve = r;
+      });
       getAccessTokenMock.mockReturnValue(delayed);
 
       const promise1 = getToken();
@@ -135,14 +137,19 @@ describe("getAccessToken", () => {
       clearToken();
       getAccessTokenMock = vi.fn();
       getAccessTokenAsyncMock = vi.fn();
-      global.Office = makeFallbackMock(getAccessTokenMock, getAccessTokenAsyncMock) as unknown as typeof Office;
+      global.Office = makeFallbackMock(
+        getAccessTokenMock,
+        getAccessTokenAsyncMock
+      ) as unknown as typeof Office;
     });
 
     it("falls back to getAccessTokenAsync when primary path fails with a non-13006 error", async () => {
       getAccessTokenMock.mockRejectedValue({ code: 13005, message: "Primary failed" });
-      getAccessTokenAsyncMock.mockImplementation((_options: unknown, callback: (_result: { status: string; value: string }) => void) => {
-        callback({ status: "succeeded", value: "fallback-token" });
-      });
+      getAccessTokenAsyncMock.mockImplementation(
+        (_options: unknown, callback: (_result: { status: string; value: string }) => void) => {
+          callback({ status: "succeeded", value: "fallback-token" });
+        }
+      );
 
       const token = await getToken();
 
@@ -153,24 +160,28 @@ describe("getAccessToken", () => {
 
     it("passes the correct options to getAccessTokenAsync", async () => {
       getAccessTokenMock.mockRejectedValue({ code: 13005 });
-      getAccessTokenAsyncMock.mockImplementation((_options: unknown, callback: (_result: { status: string; value: string }) => void) => {
-        callback({ status: "succeeded", value: "token" });
-      });
+      getAccessTokenAsyncMock.mockImplementation(
+        (_options: unknown, callback: (_result: { status: string; value: string }) => void) => {
+          callback({ status: "succeeded", value: "token" });
+        }
+      );
 
       await getToken();
 
       expect(getAccessTokenAsyncMock).toHaveBeenCalledWith(
         expect.objectContaining({ forMSGraphAccess: true, allowSignInPrompt: true }),
-        expect.any(Function),
+        expect.any(Function)
       );
     });
 
     it("rejects when getAccessTokenAsync callback reports failure", async () => {
       getAccessTokenMock.mockRejectedValue({ code: 13005 });
       const asyncError = new Error("Async auth failed");
-      getAccessTokenAsyncMock.mockImplementation((_options: unknown, callback: (_result: { status: string; error: Error }) => void) => {
-        callback({ status: "failed", error: asyncError });
-      });
+      getAccessTokenAsyncMock.mockImplementation(
+        (_options: unknown, callback: (_result: { status: string; error: Error }) => void) => {
+          callback({ status: "failed", error: asyncError });
+        }
+      );
 
       await expect(getToken()).rejects.toThrow("Async auth failed");
     });
@@ -178,7 +189,7 @@ describe("getAccessToken", () => {
     it("throws the original error when context.auth.getAccessTokenAsync is unavailable", async () => {
       const originalError = { code: 13005, message: "No fallback available" };
       global.Office = makePrimaryMock(
-        vi.fn().mockRejectedValue(originalError),
+        vi.fn().mockRejectedValue(originalError)
       ) as unknown as typeof Office;
 
       await expect(getToken()).rejects.toEqual(originalError);
@@ -187,9 +198,7 @@ describe("getAccessToken", () => {
 
   describe("clearToken", () => {
     it("clears the cached token so the next call fetches a fresh one", async () => {
-      getAccessTokenMock
-        .mockResolvedValueOnce("token-1")
-        .mockResolvedValueOnce("token-2");
+      getAccessTokenMock.mockResolvedValueOnce("token-1").mockResolvedValueOnce("token-2");
 
       await getToken();
       clearToken();

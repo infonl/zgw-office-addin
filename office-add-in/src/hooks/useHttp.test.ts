@@ -5,7 +5,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { OfficeMockObject } from "office-addin-mock";
 import { useHttp } from "./useHttp";
 import { useLogger } from "./useLogger";
 
@@ -54,7 +53,11 @@ describe("useHttp", () => {
   describe("GET method", () => {
     it("should make a successful GET request", async () => {
       const mockData = { id: 1, name: "Test" };
-      mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: vi.fn().mockResolvedValue(mockData) });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue(mockData),
+      });
 
       const { result } = renderHook(() => useHttp());
       const response = await result.current.GET("/test");
@@ -65,7 +68,7 @@ describe("useHttp", () => {
         expect.objectContaining({
           method: "GET",
           headers: expect.objectContaining({ "Content-Type": "application/json" }),
-        }),
+        })
       );
       expect(mockDebug).toHaveBeenCalledTimes(3);
     });
@@ -83,7 +86,7 @@ describe("useHttp", () => {
             "Content-Type": "application/json",
             Authorization: "Bearer token",
           }),
-        }),
+        })
       );
     });
 
@@ -95,7 +98,7 @@ describe("useHttp", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://localhost:3003/search?q=test&limit=10"),
-        expect.objectContaining({ method: "GET" }),
+        expect.objectContaining({ method: "GET" })
       );
     });
 
@@ -107,7 +110,7 @@ describe("useHttp", () => {
       await expect(result.current.GET("/nonexistent")).rejects.toThrow("HTTP error! status: 404");
       expect(mockError).toHaveBeenCalledWith(
         "[GET] [ERROR] https://localhost:3003/nonexistent",
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
@@ -120,7 +123,7 @@ describe("useHttp", () => {
       await expect(result.current.GET("/test")).rejects.toThrow("Network error");
       expect(mockError).toHaveBeenCalledWith(
         "[GET] [ERROR] https://localhost:3003/test",
-        networkError,
+        networkError
       );
     });
   });
@@ -128,7 +131,11 @@ describe("useHttp", () => {
   describe("POST method", () => {
     it("should make a successful POST request", async () => {
       const mockData = { id: 1, created: true };
-      mockFetch.mockResolvedValueOnce({ ok: true, status: 201, json: vi.fn().mockResolvedValue(mockData) });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: vi.fn().mockResolvedValue(mockData),
+      });
 
       const requestBody = JSON.stringify({ name: "Test" });
       const { result } = renderHook(() => useHttp());
@@ -141,7 +148,7 @@ describe("useHttp", () => {
           method: "POST",
           headers: expect.objectContaining({ "Content-Type": "application/json" }),
           body: requestBody,
-        }),
+        })
       );
     });
 
@@ -159,7 +166,7 @@ describe("useHttp", () => {
             "Content-Type": "application/json",
             "X-API-Key": "secret",
           }),
-        }),
+        })
       );
     });
 
@@ -174,7 +181,7 @@ describe("useHttp", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://localhost:3003/upload"),
-        expect.objectContaining({ method: "POST", body: formData }),
+        expect.objectContaining({ method: "POST", body: formData })
       );
     });
 
@@ -210,14 +217,22 @@ describe("useHttp", () => {
     });
 
     it("should log response status", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true, status: 201, json: vi.fn().mockResolvedValue({}) });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: vi.fn().mockResolvedValue({}),
+      });
 
       const { result } = renderHook(() => useHttp());
       await result.current.POST("/create", "{}");
 
-      expect(mockDebug).toHaveBeenNthCalledWith(2, "[POST] [STATUS] https://localhost:3003/create", {
-        status: 201,
-      });
+      expect(mockDebug).toHaveBeenNthCalledWith(
+        2,
+        "[POST] [STATUS] https://localhost:3003/create",
+        {
+          status: 201,
+        }
+      );
     });
 
     it("should log response data", async () => {
@@ -227,7 +242,11 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("/test");
 
-      expect(mockDebug).toHaveBeenNthCalledWith(3, "[GET] [RESULT] https://localhost:3003/test", mockData);
+      expect(mockDebug).toHaveBeenNthCalledWith(
+        3,
+        "[GET] [RESULT] https://localhost:3003/test",
+        mockData
+      );
     });
 
     it("should use correct logger context", () => {
@@ -245,7 +264,7 @@ describe("useHttp", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://localhost:3003/api/test"),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -255,7 +274,10 @@ describe("useHttp", () => {
       const { result } = renderHook(() => useHttp());
       await result.current.GET("");
 
-      expect(mockFetch).toHaveBeenCalledWith(new URL("https://localhost:3003/"), expect.any(Object));
+      expect(mockFetch).toHaveBeenCalledWith(
+        new URL("https://localhost:3003/"),
+        expect.any(Object)
+      );
     });
   });
 
@@ -292,8 +314,8 @@ describe("useHttp", () => {
     it("falls back to crypto.randomUUID when Office is not available", async () => {
       vi.resetModules();
       vi.stubGlobal("Office", undefined);
-      vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
-        "generated-uuid-xyz" as ReturnType<typeof crypto.randomUUID>,
+      vi.spyOn(crypto, "randomUUID").mockReturnValue(
+        "generated-uuid-xyz" as ReturnType<typeof crypto.randomUUID>
       );
       setupLoggerMock();
       mockFetch.mockResolvedValueOnce(okResponse());
@@ -303,7 +325,9 @@ describe("useHttp", () => {
       await result.current.GET("/test");
 
       const [, init] = mockFetch.mock.calls[0];
-      expect((init.headers as Record<string, string>)["X-Correlation-ID"]).toBe("generated-uuid-xyz");
+      expect((init.headers as Record<string, string>)["X-Correlation-ID"]).toBe(
+        "generated-uuid-xyz"
+      );
 
       vi.unstubAllGlobals();
       vi.resetModules();
@@ -313,8 +337,8 @@ describe("useHttp", () => {
       vi.resetModules();
       vi.stubGlobal("Office", undefined);
       let callCount = 0;
-      vi.spyOn(globalThis.crypto, "randomUUID").mockImplementation(
-        () => `uuid-${++callCount}` as ReturnType<typeof crypto.randomUUID>,
+      vi.spyOn(crypto, "randomUUID").mockImplementation(
+        () => `uuid-${++callCount}` as ReturnType<typeof crypto.randomUUID>
       );
       setupLoggerMock();
       mockFetch.mockResolvedValue(okResponse());
@@ -325,8 +349,12 @@ describe("useHttp", () => {
       await result.current.GET("/second");
 
       expect(callCount).toBe(1);
-      const id1 = (mockFetch.mock.calls[0][1].headers as Record<string, string>)["X-Correlation-ID"];
-      const id2 = (mockFetch.mock.calls[1][1].headers as Record<string, string>)["X-Correlation-ID"];
+      const id1 = (mockFetch.mock.calls[0][1].headers as Record<string, string>)[
+        "X-Correlation-ID"
+      ];
+      const id2 = (mockFetch.mock.calls[1][1].headers as Record<string, string>)[
+        "X-Correlation-ID"
+      ];
       expect(id1).toBe(id2);
 
       vi.unstubAllGlobals();
