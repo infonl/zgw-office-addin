@@ -32,6 +32,7 @@ spec:
           imagePullPolicy: "{{ .Values.frontend.image.pullPolicy }}"
           ports:
             - containerPort: 8080
+            - containerPort: 8443
           env:
             - name: MSAL_CLIENT_ID
               value: {{ .Values.common.msalClientId | required "common.msalClientId is required" | quote }}
@@ -56,7 +57,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{ if .Values.frontend.enableHttps }}443{{ else }}8080{{ end }}
+              port: {{ if .Values.frontend.enableHttps }}8443{{ else }}8080{{ end }}
               scheme: {{ if .Values.frontend.enableHttps }}HTTPS{{ else }}HTTP{{ end }}
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -65,7 +66,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{ if .Values.frontend.enableHttps }}443{{ else }}8080{{ end }}
+              port: {{ if .Values.frontend.enableHttps }}8443{{ else }}8080{{ end }}
               scheme: {{ if .Values.frontend.enableHttps }}HTTPS{{ else }}HTTP{{ end }}
             initialDelaySeconds: 10
             periodSeconds: 5

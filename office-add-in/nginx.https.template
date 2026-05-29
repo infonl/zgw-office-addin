@@ -3,7 +3,7 @@
 
 # HTTPS server block (conditionally enabled)
 server {
-    listen 443 ssl;
+    listen 8443 ssl;
     server_tokens off;
     server_name _;
     root /usr/share/nginx/html;

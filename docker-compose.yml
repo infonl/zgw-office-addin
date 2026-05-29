@@ -8,7 +8,7 @@ services:
   frontend:
     image: ghcr.io/infonl/zgw-office-add-in-frontend:dev
     ports:
-      - "3000:443"
+      - "3000:8443"
     environment:
       - APP_ENV=local
       - FRONTEND_URL=https://localhost:3000
@@ -22,7 +22,7 @@ services:
     volumes:
       - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
     healthcheck:
-      test: ["CMD-SHELL", "curl -f -k https://localhost:443/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f -k https://localhost:8443/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
