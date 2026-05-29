@@ -9,9 +9,13 @@ let _sessionCorrelationId: string | undefined;
 
 function getSessionCorrelationId(): string {
   if (!_sessionCorrelationId) {
-    _sessionCorrelationId = Office?.context?.diagnostics?.correlationId ?? crypto.randomUUID();
+    // correlationId exists at runtime but is not yet in @types/office-js
+    const diagnostics = Office?.context?.diagnostics as
+      | (Office.ContextInformation & { correlationId?: string })
+      | undefined;
+    _sessionCorrelationId = diagnostics?.correlationId ?? crypto.randomUUID();
   }
-  return _sessionCorrelationId;
+  return _sessionCorrelationId!;
 }
 
 export function useHttp() {
