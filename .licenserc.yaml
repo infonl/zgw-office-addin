@@ -30,6 +30,8 @@ header:
     - ".github/CODEOWNERS"
     - "**/dist"
     - ".nvmrc"
+    - ".npmrc"
+    - ".licenserc.yaml"
     - "**/manifest-office.xml"
     - "**/manifest-outlook.xml"
     - "**/*.example.cnf"
