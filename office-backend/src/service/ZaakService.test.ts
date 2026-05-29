@@ -36,10 +36,10 @@ const GET_HEADERS = {
   "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in",
 };
 
-const POST_HEADERS = [
-  ["X-NLX-Logrecord-ID", "test-uti-value"],
-  ["X-Audit-Toelichting", "Document toevoegen vanuit ZGW Office Add-in"],
-];
+const POST_HEADERS = {
+  "X-NLX-Logrecord-ID": "test-uti-value",
+  "X-Audit-Toelichting": "Document toevoegen vanuit ZGW Office Add-in",
+};
 
 describe("ZaakService", () => {
   let zaakService: ZaakService;
@@ -455,7 +455,7 @@ describe("ZaakService", () => {
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.any(String),
         mockUserInfo,
-        expect.arrayContaining([["X-NLX-Logrecord-ID", "office-correlation-id"]]),
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "office-correlation-id" }),
       );
     });
 
@@ -469,7 +469,7 @@ describe("ZaakService", () => {
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.any(String),
         mockUserInfo,
-        expect.arrayContaining([["X-NLX-Logrecord-ID", mockUserInfo.uti]]),
+        expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
       );
     });
   });

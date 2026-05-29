@@ -1,16 +1,6 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
-# Allowed Office origins
-map $http_origin $cors_origin {
-    default "";
-    "~^https://.*\.officeapps\.live\.com$"     $http_origin;
-    "~^https://.*\.microsoft\.com$"            $http_origin;
-    "~^https://word\.cloud\.microsoft$"        $http_origin;
-    "~^https://outlook\.cloud\.microsoft$"     $http_origin;
-    "~^https://.*\.office\.com$"               $http_origin;
-}
-
 # HTTPS server block (conditionally enabled)
 server {
     listen 443 ssl;

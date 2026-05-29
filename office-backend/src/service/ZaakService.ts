@@ -56,10 +56,10 @@ export class ZaakService {
 
   public async addDocumentToZaak(zaakIdentificatie: string, userInfo: { preferredUsername: string; name: string; uti?: string }, correlationId?: string, body: Record<string, unknown> = {}) {
     const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
-    const headers: HeadersInit = [
-      ["X-NLX-Logrecord-ID", nlxRecordId],
-      ["X-Audit-Toelichting", "Document toevoegen vanuit ZGW Office Add-in"]
-    ]
+    const headers = {
+      "X-NLX-Logrecord-ID": nlxRecordId,
+      "X-Audit-Toelichting": "Document toevoegen vanuit ZGW Office Add-in",
+    }
     LoggerService.log(`[${nlxRecordId}] user '${userInfo.preferredUsername}' add document '${body.titel}' to zaak ${zaakIdentificatie}`)
 
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
