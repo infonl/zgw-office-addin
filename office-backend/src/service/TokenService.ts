@@ -7,12 +7,12 @@ import { jwtDecode } from "jwt-decode";
 import { Unauthorized } from "../exception/Unauthorized";
 
 export class TokenService {
-  public getUserInfo(token?: string): { preferredUsername: string; name: string } {
+  public getUserInfo(token?: string): { preferredUsername: string; name: string; uti?: string } {
     if (!token) throw new Unauthorized();
     try {
       const cleanedToken = String(token).replace("Bearer ", "");
 
-      const decodedToken = jwtDecode<{ preferred_username: string; name: string }>(cleanedToken);
+      const decodedToken = jwtDecode<{ preferred_username: string; name: string; uti?: string }>(cleanedToken);
 
       if (!decodedToken.preferred_username || !decodedToken.name) {
         throw new Unauthorized();
@@ -20,6 +20,7 @@ export class TokenService {
       return {
         preferredUsername: decodedToken.preferred_username,
         name: decodedToken.name,
+        uti: decodedToken.uti,
       };
     } catch (error) {
       throw new Unauthorized();

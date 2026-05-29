@@ -13,20 +13,22 @@ import { TokenService } from "./TokenService";
 import {randomUUID} from "node:crypto";
 
 export class ZaakService {
-  private userInfo: { preferredUsername: string; name: string } | null = null;
   constructor(
     private readonly httpService: HttpService,
     private readonly tokenService: TokenService,
   ) {}
 
-  public async getZaak(zaakIdentificatie: string) {
-    const userInfo = this.userInfo!;
-    let correlationId = `${randomUUID()}`;
+  public resolveUserInfo(jwt: string | undefined) {
+    return this.tokenService.getUserInfo(jwt);
+  }
+
+  public async getZaak(zaakIdentificatie: string, userInfo: { preferredUsername: string; name: string; uti?: string }, correlationId?: string) {
+    const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
     const headers = {
-      "X-NLX-Logrecord-ID": correlationId,
+      "X-NLX-Logrecord-ID": nlxRecordId,
       "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in"
     }
-    LoggerService.log(`[${correlationId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`)
+    LoggerService.log(`[${nlxRecordId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`)
 
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
@@ -52,14 +54,13 @@ export class ZaakService {
     };
   }
 
-  public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
-    const userInfo = this.userInfo!;
-    const correlationId = `${randomUUID()}`;
+  public async addDocumentToZaak(zaakIdentificatie: string, userInfo: { preferredUsername: string; name: string; uti?: string }, correlationId?: string, body: Record<string, unknown> = {}) {
+    const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
     const headers: HeadersInit = [
-      ["X-NLX-Logrecord-ID", correlationId],
+      ["X-NLX-Logrecord-ID", nlxRecordId],
       ["X-Audit-Toelichting", "Document toevoegen vanuit ZGW Office Add-in"]
     ]
-    LoggerService.log(`[${correlationId}] user '${userInfo.preferredUsername}' add document '${body.titel}' to zaak ${zaakIdentificatie}`)
+    LoggerService.log(`[${nlxRecordId}] user '${userInfo.preferredUsername}' add document '${body.titel}' to zaak ${zaakIdentificatie}`)
 
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
@@ -168,11 +169,4 @@ export class ZaakService {
     );
   }
 
-  public setUserInfo(jwt: string | undefined) {
-    try {
-      this.userInfo = this.tokenService.getUserInfo(jwt);
-    } catch (e) {
-      this.userInfo = null;
-    }
-  }
 }

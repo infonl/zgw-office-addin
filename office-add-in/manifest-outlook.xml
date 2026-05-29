@@ -23,9 +23,9 @@
     <Host Name="Mailbox" />
   </Hosts>
 
-  <!-- 1.5 for Ribbon buttons and Taskpane, for SSO 1.9 is minimum -->
+  <!-- SSO requires minimum 1.9 -->
   <Requirements>
-    <Sets DefaultMinVersion="1.5">
+    <Sets DefaultMinVersion="1.9">
       <Set Name="Mailbox" />
     </Sets>
   </Requirements>

@@ -1,6 +1,16 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
+# Allowed Office origins
+map $http_origin $cors_origin {
+    default "";
+    "~^https://.*\.officeapps\.live\.com$"     $http_origin;
+    "~^https://.*\.microsoft\.com$"            $http_origin;
+    "~^https://word\.cloud\.microsoft$"        $http_origin;
+    "~^https://outlook\.cloud\.microsoft$"     $http_origin;
+    "~^https://.*\.office\.com$"               $http_origin;
+}
+
 server {
     listen 8080;
     server_tokens off;
@@ -76,17 +86,18 @@ server {
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
 
         # CORS headers for Office Add-ins
-        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Origin $cors_origin always;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
         add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
         add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always;
         add_header Access-Control-Allow-Credentials "true" always;
+        add_header Vary "Origin" always;
 
-        # Handle preflight requests
         if ($request_method = 'OPTIONS') {
-            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Origin $cors_origin;
             add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
             add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization";
+            add_header Access-Control-Allow-Credentials "true";
             add_header Access-Control-Max-Age 1728000;
             add_header Content-Type "text/plain; charset=utf-8";
             add_header Content-Length 0;

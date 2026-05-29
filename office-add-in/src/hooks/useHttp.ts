@@ -5,6 +5,15 @@
 
 import { useLogger } from "./useLogger";
 
+let _sessionCorrelationId: string | undefined;
+
+function getSessionCorrelationId(): string {
+  if (!_sessionCorrelationId) {
+    _sessionCorrelationId = Office?.context?.diagnostics?.correlationId ?? crypto.randomUUID();
+  }
+  return _sessionCorrelationId;
+}
+
 export function useHttp() {
   const { DEBUG, ERROR } = useLogger(useHttp.name);
 
@@ -39,6 +48,7 @@ export function useHttp() {
         method,
         headers: {
           "Content-Type": "application/json",
+          "X-Correlation-ID": getSessionCorrelationId(),
           ...options.headers,
         },
       };
