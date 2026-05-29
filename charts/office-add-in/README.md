@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.87](https://img.shields.io/badge/Version-0.0.87-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.88](https://img.shields.io/badge/Version-0.0.88-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -37,9 +37,9 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
-| backend.podSecurityContext | object | `{}` | Pod security context for the backend deployment |
-| backend.resources | object | `{}` |  |
-| backend.securityContext | object | `{}` | Security context for the backend container |
+| backend.podSecurityContext | object | `{"fsGroup":10001}` | Pod security context for the backend deployment |
+| backend.resources | object | `{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource limits and requests for the backend container |
+| backend.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":10001,"runAsNonRoot":true,"runAsUser":10001}` | Security context for the backend container |
 | backend.service.port | int | `3003` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
 | backend.tolerations | list | `[]` | Tolerations for the backend deployment |
@@ -58,9 +58,9 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |
 | frontend.podAnnotations | object | `{}` | Pod annotations for the frontend deployment |
-| frontend.podSecurityContext | object | `{}` | Pod security context for the frontend deployment |
-| frontend.resources | object | `{}` | Resource limits and requests for the frontend container |
-| frontend.securityContext | object | `{}` | Security context for the frontend container |
+| frontend.podSecurityContext | object | `{"fsGroup":10001}` | Pod security context for the frontend deployment |
+| frontend.resources | object | `{"limits":{"cpu":"250m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` | Resource limits and requests for the frontend container |
+| frontend.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":10001,"runAsNonRoot":true,"runAsUser":10001}` | Security context for the frontend container |
 | frontend.service.port | int | `80` |  |
 | frontend.service.type | string | `"ClusterIP"` |  |
 | frontend.tolerations | list | `[]` | Tolerations for the frontend deployment |
