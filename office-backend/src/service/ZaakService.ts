@@ -10,6 +10,8 @@ import { LoggerService } from "./LoggerService";
 import { type DrcType } from "../../../generated/drc-generated-types";
 import { type ZrcType } from "../../../generated/zrc-generated-types";
 import { TokenService } from "./TokenService";
+import {randomUUID} from "node:crypto";
+
 export class ZaakService {
   private userInfo: { preferredUsername: string; name: string } | null = null;
   constructor(
@@ -19,19 +21,25 @@ export class ZaakService {
 
   public async getZaak(zaakIdentificatie: string) {
     const userInfo = this.userInfo!;
+    let correlationId = `${randomUUID()}`;
+    const headers = {
+      "X-NLX-Logrecord-ID": correlationId,
+      "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in"
+    }
+    LoggerService.log(`[${correlationId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`)
 
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
-    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype, userInfo);
+    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype, userInfo, undefined, headers);
 
     const status = zaak.status
-      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, userInfo)
+      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, userInfo, undefined, headers)
       : ({ statustoelichting: "-" } satisfies Partial<ZrcType<"Status">>);
 
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url: string) =>
         this.httpService
-          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url, userInfo)
+          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url, userInfo, undefined, headers)
           .then((result) => ({ ...result, url })),
       ),
     );
@@ -46,8 +54,14 @@ export class ZaakService {
 
   public async addDocumentToZaak(zaakIdentificatie: string, body: Record<string, unknown> = {}) {
     const userInfo = this.userInfo!;
+    const correlationId = `${randomUUID()}`;
+    const headers: HeadersInit = [
+      ["X-NLX-Logrecord-ID", correlationId],
+      ["X-Audit-Toelichting", "Document toevoegen vanuit ZGW Office Add-in"]
+    ]
+    LoggerService.log(`[${correlationId}] user '${userInfo.preferredUsername}' add document '${body.titel}' to zaak ${zaakIdentificatie}`)
 
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo);
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
@@ -58,16 +72,18 @@ export class ZaakService {
         formaat: this.getFileFormat(String(body.titel)),
         taal: "dut",
         bestandsnaam: body.titel,
-        creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T").slice(0, 1)[0],
+        creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T")[0],
       }),
-      userInfo as { preferredUsername: string; name: string },
+      userInfo,
+      headers
     );
-    LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
 
+    LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
     await this.createGebruiksrechten(
       informatieobject.url,
       new Date(String(body.creatiedatum)),
-      userInfo as { preferredUsername: string; name: string },
+      userInfo,
+      headers
     );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
@@ -77,7 +93,8 @@ export class ZaakService {
         informatieobject: informatieobject.url,
         zaak: zaak.url,
       }),
-      userInfo as { preferredUsername: string; name: string },
+      userInfo,
+      headers
     );
 
     return informatieobject;
@@ -113,6 +130,7 @@ export class ZaakService {
   private async getZaakFromOpenZaak(
     zaakIdentificatie: string,
     userInfo: { preferredUsername: string; name: string },
+    headers: HeadersInit,
   ) {
     const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
       "/zaken/api/v1/zaken",
@@ -120,6 +138,7 @@ export class ZaakService {
       {
         identificatie: zaakIdentificatie,
       },
+      headers
     );
 
     const zaak = zaken.results.slice(0, 1)[0];
@@ -135,6 +154,7 @@ export class ZaakService {
     url: string,
     startdatum: Date,
     userInfo: { preferredUsername: string; name: string },
+    headers: HeadersInit,
   ) {
     await this.httpService.POST(
       "/documenten/api/v1/gebruiksrechten",
@@ -144,6 +164,7 @@ export class ZaakService {
         omschrijvingVoorwaarden: "geen",
       }),
       userInfo,
+      headers
     );
   }
 
