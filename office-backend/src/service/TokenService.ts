@@ -12,7 +12,9 @@ export class TokenService {
     try {
       const cleanedToken = String(token).replace("Bearer ", "");
 
-      const decodedToken = jwtDecode<{ preferred_username: string; name: string; uti?: string }>(cleanedToken);
+      const decodedToken = jwtDecode<{ preferred_username: string; name: string; uti?: string }>(
+        cleanedToken,
+      );
 
       if (!decodedToken.preferred_username || !decodedToken.name) {
         throw new Unauthorized();
@@ -22,7 +24,7 @@ export class TokenService {
         name: decodedToken.name,
         uti: decodedToken.uti,
       };
-    } catch (error) {
+    } catch {
       throw new Unauthorized();
     }
   }

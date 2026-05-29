@@ -107,10 +107,18 @@ describe("ZaakController", () => {
     it("resolves userInfo from the authorization header and passes it to the service", async () => {
       const body = { titel: "doc.pdf", creatiedatum: "2025-01-15" };
 
-      await controller.addDocumentToZaak(makePostRequest("Bearer valid.jwt", "ZAAK-001", body), mockReply);
+      await controller.addDocumentToZaak(
+        makePostRequest("Bearer valid.jwt", "ZAAK-001", body),
+        mockReply,
+      );
 
       expect(mockZaakService.resolveUserInfo).toHaveBeenCalledWith("Bearer valid.jwt");
-      expect(mockZaakService.addDocumentToZaak).toHaveBeenCalledWith("ZAAK-001", mockUserInfo, undefined, body);
+      expect(mockZaakService.addDocumentToZaak).toHaveBeenCalledWith(
+        "ZAAK-001",
+        mockUserInfo,
+        undefined,
+        body,
+      );
     });
 
     it("returns 200 with the created document returned by the service", async () => {

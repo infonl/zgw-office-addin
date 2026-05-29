@@ -5,9 +5,13 @@
 
 import officeAddins from "eslint-plugin-office-addins";
 import tsParser from "@typescript-eslint/parser";
-import tsEslint from "@typescript-eslint/eslint-plugin";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import globals from "globals";
+
+// Reuse the same @typescript-eslint instance already registered by officeAddins to avoid plugin redefinition errors
+const tsEslintPlugin = officeAddins.configs.recommended
+  .find((c) => c.plugins?.["@typescript-eslint"])
+  ?.plugins?.["@typescript-eslint"];
 
 /**
  * @type {import("eslint").Linter.Config[]}
@@ -18,7 +22,7 @@ export default [
   {
     plugins: {
       "office-addins": officeAddins,
-      "@typescript-eslint": tsEslint,
+      ...(tsEslintPlugin ? { "@typescript-eslint": tsEslintPlugin } : {}),
     },
     files: ["**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"],
     languageOptions: {

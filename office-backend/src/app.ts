@@ -92,7 +92,7 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
 // === OBO AUTH ENDPOINT ===
 fastify.post("/auth/obo", async (req, res) => {
   try {
-    const body = req.body as any;
+    const body = req.body as { token?: string };
 
     if (!body?.token) {
       return res.status(400).send("Missing bootstrap token");

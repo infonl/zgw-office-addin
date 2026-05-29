@@ -74,7 +74,7 @@ export class HttpService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as T;
 
       LoggerService.debug(`[HTTP] [${method}] [RESULT] ${fullUrl}`, data);
 

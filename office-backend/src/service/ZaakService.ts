@@ -10,7 +10,7 @@ import { LoggerService } from "./LoggerService";
 import { type DrcType } from "../../../generated/drc-generated-types";
 import { type ZrcType } from "../../../generated/zrc-generated-types";
 import { TokenService } from "./TokenService";
-import {randomUUID} from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 export class ZaakService {
   constructor(
@@ -22,17 +22,28 @@ export class ZaakService {
     return this.tokenService.getUserInfo(jwt);
   }
 
-  public async getZaak(zaakIdentificatie: string, userInfo: { preferredUsername: string; name: string; uti?: string }, correlationId?: string) {
+  public async getZaak(
+    zaakIdentificatie: string,
+    userInfo: { preferredUsername: string; name: string; uti?: string },
+    correlationId?: string,
+  ) {
     const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
     const headers = {
       "X-NLX-Logrecord-ID": nlxRecordId,
-      "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in"
-    }
-    LoggerService.log(`[${nlxRecordId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`)
+      "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in",
+    };
+    LoggerService.log(
+      `[${nlxRecordId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`,
+    );
 
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
-    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(zaak.zaaktype, userInfo, undefined, headers);
+    const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(
+      zaak.zaaktype,
+      userInfo,
+      undefined,
+      headers,
+    );
 
     const status = zaak.status
       ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, userInfo, undefined, headers)
@@ -41,7 +52,10 @@ export class ZaakService {
     const zaakinformatieobjecten = await Promise.all(
       zaaktype.informatieobjecttypen.map((url: string) =>
         this.httpService
-          .GET<{ omschrijving: string; vertrouwelijkheidaanduiding: string }>(url, userInfo, undefined, headers)
+          .GET<{
+            omschrijving: string;
+            vertrouwelijkheidaanduiding: string;
+          }>(url, userInfo, undefined, headers)
           .then((result) => ({ ...result, url })),
       ),
     );
@@ -54,13 +68,20 @@ export class ZaakService {
     };
   }
 
-  public async addDocumentToZaak(zaakIdentificatie: string, userInfo: { preferredUsername: string; name: string; uti?: string }, correlationId?: string, body: Record<string, unknown> = {}) {
+  public async addDocumentToZaak(
+    zaakIdentificatie: string,
+    userInfo: { preferredUsername: string; name: string; uti?: string },
+    correlationId?: string,
+    body: Record<string, unknown> = {},
+  ) {
     const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
     const headers = {
       "X-NLX-Logrecord-ID": nlxRecordId,
       "X-Audit-Toelichting": "Document toevoegen vanuit ZGW Office Add-in",
-    }
-    LoggerService.log(`[${nlxRecordId}] user '${userInfo.preferredUsername}' add document '${body.titel}' to zaak ${zaakIdentificatie}`)
+    };
+    LoggerService.log(
+      `[${nlxRecordId}] user '${userInfo.preferredUsername}' add document '${String(body.titel)}' to zaak ${zaakIdentificatie}`,
+    );
 
     const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
 
@@ -76,7 +97,7 @@ export class ZaakService {
         creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T")[0],
       }),
       userInfo,
-      headers
+      headers,
     );
 
     LoggerService.debug(`adding gebruiksrechten to document ${informatieobject.url}`);
@@ -84,7 +105,7 @@ export class ZaakService {
       informatieobject.url,
       new Date(String(body.creatiedatum)),
       userInfo,
-      headers
+      headers,
     );
 
     LoggerService.debug(`adding document to zaak ${zaak.url}`, informatieobject);
@@ -95,7 +116,7 @@ export class ZaakService {
         zaak: zaak.url,
       }),
       userInfo,
-      headers
+      headers,
     );
 
     return informatieobject;
@@ -139,7 +160,7 @@ export class ZaakService {
       {
         identificatie: zaakIdentificatie,
       },
-      headers
+      headers,
     );
 
     const zaak = zaken.results.slice(0, 1)[0];
@@ -165,8 +186,7 @@ export class ZaakService {
         omschrijvingVoorwaarden: "geen",
       }),
       userInfo,
-      headers
+      headers,
     );
   }
-
 }

@@ -99,12 +99,16 @@ describe("ZaakService", () => {
       mockTokenService.getUserInfo.mockImplementation(() => {
         throw new Unauthorized();
       });
-      expect(() => zaakService.resolveUserInfo("Bearer token.without.claims")).toThrow(Unauthorized);
+      expect(() => zaakService.resolveUserInfo("Bearer token.without.claims")).toThrow(
+        Unauthorized,
+      );
     });
 
     it("propagates the error from TokenService directly without swallowing it", () => {
       const error = new Unauthorized();
-      mockTokenService.getUserInfo.mockImplementation(() => { throw error; });
+      mockTokenService.getUserInfo.mockImplementation(() => {
+        throw error;
+      });
       expect(() => zaakService.resolveUserInfo("Bearer bad")).toThrow(error);
     });
   });
@@ -260,7 +264,10 @@ describe("ZaakService", () => {
       await zaakService.getZaak("ZAAK-001", mockUserInfo, "office-correlation-id");
 
       expect(mockHttpService.GET).toHaveBeenNthCalledWith(
-        1, "/zaken/api/v1/zaken", mockUserInfo, { identificatie: "ZAAK-001" },
+        1,
+        "/zaken/api/v1/zaken",
+        mockUserInfo,
+        { identificatie: "ZAAK-001" },
         expect.objectContaining({ "X-NLX-Logrecord-ID": "office-correlation-id" }),
       );
     });
@@ -275,7 +282,10 @@ describe("ZaakService", () => {
       await zaakService.getZaak("ZAAK-001", mockUserInfo, undefined);
 
       expect(mockHttpService.GET).toHaveBeenNthCalledWith(
-        1, "/zaken/api/v1/zaken", mockUserInfo, { identificatie: "ZAAK-001" },
+        1,
+        "/zaken/api/v1/zaken",
+        mockUserInfo,
+        { identificatie: "ZAAK-001" },
         expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
       );
     });
@@ -324,7 +334,12 @@ describe("ZaakService", () => {
         .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({}))
         .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({}));
 
-      const result = await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, documentBody);
+      const result = await zaakService.addDocumentToZaak(
+        "ZAAK-001",
+        mockUserInfo,
+        undefined,
+        documentBody,
+      );
 
       expect(result).toEqual(mockInformatieobject);
 
@@ -448,7 +463,12 @@ describe("ZaakService", () => {
     it("uses correlationId as X-NLX-Logrecord-ID when provided", async () => {
       mockHttpService.POST.mockResolvedValue(mockInformatieobject);
 
-      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, "office-correlation-id", documentBody);
+      await zaakService.addDocumentToZaak(
+        "ZAAK-001",
+        mockUserInfo,
+        "office-correlation-id",
+        documentBody,
+      );
 
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         1,

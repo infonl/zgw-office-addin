@@ -34,7 +34,12 @@ export class ZaakController {
     try {
       const userInfo = this.zaakService.resolveUserInfo(request.headers["authorization"]);
       const correlationId = request.headers["x-correlation-id"] as string | undefined;
-      const data = await this.zaakService.addDocumentToZaak(zaakIdentificatie, userInfo, correlationId, request.body);
+      const data = await this.zaakService.addDocumentToZaak(
+        zaakIdentificatie,
+        userInfo,
+        correlationId,
+        request.body,
+      );
       reply.status(200).send(data);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
