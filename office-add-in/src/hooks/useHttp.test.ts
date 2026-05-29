@@ -5,6 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { OfficeMockObject } from "office-addin-mock";
 import { useHttp } from "./useHttp";
 import { useLogger } from "./useLogger";
 
@@ -271,6 +272,8 @@ describe("useHttp", () => {
 
     it("uses Office.context.diagnostics.correlationId when available", async () => {
       vi.resetModules();
+      // Plain object stub — OfficeMockObject wraps nested values as child mocks,
+      // which breaks direct string reads like Office.context.diagnostics.correlationId.
       vi.stubGlobal("Office", { context: { diagnostics: { correlationId: "office-id-abc" } } });
       setupLoggerMock();
       mockFetch.mockResolvedValueOnce(okResponse());
