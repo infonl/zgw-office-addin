@@ -29,6 +29,7 @@ header:
     - "**/**.txt"
     - ".github/CODEOWNERS"
     - "**/dist"
+    - "e2e/playwright-report"
     - ".nvmrc"
     - ".npmrc"
     - ".licenserc.yaml"
