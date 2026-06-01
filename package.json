@@ -9,7 +9,8 @@
   },
   "workspaces": [
     "office-add-in",
-    "office-backend"
+    "office-backend",
+    "e2e"
   ],
   "packageManager": "npm@11.13.0",
   "scripts": {
