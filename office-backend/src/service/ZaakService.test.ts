@@ -8,9 +8,7 @@ import { ZaakService } from "./ZaakService";
 import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { FileNotSupported } from "../exception/FileNotSupported";
 import { LoggerService } from "./LoggerService";
-import { Unauthorized } from "../exception/Unauthorized";
 import type { HttpService } from "./HttpService";
-import { TokenService } from "./TokenService";
 
 vi.mock("./LoggerService", () => ({
   LoggerService: {
@@ -47,9 +45,6 @@ describe("ZaakService", () => {
     GET: MockedFunction<HttpService["GET"]>;
     POST: MockedFunction<HttpService["POST"]>;
   };
-  let mockTokenService: {
-    getUserInfo: MockedFunction<TokenService["getTokenInfo"]>;
-  };
 
   beforeEach(() => {
     const defaultGet: HttpService["GET"] = async <T>(
@@ -70,13 +65,7 @@ describe("ZaakService", () => {
       GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
       POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
     };
-    mockTokenService = {
-      getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
-    };
-    zaakService = new ZaakService(
-      mockHttpService as unknown as HttpService,
-      mockTokenService as unknown as TokenService,
-    );
+    zaakService = new ZaakService(mockHttpService as unknown as HttpService);
     vi.clearAllMocks();
   });
 
@@ -254,6 +243,25 @@ describe("ZaakService", () => {
         mockUserInfo,
         { identificatie: "ZAAK-001" },
         expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
+      );
+    });
+
+    it("falls back to randomUUID when both correlationId and uti are absent", async () => {
+      const userWithoutUti = { preferredUsername: "test-user", name: "Test User" };
+      mockHttpService.GET.mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve(mockZaaktype))
+        .mockImplementationOnce(() => Promise.resolve(mockStatus))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[0]))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[1]));
+
+      await zaakService.getZaak("ZAAK-001", userWithoutUti);
+
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        1,
+        "/zaken/api/v1/zaken",
+        userWithoutUti,
+        { identificatie: "ZAAK-001" },
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "test-uuid-1234" }),
       );
     });
 
@@ -457,6 +465,25 @@ describe("ZaakService", () => {
         expect.any(String),
         mockUserInfo,
         expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
+      );
+    });
+
+    it("falls back to randomUUID when both correlationId and uti are absent", async () => {
+      const userWithoutUti = { preferredUsername: "test-user", name: "Test User" };
+      mockHttpService.GET.mockReset().mockImplementationOnce(
+        <T>(_url: string, _userInfo: unknown, _params?: unknown, _headers: HeadersInit = {}) =>
+          Promise.resolve({ results: [mockZaak] } as T),
+      );
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", userWithoutUti, undefined, documentBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.any(String),
+        userWithoutUti,
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "test-uuid-1234" }),
       );
     });
   });

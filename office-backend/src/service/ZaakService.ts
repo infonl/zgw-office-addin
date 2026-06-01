@@ -13,9 +13,7 @@ import { type ZrcType } from "../../../generated/zrc-generated-types";
 import { randomUUID } from "node:crypto";
 
 export class ZaakService {
-  constructor(
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   public async getZaak(zaakIdentificatie: string, tokenInfo: TokenInfo, correlationId?: string) {
     const nlxRecordId = correlationId ?? tokenInfo.uti ?? randomUUID();
