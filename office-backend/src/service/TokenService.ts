@@ -5,9 +5,10 @@
 
 import { jwtDecode } from "jwt-decode";
 import { Unauthorized } from "../exception/Unauthorized";
+import type { TokenInfo } from "../dto/TokenInfo";
 
 export class TokenService {
-  public getUserInfo(token?: string): { preferredUsername: string; name: string; uti?: string } {
+  public getTokenInfo(token?: string): TokenInfo {
     if (!token) throw new Unauthorized();
     try {
       const cleanedToken = String(token).replace("Bearer ", "");

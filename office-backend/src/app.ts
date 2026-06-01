@@ -69,8 +69,8 @@ fastify.addHook("onRequest", onRequestLoggerHook);
 
 const httpService = new HttpService();
 const tokenService = new TokenService();
-const zaakService = new ZaakService(httpService, tokenService);
-const zaakController = new ZaakController(zaakService);
+const zaakService = new ZaakService(httpService);
+const zaakController = new ZaakController(tokenService, zaakService);
 
 // Health check endpoint for Kubernetes probes
 fastify.get("/health", async (_req, res) => {

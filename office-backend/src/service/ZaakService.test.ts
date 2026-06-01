@@ -48,7 +48,7 @@ describe("ZaakService", () => {
     POST: MockedFunction<HttpService["POST"]>;
   };
   let mockTokenService: {
-    getUserInfo: MockedFunction<TokenService["getUserInfo"]>;
+    getUserInfo: MockedFunction<TokenService["getTokenInfo"]>;
   };
 
   beforeEach(() => {
@@ -78,39 +78,6 @@ describe("ZaakService", () => {
       mockTokenService as unknown as TokenService,
     );
     vi.clearAllMocks();
-  });
-
-  describe("resolveUserInfo", () => {
-    it("returns userInfo when the JWT contains valid claims", () => {
-      mockTokenService.getUserInfo.mockReturnValue(mockUserInfo);
-      const result = zaakService.resolveUserInfo("Bearer valid.jwt.token");
-      expect(result).toEqual(mockUserInfo);
-      expect(mockTokenService.getUserInfo).toHaveBeenCalledWith("Bearer valid.jwt.token");
-    });
-
-    it("throws Unauthorized when the JWT is missing", () => {
-      mockTokenService.getUserInfo.mockImplementation(() => {
-        throw new Unauthorized();
-      });
-      expect(() => zaakService.resolveUserInfo(undefined)).toThrow(Unauthorized);
-    });
-
-    it("throws Unauthorized when preferred_username is absent from the token", () => {
-      mockTokenService.getUserInfo.mockImplementation(() => {
-        throw new Unauthorized();
-      });
-      expect(() => zaakService.resolveUserInfo("Bearer token.without.claims")).toThrow(
-        Unauthorized,
-      );
-    });
-
-    it("propagates the error from TokenService directly without swallowing it", () => {
-      const error = new Unauthorized();
-      mockTokenService.getUserInfo.mockImplementation(() => {
-        throw error;
-      });
-      expect(() => zaakService.resolveUserInfo("Bearer bad")).toThrow(error);
-    });
   });
 
   describe("getZaak", () => {

@@ -7,17 +7,20 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { ZaakService } from "../service/ZaakService";
 import type { ZaakParam } from "../dto/ZaakParam";
 import { ExceptionHandler } from "../exception/ExceptionHandler";
-import { LoggerService } from "../service/LoggerService";
+import { TokenService } from "../service/TokenService";
 
 export class ZaakController {
-  constructor(private readonly zaakService: ZaakService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly zaakService: ZaakService,
+  ) {}
 
   public async getZaak(request: FastifyRequest<{ Params: ZaakParam }>, reply: FastifyReply) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      const userInfo = this.zaakService.resolveUserInfo(request.headers["authorization"]);
+      const tokenInfo = this.tokenService.getTokenInfo(request.headers["authorization"]);
       const correlationId = request.headers["x-correlation-id"] as string | undefined;
-      const response = await this.zaakService.getZaak(zaakIdentificatie, userInfo, correlationId);
+      const response = await this.zaakService.getZaak(zaakIdentificatie, tokenInfo, correlationId);
       reply.status(200).send(response);
     } catch (error) {
       ExceptionHandler.handleAndReply(error, reply);
@@ -33,11 +36,11 @@ export class ZaakController {
   ) {
     const zaakIdentificatie = request.params.zaakIdentificatie;
     try {
-      const userInfo = this.zaakService.resolveUserInfo(request.headers["authorization"]);
+      const tokenInfo = this.tokenService.getTokenInfo(request.headers["authorization"]);
       const correlationId = request.headers["x-correlation-id"] as string | undefined;
       const data = await this.zaakService.addDocumentToZaak(
         zaakIdentificatie,
-        userInfo,
+        tokenInfo,
         correlationId,
         request.body,
       );

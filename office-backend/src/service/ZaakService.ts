@@ -3,50 +3,41 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
+import type { TokenInfo } from "../dto/TokenInfo";
 import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { FileNotSupported } from "../exception/FileNotSupported";
 import { type HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
 import { type DrcType } from "../../../generated/drc-generated-types";
 import { type ZrcType } from "../../../generated/zrc-generated-types";
-import { TokenService } from "./TokenService";
 import { randomUUID } from "node:crypto";
 
 export class ZaakService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly tokenService: TokenService,
   ) {}
 
-  public resolveUserInfo(jwt: string | undefined) {
-    return this.tokenService.getUserInfo(jwt);
-  }
-
-  public async getZaak(
-    zaakIdentificatie: string,
-    userInfo: { preferredUsername: string; name: string; uti?: string },
-    correlationId?: string,
-  ) {
-    const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
+  public async getZaak(zaakIdentificatie: string, tokenInfo: TokenInfo, correlationId?: string) {
+    const nlxRecordId = correlationId ?? tokenInfo.uti ?? randomUUID();
     const headers = {
       "X-NLX-Logrecord-ID": nlxRecordId,
       "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in",
     };
     LoggerService.log(
-      `[${nlxRecordId}] user '${userInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`,
+      `[${nlxRecordId}] user '${tokenInfo.preferredUsername}' requests zaak ${zaakIdentificatie}`,
     );
 
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, tokenInfo, headers);
 
     const zaaktype = await this.httpService.GET<ZrcType<"ZaakType">>(
       zaak.zaaktype,
-      userInfo,
+      tokenInfo,
       undefined,
       headers,
     );
 
     const status = zaak.status
-      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, userInfo, undefined, headers)
+      ? await this.httpService.GET<ZrcType<"Status">>(zaak.status, tokenInfo, undefined, headers)
       : ({ statustoelichting: "-" } satisfies Partial<ZrcType<"Status">>);
 
     const zaakinformatieobjecten = await Promise.all(
@@ -55,7 +46,7 @@ export class ZaakService {
           .GET<{
             omschrijving: string;
             vertrouwelijkheidaanduiding: string;
-          }>(url, userInfo, undefined, headers)
+          }>(url, tokenInfo, undefined, headers)
           .then((result) => ({ ...result, url })),
       ),
     );
@@ -70,20 +61,20 @@ export class ZaakService {
 
   public async addDocumentToZaak(
     zaakIdentificatie: string,
-    userInfo: { preferredUsername: string; name: string; uti?: string },
+    tokenInfo: TokenInfo,
     correlationId?: string,
     body: Record<string, unknown> = {},
   ) {
-    const nlxRecordId = correlationId ?? userInfo.uti ?? randomUUID();
+    const nlxRecordId = correlationId ?? tokenInfo.uti ?? randomUUID();
     const headers = {
       "X-NLX-Logrecord-ID": nlxRecordId,
       "X-Audit-Toelichting": "Document toevoegen vanuit ZGW Office Add-in",
     };
     LoggerService.log(
-      `[${nlxRecordId}] user '${userInfo.preferredUsername}' add document '${String(body.titel)}' to zaak ${zaakIdentificatie}`,
+      `[${nlxRecordId}] user '${tokenInfo.preferredUsername}' add document '${String(body.titel)}' to zaak ${zaakIdentificatie}`,
     );
 
-    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, userInfo, headers);
+    const zaak = await this.getZaakFromOpenZaak(zaakIdentificatie, tokenInfo, headers);
 
     LoggerService.debug("creating document", zaakIdentificatie);
     const informatieobject = await this.httpService.POST<DrcType<"EnkelvoudigInformatieObject">>(
@@ -96,7 +87,7 @@ export class ZaakService {
         bestandsnaam: body.titel,
         creatiedatum: new Date(String(body.creatiedatum)).toISOString().split("T")[0],
       }),
-      userInfo,
+      tokenInfo,
       headers,
     );
 
@@ -104,7 +95,7 @@ export class ZaakService {
     await this.createGebruiksrechten(
       informatieobject.url,
       new Date(String(body.creatiedatum)),
-      userInfo,
+      tokenInfo,
       headers,
     );
 
@@ -115,7 +106,7 @@ export class ZaakService {
         informatieobject: informatieobject.url,
         zaak: zaak.url,
       }),
-      userInfo,
+      tokenInfo,
       headers,
     );
 
@@ -151,12 +142,12 @@ export class ZaakService {
 
   private async getZaakFromOpenZaak(
     zaakIdentificatie: string,
-    userInfo: { preferredUsername: string; name: string },
+    tokenInfo: TokenInfo,
     headers: HeadersInit,
   ) {
     const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
       "/zaken/api/v1/zaken",
-      userInfo,
+      tokenInfo,
       {
         identificatie: zaakIdentificatie,
       },

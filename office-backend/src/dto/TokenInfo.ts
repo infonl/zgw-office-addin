@@ -1,0 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2026 INFO.nl
+ * SPDX-License-Identifier: EUPL-1.2+
+ */
+
+export interface TokenInfo {
+  preferredUsername: string;
+  name: string;
+  uti?: string;
+}

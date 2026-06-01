@@ -9,8 +9,13 @@ import { ZaakService } from "../service/ZaakService";
 import { Unauthorized } from "../exception/Unauthorized";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { ZaakParam } from "../dto/ZaakParam";
+import { TokenService } from "../service/TokenService";
 
-const mockUserInfo = { preferredUsername: "test-user", name: "Test User" };
+const mockTokenInfo = {
+  preferredUsername: "test-user",
+  name: "Test User",
+  uti: "fakeUti",
+};
 
 const mockReply = {
   status: vi.fn().mockReturnThis(),
@@ -39,27 +44,34 @@ function makePostRequest(
 describe("ZaakController", () => {
   let controller: ZaakController;
   let mockZaakService: {
-    resolveUserInfo: ReturnType<typeof vi.fn>;
     getZaak: ReturnType<typeof vi.fn>;
     addDocumentToZaak: ReturnType<typeof vi.fn>;
+  };
+  let mockTokenService: {
+    getTokenInfo: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockZaakService = {
-      resolveUserInfo: vi.fn().mockReturnValue(mockUserInfo),
       getZaak: vi.fn().mockResolvedValue({ identificatie: "ZAAK-001" }),
       addDocumentToZaak: vi.fn().mockResolvedValue({ url: "https://example.com/doc/1" }),
     };
-    controller = new ZaakController(mockZaakService as unknown as ZaakService);
+    mockTokenService = {
+      getTokenInfo: vi.fn().mockReturnValue(mockTokenInfo),
+    };
+    controller = new ZaakController(
+      mockTokenService as unknown as TokenService,
+      mockZaakService as unknown as ZaakService,
+    );
   });
 
   describe("getZaak", () => {
     it("resolves userInfo from the authorization header and passes it to the service", async () => {
       await controller.getZaak(makeGetRequest("Bearer valid.jwt"), mockReply);
 
-      expect(mockZaakService.resolveUserInfo).toHaveBeenCalledWith("Bearer valid.jwt");
-      expect(mockZaakService.getZaak).toHaveBeenCalledWith("ZAAK-001", mockUserInfo, undefined);
+      expect(mockTokenService.getTokenInfo).toHaveBeenCalledWith("Bearer valid.jwt");
+      expect(mockZaakService.getZaak).toHaveBeenCalledWith("ZAAK-001", mockTokenInfo, undefined);
     });
 
     it("returns 200 with the zaak returned by the service", async () => {
@@ -73,7 +85,7 @@ describe("ZaakController", () => {
     });
 
     it("returns 401 when the authorization header is missing", async () => {
-      mockZaakService.resolveUserInfo.mockImplementation(() => {
+      mockTokenService.getTokenInfo.mockImplementation(() => {
         throw new Unauthorized();
       });
 
@@ -84,7 +96,7 @@ describe("ZaakController", () => {
     });
 
     it("returns 401 when the token does not contain required claims (e.g. preferred_username absent on first load)", async () => {
-      mockZaakService.resolveUserInfo.mockImplementation(() => {
+      mockTokenService.getTokenInfo.mockImplementation(() => {
         throw new Unauthorized();
       });
 
@@ -112,10 +124,10 @@ describe("ZaakController", () => {
         mockReply,
       );
 
-      expect(mockZaakService.resolveUserInfo).toHaveBeenCalledWith("Bearer valid.jwt");
+      expect(mockTokenService.getTokenInfo).toHaveBeenCalledWith("Bearer valid.jwt");
       expect(mockZaakService.addDocumentToZaak).toHaveBeenCalledWith(
         "ZAAK-001",
-        mockUserInfo,
+        mockTokenInfo,
         undefined,
         body,
       );
@@ -132,7 +144,7 @@ describe("ZaakController", () => {
     });
 
     it("returns 401 when the authorization header is missing", async () => {
-      mockZaakService.resolveUserInfo.mockImplementation(() => {
+      mockTokenService.getTokenInfo.mockImplementation(() => {
         throw new Unauthorized();
       });
 
@@ -143,7 +155,7 @@ describe("ZaakController", () => {
     });
 
     it("returns 401 when the token does not contain required claims (e.g. preferred_username absent on first load)", async () => {
-      mockZaakService.resolveUserInfo.mockImplementation(() => {
+      mockTokenService.getTokenInfo.mockImplementation(() => {
         throw new Unauthorized();
       });
 
