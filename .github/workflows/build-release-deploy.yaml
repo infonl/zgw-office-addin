@@ -110,7 +110,7 @@ jobs:
           VERSION=${{ needs.next-version.outputs.version }}
           VERSION_NO_V=${VERSION#v}
           echo "Setting version to: $VERSION_NO_V"
-          
+
           # Update package.json files
           npm pkg set version="$VERSION_NO_V"
           npm pkg set version="$VERSION_NO_V" --workspace=office-add-in
@@ -250,8 +250,8 @@ jobs:
           context: office-add-in
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ghcr.io/infonl/zgw-office-add-in-frontend:latest
-            ghcr.io/infonl/zgw-office-add-in-frontend:${{ needs.next-version.outputs.version }}
+            ghcr.io/infonl/zgw-office-addin-frontend:latest
+            ghcr.io/infonl/zgw-office-addin-frontend:${{ needs.next-version.outputs.version }}
           attests: |
             type=provenance,mode=max
             type=sbom
@@ -263,8 +263,8 @@ jobs:
           context: office-backend
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ghcr.io/infonl/zgw-office-add-in-backend:latest
-            ghcr.io/infonl/zgw-office-add-in-backend:${{ needs.next-version.outputs.version }}
+            ghcr.io/infonl/zgw-office-addin-backend:latest
+            ghcr.io/infonl/zgw-office-addin-backend:${{ needs.next-version.outputs.version }}
           attests: |
             type=provenance,mode=max
             type=sbom

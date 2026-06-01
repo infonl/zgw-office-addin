@@ -81,6 +81,7 @@ export function ZaakSearch() {
 
   const form = useForm({
     resolver: zodResolver(zaakSearchSchema),
+    mode: "onChange",
     defaultValues: {
       zaaknummer: "",
     },

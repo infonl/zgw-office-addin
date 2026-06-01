@@ -31,7 +31,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 |-----|------|---------|-------------|
 | backend.affinity | object | `{}` | Affinity rules for the backend deployment |
 | backend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| backend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-backend"` |  |
+| backend.image.repository | string | `"ghcr.io/infonl/zgw-office-addin-backend"` |  |
 | backend.image.tag | string | `"v0.9.289@sha256:dc9b165344e787cbf6146183be529594308e22eea553e1db6654f49ba9e76cfb"` |  |
 | backend.imagePullSecrets | list | `[]` | Image pull secrets for the backend deployment |
 | backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
@@ -52,7 +52,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-add-in-frontend"` |  |
+| frontend.image.repository | string | `"ghcr.io/infonl/zgw-office-addin-frontend"` |  |
 | frontend.image.tag | string | `"v0.9.289@sha256:80c1fea3d16ef8a837576858e581bb20de6296af7f21c56d401f4a346c126dc0"` |  |
 | frontend.imagePullSecrets | list | `[]` | Image pull secrets for the frontend deployment |
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |

@@ -49,6 +49,17 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
+    # Custom error responses — empty body, no nginx-branded HTML.
+    # server_tokens off (above) suppresses the version number from the Server header.
+    # Fully removing "Server: nginx" requires the ngx_headers_more module, which is
+    # not compiled into this nginx build.
+    error_page 400 401 403 405 408 410 429 =400 /4xx;
+    error_page 404                          =404 /404;
+    error_page 500 502 503 504              =502 /5xx;
+    location = /404 { internal; default_type text/plain; return 404 "Not Found"; }
+    location = /4xx { internal; default_type text/plain; return 400 "Bad Request"; }
+    location = /5xx { internal; default_type text/plain; return 502 "Server Error"; }
+
     # Health check endpoint for Kubernetes probes
     location /health {
         access_log off;
@@ -80,9 +91,15 @@ server {
         alias /usr/share/nginx/html/metrics.txt;
     }
 
+    # Root has no content — all valid entry points are explicit paths (/taskpane.html etc.)
+    location = / {
+        default_type text/plain;
+        return 404 "Not Found";
+    }
+
     location / {
         client_max_body_size __MAX_BODY_SIZE__;
-        try_files $uri $uri/ /index.html;
+        try_files $uri =404;
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
 
         # CORS headers for Office Add-ins

@@ -5,7 +5,7 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'zgw-office-add-in-frontend'
+  - job_name: 'zgw-office-addin-frontend'
     static_configs:
       - targets: ['frontend:443']
     scheme: https

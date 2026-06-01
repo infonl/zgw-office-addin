@@ -20,7 +20,11 @@ COPY ./nginx.https.template /etc/nginx/
 USER root
 RUN addgroup --system --gid 10001 nginxapp && \
     adduser --system --uid 10001 --ingroup nginxapp --no-create-home nginxapp && \
-    chown -R nginxapp:nginxapp /app
+    # Remove nginx default pages so the server never serves branded content
+    rm -f /usr/share/nginx/html/index.html /usr/share/nginx/html/50x.html && \
+    chown -R nginxapp:nginxapp /app && \
+    chown -R nginxapp:nginxapp /usr/share/nginx/html && \
+    chown -R nginxapp:nginxapp /etc/nginx/conf.d
 USER 10001
 
 EXPOSE 8080

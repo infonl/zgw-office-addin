@@ -11,7 +11,7 @@ common:
 
 frontend:
   image:
-    repository: ghcr.io/infonl/zgw-office-add-in-frontend
+    repository: ghcr.io/infonl/zgw-office-addin-frontend
     tag: v0.9.289@sha256:80c1fea3d16ef8a837576858e581bb20de6296af7f21c56d401f4a346c126dc0
     pullPolicy: IfNotPresent
   service:
@@ -66,7 +66,7 @@ frontend:
 
 backend:
   image:
-    repository: ghcr.io/infonl/zgw-office-add-in-backend
+    repository: ghcr.io/infonl/zgw-office-addin-backend
     tag: v0.9.289@sha256:dc9b165344e787cbf6146183be529594308e22eea553e1db6654f49ba9e76cfb
     pullPolicy: IfNotPresent
   service:
