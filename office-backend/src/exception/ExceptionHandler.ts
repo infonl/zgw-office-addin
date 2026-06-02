@@ -41,8 +41,13 @@ export class ExceptionHandler {
       if ("statusCode" in error && typeof err.statusCode === "number") {
         statusCode = err.statusCode;
       }
-      if ("cause" in error) {
-        cause = String(err.message);
+      if ("cause" in err) {
+        cause =
+          err.cause instanceof Error
+            ? err.cause.message
+            : err.cause != null
+              ? String(err.cause)
+              : undefined;
       }
     }
     if (typeof error === "string") {
