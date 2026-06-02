@@ -35,8 +35,9 @@ function createClient() {
 }
 
 function capturedAuthProvider() {
-  return mockClientInit.mock.calls[0][0].authProvider as (
-    _: (_: unknown, _: string | null) => void
+  const firstCall = mockClientInit.mock.calls[0] as unknown as [{ authProvider: unknown }];
+  return firstCall[0].authProvider as (
+    _done: (_err: unknown, _token: string | null) => void
   ) => Promise<void>;
 }
 

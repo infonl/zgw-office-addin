@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OfficeForm } from "./OfficeForm";
@@ -19,6 +19,9 @@ import * as useGetZaakModule from "../../hooks/useGetZaak";
 vi.mock("../../hooks/useAddDocumentToZaak");
 vi.mock("../../hooks/useOffice");
 vi.mock("../../hooks/useGetZaak");
+vi.mock("../../utils/getAccessToken", () => ({
+  getToken: vi.fn().mockResolvedValue("mock-token"),
+}));
 vi.mock("./ZaakSearch", () => ({
   ZaakSearch: () => <div data-testid="zaak-search">Zaak Search</div>,
 }));
@@ -85,10 +88,6 @@ describe("OfficeForm", () => {
       isPaused: false,
       submittedAt: 0,
     });
-
-    vi.mock("../../utils/getAccessToken", () => ({
-      getToken: vi.fn().mockResolvedValue("mock-token"),
-    }));
 
     vi.mocked(useOffice).mockReturnValue({
       getSignedInUser: mockGetSignedInUser,
@@ -300,8 +299,10 @@ describe("OfficeForm", () => {
       const informatieobjecttypeSelect = screen.getByLabelText(
         /informatieobjecttype/i
       ) as HTMLSelectElement;
-      fireEvent.change(informatieobjecttypeSelect, {
-        target: { value: "https://example.com/zio/1" },
+      await act(async () => {
+        fireEvent.change(informatieobjecttypeSelect, {
+          target: { value: "https://example.com/zio/1" },
+        });
       });
 
       // Value should still be vertrouwelijk (no unnecessary updates)

@@ -8,9 +8,10 @@ import { TokenService } from "./TokenService";
 import { Unauthorized } from "../exception/Unauthorized";
 import * as jwtDecodeModule from "jwt-decode";
 
+vi.mock("jwt-decode");
+
 describe("TokenService", () => {
   const service = new TokenService();
-  vi.mock("jwt-decode");
 
   afterEach(() => {
     vi.clearAllMocks();

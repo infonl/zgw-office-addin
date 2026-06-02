@@ -103,7 +103,12 @@ describe("useHttp", () => {
     });
 
     it("should throw error for failed GET request", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, status: 404, json: vi.fn() });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: vi.fn(),
+        text: vi.fn().mockResolvedValue(""),
+      });
 
       const { result } = renderHook(() => useHttp());
 
@@ -186,7 +191,12 @@ describe("useHttp", () => {
     });
 
     it("should throw error for failed POST request", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, status: 400, json: vi.fn() });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: vi.fn(),
+        text: vi.fn().mockResolvedValue(""),
+      });
 
       const { result } = renderHook(() => useHttp());
 

@@ -92,9 +92,9 @@ export function useOutlookForm() {
       // ToDo: (remove after test on server)
       try {
         await authService.getAccessToken();
-        DEBUG("✅ GraphService ready for downloads");
+        DEBUG("GraphService ready for downloads");
       } catch (authError) {
-        ERROR("❌ Graph API authentication failed:", authError);
+        ERROR("Graph API authentication failed:", authError);
         throw authError;
       }
 
@@ -125,11 +125,11 @@ export function useOutlookForm() {
         DEBUG("processedDocuments for results", processedDocuments);
         results = await processAndUploadDocuments({ processedDocuments, zaak, graphService });
 
-        DEBUG("✅ processAndUploadDocuments completed", {
+        DEBUG("processAndUploadDocuments completed", {
           total: results.length,
         });
       } catch (error) {
-        ERROR("❌ processAndUploadDocuments threw an error:", error);
+        ERROR("processAndUploadDocuments threw an error:", error);
         return { error: error instanceof Error ? error : new Error(String(error)) };
       }
 
@@ -169,8 +169,9 @@ export function useOutlookForm() {
           try {
             const result = await mutateAsync(doc);
             return { status: "fulfilled", value: result };
-          } catch {
-            return { status: "rejected" };
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            return { status: "rejected", reason };
           }
         })
       );
@@ -178,12 +179,14 @@ export function useOutlookForm() {
       const failed = mutationResults.filter((r) => r.status === "rejected").length;
 
       if (failed > 0) {
-        ERROR(`❌ Failed to upload ${failed} documents`);
-        showErrorToast(failed, selectedDocuments.length);
+        ERROR(`Failed to upload ${failed} documents`);
+        const firstReason = mutationResults.find((r) => r.status === "rejected" && "reason" in r)
+          ?.reason as string | undefined;
+        showErrorToast(failed, selectedDocuments.length, firstReason);
         return { error: new Error(`Failed to upload ${failed} documents`) };
       }
 
-      DEBUG("✅ All documents uploaded successfully");
+      DEBUG("All documents uploaded successfully");
       const emailSelected = selectedDocuments.some(
         (doc) => doc.attachment.attachmentType === "item"
       );
@@ -194,7 +197,7 @@ export function useOutlookForm() {
       showSuccessToast(emailSelected, attachmentsSelected);
       return { error: null };
     } catch (error) {
-      ERROR("❌ Upload process failed:", error);
+      ERROR("Upload process failed:", error);
       // Note: Individual mutation errors are already tracked by TanStack Query
       // This is a catch-all for orchestration-level errors (not file-level errors)
       showGeneralErrorToast();

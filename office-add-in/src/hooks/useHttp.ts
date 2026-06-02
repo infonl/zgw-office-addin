@@ -67,7 +67,8 @@ export function useHttp() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const body = await response.text().catch(() => "");
+        throw new Error(body || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();

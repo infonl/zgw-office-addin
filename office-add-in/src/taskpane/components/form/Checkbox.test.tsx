@@ -23,7 +23,7 @@ vi.mock("@fluentui/react-components", () => ({
     label,
   }: {
     checked: boolean;
-    onChange: (_: React.ChangeEvent<HTMLInputElement>, _: { checked: boolean }) => void;
+    onChange: (_event: React.ChangeEvent<HTMLInputElement>, _data: { checked: boolean }) => void;
     onBlur: () => void;
     name: string;
     label: string;
@@ -38,7 +38,7 @@ vi.mock("@fluentui/react-components", () => ({
       aria-label={String(label)}
     />
   ),
-  _: ({
+  Field: ({
     children,
     validationState,
     validationMessage,

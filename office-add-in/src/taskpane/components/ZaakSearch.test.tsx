@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ZaakSearch } from "./ZaakSearch";
@@ -31,7 +31,9 @@ describe("ZaakSearch", () => {
 
   describe("search button format validation", () => {
     it("is disabled when the input is empty", async () => {
-      render(<ZaakSearch />, { wrapper: createWrapper });
+      await act(async () => {
+        render(<ZaakSearch />, { wrapper: createWrapper });
+      });
       expect(
         (screen.getByRole("button", { name: "Zaak zoeken" }) as HTMLButtonElement).disabled
       ).toBe(true);
@@ -39,8 +41,10 @@ describe("ZaakSearch", () => {
 
     it("is disabled when the input does not start with ZAAK-", async () => {
       render(<ZaakSearch />, { wrapper: createWrapper });
-      fireEvent.change(screen.getByLabelText("Zaaknummer"), {
-        target: { value: "2026-0000000001" },
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText("Zaaknummer"), {
+          target: { value: "2026-0000000001" },
+        });
       });
       expect(
         (screen.getByRole("button", { name: "Zaak zoeken" }) as HTMLButtonElement).disabled
@@ -49,7 +53,9 @@ describe("ZaakSearch", () => {
 
     it("is disabled when the input is only the prefix ZAAK without a dash", async () => {
       render(<ZaakSearch />, { wrapper: createWrapper });
-      fireEvent.change(screen.getByLabelText("Zaaknummer"), { target: { value: "ZAAK" } });
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText("Zaaknummer"), { target: { value: "ZAAK" } });
+      });
       expect(
         (screen.getByRole("button", { name: "Zaak zoeken" }) as HTMLButtonElement).disabled
       ).toBe(true);

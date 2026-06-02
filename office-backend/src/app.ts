@@ -102,7 +102,7 @@ fastify.post("/auth/obo", async (req, res) => {
 
     return res.status(200).send({ access_token: graphToken });
   } catch (err) {
-    LoggerService.error("❌ /auth/obo error:", err);
+    LoggerService.error("/auth/obo error:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return res.status(500).send(errorMessage);
   }

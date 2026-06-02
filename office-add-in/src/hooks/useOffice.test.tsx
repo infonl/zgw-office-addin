@@ -289,7 +289,7 @@ describe("useOffice", () => {
       const { result } = renderHook(() => useOffice());
       const fileName = await result.current.getFileName();
 
-      // ✅ Fixed: sanitizeFileName collapses multiple spaces to single space
+      // Fixed: sanitizeFileName collapses multiple spaces to single space
       expect(fileName).toBe("RE Invoice Payment Update.eml");
       expect(fileName).not.toContain(":");
       expect(fileName).not.toContain("/");
