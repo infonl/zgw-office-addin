@@ -41,9 +41,9 @@ test.describe("document-upload", () => {
 
     await taskpane.getByRole("button", { name: "Document koppelen" }).click();
 
-    await expect(taskpane.getByText("Document gekoppeld")).toBeVisible({
-      timeout: 20_000,
-    });
+    await expect(
+      taskpane.getByText("Document gekoppeld", { exact: true }),
+    ).toBeVisible({ timeout: 20_000 });
   });
 
   test("unsupported file type shows FileNotSupported error", async ({
