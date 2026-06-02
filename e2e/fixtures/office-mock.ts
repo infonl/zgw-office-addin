@@ -20,10 +20,7 @@ export interface OfficeMockOptions {
   fileName?: string;
 }
 
-export function officeMockScript(
-  jwt: string,
-  options: OfficeMockOptions = {},
-): string {
+export function officeMockScript(jwt: string, options: OfficeMockOptions = {}): string {
   const pdfPath = path.join(__dirname, "test-document.pdf");
   const pdfBytes = Array.from(fs.readFileSync(pdfPath));
   const fileName = options.fileName ?? "test-document.pdf";
@@ -102,10 +99,7 @@ export interface OutlookMockOptions {
   }>;
 }
 
-export function outlookMockScript(
-  jwt: string,
-  options: OutlookMockOptions = {},
-): string {
+export function outlookMockScript(jwt: string, options: OutlookMockOptions = {}): string {
   const subject = options.subject ?? "Test e-mail onderwerp";
   const itemId = options.itemId ?? "AAMkAGVmZTM3fake-ews-item-id";
   const attachments = (

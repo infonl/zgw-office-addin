@@ -12,13 +12,8 @@
  * The frontend's getToken() will re-fetch on each call because its expiry
  * check sees undefined exp, but the mock resolves instantly so this is benign.
  */
-export function makeTestJwt(
-  preferredUsername = "e2e-user",
-  name = "E2E User",
-): string {
+export function makeTestJwt(preferredUsername = "e2e-user", name = "E2E User"): string {
   const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }));
-  const payload = btoa(
-    JSON.stringify({ preferred_username: preferredUsername, name }),
-  );
+  const payload = btoa(JSON.stringify({ preferred_username: preferredUsername, name }));
   return `${header}.${payload}.`;
 }

@@ -5,7 +5,12 @@
 
 import { test as base, FrameLocator, Page } from "@playwright/test";
 import { makeTestJwt } from "./auth";
-import { officeMockScript, OfficeMockOptions, outlookMockScript, OutlookMockOptions } from "./office-mock";
+import {
+  officeMockScript,
+  OfficeMockOptions,
+  outlookMockScript,
+  OutlookMockOptions,
+} from "./office-mock";
 
 export type TaskpaneFixture = {
   /** FrameLocator scoped to the Word add-in taskpane iframe, ready for interaction. */
@@ -50,10 +55,7 @@ export const test = base.extend<TaskpaneFixture>({
   },
 });
 
-async function loadTaskpane(
-  page: Page,
-  options: OfficeMockOptions = {},
-): Promise<FrameLocator> {
+async function loadTaskpane(page: Page, options: OfficeMockOptions = {}): Promise<FrameLocator> {
   const jwt = makeTestJwt();
 
   // taskpane.html loads Office.js from the CDN via a synchronous <script> tag.

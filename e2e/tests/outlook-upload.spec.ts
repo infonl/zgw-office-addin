@@ -15,27 +15,19 @@ async function findZaak(taskpane: FrameLocator) {
 }
 
 test.describe("outlook-upload", () => {
-  test("shows email and attachment as selectable items", async ({
-    outlookTaskpane,
-  }) => {
+  test("shows email and attachment as selectable items", async ({ outlookTaskpane }) => {
     await findZaak(outlookTaskpane);
 
-    await expect(
-      outlookTaskpane.getByText("Bestanden selecteren", { exact: true }),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByText("Bestanden selecteren", { exact: true })).toBeVisible();
 
     // Email itself appears as a selectable item
-    await expect(
-      outlookTaskpane.getByLabel("E-mail: Test e-mail onderwerp.eml"),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByLabel("E-mail: Test e-mail onderwerp.eml")).toBeVisible();
 
     // File attachment appears as a selectable item
     await expect(outlookTaskpane.getByLabel("bijlage.pdf")).toBeVisible();
   });
 
-  test("next-step button is disabled until a file is selected", async ({
-    outlookTaskpane,
-  }) => {
+  test("next-step button is disabled until a file is selected", async ({ outlookTaskpane }) => {
     await findZaak(outlookTaskpane);
 
     const nextButton = outlookTaskpane.getByRole("button", {
@@ -56,18 +48,12 @@ test.describe("outlook-upload", () => {
     await findZaak(outlookTaskpane);
 
     await outlookTaskpane.getByLabel("bijlage.pdf").check();
-    await outlookTaskpane
-      .getByRole("button", { name: "Volgende stap: bestandsgegevens" })
-      .click();
+    await outlookTaskpane.getByRole("button", { name: "Volgende stap: bestandsgegevens" }).click();
 
-    await expect(
-      outlookTaskpane.getByText("Bestandsgegevens", { exact: true }),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByText("Bestandsgegevens", { exact: true })).toBeVisible();
 
     // Zaak number is shown in the metadata overview
-    await expect(
-      outlookTaskpane.getByText("ZAAK-2026-0000000001"),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByText("ZAAK-2026-0000000001")).toBeVisible();
 
     // Selected file appears as an accordion item
     await expect(outlookTaskpane.getByText("bijlage.pdf")).toBeVisible();
@@ -77,20 +63,12 @@ test.describe("outlook-upload", () => {
     await findZaak(outlookTaskpane);
 
     await outlookTaskpane.getByLabel("bijlage.pdf").check();
-    await outlookTaskpane
-      .getByRole("button", { name: "Volgende stap: bestandsgegevens" })
-      .click();
+    await outlookTaskpane.getByRole("button", { name: "Volgende stap: bestandsgegevens" }).click();
 
-    await expect(
-      outlookTaskpane.getByText("Bestandsgegevens", { exact: true }),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByText("Bestandsgegevens", { exact: true })).toBeVisible();
 
-    await outlookTaskpane
-      .getByRole("button", { name: "Vorige stap" })
-      .click();
+    await outlookTaskpane.getByRole("button", { name: "Vorige stap" }).click();
 
-    await expect(
-      outlookTaskpane.getByText("Bestanden selecteren", { exact: true }),
-    ).toBeVisible();
+    await expect(outlookTaskpane.getByText("Bestanden selecteren", { exact: true })).toBeVisible();
   });
 });

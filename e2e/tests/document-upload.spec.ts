@@ -15,24 +15,16 @@ async function findZaak(taskpane: FrameLocator) {
 }
 
 test.describe("document-upload", () => {
-  test("upload PDF to zaak shows success confirmation", async ({
-    taskpane,
-  }) => {
+  test("upload PDF to zaak shows success confirmation", async ({ taskpane }) => {
     await findZaak(taskpane);
 
     // The upload form should be visible after finding a zaak
-    await expect(
-      taskpane.getByText("Documentgegevens", { exact: true }),
-    ).toBeVisible();
+    await expect(taskpane.getByText("Documentgegevens", { exact: true })).toBeVisible();
     // The document upload button will be disabled to start with
-    await taskpane
-      .getByRole("button", { name: "Document koppelen" })
-      .isDisabled();
+    await taskpane.getByRole("button", { name: "Document koppelen" }).isDisabled();
 
     // Fill mandatory fields. Auteur is auto-populated from the JWT name claim.
-    await taskpane
-      .getByLabel("Informatieobjecttype")
-      .selectOption({ index: 1 });
+    await taskpane.getByLabel("Informatieobjecttype").selectOption({ index: 1 });
     await taskpane.getByLabel("Status").selectOption("definitief");
 
     // creatiedatum has a default (today) but set it explicitly for determinism
@@ -41,27 +33,19 @@ test.describe("document-upload", () => {
 
     await taskpane.getByRole("button", { name: "Document koppelen" }).click();
 
-    await expect(
-      taskpane.getByText("Document gekoppeld", { exact: true }),
-    ).toBeVisible({ timeout: 20_000 });
+    await expect(taskpane.getByText("Document gekoppeld", { exact: true })).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
-  test("unsupported file type shows FileNotSupported error", async ({
-    openWithMock,
-  }) => {
+  test("unsupported file type shows FileNotSupported error", async ({ openWithMock }) => {
     const taskpane = await openWithMock({ fileName: "test-document.xyz" });
 
     await findZaak(taskpane);
-    await expect(
-      taskpane.getByText("Documentgegevens", { exact: true }),
-    ).toBeVisible();
-    await taskpane
-      .getByRole("button", { name: "Document koppelen" })
-      .isDisabled();
+    await expect(taskpane.getByText("Documentgegevens", { exact: true })).toBeVisible();
+    await taskpane.getByRole("button", { name: "Document koppelen" }).isDisabled();
 
-    await taskpane
-      .getByLabel("Informatieobjecttype")
-      .selectOption({ index: 1 });
+    await taskpane.getByLabel("Informatieobjecttype").selectOption({ index: 1 });
     await taskpane.getByLabel("Status").selectOption("definitief");
 
     const today = new Date().toISOString().split("T")[0];
@@ -75,17 +59,13 @@ test.describe("document-upload", () => {
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test("upload button is unavailable without first finding a zaak", async ({
-    taskpane,
-  }) => {
+  test("upload button is unavailable without first finding a zaak", async ({ taskpane }) => {
     // Without searching, the upload form should not be shown at all
-    await expect(
-      taskpane.getByText("Documentgegevens", { exact: true }),
-    ).not.toBeVisible({
+    await expect(taskpane.getByText("Documentgegevens", { exact: true })).not.toBeVisible({
       timeout: 3_000,
     });
-    await expect(
-      taskpane.getByRole("button", { name: "Document koppelen" }),
-    ).not.toBeVisible({ timeout: 3_000 });
+    await expect(taskpane.getByRole("button", { name: "Document koppelen" })).not.toBeVisible({
+      timeout: 3_000,
+    });
   });
 });
