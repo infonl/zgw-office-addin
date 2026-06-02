@@ -172,7 +172,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
         });
 
         if (this.env.APP_ENV === "local") {
-          this.logger.DEBUG("🛟 Falling back to MSAL (local only)...");
+          this.logger.DEBUG("Falling back to MSAL (local only)...");
           try {
             if (this.msalAuth) {
               const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
@@ -195,7 +195,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
               );
             }
           } catch (msalError) {
-            this.logger.ERROR("⚠️ MSAL fallback also failed:", msalError);
+            this.logger.ERROR("MSAL fallback also failed:", msalError);
           }
         } else {
           this.logger.ERROR("Office SSO must work on test/prod. MSAL fallback not available.", {

@@ -64,7 +64,7 @@ export function useOutlookForm() {
     DEBUG("🚀 Starting upload of selected documents to OpenZaak:", selectedDocuments.length);
 
     if (selectedDocuments.length === 0) {
-      WARN("⚠️ No documents selected for upload");
+      WARN("No documents selected for upload");
       return { error: null };
     }
 
@@ -89,18 +89,12 @@ export function useOutlookForm() {
     try {
       DEBUG("🔧 Initializing GraphService...");
       const graphService = new GraphService(authService, { DEBUG, WARN, ERROR });
-      // ToDo: (remove after test on server)
-      try {
-        await authService.getAccessToken();
-        DEBUG("GraphService ready for downloads");
-      } catch (authError) {
-        ERROR("Graph API authentication failed:", authError);
-        throw authError;
-      }
+      await authService.getAccessToken();
+      DEBUG("GraphService ready for downloads");
 
       const currentEmail = Office.context.mailbox?.item;
       if (!currentEmail) {
-        WARN("⚠️ No email context found");
+        WARN("No email context found");
         return { error: new Error("No email context found") };
       }
 
