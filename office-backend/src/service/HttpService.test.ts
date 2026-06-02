@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import jwt from "jsonwebtoken";
 import { HttpService } from "./HttpService";
 import { LoggerService } from "./LoggerService";
@@ -24,9 +24,10 @@ vi.mock("./LoggerService", () => ({
   },
 }));
 
-const mockUserInfo = {
+const mockTokenInfo = {
   preferredUsername: "test-user",
   name: "Test User",
+  uti: "fakeUti",
 };
 
 describe("HttpService", () => {
@@ -54,7 +55,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      const result = await httpService.GET("/test", mockUserInfo);
+      const result = await httpService.GET("/test", mockTokenInfo);
 
       expect(result).toEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/test"), {
@@ -78,7 +79,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/search", mockUserInfo, { q: "test", limit: "10" });
+      await httpService.GET("/search", mockTokenInfo, { q: "test", limit: "10" });
 
       const expectedUrl = new URL("https://api.test.com/search");
       expectedUrl.search = "q=test&limit=10";
@@ -100,7 +101,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo, undefined, { "X-Custom": "value" });
+      await httpService.GET("/test", mockTokenInfo, undefined, { "X-Custom": "value" });
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/test"), {
         method: "GET",
@@ -123,7 +124,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo, { id: "123" }, { "X-Custom": "value" });
+      await httpService.GET("/test", mockTokenInfo, { id: "123" }, { "X-Custom": "value" });
 
       const expectedUrl = new URL("https://api.test.com/test");
       expectedUrl.search = "id=123";
@@ -149,10 +150,10 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("https://external-api.com/data", mockUserInfo);
+      await httpService.GET("https://external-api.com/data", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://external-api.com/data",
+        new URL("https://external-api.com/data"),
         expect.objectContaining({
           method: "GET",
         }),
@@ -167,7 +168,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.GET("/nonexistent", mockUserInfo)).rejects.toThrow(
+      await expect(httpService.GET("/nonexistent", mockTokenInfo)).rejects.toThrow(
         "HTTP error! status: 404",
       );
       expect(LoggerService.error).toHaveBeenCalledWith(
@@ -180,7 +181,7 @@ describe("HttpService", () => {
       const networkError = new Error("Network error");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.GET("/test", mockUserInfo)).rejects.toThrow("Network error");
+      await expect(httpService.GET("/test", mockTokenInfo)).rejects.toThrow("Network error");
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/test",
         networkError,
@@ -199,7 +200,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ name: "Test" });
-      const result = await httpService.POST("/create", requestBody, mockUserInfo);
+      const result = await httpService.POST("/create", requestBody, mockTokenInfo);
 
       expect(result).toEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/create"), {
@@ -225,7 +226,7 @@ describe("HttpService", () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const requestBody = JSON.stringify({ data: "test" });
-      await httpService.POST("/submit", requestBody, mockUserInfo, { "X-API-Key": "secret" });
+      await httpService.POST("/submit", requestBody, mockTokenInfo, { "X-API-Key": "secret" });
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/submit"), {
         method: "POST",
@@ -240,7 +241,7 @@ describe("HttpService", () => {
       });
     });
 
-    it("should handle POST request with FormData", async () => {
+    it("should handle POST request with plain text body", async () => {
       const mockData = { uploaded: true };
       const mockResponse = {
         ok: true,
@@ -249,10 +250,9 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      const formData = new FormData();
-      formData.append("file", "test-content");
+      const body = "plain text body";
 
-      await httpService.POST("/upload", formData, mockUserInfo);
+      await httpService.POST("/upload", body, mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(new URL("https://api.test.com/upload"), {
         method: "POST",
@@ -262,7 +262,7 @@ describe("HttpService", () => {
           "Content-Crs": "EPSG:4326",
           Authorization: "Bearer mock-jwt-token",
         },
-        body: formData,
+        body,
       });
     });
 
@@ -275,10 +275,10 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("https://external-api.com/submit", "{}", mockUserInfo);
+      await httpService.POST("https://external-api.com/submit", "{}", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://external-api.com/submit",
+        new URL("https://external-api.com/submit"),
         expect.objectContaining({
           method: "POST",
           body: "{}",
@@ -294,7 +294,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+      await expect(httpService.POST("/create", "{}", mockTokenInfo)).rejects.toThrow(
         "HTTP error! status: 400",
       );
       expect(LoggerService.error).toHaveBeenCalledWith(
@@ -307,7 +307,7 @@ describe("HttpService", () => {
       const networkError = new Error("Connection refused");
       mockFetch.mockRejectedValueOnce(networkError);
 
-      await expect(httpService.POST("/create", "{}", mockUserInfo)).rejects.toThrow(
+      await expect(httpService.POST("/create", "{}", mockTokenInfo)).rejects.toThrow(
         "Connection refused",
       );
       expect(LoggerService.error).toHaveBeenCalledWith(
@@ -326,15 +326,15 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo);
+      await httpService.GET("/test", mockTokenInfo);
 
       expect(jwt.sign).toHaveBeenCalledWith(
         {
           iss: "office-add-in",
           iat: expect.any(Number),
           client_id: "office-add-in",
-          user_id: mockUserInfo.preferredUsername,
-          user_representation: mockUserInfo.name,
+          user_id: mockTokenInfo.preferredUsername,
+          user_representation: mockTokenInfo.name,
         },
         "test-secret",
         {
@@ -351,7 +351,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo);
+      await httpService.GET("/test", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(Object),
@@ -371,8 +371,8 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValue(mockResponse);
 
-      await httpService.GET("/test1", mockUserInfo);
-      await httpService.GET("/test2", mockUserInfo);
+      await httpService.GET("/test1", mockTokenInfo);
+      await httpService.GET("/test2", mockTokenInfo);
 
       expect(jwt.sign).toHaveBeenCalledTimes(2);
     });
@@ -387,7 +387,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo, { param: "value" });
+      await httpService.GET("/test", mockTokenInfo, { param: "value" });
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         1,
@@ -404,7 +404,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.POST("/create", "{}", mockUserInfo);
+      await httpService.POST("/create", "{}", mockTokenInfo);
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         2,
@@ -422,7 +422,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo);
+      await httpService.GET("/test", mockTokenInfo);
 
       expect(LoggerService.debug).toHaveBeenNthCalledWith(
         3,
@@ -435,7 +435,7 @@ describe("HttpService", () => {
       const error = new Error("Test error");
       mockFetch.mockRejectedValueOnce(error);
 
-      await expect(httpService.GET("/test", mockUserInfo)).rejects.toThrow("Test error");
+      await expect(httpService.GET("/test", mockTokenInfo)).rejects.toThrow("Test error");
 
       expect(LoggerService.error).toHaveBeenCalledWith(
         "[HTTP] [GET] [ERROR] https://api.test.com/test",
@@ -453,7 +453,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/api/test", mockUserInfo);
+      await httpService.GET("/api/test", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://api.test.com/api/test"),
@@ -469,9 +469,12 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("http://external.com/api", mockUserInfo);
+      await httpService.GET("http://external.com/api", mockTokenInfo);
 
-      expect(mockFetch).toHaveBeenCalledWith("http://external.com/api", expect.any(Object));
+      expect(mockFetch).toHaveBeenCalledWith(
+        new URL("http://external.com/api"),
+        expect.any(Object),
+      );
     });
 
     it("should handle absolute HTTPS URLs", async () => {
@@ -482,9 +485,12 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("https://external.com/api", mockUserInfo);
+      await httpService.GET("https://external.com/api", mockTokenInfo);
 
-      expect(mockFetch).toHaveBeenCalledWith("https://external.com/api", expect.any(Object));
+      expect(mockFetch).toHaveBeenCalledWith(
+        new URL("https://external.com/api"),
+        expect.any(Object),
+      );
     });
 
     it("should handle URLs without leading slash", async () => {
@@ -495,7 +501,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("api/test", mockUserInfo);
+      await httpService.GET("api/test", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL("https://api.test.com/api/test"),
@@ -513,7 +519,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo);
+      await httpService.GET("/test", mockTokenInfo);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(Object),
@@ -536,7 +542,7 @@ describe("HttpService", () => {
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
-      await httpService.GET("/test", mockUserInfo, undefined, {
+      await httpService.GET("/test", mockTokenInfo, undefined, {
         "X-Custom": "value",
         "Content-Type": "application/xml", // Should override default
       });

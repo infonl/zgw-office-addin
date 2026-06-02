@@ -29,35 +29,56 @@ export class ExceptionHandler {
   }
 
   private static extractDetails(error: unknown): ErrorDetails {
-    let message = "Internal server error";
-    let statusCode = 500;
-    let cause: string | undefined = undefined;
-
-    if (typeof error === "object" && error !== null) {
-      const err = error as Record<string, unknown>;
-      if ("message" in error) {
-        message = String(err.message);
-      }
-      if ("statusCode" in error && typeof err.statusCode === "number") {
-        statusCode = err.statusCode;
-      }
-      if ("cause" in err) {
-        cause =
-          err.cause instanceof Error
-            ? err.cause.message
-            : err.cause != null
-              ? String(err.cause)
-              : undefined;
-      }
-    }
-    if (typeof error === "string") {
-      message = error;
-    }
-
     return {
-      message,
-      cause,
-      statusCode,
+      message: this.formatMessage(error),
+      cause: this.formatCause(error),
+      statusCode: this.determineStatusCode(error),
     };
+  }
+
+  private static formatMessage(err: unknown): string {
+    if (typeof err === "object" && err !== null) {
+      const e = err as Record<string, unknown>;
+      if ("message" in err) {
+        return String(e.message);
+      }
+    } else if (typeof err === "string") {
+      return err;
+    }
+    return "Internal server error";
+  }
+
+  private static determineStatusCode(err: unknown): number {
+    if (typeof err === "object" && err !== null) {
+      const e = err as Record<string, unknown>;
+      if ("statusCode" in err && typeof e.statusCode === "number") {
+        return e.statusCode;
+      }
+    }
+    return 500;
+  }
+
+  private static formatCause(err: unknown): string {
+    return this.buildCauseParts(err).join("\n");
+  }
+
+  private static buildCauseParts(err: unknown): string[] {
+    if (typeof err !== "object" || err === null || !("cause" in err)) {
+      return [];
+    }
+    const causeValue = (err as Record<string, unknown>).cause;
+    if (typeof causeValue === "string") {
+      return [causeValue];
+    }
+    if (typeof causeValue === "object" && causeValue !== null) {
+      const parts: string[] = [];
+      const msg = (causeValue as Record<string, unknown>).message;
+      if (typeof msg === "string" && msg) {
+        parts.push(msg);
+      }
+      parts.push(...this.buildCauseParts(causeValue));
+      return parts;
+    }
+    return [];
   }
 }

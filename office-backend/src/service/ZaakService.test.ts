@@ -51,14 +51,14 @@ describe("ZaakService", () => {
       _url: string,
       _userInfo: { preferredUsername: string; name: string },
       _params?: Record<string, string>,
-      _headers: HeadersInit = {},
+      _headers: Record<string, string> = {},
     ) => ({}) as T;
 
     const defaultPost: HttpService["POST"] = async <T>(
       _url: string,
-      _body: BodyInit,
+      _body: string,
       _userInfo: { preferredUsername: string; name: string },
-      _headers: HeadersInit = {},
+      _headers: Record<string, string> = {},
     ) => ({}) as T;
 
     mockHttpService = {
@@ -297,7 +297,7 @@ describe("ZaakService", () => {
           _url: string,
           _userInfo: { preferredUsername: string; name: string },
           _params?: Record<string, string>,
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ results: [mockZaak] } as T),
       );
     });
@@ -471,8 +471,12 @@ describe("ZaakService", () => {
     it("falls back to randomUUID when both correlationId and uti are absent", async () => {
       const userWithoutUti = { preferredUsername: "test-user", name: "Test User" };
       mockHttpService.GET.mockReset().mockImplementationOnce(
-        <T>(_url: string, _userInfo: unknown, _params?: unknown, _headers: HeadersInit = {}) =>
-          Promise.resolve({ results: [mockZaak] } as T),
+        <T>(
+          _url: string,
+          _userInfo: unknown,
+          _params?: unknown,
+          _headers: Record<string, string> = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
       );
       mockHttpService.POST.mockResolvedValue(mockInformatieobject);
 
@@ -501,15 +505,15 @@ describe("ZaakService", () => {
           _url: string,
           _userInfo: { preferredUsername: string; name: string },
           _params?: Record<string, string>,
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ results: [mockZaak] } as T),
       );
       mockHttpService.POST.mockImplementation(
         <T>(
           _url: string,
-          _body: BodyInit,
+          _body: string,
           _userInfo: { preferredUsername: string; name: string },
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ url: "test" } as T),
       );
     });

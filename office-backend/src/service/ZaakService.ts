@@ -141,7 +141,7 @@ export class ZaakService {
   private async getZaakFromOpenZaak(
     zaakIdentificatie: string,
     tokenInfo: TokenInfo,
-    headers: HeadersInit,
+    headers: Record<string, string>,
   ) {
     const zaken = await this.httpService.GET<ZrcType<"PaginatedZaakList">>(
       "/zaken/api/v1/zaken",
@@ -165,7 +165,7 @@ export class ZaakService {
     url: string,
     startdatum: Date,
     userInfo: TokenInfo,
-    headers: HeadersInit,
+    headers: Record<string, string>,
   ) {
     await this.httpService.POST(
       "/documenten/api/v1/gebruiksrechten",
