@@ -164,7 +164,7 @@ export class ZaakService {
   private async createGebruiksrechten(
     url: string,
     startdatum: Date,
-    userInfo: { preferredUsername: string; name: string },
+    userInfo: TokenInfo,
     headers: HeadersInit,
   ) {
     await this.httpService.POST(
