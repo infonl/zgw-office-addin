@@ -138,7 +138,7 @@ export function useOutlookForm() {
         DEBUG("result for document uploadPayload", result);
         DEBUG("doc for document uploadPayload", doc);
         const fileContent = result?.fileContent ?? "";
-        let inhoud = "";
+        let inhoud: string;
         if (fileContent instanceof ArrayBuffer) {
           inhoud = arrayBufferToBase64(fileContent);
         } else if (typeof fileContent === "string") {

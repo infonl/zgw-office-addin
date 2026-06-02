@@ -46,7 +46,7 @@ export function useUploadToasts() {
   const showSuccessToast = (emailSelected: boolean, attachmentsCount: number) => {
     dismissToast("uploading-documents");
 
-    let message = "";
+    let message: string;
     if (emailSelected && attachmentsCount > 0) {
       message = `De e-mail en ${attachmentsCount} ${pluralize(attachmentsCount, "bijlage", "bijlagen")} zijn succesvol gekoppeld`;
     } else if (emailSelected) {
