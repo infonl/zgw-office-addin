@@ -24,7 +24,7 @@ export function useUploadToasts() {
     );
   };
 
-  const showErrorToast = (failed: number, total: number) => {
+  const showErrorToast = (failed: number, total: number, detail?: string) => {
     dismissToast("uploading-documents");
     const message =
       total === 1
@@ -34,7 +34,10 @@ export function useUploadToasts() {
     dispatchToast(
       <Toast>
         <ToastTitle>Koppeling mislukt</ToastTitle>
-        <ToastBody>{message}</ToastBody>
+        <ToastBody>
+          {message}
+          {detail && ` ${detail}`}
+        </ToastBody>
       </Toast>,
       { intent: "error" }
     );
@@ -43,7 +46,7 @@ export function useUploadToasts() {
   const showSuccessToast = (emailSelected: boolean, attachmentsCount: number) => {
     dismissToast("uploading-documents");
 
-    let message = "";
+    let message: string;
     if (emailSelected && attachmentsCount > 0) {
       message = `De e-mail en ${attachmentsCount} ${pluralize(attachmentsCount, "bijlage", "bijlagen")} zijn succesvol gekoppeld`;
     } else if (emailSelected) {

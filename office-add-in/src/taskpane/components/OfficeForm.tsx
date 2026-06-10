@@ -72,7 +72,7 @@ export function OfficeForm() {
       dispatchToast(
         <Toast>
           <ToastTitle>Oeps, er is iets mis gegaan</ToastTitle>
-          <ToastBody>{String(error)}</ToastBody>
+          <ToastBody>{error instanceof Error ? error.message : String(error)}</ToastBody>
         </Toast>,
         { intent: "error" }
       );
@@ -165,22 +165,20 @@ export function OfficeForm() {
             Vul de volgende documentgegevens in. Daarna kan je deze koppelen aan een zaak.
           </Body1>
         </section>
-        {data && (
-          <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
-            <DocumentMetadataFields
-              zaakinformatieobjecten={data.zaakinformatieobjecten}
-              statuses={documentstatus}
-              control={form.control}
-            />
-            <Button
-              disabled={!form.formState.isValid || isPending}
-              appearance="primary"
-              type="submit"
-            >
-              Document koppelen
-            </Button>
-          </form>
-        )}
+        <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+          <DocumentMetadataFields
+            zaakinformatieobjecten={data.zaakinformatieobjecten}
+            statuses={documentstatus}
+            control={form.control}
+          />
+          <Button
+            disabled={!form.formState.isValid || isPending}
+            appearance="primary"
+            type="submit"
+          >
+            Document koppelen
+          </Button>
+        </form>
       </FormProvider>
     </>
   );

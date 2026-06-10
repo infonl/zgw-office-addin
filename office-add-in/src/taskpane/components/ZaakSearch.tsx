@@ -22,6 +22,7 @@ import { Input } from "./form/Input";
 import { useZaak } from "../../provider/ZaakProvider";
 import { Zaak } from "../../hooks/useGetZaak";
 import { useOffice } from "../../hooks/useOffice";
+import { useLogger } from "../../hooks/useLogger";
 import { mq } from "./styles/layout";
 import { useCommonStyles } from "./styles/shared";
 import { ShowTokenError } from "./TokenError";
@@ -64,6 +65,7 @@ export function ZaakSearch() {
   const styles = useStyles();
   const common = useCommonStyles();
   const { isOutlook } = useOffice();
+  const { ERROR } = useLogger(ZaakSearch.name);
   const helperText = isOutlook
     ? "Vul het zaaknummer in waar je bestanden aan wil koppelen."
     : "Vul het zaaknummer in waar je dit document aan wil koppelen.";
@@ -75,12 +77,13 @@ export function ZaakSearch() {
       .catch((error) => {
         const errorCode = error?.code;
         setTokenError(error);
-        console.log("Token error code:", errorCode);
+        ERROR("Token error code:", errorCode);
       });
   }, []);
 
   const form = useForm({
     resolver: zodResolver(zaakSearchSchema),
+    mode: "onChange",
     defaultValues: {
       zaaknummer: "",
     },

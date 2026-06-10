@@ -5,14 +5,14 @@
 # Requires .env file with MSAL configuration - see .env.example
 
 services:
-  frontend:
-    image: ghcr.io/infonl/zgw-office-add-in-frontend:dev
+  zgw-office-addin-frontend:
+    image: ghcr.io/infonl/zgw-office-addin-frontend:dev
     ports:
-      - "3000:443"
+      - "3000:8443"
     environment:
       - APP_ENV=local
       - FRONTEND_URL=https://localhost:3000
-      - BACKEND_URL=https://localhost:3003
+      - BACKEND_URL=http://zgw-office-addin-backend:3003
       - MAX_BODY_SIZE=20M
       - ENABLE_HTTPS=true
       - MSAL_CLIENT_ID=${MSAL_CLIENT_ID}
@@ -22,22 +22,20 @@ services:
     volumes:
       - ./office-add-in/ssl-certs:/etc/nginx/certs:ro
     healthcheck:
-      test: ["CMD-SHELL", "curl -f -k https://localhost:443/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f -k https://localhost:8443/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
     depends_on:
-      backend:
+      zgw-office-addin-backend:
         condition: service_healthy
 
-  backend:
-    image: ghcr.io/infonl/zgw-office-add-in-backend:dev
-    ports:
-      - "3003:3003"
+  zgw-office-addin-backend:
+    image: ghcr.io/infonl/zgw-office-addin-backend:dev
     environment:
       - APP_ENV=local
-      - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
+      - JWT_SECRET=${JWT_SECRET:-openZaakSecretKey}
       - API_BASE_URL=http://openzaak.local:8000
       - FRONTEND_URL=https://localhost:3000
       - MSAL_CLIENT_ID=${MSAL_CLIENT_ID}
@@ -49,6 +47,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    depends_on:
+      openzaak-init:
+        condition: service_completed_successfully
 
   prometheus:
     image: prom/prometheus@sha256:5550dc63da361dc30f6fe02ac0e4dfc736ededfef3c8d12a634db04a67824d78
@@ -58,11 +59,8 @@ services:
     ports:
       - "9090:9090"
 
-
   openzaak-database:
     image: docker.io/postgis/postgis:17-3.4@sha256:d0b5a6ecab18997637f55a83cb4a9467391de5645916cfa1b6f2a8d19eee7be5
-    ports:
-      - "15432:5432"
     platform: linux/amd64
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -77,7 +75,6 @@ services:
     volumes:
       - ./scripts/docker-compose/open-zaak/openzaak-database:/docker-entrypoint-initdb.d
       - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
-
 
   openzaak.local:
     image: docker.io/openzaak/open-zaak:1.27.1@sha256:7726e36a1353396fb971929645489e0e8a7e5848e5fdf0ae3fa8075b6ce15da9
@@ -102,10 +99,17 @@ services:
       - OPENZAAK_SUPERUSER_EMAIL=noreply@example.com
       - SECRET_KEY=openZaakSecretKey
       - SENDFILE_BACKEND=django_sendfile.backends.simple
+      - OTEL_SDK_DISABLED=true
     ports:
       - "8020:8000"
     healthcheck:
-      test: [ "CMD", "python", "-c", "import requests; exit(requests.head('http://localhost:8000/admin/').status_code not in [200, 302])" ]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; exit(requests.head('http://localhost:8000/admin/').status_code not in [200, 302])",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -116,8 +120,29 @@ services:
     depends_on:
       openzaak-database:
         condition: service_healthy
-      redis:
+      openzaak-redis:
         condition: service_started
 
-  redis:
+  openzaak-init:
+    image: docker.io/openzaak/open-zaak:1.27.1@sha256:7726e36a1353396fb971929645489e0e8a7e5848e5fdf0ae3fa8075b6ce15da9
+    platform: linux/amd64
+    environment:
+      - DB_HOST=openzaak-database
+      - DB_NAME=openzaak
+      - DB_PASSWORD=openzaak
+      - DB_USER=openzaak
+      - DJANGO_SETTINGS_MODULE=openzaak.conf.docker
+      - SECRET_KEY=openZaakSecretKey
+      - CACHE_DEFAULT=redis:6379/0
+      - CACHE_AXES=redis:6379/0
+    volumes:
+      - ./scripts/docker-compose/open-zaak/init:/init:ro
+    command: ["sh", "/init/seed.sh"]
+    depends_on:
+      openzaak-database:
+        condition: service_healthy
+      openzaak.local:
+        condition: service_healthy
+
+  openzaak-redis:
     image: redis:8.6.3@sha256:d4a4a4db02748731e6313d60adfd92985b6ad7bc2f2400a6cb0f8b35a2a6b492

@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 INFO.nl
+# SPDX-License-Identifier: EUPL-1.2+
+
+# E2E testing override. Two usage modes:
+#
+# Local dev (uses pre-pulled images, no build step needed):
+#   docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d
+#
+# CI / local with freshly built images:
+#   npm run build && turbo docker:build
+#   docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d
+
+services:
+  # MSAL vars are unused in e2e — the taskpane auth goes through the Office mock.
+  # Dummy values prevent the base compose from requiring a real .env file.
+  zgw-office-addin-frontend:
+    environment:
+      - MSAL_CLIENT_ID=e2e-client-id
+      - MSAL_AUTHORITY=https://login.microsoftonline.com/e2e
+      - MSAL_REDIRECT_URI=https://localhost:3000
+      - MSAL_SCOPES=api://localhost:3000/e2e-client-id/access_as_user
+
+  # backend waits for seed data; MSAL vars are unused (backend only decodes JWT)
+  zgw-office-addin-backend:
+    environment:
+      - APP_ENV=e2e
+      - API_BASE_URL=http://openzaak.local:8000
+      - FRONTEND_URL=https://localhost:3000
+      - MSAL_CLIENT_ID=e2e-client-id
+      - MSAL_AUTHORITY=https://login.microsoftonline.com/e2e
+      - MSAL_SECRET=e2e-secret

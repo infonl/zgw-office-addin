@@ -9,9 +9,7 @@ import { ZaakNotFound } from "../exception/ZaakNotFound";
 import { FileNotSupported } from "../exception/FileNotSupported";
 import { LoggerService } from "./LoggerService";
 import type { HttpService } from "./HttpService";
-import { TokenService } from "./TokenService";
 
-// Mock LoggerService
 vi.mock("./LoggerService", () => ({
   LoggerService: {
     debug: vi.fn(),
@@ -21,9 +19,24 @@ vi.mock("./LoggerService", () => ({
   },
 }));
 
+vi.mock("node:crypto", () => ({
+  randomUUID: vi.fn().mockReturnValue("test-uuid-1234"),
+}));
+
 const mockUserInfo = {
   preferredUsername: "test-user",
   name: "Test User",
+  uti: "test-uti-value",
+};
+
+const GET_HEADERS = {
+  "X-NLX-Logrecord-ID": "test-uti-value",
+  "X-Audit-Toelichting": "Zoek een zaak vanuit ZGW Office Add-in",
+};
+
+const POST_HEADERS = {
+  "X-NLX-Logrecord-ID": "test-uti-value",
+  "X-Audit-Toelichting": "Document toevoegen vanuit ZGW Office Add-in",
 };
 
 describe("ZaakService", () => {
@@ -32,36 +45,27 @@ describe("ZaakService", () => {
     GET: MockedFunction<HttpService["GET"]>;
     POST: MockedFunction<HttpService["POST"]>;
   };
-  let mockTokenService: {
-    getUserInfo: MockedFunction<TokenService["getUserInfo"]>;
-  };
 
   beforeEach(() => {
     const defaultGet: HttpService["GET"] = async <T>(
       _url: string,
       _userInfo: { preferredUsername: string; name: string },
       _params?: Record<string, string>,
-      _headers: HeadersInit = {},
+      _headers: Record<string, string> = {},
     ) => ({}) as T;
 
     const defaultPost: HttpService["POST"] = async <T>(
       _url: string,
-      _body: BodyInit,
+      _body: string,
       _userInfo: { preferredUsername: string; name: string },
-      _headers: HeadersInit = {},
+      _headers: Record<string, string> = {},
     ) => ({}) as T;
 
     mockHttpService = {
       GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
       POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
     };
-    mockTokenService = {
-      getUserInfo: vi.fn().mockReturnValue(mockUserInfo),
-    };
-    zaakService = new ZaakService(
-      mockHttpService as unknown as HttpService,
-      mockTokenService as unknown as TokenService,
-    );
+    zaakService = new ZaakService(mockHttpService as unknown as HttpService);
     vi.clearAllMocks();
   });
 
@@ -108,7 +112,7 @@ describe("ZaakService", () => {
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[1]));
 
-      const result = await zaakService.getZaak("ZAAK-001");
+      const result = await zaakService.getZaak("ZAAK-001", mockUserInfo);
 
       expect(result).toEqual({
         ...mockZaak,
@@ -129,11 +133,27 @@ describe("ZaakService", () => {
       });
 
       expect(mockHttpService.GET).toHaveBeenCalledTimes(5);
-      expect(mockHttpService.GET).toHaveBeenNthCalledWith(1, "/zaken/api/v1/zaken", null, {
-        identificatie: "ZAAK-001",
-      });
-      expect(mockHttpService.GET).toHaveBeenNthCalledWith(2, mockZaak.zaaktype, null);
-      expect(mockHttpService.GET).toHaveBeenNthCalledWith(3, mockZaak.status, null);
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        1,
+        "/zaken/api/v1/zaken",
+        mockUserInfo,
+        { identificatie: "ZAAK-001" },
+        GET_HEADERS,
+      );
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        2,
+        mockZaak.zaaktype,
+        mockUserInfo,
+        undefined,
+        GET_HEADERS,
+      );
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        3,
+        mockZaak.status,
+        mockUserInfo,
+        undefined,
+        GET_HEADERS,
+      );
     });
 
     it("should handle zaak without status", async () => {
@@ -146,10 +166,10 @@ describe("ZaakService", () => {
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[1]));
 
-      const result = await zaakService.getZaak("ZAAK-001");
+      const result = await zaakService.getZaak("ZAAK-001", mockUserInfo);
 
       expect(result.status).toEqual({ statustoelichting: "-" });
-      expect(mockHttpService.GET).toHaveBeenCalledTimes(4); // No status call
+      expect(mockHttpService.GET).toHaveBeenCalledTimes(4);
     });
 
     it("should include vertrouwelijkheidaanduiding in zaakinformatieobjecten", async () => {
@@ -161,7 +181,7 @@ describe("ZaakService", () => {
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[0]))
         .mockImplementationOnce((_url, _userInfo) => Promise.resolve(mockInformatieobjecttypen[1]));
 
-      const result = await zaakService.getZaak("ZAAK-001");
+      const result = await zaakService.getZaak("ZAAK-001", mockUserInfo);
 
       expect(result.zaakinformatieobjecten).toHaveLength(2);
       expect(result.zaakinformatieobjecten[0]).toEqual({
@@ -181,12 +201,67 @@ describe("ZaakService", () => {
         Promise.resolve({ results: [] }),
       );
 
-      await expect(zaakService.getZaak("NONEXISTENT")).rejects.toThrow(ZaakNotFound);
+      await expect(zaakService.getZaak("NONEXISTENT", mockUserInfo)).rejects.toThrow(ZaakNotFound);
 
-      // Reset mock for second call
       mockHttpService.GET.mockResolvedValueOnce({ results: [] });
-      await expect(zaakService.getZaak("NONEXISTENT")).rejects.toThrow(
+      await expect(zaakService.getZaak("NONEXISTENT", mockUserInfo)).rejects.toThrow(
         "Geen zaak gevonden voor zaaknummer: NONEXISTENT",
+      );
+    });
+
+    it("uses correlationId as X-NLX-Logrecord-ID when provided", async () => {
+      mockHttpService.GET.mockImplementation(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve(mockZaaktype))
+        .mockImplementationOnce(() => Promise.resolve(mockStatus))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[0]))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[1]));
+
+      await zaakService.getZaak("ZAAK-001", mockUserInfo, "office-correlation-id");
+
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        1,
+        "/zaken/api/v1/zaken",
+        mockUserInfo,
+        { identificatie: "ZAAK-001" },
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "office-correlation-id" }),
+      );
+    });
+
+    it("falls back to uti when correlationId is absent", async () => {
+      mockHttpService.GET.mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve(mockZaaktype))
+        .mockImplementationOnce(() => Promise.resolve(mockStatus))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[0]))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[1]));
+
+      await zaakService.getZaak("ZAAK-001", mockUserInfo, undefined);
+
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        1,
+        "/zaken/api/v1/zaken",
+        mockUserInfo,
+        { identificatie: "ZAAK-001" },
+        expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
+      );
+    });
+
+    it("falls back to randomUUID when both correlationId and uti are absent", async () => {
+      const userWithoutUti = { preferredUsername: "test-user", name: "Test User" };
+      mockHttpService.GET.mockImplementationOnce(() => Promise.resolve({ results: [mockZaak] }))
+        .mockImplementationOnce(() => Promise.resolve(mockZaaktype))
+        .mockImplementationOnce(() => Promise.resolve(mockStatus))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[0]))
+        .mockImplementationOnce(() => Promise.resolve(mockInformatieobjecttypen[1]));
+
+      await zaakService.getZaak("ZAAK-001", userWithoutUti);
+
+      expect(mockHttpService.GET).toHaveBeenNthCalledWith(
+        1,
+        "/zaken/api/v1/zaken",
+        userWithoutUti,
+        { identificatie: "ZAAK-001" },
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "test-uuid-1234" }),
       );
     });
 
@@ -194,7 +269,7 @@ describe("ZaakService", () => {
       const httpError = new Error("HTTP error! status: 500");
       mockHttpService.GET.mockImplementationOnce(() => Promise.reject(httpError));
 
-      await expect(zaakService.getZaak("ZAAK-001")).rejects.toThrow(httpError);
+      await expect(zaakService.getZaak("ZAAK-001", mockUserInfo)).rejects.toThrow(httpError);
     });
   });
 
@@ -214,7 +289,6 @@ describe("ZaakService", () => {
       titel: "test-document.docx",
       creatiedatum: "2025-01-15",
       inhoud: "base64content",
-      userInfo: mockUserInfo,
     };
 
     beforeEach(() => {
@@ -223,7 +297,7 @@ describe("ZaakService", () => {
           _url: string,
           _userInfo: { preferredUsername: string; name: string },
           _params?: Record<string, string>,
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ results: [mockZaak] } as T),
       );
     });
@@ -231,15 +305,19 @@ describe("ZaakService", () => {
     it("should successfully add a document to zaak", async () => {
       mockHttpService.POST.mockImplementationOnce((_url, _body, _userInfo) =>
         Promise.resolve(mockInformatieobject),
-      ) // create document
-        .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({})) // create gebruiksrechten
-        .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({})); // link document to zaak
+      )
+        .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({}))
+        .mockImplementationOnce((_url, _body, _userInfo) => Promise.resolve({}));
 
-      const result = await zaakService.addDocumentToZaak("ZAAK-001", documentBody);
+      const result = await zaakService.addDocumentToZaak(
+        "ZAAK-001",
+        mockUserInfo,
+        undefined,
+        documentBody,
+      );
 
       expect(result).toEqual(mockInformatieobject);
 
-      // Verify document creation
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
@@ -251,10 +329,10 @@ describe("ZaakService", () => {
           bestandsnaam: documentBody.titel,
           creatiedatum: "2025-01-15",
         }),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
 
-      // Verify gebruiksrechten creation
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         2,
         "/documenten/api/v1/gebruiksrechten",
@@ -263,10 +341,10 @@ describe("ZaakService", () => {
           startdatum: new Date("2025-01-15"),
           omschrijvingVoorwaarden: "geen",
         }),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
 
-      // Verify document linking to zaak
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         3,
         "/zaken/api/v1/zaakinformatieobjecten",
@@ -274,7 +352,8 @@ describe("ZaakService", () => {
           informatieobject: mockInformatieobject.url,
           zaak: mockZaak.url,
         }),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
 
       expect(LoggerService.debug).toHaveBeenCalledWith("creating document", "ZAAK-001");
@@ -300,30 +379,30 @@ describe("ZaakService", () => {
         Promise.resolve(mockInformatieobject),
       );
 
-      await zaakService.addDocumentToZaak("ZAAK-001", body);
+      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, body);
 
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.stringContaining(`"formaat":"${expectedFormat}"`),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
     });
 
     it("should throw FileNotSupported for unsupported file types", async () => {
       const unsupportedBody = { ...documentBody, titel: "test-document.xyz" };
 
-      await expect(zaakService.addDocumentToZaak("ZAAK-001", unsupportedBody)).rejects.toThrow(
-        FileNotSupported,
-      );
+      await expect(
+        zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, unsupportedBody),
+      ).rejects.toThrow(FileNotSupported);
 
-      // Reset mock for second call
       mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
         Promise.resolve({ results: [mockZaak] }),
       );
-      await expect(zaakService.addDocumentToZaak("ZAAK-001", unsupportedBody)).rejects.toThrow(
-        "Bestand wordt niet ondersteund: test-document.xyz",
-      );
+      await expect(
+        zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, unsupportedBody),
+      ).rejects.toThrow("Bestand wordt niet ondersteund: test-document.xyz");
     });
 
     it("should throw ZaakNotFound when zaak does not exist", async () => {
@@ -331,28 +410,84 @@ describe("ZaakService", () => {
         Promise.resolve({ results: [] }),
       );
 
-      await expect(zaakService.addDocumentToZaak("NONEXISTENT", documentBody)).rejects.toThrow(
-        ZaakNotFound,
-      );
+      await expect(
+        zaakService.addDocumentToZaak("NONEXISTENT", mockUserInfo, undefined, documentBody),
+      ).rejects.toThrow(ZaakNotFound);
     });
 
     it("should handle empty body parameter", async () => {
       const bodyWithDefaults = {
         titel: "default.docx",
         creatiedatum: "2025-01-15",
-        userInfo: mockUserInfo,
       };
       mockHttpService.POST.mockImplementation((_url, _body, _userInfo) =>
         Promise.resolve(mockInformatieobject),
       );
 
-      await zaakService.addDocumentToZaak("ZAAK-001", bodyWithDefaults);
+      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, bodyWithDefaults);
 
       expect(mockHttpService.POST).toHaveBeenNthCalledWith(
         1,
         "/documenten/api/v1/enkelvoudiginformatieobjecten",
         expect.stringContaining('"bronorganisatie":"123456789"'),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
+      );
+    });
+
+    it("uses correlationId as X-NLX-Logrecord-ID when provided", async () => {
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak(
+        "ZAAK-001",
+        mockUserInfo,
+        "office-correlation-id",
+        documentBody,
+      );
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.any(String),
+        mockUserInfo,
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "office-correlation-id" }),
+      );
+    });
+
+    it("falls back to uti when correlationId is absent", async () => {
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, documentBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.any(String),
+        mockUserInfo,
+        expect.objectContaining({ "X-NLX-Logrecord-ID": mockUserInfo.uti }),
+      );
+    });
+
+    it("falls back to randomUUID when both correlationId and uti are absent", async () => {
+      const userWithoutUti = { preferredUsername: "test-user", name: "Test User" };
+      mockHttpService.GET.mockReset().mockImplementationOnce(
+        <T>(
+          _url: string,
+          _userInfo: unknown,
+          _params?: unknown,
+          _headers: Record<string, string> = {},
+        ) => Promise.resolve({ results: [mockZaak] } as T),
+      );
+      mockHttpService.POST.mockResolvedValue(mockInformatieobject);
+
+      await zaakService.addDocumentToZaak("ZAAK-001", userWithoutUti, undefined, documentBody);
+
+      expect(mockHttpService.POST).toHaveBeenNthCalledWith(
+        1,
+        "/documenten/api/v1/enkelvoudiginformatieobjecten",
+        expect.any(String),
+        userWithoutUti,
+        expect.objectContaining({ "X-NLX-Logrecord-ID": "test-uuid-1234" }),
       );
     });
   });
@@ -370,60 +505,58 @@ describe("ZaakService", () => {
           _url: string,
           _userInfo: { preferredUsername: string; name: string },
           _params?: Record<string, string>,
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ results: [mockZaak] } as T),
       );
       mockHttpService.POST.mockImplementation(
         <T>(
           _url: string,
-          _body: BodyInit,
+          _body: string,
           _userInfo: { preferredUsername: string; name: string },
-          _headers: HeadersInit = {},
+          _headers: Record<string, string> = {},
         ) => Promise.resolve({ url: "test" } as T),
       );
     });
 
     it("should return correct format for .docx files", async () => {
-      await zaakService.addDocumentToZaak("ZAAK-001", {
+      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, {
         titel: "test.docx",
         creatiedatum: "2025-01-15",
-        userInfo: mockUserInfo,
       });
 
       expect(mockHttpService.POST).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining('"formaat":"application/msword"'),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
     });
 
     it("should return correct format for .doc files", async () => {
-      // Reset mock for this test
       mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
         Promise.resolve({ results: [mockZaak] }),
       );
 
-      await zaakService.addDocumentToZaak("ZAAK-001", {
+      await zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, {
         titel: "test.doc",
         creatiedatum: "2025-01-15",
-        userInfo: mockUserInfo,
       });
 
       expect(mockHttpService.POST).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining('"formaat":"application/msword"'),
-        null,
+        mockUserInfo,
+        POST_HEADERS,
       );
     });
 
     it("should throw FileNotSupported for unsupported extensions", async () => {
-      // Reset mock for this test
       mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
         Promise.resolve({ results: [mockZaak] }),
       );
 
       await expect(
-        zaakService.addDocumentToZaak("ZAAK-001", {
+        zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, {
           titel: "test.xyz",
           creatiedatum: "2025-01-15",
         }),
@@ -431,88 +564,16 @@ describe("ZaakService", () => {
     });
 
     it("should handle files without extension", async () => {
-      // Reset mock for this test
       mockHttpService.GET.mockImplementationOnce((_url, _userInfo, _params) =>
         Promise.resolve({ results: [mockZaak] }),
       );
 
       await expect(
-        zaakService.addDocumentToZaak("ZAAK-001", { titel: "test", creatiedatum: "2025-01-15" }),
+        zaakService.addDocumentToZaak("ZAAK-001", mockUserInfo, undefined, {
+          titel: "test",
+          creatiedatum: "2025-01-15",
+        }),
       ).rejects.toThrow(FileNotSupported);
-    });
-  });
-
-  describe("setUserInfo", () => {
-    let zaakService: ZaakService;
-    let mockHttpService: {
-      GET: MockedFunction<HttpService["GET"]>;
-      POST: MockedFunction<HttpService["POST"]>;
-    };
-    let mockTokenService: {
-      getUserInfo: MockedFunction<TokenService["getUserInfo"]>;
-    };
-
-    beforeEach(() => {
-      const defaultGet: HttpService["GET"] = async <T>(
-        _url: string,
-        _userInfo: { preferredUsername: string; name: string },
-        _params?: Record<string, string>,
-        _headers: HeadersInit = {},
-      ) => ({}) as T;
-
-      const defaultPost: HttpService["POST"] = async <T>(
-        _url: string,
-        _body: BodyInit,
-        _userInfo: { preferredUsername: string; name: string },
-        _headers: HeadersInit = {},
-      ) => ({}) as T;
-
-      mockHttpService = {
-        GET: vi.fn(defaultGet) as MockedFunction<HttpService["GET"]>,
-        POST: vi.fn(defaultPost) as MockedFunction<HttpService["POST"]>,
-      };
-      mockTokenService = {
-        getUserInfo: vi.fn(),
-      };
-      zaakService = new ZaakService(
-        mockHttpService as unknown as HttpService,
-        mockTokenService as unknown as TokenService,
-      );
-    });
-
-    it("should set userInfo when a valid JWT is provided", () => {
-      const jwt = "valid.jwt.token";
-      const userInfo = { preferredUsername: "user", name: "User" };
-      mockTokenService.getUserInfo.mockReturnValue(userInfo);
-      zaakService.setUserInfo(jwt);
-      // @ts-expect-error: access private for test
-      expect(zaakService.userInfo).toEqual(userInfo);
-      expect(mockTokenService.getUserInfo).toHaveBeenCalledWith(jwt);
-    });
-
-    it("should set userInfo to null when getUserInfo returns null", () => {
-      mockTokenService.getUserInfo.mockImplementation(() => {
-        throw new Error("Unauthorized");
-      });
-      zaakService.setUserInfo(undefined);
-      // @ts-expect-error: access private for test
-      expect(zaakService.userInfo).toBeNull();
-    });
-
-    it("should use set userInfo in subsequent getZaak calls", async () => {
-      const jwt = "valid.jwt.token";
-      const userInfo = { preferredUsername: "user", name: "User" };
-      mockTokenService.getUserInfo.mockReturnValue(userInfo);
-      zaakService.setUserInfo(jwt);
-      const mockZaak = { url: "url", zaaktype: "type", bronorganisatie: "org", status: null };
-      const mockZaaktype = { informatieobjecttypen: [] };
-      mockHttpService.GET.mockImplementationOnce(() =>
-        Promise.resolve({ results: [mockZaak] }),
-      ).mockImplementationOnce(() => Promise.resolve(mockZaaktype));
-      await zaakService.getZaak("ZAAK-001");
-      expect(mockHttpService.GET).toHaveBeenCalledWith("/zaken/api/v1/zaken", userInfo, {
-        identificatie: "ZAAK-001",
-      });
     });
   });
 });

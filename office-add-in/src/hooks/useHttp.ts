@@ -5,6 +5,19 @@
 
 import { useLogger } from "./useLogger";
 
+let _sessionCorrelationId: string | undefined;
+
+function getSessionCorrelationId(): string {
+  if (!_sessionCorrelationId) {
+    // correlationId exists at runtime but is not yet in @types/office-js
+    const diagnostics = Office?.context?.diagnostics as
+      | (Office.ContextInformation & { correlationId?: string })
+      | undefined;
+    _sessionCorrelationId = diagnostics?.correlationId ?? crypto.randomUUID();
+  }
+  return _sessionCorrelationId!;
+}
+
 export function useHttp() {
   const { DEBUG, ERROR } = useLogger(useHttp.name);
 
@@ -39,6 +52,7 @@ export function useHttp() {
         method,
         headers: {
           "Content-Type": "application/json",
+          "X-Correlation-ID": getSessionCorrelationId(),
           ...options.headers,
         },
       };
@@ -53,7 +67,8 @@ export function useHttp() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const body = await response.text().catch(() => "");
+        throw new Error(body || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();

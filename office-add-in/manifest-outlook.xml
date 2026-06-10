@@ -23,9 +23,9 @@
     <Host Name="Mailbox" />
   </Hosts>
 
-  <!-- 1.5 for Ribbon buttons and Taskpane, for SSO 1.9 is minimum -->
+  <!-- SSO requires minimum 1.9 -->
   <Requirements>
-    <Sets DefaultMinVersion="1.5">
+    <Sets DefaultMinVersion="1.9">
       <Set Name="Mailbox" />
     </Sets>
   </Requirements>
@@ -55,13 +55,16 @@
       xsi:type="VersionOverridesV1_1"
     >
       <Requirements>
-        <bt:Sets DefaultMinVersion="1.5">
+        <bt:Sets DefaultMinVersion="1.9">
           <bt:Set Name="Mailbox" />
         </bt:Sets>
       </Requirements>
 
       <Hosts>
         <Host xsi:type="MailHost">
+          <Runtimes>
+            <Runtime resid="Taskpane.Url" lifetime="long" />
+          </Runtimes>
           <DesktopFormFactor>
             <!-- GetStarted not allowed in Outlook -->
 
@@ -124,7 +127,6 @@
         <Scopes>
           <Scope>openid</Scope>
           <Scope>user.read</Scope>
-          <Scope>mail.read</Scope>
           <Scope>profile</Scope>
         </Scopes>
       </WebApplicationInfo>

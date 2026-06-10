@@ -28,7 +28,7 @@
         "/.github/workflows/.+\\.ya?ml$/"
       ],
       "matchStrings": [
-  "version: (?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+) # helm version updated by renovate"
+        "version: (?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+) # helm version updated by renovate"
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "helm/helm",
@@ -55,8 +55,8 @@
     {
       "groupName": "zgw-office-addin-docker-images",
       "matchPackageNames": [
-        "ghcr.io/infonl/zgw-office-add-in-backend",
-        "ghcr.io/infonl/zgw-office-add-in-frontend"
+        "ghcr.io/infonl/zgw-office-addin-backend",
+        "ghcr.io/infonl/zgw-office-addin-frontend"
       ],
       "matchDatasources": [
         "docker"
