@@ -89,7 +89,7 @@
     "office-addin-debugging": "6.0.7",
     "office-addin-dev-certs": "2.0.9",
     "office-addin-lint": "3.0.9",
-    "office-addin-manifest": "2.1.3",
+    "office-addin-manifest": "2.1.5",
     "office-addin-mock": "3.0.9",
     "office-addin-prettier-config": "2.0.2",
     "source-map-loader": "5.0.0",
