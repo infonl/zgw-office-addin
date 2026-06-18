@@ -42,6 +42,12 @@
       "matchManagers": ["npm"]
     },
     {
+      "description": "Cap eslint below 10 until neostandard supports it (its peerDependency is eslint ^9). Remove this rule once neostandard allows eslint 10.",
+      "matchPackageNames": ["eslint"],
+      "matchManagers": ["npm"],
+      "allowedVersions": "<10"
+    },
+    {
       "matchDatasources": [
         "docker"
       ],
