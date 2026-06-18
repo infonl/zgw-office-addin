@@ -38,14 +38,14 @@
   "packageRules": [
     {
       "groupName": "eslint",
-      "matchPackageNames": ["eslint", "neostandard"],
+      "matchPackageNames": ["eslint", "@eslint/js", "typescript-eslint"],
       "matchManagers": ["npm"]
     },
     {
-      "description": "Cap eslint below 10 until neostandard supports it (its peerDependency is eslint ^9). Remove this rule once neostandard allows eslint 10.",
-      "matchPackageNames": ["eslint"],
-      "matchManagers": ["npm"],
-      "allowedVersions": "<10"
+      "description": "office-add-in reuses eslint-plugin-office-addins' typescript-eslint instance, so @typescript-eslint/parser must move in lockstep with it.",
+      "groupName": "office-addins-eslint",
+      "matchPackageNames": ["@typescript-eslint/parser", "eslint-plugin-office-addins"],
+      "matchManagers": ["npm"]
     },
     {
       "matchDatasources": [
