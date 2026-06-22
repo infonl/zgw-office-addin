@@ -73,7 +73,7 @@
     "@total-typescript/shoehorn": "0.1.2",
     "@types/node": "22.19.21",
     "@types/office-js": "1.0.592",
-    "@types/office-runtime": "1.0.37",
+    "@types/office-runtime": "1.0.38",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/webpack": "5.28.5",
