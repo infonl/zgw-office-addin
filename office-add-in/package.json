@@ -95,7 +95,7 @@
     "office-addin-lint": "3.0.9",
     "office-addin-manifest": "2.1.5",
     "office-addin-mock": "3.0.9",
-    "office-addin-prettier-config": "2.0.2",
+    "office-addin-prettier-config": "2.0.4",
     "source-map-loader": "5.0.0",
     "ts-loader": "9.5.7",
     "typescript": "5.9.3",
