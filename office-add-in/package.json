@@ -1,6 +1,6 @@
 {
   "name": "office-add-in",
-  "version": "0.9.333",
+  "version": "0.9.336",
   "repository": {
     "type": "git",
     "url": "https://github.com/infonl/zgw-office-addin"
@@ -93,7 +93,7 @@
     "office-addin-debugging": "6.0.7",
     "office-addin-dev-certs": "2.0.9",
     "office-addin-lint": "3.0.9",
-    "office-addin-manifest": "2.1.3",
+    "office-addin-manifest": "2.1.5",
     "office-addin-mock": "3.0.9",
     "office-addin-prettier-config": "2.0.4",
     "source-map-loader": "5.0.0",
@@ -101,7 +101,7 @@
     "typescript": "5.9.3",
     "webpack": "5.106.2",
     "webpack-cli": "7.0.2",
-    "webpack-dev-server": "5.2.4"
+    "webpack-dev-server": "5.2.5"
   },
   "browserslist": [
     "last 2 versions",
