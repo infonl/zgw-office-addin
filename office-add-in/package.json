@@ -1,6 +1,6 @@
 {
   "name": "office-add-in",
-  "version": "0.9.339",
+  "version": "0.9.340",
   "repository": {
     "type": "git",
     "url": "https://github.com/infonl/zgw-office-addin"
@@ -100,7 +100,7 @@
     "ts-loader": "9.5.7",
     "typescript": "5.9.3",
     "webpack": "5.106.2",
-    "webpack-cli": "7.0.2",
+    "webpack-cli": "7.0.3",
     "webpack-dev-server": "5.2.5"
   },
   "browserslist": [
