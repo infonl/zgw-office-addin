@@ -145,4 +145,4 @@ services:
         condition: service_healthy
 
   openzaak-redis:
-    image: redis:8.6.3@sha256:d4a4a4db02748731e6313d60adfd92985b6ad7bc2f2400a6cb0f8b35a2a6b492
+    image: redis:8.6.4@sha256:c00011808d8c33f83e4eedb0a50f04a4c8e86b08d7727e7d809a75a59298846b
