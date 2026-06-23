@@ -44,3 +44,5 @@ dist/
 ### Testing ###
 coverage/
 **/coverage/
+e2e/test-results/
+e2e/playwright-report/

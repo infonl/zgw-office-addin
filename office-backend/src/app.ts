@@ -53,7 +53,10 @@ fastify.addHook("onRequest", (request, reply, done) => {
   if (origin && allowedOrigins.includes(origin)) {
     reply.header("Access-Control-Allow-Origin", origin);
     reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, auteur");
+    reply.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, auteur, X-Correlation-ID",
+    );
     reply.header("Access-Control-Allow-Credentials", "true");
   }
 
@@ -69,8 +72,8 @@ fastify.addHook("onRequest", onRequestLoggerHook);
 
 const httpService = new HttpService();
 const tokenService = new TokenService();
-const zaakService = new ZaakService(httpService, tokenService);
-const zaakController = new ZaakController(zaakService);
+const zaakService = new ZaakService(httpService);
+const zaakController = new ZaakController(tokenService, zaakService);
 
 // Health check endpoint for Kubernetes probes
 fastify.get("/health", async (_req, res) => {
@@ -92,7 +95,7 @@ fastify.post<{ Params: ZaakParam; Body: Record<string, unknown> }>(
 // === OBO AUTH ENDPOINT ===
 fastify.post("/auth/obo", async (req, res) => {
   try {
-    const body = req.body as any;
+    const body = req.body as { token?: string };
 
     if (!body?.token) {
       return res.status(400).send("Missing bootstrap token");
@@ -102,7 +105,7 @@ fastify.post("/auth/obo", async (req, res) => {
 
     return res.status(200).send({ access_token: graphToken });
   } catch (err) {
-    LoggerService.error("❌ /auth/obo error:", err);
+    LoggerService.error("/auth/obo error:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return res.status(500).send(errorMessage);
   }

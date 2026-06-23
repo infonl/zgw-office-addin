@@ -8,7 +8,7 @@ This guide will describe how the add-in can be registered within the Azure envir
 To register an add-in within your azure environment you can follow the official manual of microsoft [here](https://learn.microsoft.com/en-us/office/dev/add-ins/develop/register-sso-add-in-aad-v2). Using this manual there are a few inputs that which can be filled in like the following
 
 ## Register the add-in with Microsoft identity platform
-For the example we use the name of "zgw-office-add-in".
+For the example we use the name of "zgw-office-addin".
 
 The redirect URI can be one of the following, depending on the Office host:
 - For Word: `https://<OFFICE_ADD_IN_HOST_NAME>/manifest-office.xml`, where `<OFFICE_ADD_IN_HOST_NAME>` is the host name of the server where the add-in is hosted.

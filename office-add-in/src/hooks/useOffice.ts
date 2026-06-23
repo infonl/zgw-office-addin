@@ -67,7 +67,7 @@ export function useOffice() {
       return "";
     } catch (error) {
       WARN("Unable to get file/mail title", error);
-      // ✅ Return appropriate fallback based on host
+      // Return appropriate fallback based on host
       if (isWord) return "document.docx";
       if (isExcel) return "workbook.xlsx";
       if (isOutlook) return "Outlook-bericht.eml";
@@ -281,8 +281,8 @@ export function useOffice() {
           fileContent,
         };
       } catch (error) {
-        ERROR(`❌ [${attachment.name}] Failed to process:`, error);
-        ERROR(`💥 [${attachment.name}] Error details:`, {
+        ERROR(`[${attachment.name}] Failed to process:`, error);
+        ERROR(`[${attachment.name}] Error details:`, {
           message: error instanceof Error ? error.message : "Unknown error",
           stack: error instanceof Error ? error.stack?.substring(0, 200) + "..." : undefined,
         });

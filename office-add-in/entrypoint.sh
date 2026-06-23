@@ -26,6 +26,11 @@ NGINX_PUBLIC_HTML="${NGINX_PUBLIC_HTML:-/usr/share/nginx/html}"
 NGINX_TEMPLATES_DIR="${NGINX_TEMPLATES_DIR:-/etc/nginx}"
 NGINX_CONFIG_FILE="${NGINX_CONFIG_FILE:-/etc/nginx/conf.d/default.conf}"
 
+# Copy static files from the read-only staging directory (/app/html) into the
+# writable html volume mount so the manifest and URL rewrites below can run.
+echo "Copying static files from /app/html to $NGINX_PUBLIC_HTML..."
+cp -r /app/html/. "$NGINX_PUBLIC_HTML/"
+
 ####
 # To ensure the manifest for the Office Add-in is correctly configured,
 # we need to rewrite the URLs in the manifests manifest-office.xml and manifest-outlook.xml.

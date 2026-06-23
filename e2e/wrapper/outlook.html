@@ -1,0 +1,62 @@
+<!--
+  SPDX-FileCopyrightText: 2026 INFO.nl
+  SPDX-License-Identifier: EUPL-1.2+
+-->
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ZGW Office Add-in E2E — Outlook</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #email-stub {
+        width: 300px;
+        min-width: 200px;
+        border-right: 1px solid #ccc;
+        padding: 16px;
+        background: #f5f5f5;
+        overflow-y: auto;
+        color: #333;
+      }
+      #email-stub h2 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      #email-stub p {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+      iframe {
+        flex: 1;
+        border: none;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="email-stub">
+      <h2>Test e-mail</h2>
+      <p>Van: sender@example.com</p>
+      <p>Aan: recipient@example.com</p>
+      <p>Onderwerp: Test e-mail onderwerp</p>
+      <p>1 bijlage</p>
+    </div>
+    <iframe
+      src="https://localhost:3000/taskpane.html"
+      id="taskpane"
+      title="Add-in taskpane"
+    ></iframe>
+  </body>
+</html>

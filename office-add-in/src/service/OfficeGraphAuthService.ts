@@ -46,7 +46,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
 
     if (!response.ok) {
       const message = await response.text();
-      this.logger.ERROR("❌ OBO backend error:", message);
+      this.logger.ERROR("OBO backend error:", message);
       throw new Error("Backend OBO failed: " + message);
     }
 
@@ -119,20 +119,20 @@ export class OfficeGraphAuthService implements GraphAuthService {
         this.logger.DEBUG("🔁 Performing OBO exchange on backend...");
 
         const graphToken = await this.exchangeTokenWithBackend(token);
-        this.logger.DEBUG("✅ OBO exchange completed, received Graph token.", graphToken);
+        this.logger.DEBUG("OBO exchange completed, received Graph token.", graphToken);
 
         // decode payload to determine caching
         const graphPayload = this.decodeJwtPayload(graphToken);
         let expiryTimestamp = addMinutes(new Date(), 50).getTime();
         this.logger.DEBUG("🔎 GRAPH PAYLOAD", graphPayload);
         if (!graphPayload) {
-          this.logger.ERROR("❌ Unable to decode Graph token payload");
+          this.logger.ERROR("Unable to decode Graph token payload");
           throw new Error("Unable to decode Graph token payload");
         }
 
         // 1️⃣ Controleer audience
         if (!this.isGraphAudience(graphPayload)) {
-          this.logger.ERROR("❌ Graph token audience invalid", { aud: graphPayload.aud });
+          this.logger.ERROR("Graph token audience invalid", { aud: graphPayload.aud });
           throw new Error(`Graph token has invalid audience: ${graphPayload.aud}`);
         }
 
@@ -140,7 +140,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
         const hasRequiredScopes = this.tokenHasScopes(graphPayload, this.requiredScopes);
         if (!hasRequiredScopes) {
           const grantedScopes = graphPayload.scp?.split(" ") || [];
-          this.logger.ERROR("❌ Graph token missing required scopes", {
+          this.logger.ERROR("Graph token missing required scopes", {
             required: this.requiredScopes,
             granted: grantedScopes,
           });
@@ -160,11 +160,11 @@ export class OfficeGraphAuthService implements GraphAuthService {
           expires: addMinutes(new Date(expiryTimestamp), -TOKEN_EXPIRY_OFFSET_MINUTES).getTime(),
         };
 
-        this.logger.DEBUG("✅ Graph token acquired via OBO backend flow");
+        this.logger.DEBUG("Graph token acquired via OBO backend flow");
         return graphToken;
       })
       .catch(async (error) => {
-        this.logger.ERROR("❌ Office SSO Graph authentication failed:", {
+        this.logger.ERROR("Office SSO Graph authentication failed:", {
           code: error?.code,
           name: error?.name,
           message: error?.message,
@@ -172,7 +172,7 @@ export class OfficeGraphAuthService implements GraphAuthService {
         });
 
         if (this.env.APP_ENV === "local") {
-          this.logger.DEBUG("🛟 Falling back to MSAL (local only)...");
+          this.logger.DEBUG("Falling back to MSAL (local only)...");
           try {
             if (this.msalAuth) {
               const msalToken = await this.msalAuth.getAccessToken([...this.requiredScopes]);
@@ -195,10 +195,10 @@ export class OfficeGraphAuthService implements GraphAuthService {
               );
             }
           } catch (msalError) {
-            this.logger.ERROR("⚠️ MSAL fallback also failed:", msalError);
+            this.logger.ERROR("MSAL fallback also failed:", msalError);
           }
         } else {
-          this.logger.ERROR("❌ Office SSO must work on test/prod. MSAL fallback not available.", {
+          this.logger.ERROR("Office SSO must work on test/prod. MSAL fallback not available.", {
             suggestion: "Check Azure AD app registration and Graph API permissions",
           });
         }

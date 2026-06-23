@@ -429,7 +429,7 @@ describe("useOutlookForm", () => {
       })
     );
     expect(submitResult).toEqual({ error: expect.any(Error) });
-    expect(mockShowErrorToast).toHaveBeenCalledWith(2, 3);
+    expect(mockShowErrorToast).toHaveBeenCalledWith(2, 3, "Upload failed");
   });
 
   describe("mutation tracking via useMutationState", () => {
@@ -512,7 +512,7 @@ describe("useOutlookForm", () => {
 
       // Verify mutateAsync was called for both documents (independent tracking)
       expect(mockMutateAsync).toHaveBeenCalledTimes(2);
-      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2);
+      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2, "Upload failed");
     });
   });
 
@@ -630,7 +630,7 @@ describe("useOutlookForm", () => {
         });
       });
 
-      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2);
+      expect(mockShowErrorToast).toHaveBeenCalledWith(1, 2, "Upload failed");
     });
 
     it("calls showGeneralErrorToast when upload process fails", async () => {

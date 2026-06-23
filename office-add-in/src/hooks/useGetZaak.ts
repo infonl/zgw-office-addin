@@ -27,12 +27,10 @@ export function useGetZaak(zaaknummer: string | null) {
     enabled: !!zaaknummer,
     queryFn: async () => {
       const token = await getToken();
-      const authorizattionHeader = {
+      const authorizationHeader = {
         Authorization: `Bearer ${token}`,
       };
-      console.log(authorizattionHeader);
-
-      return GET<Zaak>(`/zaken/${zaaknummer}`, authorizattionHeader);
+      return GET<Zaak>(`/zaken/${zaaknummer}`, authorizationHeader);
     },
   });
 }

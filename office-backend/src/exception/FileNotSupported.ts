@@ -4,7 +4,7 @@
  */
 
 export class FileNotSupported extends Error {
-  public readonly statusCode = 500;
+  public readonly statusCode = 400; // bad request
   constructor(file: string) {
     super(`Bestand wordt niet ondersteund: ${file}`);
     this.name = FileNotSupported.name;

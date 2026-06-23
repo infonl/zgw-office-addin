@@ -1,8 +1,18 @@
 # SPDX-FileCopyrightText: 2025 INFO.nl
 # SPDX-License-Identifier: EUPL-1.2+
 
+# Allowed Office origins
+map $http_origin $cors_origin {
+    default "";
+    "~^https://.*\.officeapps\.live\.com$"     $http_origin;
+    "~^https://.*\.microsoft\.com$"            $http_origin;
+    "~^https://word\.cloud\.microsoft$"        $http_origin;
+    "~^https://outlook\.cloud\.microsoft$"     $http_origin;
+    "~^https://.*\.office\.com$"               $http_origin;
+}
+
 server {
-    listen 80;
+    listen 8080;
     server_tokens off;
     server_name _;
     root /usr/share/nginx/html;
@@ -39,6 +49,17 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
+    # Custom error responses — empty body, no nginx-branded HTML.
+    # server_tokens off (above) suppresses the version number from the Server header.
+    # Fully removing "Server: nginx" requires the ngx_headers_more module, which is
+    # not compiled into this nginx build.
+    error_page 400 401 403 405 408 410 429 =400 /4xx;
+    error_page 404                          =404 /404;
+    error_page 500 502 503 504              =502 /5xx;
+    location = /404 { internal; default_type text/plain; return 404 "Not Found"; }
+    location = /4xx { internal; default_type text/plain; return 400 "Bad Request"; }
+    location = /5xx { internal; default_type text/plain; return 502 "Server Error"; }
+
     # Health check endpoint for Kubernetes probes
     location /health {
         access_log off;
@@ -70,23 +91,30 @@ server {
         alias /usr/share/nginx/html/metrics.txt;
     }
 
+    # Root has no content — all valid entry points are explicit paths (/taskpane.html etc.)
+    location = / {
+        default_type text/plain;
+        return 404 "Not Found";
+    }
+
     location / {
         client_max_body_size __MAX_BODY_SIZE__;
-        try_files $uri $uri/ /index.html;
+        try_files $uri =404;
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
 
         # CORS headers for Office Add-ins
-        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Origin $cors_origin always;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization" always;
+        add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID" always;
         add_header Access-Control-Expose-Headers "Content-Length,Content-Range" always;
         add_header Access-Control-Allow-Credentials "true" always;
+        add_header Vary "Origin" always;
 
-        # Handle preflight requests
         if ($request_method = 'OPTIONS') {
-            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Origin $cors_origin;
             add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-            add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization";
+            add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID";
+            add_header Access-Control-Allow-Credentials "true";
             add_header Access-Control-Max-Age 1728000;
             add_header Content-Type "text/plain; charset=utf-8";
             add_header Content-Length 0;
