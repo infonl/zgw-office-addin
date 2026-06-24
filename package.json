@@ -31,10 +31,10 @@
     "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "4.1.5",
-    "@vitest/ui": "4.1.5",
+    "@vitest/coverage-v8": "4.1.9",
+    "@vitest/ui": "4.1.9",
     "turbo": "2.9.14",
-    "vitest": "4.1.5"
+    "vitest": "4.1.9"
   },
   "engines": {
     "node": ">=22.0.0"
