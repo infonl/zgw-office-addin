@@ -1,6 +1,6 @@
 # zgw-office-addin
 
-![Version: 0.0.88](https://img.shields.io/badge/Version-0.0.88-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
+![Version: 0.0.89](https://img.shields.io/badge/Version-0.0.89-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.2.0](https://img.shields.io/badge/AppVersion-0.2.0-informational?style=flat-square)
 
 A Helm chart for deploying the zgw-office-addin (frontend and backend)
 
@@ -37,6 +37,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | backend.msalSecret | string | `""` | Client secret for MSAL authentication towards Azure AD |
 | backend.nodeSelector | object | `{}` | Node selector for the backend deployment |
 | backend.podAnnotations | object | `{}` | Pod annotations for the backend deployment |
+| backend.podLabels | object | `{}` | Extra pod labels for the backend pod (merged over common.podLabels) |
 | backend.podSecurityContext | object | `{"fsGroup":10001}` | Pod security context for the backend deployment |
 | backend.resources | object | `{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource limits and requests for the backend container |
 | backend.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":10001,"runAsNonRoot":true,"runAsUser":10001}` | Security context for the backend container |
@@ -49,6 +50,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | common.frontendUrl | string | `"http://localhost:3000"` | The frontend public URL where the manifest files and static js file are served |
 | common.msalClientId | string | `""` | MS Azure Client ID assigned to the Office Add-in application |
 | common.msalTenantId | string | `""` | MS Azure Tenant ID of the Organization |
+| common.podLabels | object | `{}` | Extra pod labels applied to BOTH the frontend and backend pods. Useful for observability: set e.g. `app` / `service_name` so the pods are attributed to the add-in instead of the Helm release name in Grafana/Loki. |
 | frontend.affinity | object | `{}` | Affinity rules for the frontend deployment |
 | frontend.enableHttps | bool | `false` | If enabled nginx will also listen on port 443. You will need to volume map a key and certificate valid for your frontendUrl |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
@@ -58,6 +60,7 @@ The Github workflow will perform helm-linting and will bump the version if neede
 | frontend.maxBodySize | string | `"80M"` | Maximum content body size (e.g. for attachments) |
 | frontend.nodeSelector | object | `{}` | Node selector for the frontend deployment |
 | frontend.podAnnotations | object | `{}` | Pod annotations for the frontend deployment |
+| frontend.podLabels | object | `{}` | Extra pod labels for the frontend pod (merged over common.podLabels) |
 | frontend.podSecurityContext | object | `{"fsGroup":10001}` | Pod security context for the frontend deployment |
 | frontend.resources | object | `{"limits":{"cpu":"250m","memory":"128Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` | Resource limits and requests for the frontend container |
 | frontend.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":10001,"runAsNonRoot":true,"runAsUser":10001}` | Security context for the frontend container |
