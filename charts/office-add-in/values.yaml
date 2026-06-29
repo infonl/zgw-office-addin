@@ -8,6 +8,10 @@ common:
   msalTenantId: ""
   # -- MS Azure Client ID assigned to the Office Add-in application
   msalClientId: ""
+  # -- Extra pod labels applied to BOTH the frontend and backend pods. Useful for
+  # observability: set e.g. `app` / `service_name` so the pods are attributed to
+  # the add-in instead of the Helm release name in Grafana/Loki.
+  podLabels: {}
 
 frontend:
   image:
@@ -32,6 +36,8 @@ frontend:
       memory: 64Mi
   # -- Pod annotations for the frontend deployment
   podAnnotations: {}
+  # -- Extra pod labels for the frontend pod (merged over common.podLabels)
+  podLabels: {}
   # -- Pod security context for the frontend deployment
   podSecurityContext:
     fsGroup: 10001
@@ -88,6 +94,8 @@ backend:
       memory: 128Mi
   # -- Pod annotations for the backend deployment
   podAnnotations: {}
+  # -- Extra pod labels for the backend pod (merged over common.podLabels)
+  podLabels: {}
   # -- Pod security context for the backend deployment
   podSecurityContext:
     fsGroup: 10001
