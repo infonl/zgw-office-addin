@@ -16,13 +16,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "office-add-in.backend.selectorLabels" . | nindent 8 }}
         {{- with .Values.common.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- with .Values.backend.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- /* selectorLabels rendered LAST so they always win on key collision
+               and keep matching spec.selector.matchLabels */}}
+        {{- include "office-add-in.backend.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.backend.imagePullSecrets }}
       imagePullSecrets:
