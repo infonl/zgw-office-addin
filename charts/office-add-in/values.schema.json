@@ -26,6 +26,9 @@
         "msalClientId": {
           "type": "string",
           "description": "MS Azure Client ID assigned to the Office Add-in application"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/podLabels"
         }
       }
     },
@@ -53,6 +56,9 @@
         },
         "podAnnotations": {
           "$ref": "#/$defs/podAnnotations"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/podLabels"
         },
         "podSecurityContext": {
           "$ref": "#/$defs/podSecurityContext"
@@ -112,6 +118,9 @@
         },
         "podAnnotations": {
           "$ref": "#/$defs/podAnnotations"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/podLabels"
         },
         "podSecurityContext": {
           "$ref": "#/$defs/podSecurityContext"
@@ -197,6 +206,11 @@
     "podAnnotations": {
       "type": "object",
       "description": "Pod annotations",
+      "additionalProperties": { "type": "string" }
+    },
+    "podLabels": {
+      "type": "object",
+      "description": "Pod labels",
       "additionalProperties": { "type": "string" }
     },
     "podSecurityContext": {

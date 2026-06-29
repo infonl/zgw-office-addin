@@ -17,6 +17,12 @@ spec:
       {{- end }}
       labels:
         {{- include "office-add-in.backend.selectorLabels" . | nindent 8 }}
+        {{- with .Values.common.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.backend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.backend.imagePullSecrets }}
       imagePullSecrets:
