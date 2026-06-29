@@ -213,6 +213,16 @@ entries:
   zgw-office-addin:
   - apiVersion: v2
     appVersion: 0.2.0
+    created: "2026-06-29T14:01:33.529878997Z"
+    description: A Helm chart for deploying the zgw-office-addin (frontend and backend)
+    digest: 98f2c0e698cd690bb1bb6c3d48c99701d8de524ea45255187f2a11386b213f41
+    name: zgw-office-addin
+    type: application
+    urls:
+    - https://github.com/infonl/zgw-office-addin/releases/download/zgw-office-addin-0.0.89/zgw-office-addin-0.0.89.tgz
+    version: 0.0.89
+  - apiVersion: v2
+    appVersion: 0.2.0
     created: "2026-06-10T10:23:07.145609101Z"
     description: A Helm chart for deploying the zgw-office-addin (frontend and backend)
     digest: 33e3967fd9464aba8ec86303df677c67fdabd59120ce72cfa16c7e41ae5f8949
@@ -891,4 +901,4 @@ entries:
     urls:
     - https://github.com/infonl/zgw-office-addin/releases/download/zgw-office-addin-0.0.21/zgw-office-addin-0.0.21.tgz
     version: 0.0.21
-generated: "2026-06-10T10:23:07.145937689Z"
+generated: "2026-06-29T14:01:33.532457701Z"
