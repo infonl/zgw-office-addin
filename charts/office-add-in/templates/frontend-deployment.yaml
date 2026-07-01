@@ -16,6 +16,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        {{- with .Values.common.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.frontend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- /* selectorLabels rendered LAST so they always win on key collision
+               and keep matching spec.selector.matchLabels */}}
         {{- include "office-add-in.frontend.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.frontend.imagePullSecrets }}
