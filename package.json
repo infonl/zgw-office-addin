@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "zgw-office-addin",
-  "version": "0.9.355",
+  "version": "0.9.356",
   "license": "EUPL-1.2+",
   "repository": {
     "type": "git",
@@ -31,7 +31,6 @@
     "check": "npm run types && npm run lint && npm run prettier && npm run validate && npm run test"
   },
   "devDependencies": {
-    "turbo": "2.9.18",
     "@vitest/coverage-v8": "4.1.9",
     "@vitest/ui": "4.1.9",
     "turbo": "2.9.14",
