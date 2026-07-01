@@ -43,7 +43,7 @@
     "@types/serve-static": "2.2.0",
     "esbuild": "0.28.1",
     "eslint": "10.2.1",
-    "prettier": "3.8.4",
+    "prettier": "3.8.5",
     "ts-node": "10.9.2",
     "ts-node-dev": "2.0.0",
     "typescript": "6.0.3"
