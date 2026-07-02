@@ -87,7 +87,7 @@
     "happy-dom": "20.9.0",
     "html-loader": "5.1.0",
     "html-webpack-plugin": "5.6.7",
-    "less": "4.6.6",
+    "less": "4.6.7",
     "less-loader": "12.3.3",
     "office-addin-cli": "2.0.9",
     "office-addin-debugging": "6.0.7",
