@@ -12,14 +12,18 @@ on:
   workflow_dispatch:
     inputs:
       version_bump:
-        description: "Select the version bump."
+        description: "Select the version bump for a release."
         type: choice
         required: true
-        default: "patch"
+        default: "minor"
         options:
           - patch
           - minor
           - major
+      hotfix_version:
+        description: "Explicit version for hotfix branch (e.g. 0.9.354). Required when dispatching on a hotfix/* branch."
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -30,63 +34,136 @@ jobs:
   validate-input:
     runs-on: ubuntu-24.04
     outputs:
-      version-bump: ${{ github.event.inputs.version_bump || 'patch' }}
+      version-bump: ${{ github.event.inputs.version_bump || 'minor' }}
     steps:
       - name: Use selected version bump
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          echo "Version will be bumped to next ${{ github.event.inputs.version_bump || 'patch' }} number."
+          echo "Version will be bumped to next ${{ github.event.inputs.version_bump || 'minor' }} number."
 
-      - name: Manual version bump only allowed on main branch
-        if: ${{ github.ref != 'refs/heads/main' && github.event_name == 'workflow_dispatch' }}
+      - name: Manual version bump only allowed on main or hotfix branches
+        if: ${{ github.ref != 'refs/heads/main' && github.event_name == 'workflow_dispatch' && (!startsWith(github.ref_name, 'hotfix/') || github.event.inputs.hotfix_version == '') }}
         run: |
-          echo "Version bump input only valid on main branch."
+          echo "Version bump input only valid on main (hotfix branches require explicit hotfix_version)."
           exit 1
 
-  next-version:
+  # Determines the version for this build.
+  # - Regular pushes to main produce a floating "next minor, -dev" pre-release (no real bump).
+  # - A manual dispatch on main bumps minor/major for a real release, resetting the patch to 0.
+  # - A manual dispatch on a hotfix/* branch uses the explicit hotfix_version input as-is, which
+  #   is the only way a patch number ever changes.
+  determine-version:
     runs-on: ubuntu-24.04
     needs: [validate-input]
     outputs:
-      old-version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.old_tag || steps.get-tag-non-main.outputs.old_tag }}
-      version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}
+      old-version: ${{ steps.prev-tag.outputs.tag }}
+      version: ${{ steps.set-hotfix-version.outputs.version || steps.calc-version.outputs.version }}
+      tag: ${{ steps.set-hotfix-version.outputs.tag || steps.calc-version.outputs.tag }}
+      release-type: ${{ steps.release-type.outputs.release-type }}
     steps:
-      # Checkout the repository including tags
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-      # Determine the next semantic version based on the commit message tags
-      - name: Get next tag on main
-        id: get-tag-main
-        if: ${{ github.ref == 'refs/heads/main'}}
-        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRERELEASE: false
-          FORCE_WITHOUT_CHANGES: true # Always build of a new version, even if there have been no code changes
-          DEFAULT_BUMP: ${{ needs.validate-input.outputs.version-bump }}
-          WITH_V: true
-          RELEASE_BRANCHES: main
-      # If not on main, Determine the next semantic version based on the commit message tags without pushing tags`
-      - name: Get next tag on non-main
-        id: get-tag-non-main
-        if: ${{ github.ref != 'refs/heads/main'}}
-        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRERELEASE: false
-          FORCE_WITHOUT_CHANGES: false
-          DEFAULT_BUMP: patch
-          WITH_V: true
-          RELEASE_BRANCHES: main
-          DRY_RUN: true
-      - name: Print new version
+
+      - name: Ensure hotfix_version input provided
+        if: startsWith(github.ref_name, 'hotfix/')
         run: |
-          echo "Next version: ${{ github.ref == 'refs/heads/main' && steps.get-tag-main.outputs.new_tag || steps.get-tag-non-main.outputs.new_tag }}"
+          if [ -z "${{ github.event.inputs.hotfix_version }}" ]; then
+            echo "hotfix_version input is required when running on a hotfix/* branch."
+            exit 1
+          fi
+
+      - name: Validate semantic version pattern
+        if: startsWith(github.ref_name, 'hotfix/')
+        run: |
+          V='${{ github.event.inputs.hotfix_version }}'
+          if ! echo "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9._-]+)?$'; then
+            echo "hotfix_version '$V' is not a valid semantic version (expected: N.N.N or N.N.N-suffix)."
+            exit 1
+          fi
+
+      - name: Check hotfix tag does not already exist
+        if: startsWith(github.ref_name, 'hotfix/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          V='${{ github.event.inputs.hotfix_version }}'
+          if git ls-remote --exit-code --tags origin "refs/tags/v${V}" >/dev/null 2>&1; then
+            echo "Tag v${V} already exists. Choose a different version."
+            exit 1
+          fi
+
+      - name: Set hotfix version outputs
+        if: startsWith(github.ref_name, 'hotfix/')
+        id: set-hotfix-version
+        run: |
+          echo "version=${{ github.event.inputs.hotfix_version }}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${{ github.event.inputs.hotfix_version }}" >> "$GITHUB_OUTPUT"
+          echo "Calculated version: ${{ github.event.inputs.hotfix_version }} (tag: v${{ github.event.inputs.hotfix_version }})"
+
+      - name: Determine release type
+        id: release-type
+        run: |
+          if [[ "${{ startsWith(github.ref_name, 'hotfix/') }}" == "true" ]]; then
+            echo "release-type=hotfix" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "release-type=release" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "release-type=dev" >> "$GITHUB_OUTPUT"
+          else
+            echo "release-type=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Calculate next version
+        if: ${{ !startsWith(github.ref_name, 'hotfix/') }}
+        id: calc-version
+        run: |
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | grep -m 1 -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous release tag found. Starting from v0.0.0"
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "Highest release tag: $LATEST_TAG"
+
+          VERSION="${LATEST_TAG#v}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+
+          RELEASE_TYPE="${{ steps.release-type.outputs.release-type }}"
+
+          if [ "$RELEASE_TYPE" = "dev" ]; then
+            # Dev builds always assume next minor version
+            MINOR=$((MINOR + 1))
+            NEXT_VERSION="${MAJOR}.${MINOR}.0-dev"
+          else
+            BUMP_TYPE="${{ needs.validate-input.outputs.version-bump }}"
+            case "$BUMP_TYPE" in
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                ;;
+            esac
+            NEXT_VERSION="${MAJOR}.${MINOR}.0"
+          fi
+
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Calculated version: ${NEXT_VERSION} (release type: ${RELEASE_TYPE})"
+
+      - name: Find previous release tag
+        id: prev-tag
+        run: |
+          PREV_TAG=$(git tag -l 'v*' --sort=-v:refname --merged HEAD | grep -m 1 -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+          echo "tag=${PREV_TAG:-}" >> "$GITHUB_OUTPUT"
+          echo "Previous release tag: ${PREV_TAG:-none}"
 
   build:
     runs-on: ubuntu-24.04
-    needs: [validate-input, next-version]
+    needs: [validate-input, determine-version]
 
     steps:
       - name: Checkout repository
@@ -104,17 +181,6 @@ jobs:
       - name: Create .env file from secrets
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
-
-      - name: Update package.json versions
-        run: |
-          VERSION=${{ needs.next-version.outputs.version }}
-          VERSION_NO_V=${VERSION#v}
-          echo "Setting version to: $VERSION_NO_V"
-
-          # Update package.json files
-          npm pkg set version="$VERSION_NO_V"
-          npm pkg set version="$VERSION_NO_V" --workspace=office-add-in
-          npm pkg set version="$VERSION_NO_V" --workspace=office-backend
 
       - name: Run code validation
         id: validation
@@ -177,7 +243,7 @@ jobs:
           cp -r office-add-in/dist release/
 
       - name: Archive Artifacts for release zip
-        if: github.ref == 'refs/heads/main'
+        if: ${{ needs.determine-version.outputs.release-type != 'none' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: office-addin-artifacts
@@ -192,9 +258,14 @@ jobs:
             office-backend/dist/
 
   create-release:
-    needs: [build, next-version]
+    needs: [build, determine-version]
     runs-on: ubuntu-24.04
-    if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
+    if: ${{ needs.determine-version.outputs.release-type != 'none' && !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
+    env:
+      NEXT_VERSION: ${{ needs.determine-version.outputs.version }}
+      NEXT_VERSION_TAG: ${{ needs.determine-version.outputs.tag }}
+      RELEASE_TYPE: ${{ needs.determine-version.outputs.release-type }}
+      PREVIOUS_TAG: ${{ needs.determine-version.outputs.old-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -203,25 +274,65 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: office-addin-artifacts
-          path: release-${{ needs.next-version.outputs.version }}/
+          path: release-${{ env.NEXT_VERSION_TAG }}/
 
       - name: Create zip
         run: |
-          zip -r zgw-office-addin-${{ needs.next-version.outputs.version }}.zip release-${{ needs.next-version.outputs.version }}
+          zip -r zgw-office-addin-${{ env.NEXT_VERSION_TAG }}.zip release-${{ env.NEXT_VERSION_TAG }}
 
-      - name: Create Github release
+      - name: Delete existing dev pre-releases
+        if: ${{ env.RELEASE_TYPE == 'dev' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dev_tags=$(gh release list --json tagName,isPrerelease -q '[.[] | select(.isPrerelease and (.tagName | endswith("-dev")))] | .[].tagName' 2>/dev/null || echo "")
+          for tag in $dev_tags; do
+            echo "Deleting dev pre-release: $tag"
+            gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          done
+
+      - name: Create dev pre-release
+        if: ${{ env.RELEASE_TYPE == 'dev' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # gh release create doesn't allow combining --notes with --generate-notes,
+          # so the changelog is generated separately and merged into the warning banner.
+          GENERATE_NOTES_ARGS=(-f tag_name="$NEXT_VERSION_TAG" -f target_commitish="${{ github.sha }}")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            GENERATE_NOTES_ARGS+=(-f previous_tag_name="$PREVIOUS_TAG")
+          fi
+          GENERATED_NOTES=$(gh api "repos/${{ github.repository }}/releases/generate-notes" "${GENERATE_NOTES_ARGS[@]}" --jq '.body')
+
+          gh release create "$NEXT_VERSION_TAG" "zgw-office-addin-${NEXT_VERSION_TAG}.zip" \
+            --title "${NEXT_VERSION_TAG} (development build)" \
+            --prerelease \
+            --notes "⚠️ This is a development pre-release and is updated with every push to main.
+
+          ${GENERATED_NOTES}"
+
+      - name: Create release
+        if: ${{ env.RELEASE_TYPE == 'release' || env.RELEASE_TYPE == 'hotfix' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ needs.next-version.outputs.version }} zgw-office-addin-${{ needs.next-version.outputs.version }}.zip --notes-start-tag ${{ needs.next-version.outputs.old-version }} --generate-notes
+          NOTES_ARGS=()
+          if [ -n "$PREVIOUS_TAG" ]; then
+            NOTES_ARGS+=(--notes-start-tag "$PREVIOUS_TAG")
+          fi
+          gh release create "$NEXT_VERSION_TAG" "zgw-office-addin-${NEXT_VERSION_TAG}.zip" \
+            --generate-notes "${NOTES_ARGS[@]}"
 
   create-docker-image:
-    needs: [build, next-version]
+    needs: [build, determine-version]
     runs-on: ubuntu-24.04
     if: ${{ !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
     permissions:
       contents: read
       packages: write
+    env:
+      NEXT_VERSION: ${{ needs.determine-version.outputs.version }}
+      RELEASE_TYPE: ${{ needs.determine-version.outputs.release-type }}
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -241,17 +352,47 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute Docker image tags
+        id: tags
+        run: |
+          build_tags() {
+            local image=$1
+            local tags="ghcr.io/infonl/${image}:${NEXT_VERSION}"
+            if [ "$RELEASE_TYPE" = "dev" ] || [ "$RELEASE_TYPE" = "release" ]; then
+              # 'latest' tracks main only, hotfix builds must not overwrite it
+              tags="${tags}"$'\n'"ghcr.io/infonl/${image}:latest"
+            fi
+            if [ "$RELEASE_TYPE" = "dev" ]; then
+              tags="${tags}"$'\n'"ghcr.io/infonl/${image}:${NEXT_VERSION}.${{ github.run_number }}"
+            fi
+            if [ "$RELEASE_TYPE" = "release" ]; then
+              local major minor
+              major=$(echo "$NEXT_VERSION" | cut -d. -f1)
+              minor=$(echo "$NEXT_VERSION" | cut -d. -f2)
+              tags="${tags}"$'\n'"ghcr.io/infonl/${image}:${major}"
+              tags="${tags}"$'\n'"ghcr.io/infonl/${image}:${major}.${minor}"
+            fi
+            echo "$tags"
+          }
+
+          {
+            echo "frontend_tags<<EOF"
+            build_tags zgw-office-addin-frontend
+            echo "EOF"
+            echo "backend_tags<<EOF"
+            build_tags zgw-office-addin-backend
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build (and Push) Frontend Docker image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           file: ./office-add-in/Dockerfile
           build-args: |
-            APP_VERSION="${{ needs.next-version.outputs.version }}"
+            APP_VERSION=${{ env.NEXT_VERSION }}
           context: office-add-in
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ghcr.io/infonl/zgw-office-addin-frontend:latest
-            ghcr.io/infonl/zgw-office-addin-frontend:${{ needs.next-version.outputs.version }}
+          push: ${{ env.RELEASE_TYPE != 'none' }}
+          tags: ${{ steps.tags.outputs.frontend_tags }}
           attests: |
             type=provenance,mode=max
             type=sbom
@@ -261,56 +402,19 @@ jobs:
         with:
           file: ./office-backend/Dockerfile
           context: office-backend
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ghcr.io/infonl/zgw-office-addin-backend:latest
-            ghcr.io/infonl/zgw-office-addin-backend:${{ needs.next-version.outputs.version }}
+          push: ${{ env.RELEASE_TYPE != 'none' }}
+          tags: ${{ steps.tags.outputs.backend_tags }}
           attests: |
             type=provenance,mode=max
             type=sbom
 
-  commit-version-update:
-    # Only commit version update if we are on main branch, only there we have the correct version to set.concurrency.
-    # Resets the version in package files, to ensure this can be committed correctly.
-    # This also catches the manual version bump via workflow_dispatch on main branch
-    # The commit message contains [skip actions] to avoid retriggering the workflow!
-    needs: [next-version, create-release]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-
-      - name: Update package.json versions
-        run: |
-          V_VERSION=${{ needs.next-version.outputs.version }}
-          VERSION=${V_VERSION#v}
-          # Update package.json files
-          npm pkg set version="$VERSION"
-          npm pkg set version="$VERSION" --workspace=office-add-in
-          npm pkg set version="$VERSION" --workspace=office-backend
-
-      - name: Commit version updates
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json office-add-in/package.json office-backend/package.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: bump version to ${{ needs.next-version.outputs.version }} [skip actions]"
-            git push
-          else
-            echo "No version change to commit."
-          fi
-
   trigger-provision:
-    needs: [next-version, create-docker-image]
+    needs: [determine-version, create-docker-image]
     env:
-      NEXT_VERSION: ${{ needs.next-version.outputs.version }}
+      NEXT_VERSION: ${{ needs.determine-version.outputs.release-type == 'dev' && format('{0}.{1}', needs.determine-version.outputs.version, github.run_number) || needs.determine-version.outputs.version }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    if: ${{ github.ref == 'refs/heads/main' && vars.ENABLE_AUTOMATIC_PROVISION == 'true' }}
+    if: ${{ needs.determine-version.outputs.release-type != 'none' && vars.ENABLE_AUTOMATIC_PROVISION == 'true' }}
     steps:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
