@@ -65,11 +65,7 @@ api://<fully-qualified-domain-name>/<app-id>
 | `<fully-qualified-domain-name>` | `(env-)office-addin.<municipality>.nl` | `acc-office-addin.dimpact.nl` |
 | `<app-id>` | The Application (client) ID you saved earlier | `396725da-f7af-40c4-9dce-53ab2bc8e0cb` |
 
-4. You will then be taken to the **Add a scope** screen. The following scopes are required for the ZGW Office Add-in to function correctly:
-   - `openid`
-   - `user.read`
-   - `mail.read`
-   - `profile`
+4. You will then be taken to the **Add a scope** screen. The following scope is required for the ZGW Office Add-in to function correctly:
    - `access_as_user`
 
    For the **Scope name**, use the Application ID URI combined with the scope attribute, for example:
@@ -111,8 +107,10 @@ For the Office and Outlook Add-ins we use the ID `ea5a67f6-b6f3-4338-b240-c655dd
 2. Click **Add a permission**.
 3. Select **Microsoft Graph**.
 4. Select **Delegated permissions**.
-5. Select the permissions that match the scopes you added earlier:
-
+5. Add the following permissions:
+   - `Mail.Read`
+   - `User.Read`
+   
 ![API Permissions](./images/azure-registratie/machtigingen.png)
 
 6. After adding the permissions, grant **admin consent** for all of them.
