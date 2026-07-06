@@ -6,7 +6,6 @@ This guide is intended for administrators of the Azure environment of the respec
 It describes how the ZGW Office Add-in can be registered within the Azure environment and made available to users.
 
 Before starting, make sure that:
-- The municipality has registered with Dimpact Beheer and has a ticket number.
 - The Azure administrator has the necessary administrator rights within the tenant.
 
 > **Note:** Depending on the language settings of your Microsoft environment and browser, some terms and screenshots in this guide may differ slightly from what you see in practice. Account for translations where necessary.
@@ -46,9 +45,8 @@ A client secret (sometimes called an "application password") is a long string us
 4. Set the **Expiry** to the maximum of **24 months**.
 5. Click **Add**. Your secret is now created.
 
-> **Important:** The value of the secret shown on your screen must also be stored securely. This concerns the **Value** field. Once you navigate away from this screen, this value will no longer be accessible. This value must also be shared with Dimpact.
+> **Important:** The value of the secret shown on your screen must also be stored securely. This concerns the **Value** field. Once you navigate away from this screen, this value will no longer be accessible.
 
-> **Note:** When the secret expires, the new secret must be shared with Dimpact so the Add-in configuration can be updated.
 
 ---
 
@@ -140,15 +138,3 @@ The manifest files are available at the following URLs:
 
 4. After adding the app, you can assign it to specific users or make it available to the **entire organisation**, as desired.
 5. To use the Add-in in Office applications: go to **Add-ins** → **More Add-ins** → **Built for your org**, where you can select the Add-in.
-
----
-
-## Information to Share with Dimpact
-
-Once the app registration is complete, the following information must be shared securely with Dimpact Beheer:
-
-| Item | Description |
-|---|---|
-| Application (client) ID | Found on the app registration overview page |
-| Directory (tenant) ID | Found on the app registration overview page |
-| Client secret value | The value generated in the Certificates & secrets section |
