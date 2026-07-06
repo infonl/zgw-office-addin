@@ -17,7 +17,6 @@ on:
         required: true
         default: "minor"
         options:
-          - patch
           - minor
           - major
       hotfix_version:
@@ -29,6 +28,11 @@ permissions:
   contents: write
   packages: write
   pull-requests: write
+
+# Serialize runs per ref so overlapping pushes to main can't race on the moving -dev tag/release.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !contains(github.ref, 'main') }}
 
 jobs:
   validate-input:
@@ -260,7 +264,7 @@ jobs:
   create-release:
     needs: [build, determine-version]
     runs-on: ubuntu-24.04
-    if: ${{ needs.determine-version.outputs.release-type != 'none' && !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
+    if: ${{ needs.determine-version.outputs.release-type != 'none' && (github.event_name != 'push' || !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to')) }}
     env:
       NEXT_VERSION: ${{ needs.determine-version.outputs.version }}
       NEXT_VERSION_TAG: ${{ needs.determine-version.outputs.tag }}
@@ -326,7 +330,7 @@ jobs:
   create-docker-image:
     needs: [build, determine-version]
     runs-on: ubuntu-24.04
-    if: ${{ !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, 'update zgw-office-addin-docker-images to') }}
     permissions:
       contents: read
       packages: write
