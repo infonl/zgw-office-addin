@@ -6,7 +6,7 @@
     "clean": "rm -rf dist && rm -rf .turbo && rm -f docker-metadata.json",
     "clean:deep": "npm run clean && npm run docker:clean && rm -rf node_modules && rm -rf package-lock.json",
     "start": "ts-node src/app.ts",
-    "dev": "ts-node-dev --respawn ./src/app.ts",
+    "dev": "tsx watch ./src/app.ts",
     "build": "NODE_ENV=production node esbuild.config.js && cp -r ../generated dist/",
     "build:dev": "NODE_ENV=development node esbuild.config.js && cp -r ../generated dist/",
     "lint": "eslint . --max-warnings=0",
@@ -45,7 +45,7 @@
     "eslint": "10.2.1",
     "prettier": "3.8.5",
     "ts-node": "10.9.2",
-    "ts-node-dev": "2.0.0",
+    "tsx": "4.23.1",
     "typescript": "6.0.3"
   }
 }

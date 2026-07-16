@@ -31,7 +31,7 @@ const mockReset = vi.fn();
 // Module mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("usehooks-ts", () => ({
+vi.mock("../../hooks/useDarkMode", () => ({
   useDarkMode: () => ({ isDarkMode: false }),
 }));
 

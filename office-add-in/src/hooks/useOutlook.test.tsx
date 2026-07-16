@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useOutlook } from "./useOutlook";
-import { fromPartial } from "@total-typescript/shoehorn";
+import { fromPartial } from "../test/fromPartial";
 
 type Item = typeof Office.context.mailbox.item;
 function mockOfficeItem(item?: Item) {

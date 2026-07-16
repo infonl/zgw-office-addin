@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ZaakSearch } from "./ZaakSearch";
 import { useOffice } from "../../hooks/useOffice";
 import { ZaakProvider } from "../../provider/ZaakProvider";
-import { fromPartial } from "@total-typescript/shoehorn";
+import { fromPartial } from "../../test/fromPartial";
 
 vi.mock("../../hooks/useOffice");
 vi.mock("../../utils/getAccessToken", () => ({
