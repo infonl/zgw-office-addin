@@ -13,11 +13,18 @@ export function useDarkMode(): { isDarkMode: boolean } {
   );
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia(COLOR_SCHEME_QUERY);
+    const mediaQuery = window.matchMedia?.(COLOR_SCHEME_QUERY);
+    if (!mediaQuery) return;
+
     const handleChange = (event: MediaQueryListEvent) => setIsDarkMode(event.matches);
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
   }, []);
 
   return { isDarkMode };
