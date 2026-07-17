@@ -63,10 +63,19 @@ function escapeRegExp(value: string): string {
 }
 
 function splitParts(body: string, boundary: string): string[] {
-  const marker = escapeRegExp(`--${boundary}`);
+  const escapedBoundary = escapeRegExp(boundary);
+  // RFC 2046: a boundary delimiter line must be preceded by CRLF (that CRLF
+  // is part of the delimiter itself, not the preceding part's content) and
+  // must start the line. Requiring that leading CRLF — rather than making
+  // it optional — is what stops the same literal bytes appearing mid-line
+  // inside a part's content (e.g. inside base64-encoded attachment data)
+  // from being mistaken for a real boundary. Prepending a synthetic "\n"
+  // lets the very first boundary (which has no real preceding CRLF) match
+  // via the same rule.
+  const delimiterPattern = new RegExp(`\\r?\\n--${escapedBoundary}(?:--)?[ \\t]*\\r?\\n?`, "g");
+  const segments = ("\n" + body).split(delimiterPattern);
   // Splitting on every boundary line (the final one has a trailing "--") yields
   // [preamble, part1, part2, ..., partN, epilogue] — drop the outer two.
-  const segments = body.split(new RegExp(`(?:\\r?\\n)?${marker}(?:--)?[ \\t]*\\r?\\n?`));
   return segments.slice(1, -1);
 }
 
