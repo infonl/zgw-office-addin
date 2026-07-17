@@ -109,6 +109,59 @@ describe("stripEmailAttachments", () => {
     expect(result).not.toContain("Content-Disposition: attachment");
   });
 
+  it("does not split on a boundary-lookalike substring that isn't at the start of a line", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: text/plain`,
+      "",
+      "Body text",
+      `--${boundary}`,
+      `Content-Type: application/pdf`,
+      `Content-Disposition: attachment; filename="a.pdf"`,
+      "",
+      // A boundary-lookalike string embedded mid-line inside the attachment's
+      // own (e.g. base64) content must not be mistaken for a real delimiter —
+      // otherwise the tail of a "stripped" attachment can leak into the output.
+      "AAAA--_boundary_BBBB",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).toContain("Body text");
+    expect(result).not.toContain("AAAA");
+    expect(result).not.toContain("BBBB");
+    expect(result).not.toContain("Content-Disposition: attachment");
+  });
+
+  it("does not split on a boundary-lookalike substring mid-line inside a kept body part", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: text/plain`,
+      "",
+      `See reference code AAAA--${boundary}BBBB in the ticket.`,
+      `--${boundary}`,
+      `Content-Type: application/pdf`,
+      `Content-Disposition: attachment; filename="a.pdf"`,
+      "",
+      "pdf-bytes",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).toContain(`See reference code AAAA--${boundary}BBBB in the ticket.`);
+    expect(result).not.toContain("pdf-bytes");
+  });
+
   it("keeps inline images (Content-Disposition: inline) untouched", () => {
     const boundary = "_boundary_";
     const message = [
