@@ -29,7 +29,7 @@ function buildEmailWithAttachment(): string {
 
   return [
     `MIME-Version: 1.0`,
-    `From: Administrator <admin@contoso.com>`,
+    `From: Administrator <admin@info.nl>`,
     `Subject: This email has attachment.`,
     `Content-Type: multipart/mixed; boundary="${outerBoundary}"`,
     "",
@@ -63,7 +63,7 @@ describe("stripEmailAttachments", () => {
   it("preserves top-level headers verbatim", () => {
     const result = stripEmailAttachments(buildEmailWithAttachment());
 
-    expect(result).toContain("From: Administrator <admin@contoso.com>");
+    expect(result).toContain("From: Administrator <admin@info.nl>");
     expect(result).toContain("Subject: This email has attachment.");
   });
 
