@@ -9,7 +9,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type Zaak } from "./useGetZaak";
 import { useGetZaak } from "./useGetZaak";
-import { fromPartial } from "../test/fromPartial";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 // Mock console methods to avoid noise in tests
 vi.spyOn(console, "debug").mockImplementation(() => {});

@@ -13,7 +13,7 @@ import { useOffice } from "../../hooks/useOffice";
 import { ZaakProvider } from "../../provider/ZaakProvider";
 import { ToastProvider } from "../../provider/ToastProvider";
 import type { Zaak } from "../../hooks/useGetZaak";
-import { fromPartial } from "../../test/fromPartial";
+import { fromPartial } from "@total-typescript/shoehorn";
 import * as useGetZaakModule from "../../hooks/useGetZaak";
 
 vi.mock("../../hooks/useAddDocumentToZaak");

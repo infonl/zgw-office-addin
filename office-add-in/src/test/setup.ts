@@ -4,7 +4,7 @@
  */
 
 import "@testing-library/dom";
-import { fromPartial } from "./fromPartial";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { vi } from "vitest";
 
 // Mock window.matchMedia for happy-dom
