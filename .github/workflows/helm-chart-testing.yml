@@ -25,14 +25,14 @@ jobs:
       needsbump: ${{ steps.testbump.outputs.needsbump }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v4.1.4 # helm version updated by renovate
+          version: v4.2.3 # helm version updated by renovate
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
@@ -71,7 +71,7 @@ jobs:
     if: ${{ needs.helm-lint.outputs.changed == 'true' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -110,7 +110,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v4.1.4 # helm version updated by renovate
+          version: v4.2.3 # helm version updated by renovate
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
@@ -135,7 +135,7 @@ jobs:
     steps:
       # To allow pushing to PR branch (needed for next step) we need to be on the pr branch
       - name: Checkout PR branch
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.WORKFLOW_HELM_CHART_BUMP_GITHUB_PAT }}
@@ -157,7 +157,7 @@ jobs:
     steps:
       # To allow pushing to PR branch (needed for next step) we need to be on the pr branch
       - name: Checkout PR branch
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.WORKFLOW_HELM_CHART_BUMP_GITHUB_PAT }}

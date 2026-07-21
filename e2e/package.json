@@ -11,8 +11,8 @@
     "prettier": "prettier --check '**/*.{ts,html}'"
   },
   "devDependencies": {
-    "@playwright/test": "1.60.0",
+    "@playwright/test": "1.61.1",
     "serve": "14.2.6",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   }
 }
