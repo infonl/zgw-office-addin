@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Build application artifacts
-        run: npm run build && turbo docker:build
+        run: npm run build && npm run docker:build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
