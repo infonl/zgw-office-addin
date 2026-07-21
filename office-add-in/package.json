@@ -94,7 +94,7 @@
     "office-addin-manifest": "2.1.6",
     "office-addin-mock": "3.0.10",
     "office-addin-prettier-config": "2.0.5",
-    "ts-loader": "9.5.7",
+    "ts-loader": "9.6.2",
     "typescript": "6.0.3",
     "webpack": "5.108.4",
     "webpack-cli": "7.2.1",
