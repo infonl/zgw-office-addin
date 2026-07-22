@@ -11,8 +11,7 @@ function getSessionCorrelationId(): string {
   if (!_sessionCorrelationId) {
     // correlationId exists at runtime but is not yet in @types/office-js
     const diagnostics = Office?.context?.diagnostics as
-      | (Office.ContextInformation & { correlationId?: string })
-      | undefined;
+      (Office.ContextInformation & { correlationId?: string }) | undefined;
     _sessionCorrelationId = diagnostics?.correlationId ?? crypto.randomUUID();
   }
   return _sessionCorrelationId!;
