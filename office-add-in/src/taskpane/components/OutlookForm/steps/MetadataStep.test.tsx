@@ -92,9 +92,7 @@ const unselectedDoc = {
 // ---------------------------------------------------------------------------
 
 type Document =
-  | typeof mockAttachmentDocument1
-  | typeof mockAttachmentDocument2
-  | typeof unselectedDoc;
+  typeof mockAttachmentDocument1 | typeof mockAttachmentDocument2 | typeof unselectedDoc;
 
 function Wrapper({
   documents,
