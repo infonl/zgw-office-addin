@@ -13,7 +13,7 @@
     "docker:enableMajor"
   ],
   "reviewers": [
-    "team:dimpact"
+    "team:team-geneve"
   ],
   "helm-values": {
     "managerFilePatterns": [
@@ -36,6 +36,16 @@
     }
   ],
   "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch",
+        "lockFileMaintenance"
+      ],
+      "automerge": true,
+      "description": [
+        "Automerge all patch-level updates and weekly lockfile maintenance. The renovate-approve GitHub app provides the required approving review"
+      ]
+    },
     {
       "groupName": "eslint",
       "matchPackageNames": ["eslint", "neostandard"],
