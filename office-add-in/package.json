@@ -84,7 +84,7 @@
     "eslint-plugin-react": "7.37.5",
     "happy-dom": "20.10.6",
     "html-loader": "5.1.0",
-    "html-webpack-plugin": "5.6.7",
+    "html-webpack-plugin": "5.6.8",
     "less": "4.6.7",
     "less-loader": "13.0.0",
     "office-addin-cli": "2.0.10",
