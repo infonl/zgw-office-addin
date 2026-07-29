@@ -13,6 +13,6 @@
   "devDependencies": {
     "@playwright/test": "1.61.1",
     "serve": "14.2.6",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   }
 }
