@@ -46,7 +46,7 @@
     "docker:validate": "docker buildx build --check ."
   },
   "dependencies": {
-    "@fluentui/react-components": "9.73.8",
+    "@fluentui/react-components": "9.74.4",
     "@fluentui/react-icons": "2.0.333",
     "@hookform/resolvers": "5.2.2",
     "@microsoft/microsoft-graph-client": "3.0.7",
