@@ -45,7 +45,7 @@
     "eslint": "10.8.0",
     "prettier": "3.9.6",
     "ts-node": "10.9.2",
-    "tsx": "4.23.9",
+    "tsx": "4.23.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.65.0"
   }
