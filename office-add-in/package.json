@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@fluentui/react-components": "9.74.5",
-    "@fluentui/react-icons": "2.0.335",
+    "@fluentui/react-icons": "2.0.337",
     "@hookform/resolvers": "5.7.1",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "@microsoft/microsoft-graph-types": "2.43.1",
