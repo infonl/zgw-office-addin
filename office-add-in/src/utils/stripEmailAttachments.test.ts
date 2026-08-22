@@ -49,7 +49,7 @@ function buildEmailWithAttachment(): string {
 }
 
 describe("stripEmailAttachments", () => {
-  it("removes the attachment part but keeps the text/html body intact", () => {
+  it("removes the attachment content but keeps the text/html body intact", () => {
     const result = stripEmailAttachments(buildEmailWithAttachment());
 
     expect(result).not.toContain("Content-Disposition: attachment");
@@ -58,6 +58,14 @@ describe("stripEmailAttachments", () => {
     );
     expect(result).toContain("The attachment is an email.");
     expect(result).toContain("<html><body><p>The attachment is an email.</p></body></html>");
+  });
+
+  it("replaces the attachment with a note naming its filename and type, without its content", () => {
+    const result = stripEmailAttachments(buildEmailWithAttachment());
+
+    expect(result).toContain("Attachment email.eml");
+    expect(result).toContain("application/octet-stream");
+    expect(result).not.toContain("Content-Disposition");
   });
 
   it("preserves top-level headers verbatim", () => {
@@ -74,8 +82,8 @@ describe("stripEmailAttachments", () => {
     const boundary = boundaryMatch![1];
 
     expect(result.trimEnd().endsWith(`--${boundary}--`)).toBe(true);
-    // Only one part should remain (the multipart/alternative body)
-    expect(result.split(`--${boundary}${CRLF}`).length).toBe(2);
+    // Two parts should remain: the multipart/alternative body and the removed-attachment note
+    expect(result.split(`--${boundary}${CRLF}`).length).toBe(3);
   });
 
   it("removes multiple sibling attachments", () => {
@@ -107,6 +115,8 @@ describe("stripEmailAttachments", () => {
     expect(result).not.toContain("pdf-bytes-1");
     expect(result).not.toContain("pdf-bytes-2");
     expect(result).not.toContain("Content-Disposition: attachment");
+    expect(result).toContain("a.pdf");
+    expect(result).toContain("b.pdf");
   });
 
   it("does not split on a boundary-lookalike substring that isn't at the start of a line", () => {
@@ -252,7 +262,7 @@ describe("stripEmailAttachments", () => {
     expect(stripEmailAttachments(message)).toBe(message);
   });
 
-  it("leaves the message untouched if every part would be stripped", () => {
+  it("replaces the sole part with a note if the message is just one attachment", () => {
     const boundary = "_boundary_";
     const message = [
       `Content-Type: multipart/mixed; boundary="${boundary}"`,
@@ -266,12 +276,107 @@ describe("stripEmailAttachments", () => {
       "",
     ].join(CRLF);
 
-    expect(stripEmailAttachments(message)).toBe(message);
+    const result = stripEmailAttachments(message);
+
+    expect(result).not.toContain("pdf-bytes");
+    expect(result).not.toContain("Content-Disposition: attachment");
+    expect(result).toContain("only.pdf");
   });
 
   it("leaves the message untouched if the boundary can't be parsed", () => {
     const message = [`Content-Type: multipart/mixed`, "", "no boundary declared"].join(CRLF);
 
     expect(stripEmailAttachments(message)).toBe(message);
+  });
+
+  it("the removed-attachment note is plain text, not itself framed as a downloadable attachment", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: application/pdf`,
+      `Content-Disposition: attachment; filename="only.pdf"`,
+      "",
+      "pdf-bytes",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).not.toContain("Content-Disposition");
+    expect(result).not.toMatch(/Content-Type: application\/pdf/i);
+    expect(result).toMatch(/Content-Type: text\/plain/i);
+  });
+
+  it("falls back to the Content-Type name= parameter when Content-Disposition has no filename", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: text/plain`,
+      "",
+      "Body text",
+      `--${boundary}`,
+      `Content-Type: application/zip; name="archive.zip"`,
+      `Content-Disposition: attachment`,
+      "",
+      "zip-bytes",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).toContain("archive.zip");
+    expect(result).not.toContain("zip-bytes");
+  });
+
+  it("decodes an RFC 2231 encoded filename", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: text/plain`,
+      "",
+      "Body text",
+      `--${boundary}`,
+      `Content-Type: application/pdf`,
+      `Content-Disposition: attachment; filename*=UTF-8''re%C3%ABle%20naam.pdf`,
+      "",
+      "pdf-bytes",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).toContain("reële naam.pdf");
+  });
+
+  it("uses a generic label when no filename or type can be determined", () => {
+    const boundary = "_boundary_";
+    const message = [
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      "",
+      `--${boundary}`,
+      `Content-Type: text/plain`,
+      "",
+      "Body text",
+      `--${boundary}`,
+      `Content-Disposition: attachment`,
+      "",
+      "mystery-bytes",
+      `--${boundary}--`,
+      "",
+    ].join(CRLF);
+
+    const result = stripEmailAttachments(message);
+
+    expect(result).toContain("onbekende bijlage");
+    expect(result).not.toContain("mystery-bytes");
   });
 });
