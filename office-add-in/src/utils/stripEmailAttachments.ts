@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: EUPL-1.2+
  */
 
-// Removes MIME parts marked "Content-Disposition: attachment" from a raw
-// .eml message, leaving everything else (headers, text/html body, inline
-// images) byte-for-byte untouched.
+// Replaces MIME parts marked "Content-Disposition: attachment" in a raw
+// .eml message with a small text/plain note naming the removed file, leaving
+// everything else (headers, text/html body, inline images) byte-for-byte
+// untouched. The note has no Content-Disposition/attachment framing of its
+// own, so mail clients render it as plain text rather than as a downloadable
+// attachment — the original content is gone, but that one existed is not.
 //
 // Microsoft Graph's GET /me/messages/{id}/$value endpoint has no option to
 // exclude attachments server-side — it always returns the full raw MIME —
@@ -58,6 +61,43 @@ function isAttachmentDisposition(disposition: string | undefined): boolean {
   return !!disposition && /^attachment\b/i.test(disposition.trim());
 }
 
+/** Reads a `param=value` or `param="value"` pair out of a header value, decoding RFC 2231 (`param*=UTF-8''value`) encoding if present. */
+function extractHeaderParam(headerValue: string | undefined, param: string): string | null {
+  if (!headerValue) return null;
+  const match = headerValue.match(new RegExp(`${param}\\*?=(?:"([^"]+)"|([^;\\s]+))`, "i"));
+  if (!match) return null;
+  let value = match[1] ?? match[2] ?? null;
+  if (value && /^[^']*''/.test(value)) {
+    value = value.replace(/^[^']*''/, "");
+    try {
+      value = decodeURIComponent(value);
+    } catch {
+      // Malformed percent-encoding — fall back to the raw (still readable) value.
+    }
+  }
+  return value;
+}
+
+function getAttachmentFilename(headers: MimeHeaders): string | null {
+  return (
+    extractHeaderParam(headers.get("content-disposition"), "filename") ??
+    extractHeaderParam(headers.get("content-type"), "name")
+  );
+}
+
+function getMediaType(contentType: string | undefined): string | null {
+  return contentType?.split(";")[0].trim() || null;
+}
+
+/** Builds a text/plain replacement part noting the filename/type of a removed attachment, without its content. */
+function buildRemovedAttachmentNote(headers: MimeHeaders): string {
+  const filename = getAttachmentFilename(headers);
+  const mediaType = getMediaType(headers.get("content-type"));
+  const label = [filename, mediaType ? `(${mediaType})` : null].filter(Boolean).join(" ");
+  const note = `[Bijlage verwijderd: ${label || "onbekende bijlage"}]`;
+  return `Content-Type: text/plain; charset="utf-8"\r\n\r\n${note}`;
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -79,11 +119,9 @@ function splitParts(body: string, boundary: string): string[] {
   return segments.slice(1, -1);
 }
 
-/** Strips attachment parts from one multipart body, given its boundary. Returns null if nothing survives. */
+/** Processes each part of a multipart body, given its boundary. Returns null if the body contains no parts at all (malformed). */
 function stripMultipartBody(body: string, boundary: string): string | null {
-  const keptParts = splitParts(body, boundary)
-    .map(processPart)
-    .filter((part): part is string => part !== null);
+  const keptParts = splitParts(body, boundary).map(processPart);
 
   if (keptParts.length === 0) return null;
 
@@ -92,13 +130,13 @@ function stripMultipartBody(body: string, boundary: string): string | null {
   );
 }
 
-/** Returns the processed part, or null if the part itself should be dropped entirely. */
-function processPart(rawPart: string): string | null {
+/** Returns the part to keep in its place: unchanged, recursively stripped, or replaced with a removed-attachment note. */
+function processPart(rawPart: string): string {
   const { headers: rawHeaders, body: partBody } = splitHeadersAndBody(rawPart);
   const headers = parseHeaders(rawHeaders);
 
   if (isAttachmentDisposition(headers.get("content-disposition"))) {
-    return null;
+    return buildRemovedAttachmentNote(headers);
   }
 
   const contentType = headers.get("content-type");
@@ -106,8 +144,7 @@ function processPart(rawPart: string): string | null {
     const boundary = getBoundary(contentType);
     if (boundary) {
       const strippedBody = stripMultipartBody(partBody, boundary);
-      // If every nested part was an attachment, keep this part's body as-is
-      // rather than emit a container with nothing left in it.
+      // If the nested body couldn't be parsed at all, keep this part's body as-is.
       return strippedBody !== null ? `${rawHeaders}\r\n\r\n${strippedBody}` : rawPart;
     }
   }
@@ -116,9 +153,10 @@ function processPart(rawPart: string): string | null {
 }
 
 /**
- * Strips MIME parts marked "Content-Disposition: attachment" from a raw
- * .eml string. Leaves signed messages, non-multipart messages, and messages
- * without a parseable boundary untouched.
+ * Replaces MIME parts marked "Content-Disposition: attachment" in a raw
+ * .eml string with a text/plain note of their filename/type. Leaves signed
+ * messages, non-multipart messages, and messages without a parseable
+ * boundary untouched.
  */
 export function stripEmailAttachments(rawMime: string): string {
   const { headers, body } = splitHeadersAndBody(rawMime);
@@ -135,7 +173,7 @@ export function stripEmailAttachments(rawMime: string): string {
 
   const strippedBody = stripMultipartBody(body, boundary);
   if (strippedBody === null) {
-    // Stripping would remove every part — fail safe and keep the original.
+    // Body contains no parts at all — fail safe and keep the original.
     return rawMime;
   }
 
