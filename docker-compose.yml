@@ -52,7 +52,7 @@ services:
         condition: service_completed_successfully
 
   prometheus:
-    image: prom/prometheus@sha256:508729e0e2d18e11fd742a5a5ca70e557b940a93948c3c95fd0123a6fd538b69
+    image: prom/prometheus@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0
     volumes:
       - ./scripts/docker-compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./office-add-in/ssl-certs:/etc/prometheus/certs:ro
