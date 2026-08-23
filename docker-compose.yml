@@ -77,7 +77,7 @@ services:
       - ./scripts/docker-compose/open-zaak/openzaak-database-data:/var/lib/postgresql/data
 
   openzaak.local:
-    image: docker.io/openzaak/open-zaak:1.29.3@sha256:7ac22da287ac190a0e1c14849a370c433d3511678dcc8f3897007fd6de6dd4ac
+    image: docker.io/openzaak/open-zaak:1.30.0@sha256:9535bd1517caa18af1467d79a37d3c374952f0a7b7729e179b0acd5c95d0d8a6
     platform: linux/amd64
     environment:
       - ALLOWED_HOSTS="*"
@@ -124,7 +124,7 @@ services:
         condition: service_started
 
   openzaak-init:
-    image: docker.io/openzaak/open-zaak:1.29.3@sha256:7ac22da287ac190a0e1c14849a370c433d3511678dcc8f3897007fd6de6dd4ac
+    image: docker.io/openzaak/open-zaak:1.30.0@sha256:9535bd1517caa18af1467d79a37d3c374952f0a7b7729e179b0acd5c95d0d8a6
     platform: linux/amd64
     environment:
       - DB_HOST=openzaak-database
