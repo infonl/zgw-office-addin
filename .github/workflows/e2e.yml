@@ -33,6 +33,20 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: e2e
 
+      - name: Generate self-signed TLS certificate for frontend
+        # The frontend runs with ENABLE_HTTPS=true and requires cert.pem/key.pem
+        # at office-add-in/ssl-certs (see docker-compose.yml). Locally these come
+        # from generate-keys.sh (mkcert), but that requires installing the cert
+        # into a trust store, which CI doesn't need — Playwright is configured
+        # with ignoreHTTPSErrors, so a throwaway self-signed cert is enough.
+        run: |
+          mkdir -p office-add-in/ssl-certs
+          openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+            -keyout office-add-in/ssl-certs/key.pem \
+            -out office-add-in/ssl-certs/cert.pem \
+            -subj "/CN=localhost"
+          cp office-add-in/ssl-certs/cert.pem office-add-in/ssl-certs/ca-cert.pem
+
       - name: Start stack
         run: |
           docker compose \
