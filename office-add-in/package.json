@@ -62,8 +62,8 @@
     "regenerator-runtime": "0.14.1"
   },
   "devDependencies": {
-    "@babel/core": "8.0.1",
-    "@babel/preset-env": "8.0.2",
+    "@babel/core": "8.0.6",
+    "@babel/preset-env": "8.0.6",
     "@babel/preset-typescript": "8.0.1",
     "@prettier/plugin-xml": "3.4.2",
     "@tanstack/eslint-plugin-query": "5.101.4",
