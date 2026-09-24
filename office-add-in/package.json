@@ -36,6 +36,7 @@
     "validate": "npm run validate:office && npm run validate:outlook",
     "validate:office": "office-addin-manifest validate manifest-office.xml",
     "validate:outlook": "office-addin-manifest validate manifest-outlook.xml",
+    "validate:dist": "office-addin-manifest validate dist/manifest-office.xml && office-addin-manifest validate dist/manifest-outlook.xml",
     "signin": "office-addin-dev-settings m365-account login",
     "signout": "office-addin-dev-settings m365-account logout",
     "stop:office": "office-addin-debugging stop manifest-office.xml",

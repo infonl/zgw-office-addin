@@ -98,6 +98,46 @@ for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
 done
 
 ####
+# Validate the rewritten manifests, so a misconfigured deployment fails at startup instead of
+# serving a manifest that Office rejects. The full Microsoft validation runs in CI on the
+# unrewritten manifests; these checks cover what the rewrite above and the build can break.
+MANIFEST_ERRORS=0
+manifest_error() {
+  echo "Error: $1: $2" >&2
+  MANIFEST_ERRORS=$((MANIFEST_ERRORS + 1))
+}
+
+for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
+  [ -f "$MANIFEST_FILE" ] || continue
+
+  # Office requires the add-in version to be at least 1.0, in the form n[.n[.n[.n]]].
+  MANIFEST_VERSION="$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' "$MANIFEST_FILE" | head -n 1)"
+  if ! printf '%s' "$MANIFEST_VERSION" | grep -Eq '^[0-9]+(\.[0-9]+){0,3}$'; then
+    manifest_error "$MANIFEST_FILE" "version '$MANIFEST_VERSION' is not of the form n[.n[.n[.n]]]."
+  elif [ "${MANIFEST_VERSION%%.*}" -lt 1 ]; then
+    manifest_error "$MANIFEST_FILE" "version '$MANIFEST_VERSION' is lower than 1.0."
+  fi
+
+  # All placeholders must have been replaced.
+  if grep -q -e "TO_REPLACE_" -e "$TO_REPLACE_CLIENT_ID" "$MANIFEST_FILE"; then
+    manifest_error "$MANIFEST_FILE" "unreplaced placeholders found:"
+    grep -n -e "TO_REPLACE_" -e "$TO_REPLACE_CLIENT_ID" "$MANIFEST_FILE" >&2
+  fi
+
+  # Office only loads add-in resources over HTTPS (for example when FRONTEND_URL uses http://).
+  if grep -q -E 'DefaultValue="http://|>http://' "$MANIFEST_FILE"; then
+    manifest_error "$MANIFEST_FILE" "URLs must use https://:"
+    grep -n -E 'DefaultValue="http://|>http://' "$MANIFEST_FILE" >&2
+  fi
+done
+
+if [ "$MANIFEST_ERRORS" -gt 0 ]; then
+  echo "Error: $MANIFEST_ERRORS manifest validation error(s), refusing to start." >&2
+  exit 1
+fi
+echo "Manifests validated."
+
+####
 # To ensure the Office Add-in frontend can communicate with the backend,
 # we need to rewrite the URL in the useHttp.ts file to point to the correct
 # backend service.
