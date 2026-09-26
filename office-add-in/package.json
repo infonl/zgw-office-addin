@@ -80,7 +80,7 @@
     "babel-loader": "10.1.1",
     "copy-webpack-plugin": "14.0.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-office-addins": "4.0.10",
+    "eslint-plugin-office-addins": "5.0.1",
     "eslint-plugin-react": "7.37.5",
     "happy-dom": "20.11.15",
     "html-loader": "5.1.0",
