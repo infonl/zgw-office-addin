@@ -10,6 +10,12 @@ Before following this manual make sure that you have [setup the azure registrati
 
 The manifest files serve as guides for Outlook and other Office applications on how to install and display the add-in. They contain essential information such as the add-in’s title, description, permissions, and the web location where its content is hosted. In this way, the manifest files ensure that the add-in is correctly recognized and made available to users within Outlook.
 
+### Manifest version
+
+Office only accepts add-in versions of 1.0 or higher. The build therefore sets the `<Version>` in both manifests to the `package.json` version of the add-in, prefixed with `1.`: version `0.9.364` becomes manifest version `1.0.9.364`.
+
+This manifest version differs from the release version (the git tag, e.g. `v0.11.0`), which is used for the Docker image and the `app_version` metric. At startup the frontend container logs both versions, and it refuses to start if a manifest is invalid, for example when the manifest version is lower than 1.0 or the frontend URL does not use https.
+
 ## Retrieve the manifest files
 
 Follow the following steps:

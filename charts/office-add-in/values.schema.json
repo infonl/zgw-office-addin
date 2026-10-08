@@ -16,8 +16,9 @@
         },
         "frontendUrl": {
           "type": "string",
-          "description": "The frontend public URL where the manifest files and static js file are served",
-          "format": "uri"
+          "description": "The frontend public URL where the manifest files and static js file are served. Must use https, Office does not load add-ins over http.",
+          "format": "uri",
+          "pattern": "^https://"
         },
         "msalTenantId": {
           "type": "string",

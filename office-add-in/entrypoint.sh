@@ -108,10 +108,17 @@ manifest_error() {
 }
 
 for MANIFEST_FILE in "$MANIFEST_OFFICE_FILE" "$MANIFEST_OUTLOOK_FILE"; do
-  [ -f "$MANIFEST_FILE" ] || continue
+  # Both manifests are part of the image, so a missing one means the static files were not staged.
+  if [ ! -f "$MANIFEST_FILE" ]; then
+    manifest_error "$MANIFEST_FILE" "manifest is missing."
+    continue
+  fi
 
   # Office requires the add-in version to be at least 1.0, in the form n[.n[.n[.n]]].
+  # The build derives it from the package.json version prefixed with "1.", so it differs from
+  # APP_VERSION (see docs/manuals/setup-manifest.md).
   MANIFEST_VERSION="$(sed -n 's|.*<Version>\(.*\)</Version>.*|\1|p' "$MANIFEST_FILE" | head -n 1)"
+  echo "Manifest $MANIFEST_FILE has version $MANIFEST_VERSION."
   if ! printf '%s' "$MANIFEST_VERSION" | grep -Eq '^[0-9]+(\.[0-9]+){0,3}$'; then
     manifest_error "$MANIFEST_FILE" "version '$MANIFEST_VERSION' is not of the form n[.n[.n[.n]]]."
   elif [ "${MANIFEST_VERSION%%.*}" -lt 1 ]; then
