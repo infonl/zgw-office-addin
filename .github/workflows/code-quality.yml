@@ -46,6 +46,9 @@ jobs:
       - name: Run validation
         run: npm run validate
 
+      - name: Run entrypoint tests
+        run: ./office-add-in/entrypoint.test.sh
+
       - name: Run tests with coverage
         run: npm run test:coverage
 

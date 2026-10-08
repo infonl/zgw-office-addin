@@ -135,12 +135,13 @@ module.exports = async (env, options) => {
             from: "manifest*.xml",
             to: "[name]" + "[ext]",
             transform(content) {
-              // Replace the version with the package.json version during build
+              // Replace the version with the package.json version during build, prefixed with "1."
+              // because Office rejects manifest versions below 1.0 (0.9.364 becomes 1.0.9.364)
               const packageJson = require("./package.json");
               const version = packageJson.version || "0.0.0";
               return content.toString().replace(
                   /<Version>.*?<\/Version>/,
-                  `<Version>${version}</Version>`
+                  `<Version>1.${version}</Version>`
               );
             },
           },

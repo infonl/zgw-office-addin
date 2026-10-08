@@ -46,15 +46,18 @@ touch "$TEST_DIR/sed.log"
 sed() {
   echo "[MOCK SED] $@" >> "$LOG_DIR/sed.log"
 
-  # Inject backup suffix for in-place editing
-  if [ "$1" = "-i" ]; then
+  # Inject an empty backup suffix for in-place editing with BSD sed (GNU sed needs none)
+  if [ "$1" = "-i" ] && ! command sed --version >/dev/null 2>&1; then
     shift
     command sed -i '' "$@"
   else
     command sed "$@"
   fi
 }
-export -f sed 2>/dev/null  # export for subshells (bash), ignore error in sh
+# Export for subshells in bash only; in other shells (e.g. dash) "export -f" exits the script
+if [ -n "$BASH_VERSION" ]; then
+  export -f sed
+fi
 
 # Set test environment variables
 export FRONTEND_URL="https://testfrontend.com"
@@ -79,7 +82,11 @@ cp -r "$SRC_DIR" "$TEST_SRC"
 touch "$NGINX_CONFIG_FILE"
 
 # Run the actual script
-LOG_DIR=$TEST_DIR ./entrypoint.sh
+FAILURES=0
+if ! LOG_DIR=$TEST_DIR ./entrypoint.sh; then
+  echo "FAIL: entrypoint refused to start with valid manifests" >&2
+  FAILURES=$((FAILURES + 1))
+fi
 
 # Remove backup files created by sed
 find "$TEST_DIR" -type f -name '*-e' -exec rm {} +
@@ -91,3 +98,42 @@ diff -ru "$SRC_DIR" "$TEST_SRC"
 diff -u "$MANIFEST_OFFICE_FILE" "$TEST_MANIFEST_OFFICE"
 diff -u "$MANIFEST_OUTLOOK_FILE" "$TEST_MANIFEST_OUTLOOK"
 diff -u "$ROOT_DIR/nginx.conf.template" "$NGINX_CONFIG_FILE"
+
+# Run the entrypoint against copies of both manifests, with the Outlook manifest modified by the
+# given sed expression ("-" leaves it out), and expect it to refuse to start with the given error
+# for the Outlook manifest. An optional fourth argument overrides FRONTEND_URL.
+expect_manifest_rejected() {
+  CASE_DESCRIPTION="$1"
+  CASE_EXPECTED_ERROR="$2"
+  CASE_DIR="$TEST_DIR/rejected"
+  rm -rf "$CASE_DIR"
+  mkdir -p "$CASE_DIR"
+  cp "$MANIFEST_OFFICE_FILE" "$CASE_DIR/manifest-office.xml"
+  if [ "$3" != "-" ]; then
+    command sed -e "$3" "$MANIFEST_OUTLOOK_FILE" > "$CASE_DIR/manifest-outlook.xml"
+  fi
+  if FRONTEND_URL="${4:-$FRONTEND_URL}" NGINX_PUBLIC_HTML="$CASE_DIR" NGINX_CONFIG_FILE="$CASE_DIR/test.conf" \
+    LOG_DIR="$CASE_DIR" ./entrypoint.sh > "$CASE_DIR/output.log" 2>&1; then
+    echo "FAIL: $CASE_DESCRIPTION: entrypoint started" >&2
+    FAILURES=$((FAILURES + 1))
+  elif ! grep -qF "manifest-outlook.xml: $CASE_EXPECTED_ERROR" "$CASE_DIR/output.log"; then
+    echo "FAIL: $CASE_DESCRIPTION: expected error '$CASE_EXPECTED_ERROR', got:" >&2
+    grep "Error:" "$CASE_DIR/output.log" >&2
+    FAILURES=$((FAILURES + 1))
+  else
+    echo "PASS: $CASE_DESCRIPTION"
+  fi
+}
+
+echo
+echo "Manifest validation:"
+expect_manifest_rejected "missing manifest" "manifest is missing." "-"
+expect_manifest_rejected "version below 1.0" "version '0.9.364' is lower than 1.0." \
+  "s|<Version>.*</Version>|<Version>0.9.364</Version>|"
+expect_manifest_rejected "malformed version" "version '1.0.0-dev' is not of the form n[.n[.n[.n]]]." \
+  "s|<Version>.*</Version>|<Version>1.0.0-dev</Version>|"
+expect_manifest_rejected "unreplaced placeholder" "unreplaced placeholders found:" \
+  "s|<ProviderName>|<ProviderName>TO_REPLACE_UNKNOWN|"
+expect_manifest_rejected "http frontend URL" "URLs must use https://:" "" "http://testfrontend.com"
+
+exit "$FAILURES"

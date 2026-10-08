@@ -241,6 +241,9 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Validate built manifests
+        run: npm run validate:dist --workspace=office-add-in
+
       - name: Package Artifacts
         run: |
           mkdir -p release
