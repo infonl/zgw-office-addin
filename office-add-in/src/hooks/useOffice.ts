@@ -8,6 +8,7 @@ import { useLogger } from "./useLogger";
 import { jwtDecode } from "jwt-decode";
 import { ZaakResponse, ProcessedDocument, GraphServiceType } from "./types";
 import { getToken } from "../utils/getAccessToken";
+import { stripEmailAttachments } from "../utils/stripEmailAttachments";
 
 type State = { file: Office.File; currentSlice: number };
 
@@ -220,10 +221,12 @@ export function useOffice() {
           if (!graphId) throw new Error("No Graph ID found for email");
           DEBUG("[EmailItself] Getting email as EML via Graph API for: " + attachment.name);
           const emlContent = await graphService.getEmailAsEML(graphId);
-          fileContent = emlContent;
-          const emlBytes = new TextEncoder().encode(emlContent).length;
+          fileContent = stripEmailAttachments(emlContent);
+          const emlBytes = new TextEncoder().encode(fileContent).length;
           const emlSizeMB = Math.round((emlBytes / 1024 / 1024) * 100) / 100;
-          DEBUG(`[EmailItself] EML retrieved (raw string): ${attachment.name} ~${emlSizeMB}MB`);
+          DEBUG(
+            `[EmailItself] EML retrieved and stripped of attachments (raw string): ${attachment.name} ~${emlSizeMB}MB`
+          );
         } else {
           if (!graphId) throw new Error("Found no Graph ID for attachment");
           const parentGraphId = doc.parentEmailGraphId;
